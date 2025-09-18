@@ -58,9 +58,9 @@ export function AdminDashboard() {
       }
       
       setProfiles(profilesRes.data || []);
-      setAdvisors((profilesRes.data || []).filter(p => p.role === 'advisor'));
+      setAdvisors((profilesRes.data || []).filter((p: Profile) => p.role === 'advisor'));
       const assignmentMap = new Map<string, string>();
-      (assignmentsRes.data || []).forEach(a => { assignmentMap.set(a.student_id, a.advisor_id); });
+      (assignmentsRes.data || []).forEach((a: { student_id: string, advisor_id: string }) => { assignmentMap.set(a.student_id, a.advisor_id); });
       setAssignments(assignmentMap);
       setRequests(requestsRes.data as InstitutionRequest[] || []);
       setTestimonials(testimonialsRes.data as Testimonial[] || []);
@@ -73,7 +73,7 @@ export function AdminDashboard() {
         );
         const verificationResults = await Promise.all(verificationPromises);
         const newVerificationData = new Map<string, VerificationStatus>();
-        verificationResults.forEach((res, index) => {
+        verificationResults.forEach((res: any, index: number) => {
           if (!res.error) {
             newVerificationData.set(fetchedPayouts[index].id, res.data);
           }

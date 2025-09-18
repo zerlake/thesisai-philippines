@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { thesisChecklist } from "../lib/checklist-items";
+import { thesisChecklist, type ChecklistPhase } from "../lib/checklist-items";
 import { Progress } from "./ui/progress";
 import { PendingReviewsCard } from "./pending-reviews-card";
 import { AdvisorRequestsCard } from "./advisor-requests-card";
@@ -21,7 +21,7 @@ import { AdvisorWorkloadCard } from "./advisor-workload-card";
 import { FeedbackTurnaroundCard } from "./feedback-turnaround-card";
 import { StudentProgressOverviewChart } from "./student-progress-overview-chart";
 
-const totalChecklistItems = thesisChecklist.flatMap(phase => phase.items).length;
+const totalChecklistItems = thesisChecklist.flatMap((phase: ChecklistPhase) => phase.items).length;
 
 type Student = {
   id: string;
@@ -57,7 +57,7 @@ export function AdvisorDashboard() {
       }
 
       if (relationships && relationships.length > 0) {
-        const studentIds = relationships.map(r => r.student_id);
+        const studentIds = relationships.map((r: { student_id: string }) => r.student_id);
         
         const { data: studentProfiles, error: profileError } = await supabase
           .from('profiles')
@@ -72,12 +72,12 @@ export function AdvisorDashboard() {
         if (profileError || checklistError) {
           toast.error("Failed to fetch student data.");
         } else {
-          const progressCounts = (checklistData || []).reduce((acc: { [key: string]: number }, item) => {
+          const progressCounts = (checklistData || []).reduce((acc: { [key: string]: number }, item: { user_id: string }) => {
             acc[item.user_id] = (acc[item.user_id] || 0) + 1;
             return acc;
           }, {});
 
-          const studentsWithProgress = (studentProfiles || []).map(student => ({
+          const studentsWithProgress = (studentProfiles || []).map((student: any) => ({
             ...student,
             progress: totalChecklistItems > 0 ? ((progressCounts[student.id] || 0) / totalChecklistItems) * 100 : 0,
           }));

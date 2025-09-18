@@ -49,7 +49,7 @@ export function RecentActivityChart() {
       }
 
       if (data) {
-        const formattedData = data.map((doc) => {
+        const formattedData = data.map((doc: { title: string | null, content: string | null }) => {
           const text = (doc.content || "").replace(/<[^>]*>?/gm, "");
           const words = text.split(/\s+/).filter(Boolean).length;
           const name = doc.title || "Untitled";

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "./auth-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { thesisMilestones } from "../lib/milestones";
+import { thesisMilestones, type Milestone } from "../lib/milestones";
 import { toast } from "sonner";
 import { Skeleton } from "./ui/skeleton";
 import { CheckCircle, Clock, AlertCircle, Trophy } from "lucide-react";
@@ -30,12 +30,13 @@ export function MyMilestonesCard() {
       const { data, error } = await supabase
         .from("thesis_milestones")
         .select("milestone_key, deadline, completed_at")
-        .eq("student_id", user.id);
+        .eq("student_id", user.id)
+        .returns<MilestoneProgress[]>();
 
       if (error) {
         toast.error("Failed to load milestone progress.");
       } else {
-        const progressMap = new Map(data.map(item => [item.milestone_key, item]));
+        const progressMap = new Map(data.map((item: MilestoneProgress) => [item.milestone_key, item]));
         setProgress(progressMap);
       }
       setIsLoading(false);
@@ -67,7 +68,7 @@ export function MyMilestonesCard() {
       </CardHeader>
       <CardContent className="space-y-2">
         {hasMilestones ? (
-          thesisMilestones.map((milestone) => {
+          thesisMilestones.map((milestone: Milestone) => {
             const currentProgress = progress.get(milestone.key);
             if (!currentProgress?.deadline && !currentProgress?.completed_at) {
               return null; // Don't show milestones that haven't been set by the advisor

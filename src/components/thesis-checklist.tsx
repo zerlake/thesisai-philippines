@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Progress } from "./ui/progress";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
-import { thesisChecklist } from "../lib/checklist-items";
+import { thesisChecklist, type ChecklistItem, type ChecklistPhase } from "../lib/checklist-items";
 import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
 import { useAuth } from "./auth-provider";
@@ -17,7 +17,7 @@ import { Button } from "./ui/button";
 import { ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const allItems = thesisChecklist.flatMap(phase => phase.items);
+const allItems = thesisChecklist.flatMap((phase: ChecklistPhase) => phase.items);
 const totalItems = allItems.length;
 
 export function ThesisChecklist() {
@@ -43,7 +43,7 @@ export function ThesisChecklist() {
         toast.error("Failed to load checklist progress.");
         console.error(error);
       } else {
-        setCheckedItems(data.map(item => item.item_id));
+        setCheckedItems(data.map((item: { item_id: string }) => item.item_id));
       }
       setIsLoading(false);
     };
@@ -122,7 +122,7 @@ export function ThesisChecklist() {
             </p>
           </div>
           <Accordion type="multiple" value={openPhases} onValueChange={setOpenPhases} className="w-full">
-            {thesisChecklist.map((phase) => (
+            {thesisChecklist.map((phase: ChecklistPhase) => (
               <AccordionItem value={phase.id} key={phase.id}>
                 <AccordionTrigger>
                   <div className="flex items-center gap-3">
@@ -133,7 +133,7 @@ export function ThesisChecklist() {
                 <AccordionContent>
                   <div className="space-y-4 pl-4 border-l-2 ml-2">
                     <AnimatePresence>
-                      {phase.items.map((item) => {
+                      {phase.items.map((item: ChecklistItem) => {
                         const isChecked = checkedItems.includes(item.id);
                         
                         const handleDragEnd = (event: any, info: any) => {
