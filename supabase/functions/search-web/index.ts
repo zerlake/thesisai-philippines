@@ -1,0 +1,59 @@
+// @ts-ignore
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders })
+  }
+
+  try {
+    // @ts-ignore
+    const serpApiKey = Deno.env.get("SERPAPI_KEY");
+    if (!serpApiKey) {
+      throw new Error("SERPAPI_KEY is not set in Supabase project secrets.");
+    }
+
+    const { query } = await req.json();
+    if (!query) {
+      return new Response(JSON.stringify({ error: 'Search query is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const searchUrl = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(query)}&api_key=${serpApiKey}`;
+    
+    const serpApiResponse = await fetch(searchUrl);
+    if (!serpApiResponse.ok) {
+      const errorBody = await serpApiResponse.json();
+      throw new Error(`SerpApi request failed: ${errorBody.error || 'Unknown error'}`);
+    }
+
+    const results = await serpApiResponse.json();
+    const papers = results.organic_results?.map((result: any) => ({
+      id: result.position,
+      title: result.title,
+      link: result.link,
+      publication_info: result.displayed_link,
+      snippet: result.snippet,
+    })) || [];
+
+    return new Response(JSON.stringify({ papers }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200,
+    });
+
+  } catch (error) {
+    console.error("Error in search-web function:", error);
+    const message = error instanceof Error ? error.message : "An unknown error occurred.";
+    return new Response(JSON.stringify({ error: message }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500,
+    });
+  }
+})
