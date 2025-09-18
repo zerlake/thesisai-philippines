@@ -129,6 +129,17 @@ type Action = {
   icon: LucideIcon;
 };
 
+const defaultWidgets = {
+  stats: true,
+  next_action: true,
+  recent_activity: true,
+  checklist: true,
+  session_goal: true,
+  writing_streak: true,
+  milestones: true,
+  quick_access: true,
+};
+
 export function StudentDashboard() {
   const { session, supabase, profile } = useAuth();
   const user = session?.user;
@@ -141,6 +152,8 @@ export function StudentDashboard() {
   const [isLoadingNextAction, setIsLoadingNextAction] = useState(true);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+
+  const widgets = { ...defaultWidgets, ...profile?.user_preferences?.dashboard_widgets };
 
   useEffect(() => {
     setIsMounted(true);
@@ -244,7 +257,6 @@ export function StudentDashboard() {
     <div className="space-y-8">
       <WelcomeModal open={showWelcomeModal} onOpenChange={handleModalClose} name={displayName} />
       
-      {/* --- Header --- */}
       <div>
         <h1 className="text-3xl font-bold">
           Welcome back, <span className="text-primary">{displayName}</span>!
@@ -254,8 +266,7 @@ export function StudentDashboard() {
         </p>
       </div>
 
-      {/* --- Project Statistics Section --- */}
-      {isLoadingStats ? (
+      {widgets.stats && (isLoadingStats ? (
         <div className="grid gap-4 md:grid-cols-3">
           <Skeleton className="h-28" />
           <Skeleton className="h-28" />
@@ -267,50 +278,49 @@ export function StudentDashboard() {
           <StatCard title="Total Word Count" value={stats.wordCount.toLocaleString()} icon={BookOpenCheck} description={`+${stats.recentWordCount.toLocaleString()} in last 7 days`} />
           <StatCard title="Avg. Words / Doc" value={stats.avgWordCount.toLocaleString()} icon={Baseline} />
         </div>
+      ))}
+
+      {widgets.next_action && (
+        <div className="space-y-4">
+          {profile?.plan === 'free' && <UpgradePromptCard />}
+          <WhatsNextCard nextAction={nextAction} isLoading={isLoadingNextAction} />
+          <AdvisorFeedbackCard />
+          <ContextualActions nextAction={nextAction} latestDocument={latestDocument} />
+        </div>
       )}
 
-      {/* --- Priority Actions Section --- */}
-      <div className="space-y-4">
-        {profile?.plan === 'free' && <UpgradePromptCard />}
-        <WhatsNextCard nextAction={nextAction} isLoading={isLoadingNextAction} />
-        <AdvisorFeedbackCard />
-        <ContextualActions nextAction={nextAction} latestDocument={latestDocument} />
-      </div>
-
-      {/* --- Project Overview Section --- */}
       <div className="grid gap-6 lg:grid-cols-3">
-        <RecentActivityChart />
-        <div className="lg:col-span-2">
-          <ThesisChecklist />
-        </div>
+        {widgets.recent_activity && <RecentActivityChart />}
+        {widgets.checklist && <div className="lg:col-span-2"><ThesisChecklist /></div>}
       </div>
 
-      {/* --- Daily Momentum Section --- */}
       <div className="grid gap-6 lg:grid-cols-3">
-        <SessionGoalCard />
-        <WritingStreakCard />
-        <MyMilestonesCard />
+        {widgets.session_goal && <SessionGoalCard />}
+        {widgets.writing_streak && <WritingStreakCard />}
+        {widgets.milestones && <MyMilestonesCard />}
       </div>
 
-      {/* --- Tools & Support Section --- */}
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Quick Access Tools</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {quickAccessItems.map((item) => (
-            <Link href={item.href} key={item.title}>
-              <Card className="hover:bg-accent hover:text-accent-foreground transition-colors">
-                <CardHeader className="flex flex-row items-center gap-4">
-                  <item.icon className="w-8 h-8" />
-                  <div>
-                    <CardTitle className="text-base">{item.title}</CardTitle>
-                    <CardDescription>{item.description}</CardDescription>
-                  </div>
-                </CardHeader>
-              </Card>
-            </Link>
-          ))}
+      {widgets.quick_access && (
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Quick Access Tools</h2>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {quickAccessItems.map((item) => (
+              <Link href={item.href} key={item.title}>
+                <Card className="hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <CardHeader className="flex flex-row items-center gap-4">
+                    <item.icon className="w-8 h-8" />
+                    <div>
+                      <CardTitle className="text-base">{item.title}</CardTitle>
+                      <CardDescription>{item.description}</CardDescription>
+                    </div>
+                  </CardHeader>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+      
       <div className="grid gap-6 md:grid-cols-2">
         <UserGuideCard />
         <TestimonialSubmissionCard />

@@ -4,6 +4,7 @@ import { SettingsForm } from "@/components/settings-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdvisorManagement } from "@/components/advisor-management";
 import { useAuth } from "@/components/auth-provider";
+import { DashboardCustomization } from "@/components/dashboard-customization";
 
 export default function SettingsPage() {
   const { profile } = useAuth();
@@ -23,7 +24,12 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
-      {isStudent && <AdvisorManagement />}
+      {isStudent && (
+        <>
+          <AdvisorManagement />
+          <DashboardCustomization />
+        </>
+      )}
     </div>
   );
 }

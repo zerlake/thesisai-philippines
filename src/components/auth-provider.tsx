@@ -10,6 +10,9 @@ import { MainLayoutSkeleton } from "./main-layout-skeleton";
 type Profile = {
   id: string;
   role: string;
+  user_preferences: {
+    dashboard_widgets: { [key: string]: boolean };
+  } | null;
   [key: string]: any;
 } | null;
 
@@ -39,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       for (let i = 0; i < 3; i++) {
         const { data: profileData, error } = await supabase
           .from("profiles")
-          .select("*, documents(count), advisor:advisor_student_relationships!student_id(profiles:advisor_id(*))")
+          .select("*, documents(count), advisor:advisor_student_relationships!student_id(profiles:advisor_id(*)), user_preferences(*)")
           .eq("id", user.id)
           .single();
 
