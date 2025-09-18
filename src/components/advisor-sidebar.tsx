@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Home, Users, FileCheck, BotMessageSquare } from "lucide-react";
+import { Home, Users, FileCheck, BotMessageSquare, CheckSquare } from "lucide-react";
 
 export function AdvisorSidebar() {
   return (
@@ -33,6 +33,13 @@ export function AdvisorSidebar() {
             >
               <FileCheck className="h-4 w-4" />
               Review Queue
+            </Link>
+            <Link
+              href="/advisor/competency-assessment"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <CheckSquare className="h-4 w-4" />
+              Self-Assessment
             </Link>
           </nav>
         </div>

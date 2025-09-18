@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, FileUp, MessageSquareQuote, BotMessageSquare, FlaskConical, BarChart3, BookOpen, Lightbulb } from "lucide-react";
+import { Home, FileUp, MessageSquareQuote, BotMessageSquare, FlaskConical, BarChart3, BookOpen, Lightbulb, BookUser, University } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function StudentSidebar() {
@@ -19,6 +19,8 @@ export function StudentSidebar() {
     { href: "/student/results", label: "Results Helper", icon: BarChart3 },
     { href: "/student/conclusion", label: "Conclusion Helper", icon: Lightbulb },
     { href: "/student/resources", label: "Resources", icon: BookOpen },
+    { href: "/student/user-guide", label: "User Guide", icon: BookUser },
+    { href: "/student/atr-style-guide", label: "ATR Style Guide", icon: University },
   ];
 
   return (
