@@ -7,7 +7,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { LandingHeader } from "@/components/landing-header";
 import { LandingFooter } from "@/components/landing-footer";
 import { AuthProvider } from "@/components/auth-provider";
-import { ChunkLoadErrorHandler } from "@/components/chunk-load-error-handler";
 
 const fontSans = Outfit({
   subsets: ["latin"],
@@ -40,7 +39,6 @@ export default function RootLayout({
           fontSerif.variable
         )}
       >
-        <ChunkLoadErrorHandler />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

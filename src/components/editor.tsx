@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "./auth-provider";
 import { Skeleton } from "./ui/skeleton";
-import { useRouter } from "next/navigation";
 import { RichTextEditor } from "./rich-text-editor";
 import { saveAs } from "file-saver";
 // @ts-ignore
@@ -45,7 +44,6 @@ import HardBreak from '@tiptap/extension-hard-break';
 
 export function Editor({ documentId }: { documentId: string }) {
   const { profile, supabase } = useAuth();
-  const router = useRouter();
   const { isFocusMode, toggleFocusMode, isTimerActive } = useFocusMode();
 
   const [wordCount, setWordCount] = useState(0);
