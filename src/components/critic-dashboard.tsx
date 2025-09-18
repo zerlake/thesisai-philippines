@@ -9,6 +9,7 @@ import { Timer, Users } from "lucide-react";
 import { CriticStudentList } from "./critic-student-list";
 import { StatCard } from "./stat-card";
 import { CriticReviewQueueCard } from "./critic-review-queue-card";
+import { CriticRequestsCard } from "./critic-requests-card";
 
 export function CriticDashboard() {
   const { session, supabase } = useAuth();
@@ -59,7 +60,14 @@ export function CriticDashboard() {
         <StatCard title="Avg. Certification Time" value={isLoading ? <Skeleton className="h-8 w-12" /> : `${analytics.avg_turnaround_days?.toFixed(1) ?? 'N/A'} days`} icon={Timer} />
       </div>
 
-      <CriticReviewQueueCard />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <CriticReviewQueueCard />
+        </div>
+        <div className="space-y-6">
+          <CriticRequestsCard />
+        </div>
+      </div>
 
       <CriticStudentList />
     </div>
