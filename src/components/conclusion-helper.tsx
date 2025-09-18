@@ -125,8 +125,8 @@ export function ConclusionHelper() {
         </CardContent>
       </Card>
 
-      <Alert variant="destructive">
-        <AlertTriangle className="h-4 w-4" />
+      <Alert className="bg-muted/50 border-yellow-500/50">
+        <AlertTriangle className="h-4 w-4 text-yellow-500" />
         <AlertTitle>Critical Rule: No New Data!</AlertTitle>
         <AlertDescription>
           Chapter V is for summarizing and interpreting the data you already presented in Chapter IV. Never introduce new findings, statistics, or quotes in this final chapter. Your conclusions must flow directly from your results.
