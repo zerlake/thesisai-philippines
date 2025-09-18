@@ -28,6 +28,7 @@ import {
   Table,
   Calendar,
   Palette,
+  LayoutTemplate,
   type LucideIcon,
 } from "lucide-react";
 
@@ -95,6 +96,7 @@ export const studentNavGroups: NavGroup[] = [
     title: "UI Elements",
     items: [
       { icon: Palette, label: "Colors", href: "/ui-elements/colors" },
+      { icon: LayoutTemplate, label: "Layouts & Spacing", href: "/ui-elements/layouts" },
       { icon: Component, label: "Alerts", href: "/ui-elements/alerts" },
       { icon: Component, label: "Avatars", href: "/ui-elements/avatars" },
       { icon: Component, label: "Badges", href: "/ui-elements/badges" },

@@ -1,20 +1,41 @@
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+"use client";
 
-interface UIElementCardProps {
+import { cva, type VariantProps } from "class-variance-authority";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { cn } from "@/lib/utils";
+
+const cardVariants = cva(
+  "h-full",
+  {
+    variants: {
+      density: {
+        compact: "p-2",
+        comfortable: "p-4",
+        spacious: "p-6",
+      },
+    },
+    defaultVariants: {
+      density: "comfortable",
+    },
+  }
+);
+
+interface UIElementCardProps extends VariantProps<typeof cardVariants> {
   title: string;
+  description: string;
   children: React.ReactNode;
+  className?: string;
 }
 
-export function UIElementCard({ title, children }: UIElementCardProps) {
+export function UIElementCard({ title, description, children, density, className }: UIElementCardProps) {
   return (
-    <Card>
+    <Card className={cn(className)}>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          {children}
-        </div>
+      <CardContent className={cn(cardVariants({ density }))}>
+        {children}
       </CardContent>
     </Card>
   );
