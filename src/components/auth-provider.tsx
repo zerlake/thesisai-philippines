@@ -39,8 +39,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return null;
     }
     try {
-      // Add a small delay and retry mechanism to handle potential race conditions on sign-up
-      for (let i = 0; i < 3; i++) {
+      // Add a more robust retry mechanism to handle potential race conditions on sign-up
+      for (let i = 0; i < 5; i++) { // Increased retries to 5
         const { data: profileData, error } = await supabase
           .from("profiles")
           .select("*, documents(count), advisor:advisor_student_relationships!student_id(profiles:advisor_id(*)), user_preferences(*)")
@@ -57,8 +57,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return profileData;
         }
 
-        // If profile not found, wait and retry
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // If profile not found, wait and retry with an increased delay
+        await new Promise(resolve => setTimeout(resolve, 750)); // Increased delay to 750ms
       }
       
       // If loop finishes without returning, profile was not found
