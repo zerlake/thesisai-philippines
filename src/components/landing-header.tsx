@@ -29,12 +29,6 @@ export function LandingHeader() {
           For Advisors
         </Link>
         <Link
-          href="/pricing"
-          className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
-        >
-          Pricing
-        </Link>
-        <Link
           href="/faq"
           className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
         >

@@ -4,7 +4,6 @@ import Link from "next/link";
 const footerNav = [
   { name: "Features", href: "/features" },
   { name: "For Advisors", href: "/for-advisors" },
-  { name: "Pricing", href: "/pricing" },
   { name: "FAQ", href: "/faq" },
 ];
 
