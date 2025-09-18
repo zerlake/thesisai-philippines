@@ -92,22 +92,6 @@ export const studentNavGroups: NavGroup[] = [
       { icon: ShieldCheck, label: "Originality Check", href: "/originality-check" },
     ],
   },
-  {
-    title: "UI Elements",
-    items: [
-      { icon: Palette, label: "Colors", href: "/ui-elements/colors" },
-      { icon: LayoutTemplate, label: "Layouts & Spacing", href: "/ui-elements/layouts" },
-      { icon: Component, label: "Alerts", href: "/ui-elements/alerts" },
-      { icon: Component, label: "Avatars", href: "/ui-elements/avatars" },
-      { icon: Component, label: "Badges", href: "/ui-elements/badges" },
-      { icon: Component, label: "Buttons", href: "/ui-elements/buttons" },
-      { icon: Component, label: "Modals", href: "/ui-elements/modals" },
-      { icon: BarChart, label: "Charts", href: "/ui-elements/charts" },
-      { icon: Component, label: "Form Elements", href: "/ui-elements/form-elements" },
-      { icon: Table, label: "Tables", href: "/ui-elements/tables" },
-      { icon: Calendar, label: "Calendar", href: "/ui-elements/calendar" },
-    ],
-  },
 ];
 
 export const adminNavItems: NavItem[] = [{ icon: UserCog, label: "Admin", href: "/admin" }];
