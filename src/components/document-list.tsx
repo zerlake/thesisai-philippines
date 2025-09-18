@@ -180,7 +180,7 @@ export function DocumentList() {
       ) : documents.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {documents.map((doc) => (
-            <Card key={doc.id} className="flex flex-col">
+            <Card key={doc.id} className="flex flex-col transition-transform duration-200 hover:scale-[1.02] hover:shadow-md">
               <CardHeader className="flex-1">
                 <div className="flex justify-between items-start">
                   <FileText className="w-8 h-8 text-muted-foreground mb-4" />

@@ -5,7 +5,7 @@ import { supabase } from "../integrations/supabase/client";
 import { Session, SupabaseClient, AuthChangeEvent, User } from "@supabase/supabase-js";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { MainLayoutSkeleton } from "./main-layout-skeleton";
+import { BrandedLoader } from "./branded-loader";
 
 type Profile = {
   id: string;
@@ -138,7 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isPublicPage = publicPaths.some(p => pathname.startsWith(p)) || pathname.startsWith("/share/");
 
   if (authStatus === 'loading' && !isPublicPage) {
-    return <MainLayoutSkeleton />;
+    return <BrandedLoader />;
   }
 
   return (

@@ -1,10 +1,10 @@
 import { RegisterPage } from "@/components/register-page";
-import { RegisterPageSkeleton } from "@/components/register-page-skeleton";
+import { BrandedLoader } from "@/components/branded-loader";
 import { Suspense } from "react";
 
 export default function Register() {
   return (
-    <Suspense fallback={<RegisterPageSkeleton />}>
+    <Suspense fallback={<BrandedLoader />}>
       <RegisterPage />
     </Suspense>
   );
