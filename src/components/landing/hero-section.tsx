@@ -9,7 +9,7 @@ export function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-slate-900">
       <div className="absolute inset-0 bg-grid-slate-700/[0.05] [mask-image:linear-gradient(to_bottom,white_5%,transparent_90%)]"></div>
-      <div className="relative container flex flex-col items-center justify-center text-center py-24 md:py-32 lg:py-40">
+      <div className="relative container flex flex-col items-center justify-center text-center py-20 md:py-24 lg:py-28">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

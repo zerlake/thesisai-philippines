@@ -22,7 +22,7 @@ const tools = [
 
 export function AiToolkitSection() {
   return (
-    <section className="py-16 md:py-24 lg:py-32 bg-slate-900">
+    <section className="py-12 md:py-16 lg:py-20 bg-slate-900">
       <div className="container">
         <div className="mx-auto mb-12 max-w-3xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-white">
