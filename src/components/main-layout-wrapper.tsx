@@ -20,7 +20,7 @@ export function MainLayoutWrapper({ children }: { children: React.ReactNode }) {
           <Sidebar />
         </div>
         <div className="flex flex-col flex-1 overflow-hidden">
-          <main id="main-content" tabIndex={-1} className={cn("flex-1 overflow-y-auto bg-gradient-to-b from-background to-muted/30", isFocusMode ? "p-0" : "p-4 md:p-6")}>
+          <main id="main-content" tabIndex={-1} className={cn("flex-1 overflow-y-auto bg-background", isFocusMode ? "p-0" : "p-4 md:p-6")}>
             <div className={cn("mb-6", isFocusMode && "hidden")}>
               <Breadcrumb />
             </div>
