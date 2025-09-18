@@ -20,7 +20,7 @@ import { useAuth } from "./auth-provider";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
-import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { cn } from "../lib/utils";
 import { NotificationBell } from "./notification-bell";
 import { studentNavGroups, adminNavItems, advisorNavGroups, type NavItem, type NavGroup } from "../lib/navigation";
@@ -80,10 +80,17 @@ export function Header() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-4 flex flex-col">
-            <div className="flex items-center gap-3 mb-6">
-              <BookText className="w-6 h-6" />
-              <h1 className="text-lg font-semibold">ThesisAI</h1>
-            </div>
+            <SheetHeader className="text-left mb-2">
+              <SheetTitle>
+                <div className="flex items-center gap-3">
+                  <BookText className="w-6 h-6" />
+                  <span className="text-lg font-semibold">ThesisAI</span>
+                </div>
+              </SheetTitle>
+              <SheetDescription className="sr-only">
+                Main navigation menu.
+              </SheetDescription>
+            </SheetHeader>
             <ScrollArea className="-mx-4 flex-1">
               <nav className="space-y-2 px-4">
                 {profile?.role === "admin" && (
