@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "./ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { FilePlus2, Wand2 } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 import { Input } from "./ui/input";
@@ -10,6 +10,13 @@ import { Label } from "./ui/label";
 import { useAuth } from "./auth-provider";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "./ui/carousel";
 
 export function PresentationGenerator() {
   const { session, supabase } = useAuth();
@@ -135,37 +142,42 @@ export function PresentationGenerator() {
               {slides.length > 0 && !isLoading && (
                 <Button variant="outline" size="sm" onClick={handleSaveAsDraft} disabled={isSaving}>
                   <FilePlus2 className="w-4 h-4 mr-2" />
-                  {isSaving ? "Saving..." : "Save as Draft"}
+                  {isSaving ? "Saving..." : "Save Outline as Draft"}
                 </Button>
               )}
             </div>
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="space-y-4">
-                <Skeleton className="h-32 w-full" />
-                <Skeleton className="h-32 w-full" />
-                <Skeleton className="h-32 w-full" />
-              </div>
+              <Skeleton className="h-96 w-full" />
             ) : (
-              <div className="space-y-6">
-                {slides.map((slide, index) => (
-                  <Card key={index} className="overflow-hidden bg-background">
-                    <CardHeader className="bg-muted/50">
-                      <CardTitle className="text-lg">
-                        Slide {index + 1}: {slide.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                      <ul className="space-y-2 list-disc list-inside text-muted-foreground">
-                        {slide.content.map((point: string, i: number) => (
-                          <li key={i}>{point}</li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              <Carousel className="w-full max-w-2xl mx-auto">
+                <CarouselContent>
+                  {slides.map((slide, index) => (
+                    <CarouselItem key={index}>
+                      <div className="p-1">
+                        <Card className="aspect-video flex flex-col bg-background">
+                          <CardHeader>
+                            <CardTitle className="text-2xl">{slide.title}</CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-4 flex-1">
+                            <ul className="space-y-4 list-disc list-inside text-lg">
+                              {slide.content.map((point: string, i: number) => (
+                                <li key={i}>{point}</li>
+                              ))}
+                            </ul>
+                          </CardContent>
+                          <CardFooter className="text-sm text-muted-foreground justify-end">
+                            <p>Slide {index + 1} of {slides.length}</p>
+                          </CardFooter>
+                        </Card>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="hidden sm:flex" />
+                <CarouselNext className="hidden sm:flex" />
+              </Carousel>
             )}
           </CardContent>
         </Card>
