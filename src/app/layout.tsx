@@ -4,10 +4,9 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { LandingHeader } from "@/components/landing-header";
-import { LandingFooter } from "@/components/landing-footer";
 import { AuthProvider } from "@/components/auth-provider";
 import { SkipToContentLink } from "@/components/skip-to-content-link";
+import { RootLayoutClient } from "@/components/root-layout-client";
 
 const fontSans = Outfit({
   subsets: ["latin"],
@@ -48,11 +47,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <div className="flex min-h-dvh flex-col bg-background">
-              <LandingHeader />
-              <main className="flex-1">{children}</main>
-              <LandingFooter />
-            </div>
+            <RootLayoutClient>{children}</RootLayoutClient>
             <Toaster />
           </AuthProvider>
         </ThemeProvider>
