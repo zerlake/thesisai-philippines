@@ -13,6 +13,7 @@ import {
   Wand2,
   TextQuote,
   FileText,
+  Loader2,
 } from "lucide-react";
 import { useAuth } from "./auth-provider";
 import { toast } from "sonner";
@@ -210,7 +211,7 @@ export function AIAssistantPanel({
               disabled={!!isLoading}
               className="w-full justify-start"
             >
-              <Wand2 className="w-4 h-4 mr-2" />
+              {isLoading === "improve" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Wand2 className="w-4 h-4 mr-2" />}
               {isLoading === "improve"
                 ? "Improving..."
                 : "Improve Entire Document"}
@@ -220,7 +221,7 @@ export function AIAssistantPanel({
               disabled={!!isLoading}
               className="w-full justify-start"
             >
-              <TextQuote className="w-4 h-4 mr-2" />
+              {isLoading === "summarize" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <TextQuote className="w-4 h-4 mr-2" />}
               {isLoading === "summarize"
                 ? "Summarizing..."
                 : "Summarize Document"}
@@ -230,7 +231,7 @@ export function AIAssistantPanel({
               disabled={!!isLoading}
               className="w-full justify-start"
             >
-              <FileText className="w-4 h-4 mr-2" />
+              {isLoading === "abstract" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
               {isLoading === "abstract" ? "Generating..." : "Generate Abstract"}
             </Button>
           </TabsContent>
