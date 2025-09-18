@@ -23,6 +23,12 @@ export function LandingHeader() {
           Features
         </Link>
         <Link
+          href="/pricing"
+          className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
+        >
+          Pricing
+        </Link>
+        <Link
           href="/for-advisors"
           className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
         >

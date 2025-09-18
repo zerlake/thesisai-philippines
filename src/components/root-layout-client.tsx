@@ -11,6 +11,7 @@ const publicPaths = [
   "/explore",
   "/features",
   "/for-advisors",
+  "/pricing",
   "/faq",
   "/university-guides",
   "/user-guide",
