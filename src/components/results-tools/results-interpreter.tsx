@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Copy, Wand2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useAuth } from "../auth-provider";
 
 type InputField = {
   name: string;
@@ -25,7 +26,6 @@ type TestConfig = {
   [key: string]: {
     label: string;
     inputs: InputField[];
-    template: (values: Record<string, string>, isSignificant: boolean) => string;
   };
 };
 
@@ -37,7 +37,6 @@ const testConfig: TestConfig = {
       { name: "n", label: "Sample Size (N)", placeholder: "e.g., 50" },
       { name: "p", label: "p-value", placeholder: "e.g., 0.001" },
     ],
-    template: (v, sig) => `A Pearson product-moment correlation was run to determine the relationship between [variable 1] and [variable 2]. There was a ${sig ? "" : "non-"}significant, ${parseFloat(v.r || '0') >= 0 ? "positive" : "negative"} correlation between the two variables, r(${v.n ? parseInt(v.n) - 2 : 'N-2'}) = ${v.r || '[r]'}, p = ${parseFloat(v.p || '1').toFixed(3)}.`,
   },
   "spearman-correlation": {
     label: "Spearman Rank Correlation",
@@ -46,7 +45,6 @@ const testConfig: TestConfig = {
       { name: "n", label: "Sample Size (N)", placeholder: "e.g., 50" },
       { name: "p", label: "p-value", placeholder: "e.g., 0.001" },
     ],
-    template: (v, sig) => `A Spearman's rank-order correlation was run to determine the relationship between [variable 1] and [variable 2]. There was a ${sig ? "" : "non-"}significant, ${parseFloat(v.rho || '0') >= 0 ? "positive" : "negative"} correlation between the two variables, rs(${v.n || 'N'}) = ${v.rho || '[rho]'}, p = ${parseFloat(v.p || '1').toFixed(3)}.`,
   },
   "independent-t-test": {
     label: "Independent Samples T-test",
@@ -55,7 +53,6 @@ const testConfig: TestConfig = {
       { name: "df", label: "Degrees of Freedom (df)", placeholder: "e.g., 48" },
       { name: "p", label: "p-value", placeholder: "e.g., 0.021" },
     ],
-    template: (v, sig) => `An independent samples t-test was conducted to compare the [dependent variable] between [group 1] and [group 2]. There was a ${sig ? "significant" : "non-significant"} difference in the scores for [group 1] (M=[mean], SD=[SD]) and [group 2] (M=[mean], SD=[SD]); t(${v.df || '[df]'}) = ${v.t || '[t]'}, p = ${parseFloat(v.p || '1').toFixed(3)}.`,
   },
   "paired-t-test": {
     label: "Paired Samples T-test",
@@ -64,7 +61,6 @@ const testConfig: TestConfig = {
       { name: "df", label: "Degrees of Freedom (df)", placeholder: "e.g., 29" },
       { name: "p", label: "p-value", placeholder: "e.g., 0.004" },
     ],
-    template: (v, sig) => `A paired samples t-test was conducted to compare [e.g., pre-test scores] and [e.g., post-test scores]. There was a ${sig ? "significant" : "non-significant"} difference in the scores for [condition 1] (M=[mean], SD=[SD]) and [condition 2] (M=[mean], SD=[SD]); t(${v.df || '[df]'}) = ${v.t || '[t]'}, p = ${parseFloat(v.p || '1').toFixed(3)}.`,
   },
   "one-sample-t-test": {
     label: "One-sample T-test",
@@ -74,7 +70,6 @@ const testConfig: TestConfig = {
       { name: "p", label: "p-value", placeholder: "e.g., 0.008" },
       { name: "known_mean", label: "Known Mean (μ)", placeholder: "e.g., 50" },
     ],
-    template: (v, sig) => `A one-sample t-test was run to determine whether the [e.g., average student score] was different from the known population mean of ${v.known_mean || '[μ]'}. The sample mean (M=[mean], SD=[SD]) was found to be ${sig ? "significantly" : "not significantly"} different from the population mean, t(${v.df || '[df]'}) = ${v.t || '[t]'}, p = ${parseFloat(v.p || '1').toFixed(3)}.`,
   },
   "anova": {
     label: "ANOVA",
@@ -84,7 +79,6 @@ const testConfig: TestConfig = {
       { name: "df2", label: "df (within-groups)", placeholder: "e.g., 87" },
       { name: "p", label: "p-value", placeholder: "e.g., 0.014" },
     ],
-    template: (v, sig) => `A one-way analysis of variance (ANOVA) was conducted to determine if there were differences in [dependent variable] between [number] groups: ([group 1], [group 2], and [group 3]). The results indicated a ${sig ? "significant" : "non-significant"} effect of [independent variable] on [dependent variable], F(${v.df1 || '[df1]'}, ${v.df2 || '[df2]'}) = ${v.F || '[F]'}, p = ${parseFloat(v.p || '1').toFixed(3)}.`,
   },
   "kruskal-wallis": {
     label: "Kruskal–Wallis Test",
@@ -93,7 +87,6 @@ const testConfig: TestConfig = {
       { name: "df", label: "Degrees of Freedom (df)", placeholder: "e.g., 2" },
       { name: "p", label: "p-value", placeholder: "e.g., 0.020" },
     ],
-    template: (v, sig) => `A Kruskal-Wallis H test showed that there was a ${sig ? "statistically significant" : "non-significant"} difference in [dependent variable] between the different [groups], χ²(${v.df || '[df]'}) = ${v.H || '[H]'}, p = ${parseFloat(v.p || '1').toFixed(3)}.`,
   },
   "mann-whitney": {
     label: "Mann-Whitney U Test",
@@ -103,7 +96,6 @@ const testConfig: TestConfig = {
       { name: "n2", label: "Sample Size (n2)", placeholder: "e.g., 22" },
       { name: "p", label: "p-value", placeholder: "e.g., 0.031" },
     ],
-    template: (v, sig) => `A Mann-Whitney U test was run to determine if there were differences in [dependent variable] between [group 1] and [group 2]. The results indicate that [dependent variable] for [group 1] (Mdn = [median]) and [group 2] (Mdn = [median]) were ${sig ? "statistically significantly" : "not statistically significantly"} different, U = ${v.U || '[U]'}, p = ${parseFloat(v.p || '1').toFixed(3)}.`,
   },
   "wilcoxon": {
     label: "Wilcoxon Signed-rank Test",
@@ -111,7 +103,6 @@ const testConfig: TestConfig = {
       { name: "Z", label: "Z-statistic", placeholder: "e.g., -2.54" },
       { name: "p", label: "p-value", placeholder: "e.g., 0.011" },
     ],
-    template: (v, sig) => `A Wilcoxon signed-rank test showed that the [intervention] elicited a ${sig ? "statistically significant" : "non-significant"} change in [dependent variable], Z = ${v.Z || '[Z]'}, p = ${parseFloat(v.p || '1').toFixed(3)}.`,
   },
   "chi-square": {
     label: "Chi-Square Test",
@@ -120,14 +111,12 @@ const testConfig: TestConfig = {
       { name: "df", label: "Degrees of Freedom (df)", placeholder: "e.g., 1" },
       { name: "p", label: "p-value", placeholder: "e.g., 0.002" },
     ],
-    template: (v, sig) => `A chi-square test of independence was performed to examine the relation between [variable 1] and [variable 2]. The relation between these variables was ${sig ? "significant" : "not significant"}, χ²(${v.df || '[df]'}, N = [sample size]) = ${v.chi2 || '[χ²]'}, p = ${parseFloat(v.p || '1').toFixed(3)}.`,
   },
   "fishers-exact": {
     label: "Fisher’s Exact Test",
     inputs: [
       { name: "p", label: "p-value", placeholder: "e.g., 0.045" },
     ],
-    template: (v, sig) => `Fisher's exact test was used to determine if there was a significant association between [variable 1] and [variable 2]. The results indicate a ${sig ? "significant" : "non-significant"} association between the variables, p = ${parseFloat(v.p || '1').toFixed(3)}.`,
   },
   "regression": {
     label: "Regression Analysis",
@@ -138,7 +127,6 @@ const testConfig: TestConfig = {
       { name: "df2", label: "df (residual)", placeholder: "e.g., 97" },
       { name: "p", label: "p-value", placeholder: "e.g., 0.008" },
     ],
-    template: (v, sig) => `A multiple regression was run to predict [dependent variable] from [independent variable 1] and [independent variable 2]. These variables statistically ${sig ? "significantly" : "non-significantly"} predicted [dependent variable], F(${v.df1 || '[df1]'}, ${v.df2 || '[df2]'}) = ${v.F || '[F]'}, p = ${parseFloat(v.p || '1').toFixed(3)}, R² = ${v.R2 || '[R²]'}.`,
   },
   "z-test": {
     label: "Z-test",
@@ -146,7 +134,6 @@ const testConfig: TestConfig = {
       { name: "Z", label: "Z-statistic", placeholder: "e.g., 2.58" },
       { name: "p", label: "p-value", placeholder: "e.g., 0.010" },
     ],
-    template: (v, sig) => `A z-test was used to compare the sample mean to the population mean. The results indicate that the sample mean (M=[mean]) was ${sig ? "significantly" : "not significantly"} different from the population mean (μ=[population mean]), Z = ${v.Z || '[Z]'}, p = ${parseFloat(v.p || '1').toFixed(3)}.`,
   },
   "mcnemar": {
     label: "McNemar’s Test",
@@ -154,7 +141,6 @@ const testConfig: TestConfig = {
       { name: "chi2", label: "Chi-Square (χ²)", placeholder: "e.g., 5.44" },
       { name: "p", label: "p-value", placeholder: "e.g., 0.020" },
     ],
-    template: (v, sig) => `McNemar's test was used to determine if there was a significant change in the proportion of [e.g., 'yes' responses] before and after the [intervention]. The results showed a ${sig ? "statistically significant" : "non-significant"} change in proportions, χ²(1, N = [sample size]) = ${v.chi2 || '[χ²]'}, p = ${parseFloat(v.p || '1').toFixed(3)}.`,
   },
 };
 
@@ -165,9 +151,11 @@ const testOrder = [
 ];
 
 export function ResultsInterpreter() {
+  const { session } = useAuth();
   const [testType, setTestType] = useState("pearson-correlation");
   const [values, setValues] = useState<Record<string, string>>({});
   const [interpretation, setInterpretation] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setValues({});
@@ -180,12 +168,43 @@ export function ResultsInterpreter() {
     setValues((prev) => ({ ...prev, [field]: value }));
   };
 
-  const generateInterpretation = () => {
-    const pValue = parseFloat(values.p || "1");
-    const isSignificant = pValue < 0.05;
-    const result = currentTest.template(values, isSignificant);
-    setInterpretation(result);
-    toast.success("Interpretation generated!");
+  const generateInterpretation = async () => {
+    if (!session) {
+      toast.error("You must be logged in to use this feature.");
+      return;
+    }
+    setIsLoading(true);
+    setInterpretation("");
+    try {
+      const pValue = parseFloat(values.p || "1");
+      const isSignificant = pValue < 0.05;
+
+      const response = await fetch(
+        "https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/interpret-results",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+            apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
+          },
+          body: JSON.stringify({
+            testLabel: currentTest.label,
+            values,
+            isSignificant,
+          }),
+        }
+      );
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+      
+      setInterpretation(data.interpretation);
+      toast.success("Interpretation generated!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to generate interpretation.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCopyToClipboard = () => {
@@ -219,8 +238,8 @@ export function ResultsInterpreter() {
         ))}
       </div>
 
-      <Button onClick={generateInterpretation}>
-        <Wand2 className="w-4 h-4 mr-2" /> Generate Interpretation
+      <Button onClick={generateInterpretation} disabled={isLoading}>
+        <Wand2 className="w-4 h-4 mr-2" /> {isLoading ? "Generating..." : "Generate Interpretation"}
       </Button>
 
       {interpretation && (
