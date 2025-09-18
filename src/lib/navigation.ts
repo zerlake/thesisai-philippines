@@ -1,22 +1,34 @@
 import {
-  LayoutDashboard,
-  FileText,
+  BookCheck,
   BookCopy,
-  FlaskConical,
-  Sigma,
-  FileCheck2,
-  Lightbulb,
-  FileClock,
-  Users,
+  BookMarked,
+  BookOpen,
   BookUser,
-  Shield,
-  UserCog,
-  University,
-  CreditCard,
-  Gift,
+  BrainCircuit,
+  ClipboardCheck,
+  ClipboardPen,
+  FileText,
+  FlaskConical,
+  LayoutDashboard,
+  Lightbulb,
   List,
+  Presentation,
+  ShieldCheck,
+  UserCog,
+  BookText as TitleIdeaIcon,
+  Languages,
+  Baseline,
+  University,
+  CheckSquare,
+  Gift,
+  CreditCard,
+  UserCheck,
+  Component,
+  BarChart,
+  Table,
+  Calendar,
+  type LucideIcon,
 } from "lucide-react";
-import { type LucideIcon } from "lucide-react";
 
 export type NavItem = {
   label: string;
@@ -33,53 +45,79 @@ export const studentNavGroups: NavGroup[] = [
   {
     title: "Workspace",
     items: [
-      { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-      { label: "Drafts", href: "/drafts", icon: FileText },
-      { label: "Resources", href: "/resources", icon: BookCopy },
+      { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+      { icon: FileText, label: "Drafts", href: "/drafts" },
+      { icon: UserCheck, label: "My Advisor", href: "/settings" },
+      { icon: CreditCard, label: "Billing", href: "/settings/billing" },
+      { icon: Gift, label: "Referrals", href: "/settings/referrals" },
+      { icon: BookOpen, label: "Resources", href: "/resources" },
+      { icon: University, label: "University Guides", href: "/university-guides" },
+      { icon: BookUser, label: "User Guide", href: "/user-guide" },
     ],
   },
   {
     title: "Pre-Writing",
     items: [
-      { label: "Topic Ideas", href: "/tools/topic-ideas", icon: Lightbulb },
-      { label: "Outline Generator", href: "/tools/outline-generator", icon: List },
+      { icon: BrainCircuit, label: "Topic Ideas", href: "/topic-ideas" },
+      { icon: TitleIdeaIcon, label: "Title Generator", href: "/title-generator" },
+      { icon: List, label: "Outline", href: "/outline" },
+      { icon: FlaskConical, label: "Research", href: "/research" },
     ],
   },
   {
     title: "Writing Helpers",
     items: [
-      { label: "Methodology", href: "/tools/methodology", icon: FlaskConical },
-      { label: "Results", href: "/tools/results", icon: Sigma },
-      { label: "Conclusion", href: "/tools/conclusion", icon: FileCheck2 },
+      { icon: ClipboardPen, label: "Methodology", href: "/methodology" },
+      { icon: ClipboardCheck, label: "Results", href: "/results" },
+      { icon: BookCheck, label: "Conclusion", href: "/conclusion" },
+      { icon: Languages, label: "Paraphraser", href: "/paraphraser" },
+    ],
+  },
+  {
+    title: "Citation Tools",
+    items: [
+      { icon: BookMarked, label: "Citations", href: "/citations" },
+      { icon: BookCopy, label: "Bibliography", href: "/bibliography" },
     ],
   },
   {
     title: "Review Tools",
     items: [
-      { label: "Originality Checker", href: "/tools/originality-checker", icon: Shield },
-      { label: "Grammar Checker", href: "/tools/grammar-checker", icon: FileClock },
+      { icon: FileText, label: "Title Page", href: "/title-page" },
+      { icon: Presentation, label: "Presentation", href: "/presentation" },
+      { icon: Lightbulb, label: "Flashcards", href: "/flashcards" },
+      { icon: Baseline, label: "Grammar Check", href: "/grammar-check" },
+      { icon: ShieldCheck, label: "Originality Check", href: "/originality-check" },
+    ],
+  },
+  {
+    title: "UI Elements",
+    items: [
+      { icon: Component, label: "Alerts", href: "/ui-elements/alerts" },
+      { icon: Component, label: "Avatars", href: "/ui-elements/avatars" },
+      { icon: Component, label: "Badges", href: "/ui-elements/badges" },
+      { icon: Component, label: "Buttons", href: "/ui-elements/buttons" },
+      { icon: Component, label: "Modals", href: "/ui-elements/modals" },
+      { icon: BarChart, label: "Charts", href: "/ui-elements/charts" },
+      { icon: Component, label: "Form Elements", href: "/ui-elements/form-elements" },
+      { icon: Table, label: "Tables", href: "/ui-elements/tables" },
+      { icon: Calendar, label: "Calendar", href: "/ui-elements/calendar" },
     ],
   },
 ];
+
+export const adminNavItems: NavItem[] = [{ icon: UserCog, label: "Admin", href: "/admin" }];
 
 export const advisorNavGroups: NavGroup[] = [
   {
-    title: "Workspace",
+    title: "Advisor Workspace",
     items: [
-      { label: "Dashboard", href: "/advisor", icon: LayoutDashboard },
-      { label: "Student Drafts", href: "/advisor/drafts", icon: FileText },
+      { icon: LayoutDashboard, label: "Dashboard", href: "/advisor" },
+      { icon: FileText, label: "Drafts", href: "/drafts" },
+      { icon: CheckSquare, label: "Competency Self-Assessment", href: "/advisor/competency" },
+      { icon: BookOpen, label: "Resources", href: "/resources" },
+      { icon: University, label: "University Guides", href: "/university-guides" },
+      { icon: BookUser, label: "Advisor Guide", href: "/advisor-guide" },
     ],
   },
-  {
-    title: "Mentorship Tools",
-    items: [
-      { label: "My Students", href: "/advisor/students", icon: Users },
-      { label: "Advisor Guide", href: "/advisor/guide", icon: BookUser },
-      { label: "Competency Assessment", href: "/advisor/assessment", icon: UserCog },
-    ],
-  },
-];
-
-export const adminNavItems: NavItem[] = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
 ];

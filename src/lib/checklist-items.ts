@@ -1,11 +1,5 @@
-import {
-  Lightbulb,
-  BookOpen,
-  FlaskConical,
-  BarChart3,
-  GraduationCap,
-  type LucideIcon,
-} from "lucide-react";
+import { Edit3, FileCheck2, Sparkles, GitBranch } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 
 export type ChecklistItem = {
   id: string;
@@ -25,56 +19,144 @@ export type ChecklistPhase = {
 export const thesisChecklist: ChecklistPhase[] = [
   {
     id: "phase-1",
-    title: "Phase 1: Pre-Writing & Proposal",
-    icon: Lightbulb,
+    title: "Getting Started",
+    icon: Sparkles,
     items: [
-      { id: "p1-1", title: "Brainstorm & Select a Topic", description: "Choose a researchable and interesting topic.", href: "/tools/topic-ideas", toolName: "Topic Idea Generator" },
-      { id: "p1-2", title: "Conduct Preliminary Research", description: "Gather initial sources to confirm topic viability.", href: "/tools/research-helper", toolName: "Research Helper" },
-      { id: "p1-3", title: "Develop Research Questions", description: "Formulate clear, focused questions your research will answer." },
-      { id: "p1-4", title: "Create a Detailed Outline", description: "Structure your entire paper chapter by chapter.", href: "/tools/outline-generator", toolName: "Outline Generator" },
-      { id: "p1-5", title: "Write & Defend Proposal", description: "Draft Chapters 1-3 and get approval from your panel." },
+      {
+        id: "item-1-1",
+        title: "Define a Research Topic",
+        description: "Choose a topic that is interesting, relevant, and feasible to research.",
+        href: "/topic-ideas",
+        toolName: "Topic Idea Generator",
+      },
+      {
+        id: "item-1-2",
+        title: "Formulate a Research Problem",
+        description: "Clearly state the specific issue or gap your research will address.",
+      },
+      {
+        id: "item-1-3",
+        title: "Write Research Questions",
+        description: "Develop clear, focused questions that your project will answer.",
+      },
+      {
+        id: "item-1-4",
+        title: "Conduct a Literature Search",
+        description: "Find and evaluate relevant academic sources for your literature review.",
+        href: "/research",
+        toolName: "Research Helper",
+      },
     ],
   },
   {
     id: "phase-2",
-    title: "Phase 2: Literature Review",
-    icon: BookOpen,
+    title: "Structuring Your Project",
+    icon: GitBranch,
     items: [
-      { id: "p2-1", title: "Gather Sources", description: "Find relevant academic literature for your topic.", href: "/tools/research-helper", toolName: "Research Helper" },
-      { id: "p2-2", title: "Synthesize Literature", description: "Analyze and connect ideas from your sources." },
-      { id: "p2-3", title: "Draft Chapter II", description: "Write the complete Review of Related Literature." },
+      {
+        id: "item-2-1",
+        title: "Create a Project Outline",
+        description: "Plan the structure of your chapters and the main points for each section.",
+        href: "/outline",
+        toolName: "Outline Generator",
+      },
+      {
+        id: "item-2-2",
+        title: "Write a Compelling Introduction",
+        description: "Hook the reader, provide background, and state your research problem and questions.",
+      },
+      {
+        id: "item-2-3",
+        title: "Choose a Research Methodology",
+        description: "Describe and justify the methods you will use to collect and analyze data.",
+        href: "/methodology",
+        toolName: "Methodology Helper",
+      },
+      {
+        id: "item-2-4",
+        title: "Present Your Research Results",
+        description: "Objectively report the findings of your research using tables, charts, and text.",
+        href: "/results",
+        toolName: "Results Helper",
+      },
+      {
+        id: "item-2-5",
+        title: "Discuss the Meaning of the Results",
+        description: "Interpret your findings, explain their significance, and relate them to your literature review.",
+        href: "/results",
+        toolName: "Results Helper",
+      },
+      {
+        id: "item-2-6",
+        title: "Write a Strong Conclusion",
+        description: "Summarize your research, answer your main research question, and provide recommendations.",
+        href: "/conclusion",
+        toolName: "Conclusion Helper",
+      },
     ],
   },
   {
     id: "phase-3",
-    title: "Phase 3: Methodology & Data Collection",
-    icon: FlaskConical,
+    title: "Writing It Up",
+    icon: Edit3,
     items: [
-      { id: "p3-1", title: "Finalize Research Design", description: "Confirm your overall approach (qualitative, quantitative, etc.).", href: "/tools/methodology", toolName: "Methodology Helper" },
-      { id: "p3-2", title: "Develop Instruments", description: "Create your survey, interview questions, or experiment." },
-      { id: "p3-3", title: "Gather Data", description: "Collect information from your participants or sources." },
-      { id: "p3-4", title: "Draft Chapter III", description: "Write the complete Methodology section." },
+      {
+        id: "item-3-1",
+        title: "Use an Academic Writing Style",
+        description: "Ensure your language is formal, objective, clear, and concise.",
+        href: "/paraphraser",
+        toolName: "Paraphrasing Tool",
+      },
+      {
+        id: "item-3-2",
+        title: "Structure Your Paragraphs Logically",
+        description: "Each paragraph should focus on a single idea, with a clear topic sentence.",
+      },
+      {
+        id: "item-3-3",
+        title: "Use Clear Transitions",
+        description: "Connect your ideas smoothly between paragraphs and sections.",
+      },
     ],
   },
   {
     id: "phase-4",
-    title: "Phase 4: Data Analysis & Results",
-    icon: BarChart3,
+    title: "The Finishing Touches",
+    icon: FileCheck2,
     items: [
-      { id: "p4-1", title: "Analyze Data", description: "Process your collected data using appropriate techniques.", href: "/tools/results", toolName: "Results Helper" },
-      { id: "p4-2", title: "Present Findings", description: "Create tables, charts, and describe your results." },
-      { id: "p4-3", title: "Draft Chapter IV", description: "Write the complete Results and Discussion section." },
-    ],
-  },
-  {
-    id: "phase-5",
-    title: "Phase 5: Finalization & Defense",
-    icon: GraduationCap,
-    items: [
-      { id: "p5-1", title: "Draft Chapter V", description: "Write the Summary, Conclusion, and Recommendations.", href: "/tools/conclusion", toolName: "Conclusion Helper" },
-      { id: "p5-2", title: "Final Review & Edit", description: "Proofread the entire manuscript for errors." },
-      { id: "p5-3", title: "Prepare for Oral Defense", description: "Create your presentation and practice your delivery." },
-      { id: "p5-4", title: "Submit Final Paper", description: "Complete all revisions and submit the final bound copies." },
+      {
+        id: "item-4-1",
+        title: "Create a Title Page",
+        description: "Format your title page according to your university's guidelines.",
+        href: "/title-page",
+        toolName: "Title Page Generator",
+      },
+      {
+        id: "item-4-2",
+        title: "Write a Concise Abstract",
+        description: "Provide a short summary of your entire project. Use the AI Assistant in the editor.",
+      },
+      {
+        id: "item-4-3",
+        title: "Format the Reference List",
+        description: "Ensure all citations are correct and consistently formatted in the required style.",
+        href: "/bibliography",
+        toolName: "Bibliography Generator",
+      },
+      {
+        id: "item-4-4",
+        title: "Proofread for Errors",
+        description: "Carefully check for any spelling, grammar, and punctuation mistakes.",
+        href: "/grammar-check",
+        toolName: "Grammar & Writing Check",
+      },
+      {
+        id: "item-4-5",
+        title: "Run a Plagiarism Check",
+        description: "Use a plagiarism checker to ensure all sources are properly cited.",
+        href: "/originality-check",
+        toolName: "Originality Checker",
+      },
     ],
   },
 ];

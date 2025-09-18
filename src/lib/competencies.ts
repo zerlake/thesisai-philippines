@@ -1,60 +1,78 @@
-import { Book, BrainCircuit, Briefcase, CheckSquare, Clock, Edit3, FlaskConical, FolderLock, Heart, Mic, ShieldAlert, ShieldCheck, Sparkles, Users } from "lucide-react";
+import { BookCopy, MessageSquare, Users, Heart, Sparkles } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 
-export const advisorCompetencies = [
+export type CompetencyItem = {
+  id: string;
+  text: string;
+};
+
+export type Competency = {
+  id: string;
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  items: CompetencyItem[];
+};
+
+export const advisorCompetencies: Competency[] = [
   {
     id: "subject-expertise",
-    title: "Subject Matter Expertise",
-    icon: Book,
-    description: "Your knowledge and proficiency in the student's field of study.",
+    title: "Subject Matter and Research Expertise",
+    icon: BookCopy,
+    description: "Your knowledge in the field and understanding of research methodologies.",
     items: [
       { id: "se-1", text: "I am current with the latest research and developments in my field." },
-      { id: "se-2", text: "I can provide relevant and insightful guidance on the student's research topic." },
-      { id: "se-3", text: "I am familiar with the key literature and theoretical frameworks relevant to the student's work." },
+      { id: "se-2", text: "I can guide students in selecting appropriate and rigorous research methodologies." },
+      { id: "se-3", text: "I effectively help students refine their research questions to be focused and significant." },
+      { id: "se-4", text: "I can identify potential flaws in research design and suggest viable solutions." },
     ],
   },
   {
-    id: "mentorship-skills",
-    title: "Mentorship & Communication",
+    id: "communication",
+    title: "Communication and Feedback",
+    icon: MessageSquare,
+    description: "How you communicate expectations, feedback, and guidance.",
+    items: [
+      { id: "cf-1", text: "I provide feedback that is constructive, specific, and actionable." },
+      { id: "cf-2", text: "I communicate my expectations regarding timelines and quality of work clearly." },
+      { id: "cf-3", text: "I am an active listener during meetings with my students." },
+      { id: "cf-4", text: "My feedback is delivered in a timely manner." },
+    ],
+  },
+  {
+    id: "interpersonal",
+    title: "Interpersonal and Mentoring Skills",
     icon: Users,
-    description: "Your ability to guide, support, and communicate effectively with your students.",
+    description: "Your ability to build a positive and productive mentoring relationship.",
     items: [
-      { id: "ms-1", text: "I establish clear expectations and maintain open lines of communication." },
-      { id: "ms-2", text: "I provide constructive, timely, and actionable feedback on student work." },
-      { id: "ms-3", text: "I adapt my advising style to meet the individual needs of my students." },
-      { id: "ms-4", text: "I foster a supportive and motivating environment for my students." },
+      { id: "im-1", text: "I foster an environment where students feel comfortable discussing challenges." },
+      { id: "im-2", text: "I help students develop their independence and confidence as researchers." },
+      { id: "im-3", text: "I adapt my mentoring style to meet the individual needs of my students." },
+      { id: "im-4", text: "I am approachable and accessible to my students for guidance." },
     ],
   },
   {
-    id: "research-guidance",
-    title: "Research Process Guidance",
-    icon: FlaskConical,
-    description: "Your ability to guide students through the entire research lifecycle.",
+    id: "wellbeing",
+    title: "Student Wellbeing and Support",
+    icon: Heart,
+    description: "Your role in supporting the student's overall academic and personal wellbeing.",
     items: [
-      { id: "rg-1", text: "I effectively assist students in refining their research questions and objectives." },
-      { id: "rg-2", text: "I provide sound advice on research design, methodology, and data analysis." },
-      { id: "rg-3", text: "I help students navigate challenges and overcome obstacles in their research." },
+      { id: "wb-1", text: "I recognize signs of student stress or burnout and discuss them constructively." },
+      { id: "wb-2", text: "I promote a healthy work-life balance for my students." },
+      { id: "wb-3", text: "I am aware of university support services (e.g., counseling) and can refer students when needed." },
+      { id: "wb-4", text: "I celebrate student progress and milestones to maintain motivation." },
     ],
   },
   {
-    id: "professional-development",
-    title: "Professional & Career Development",
-    icon: Briefcase,
-    description: "Your role in preparing students for their future careers.",
+    id: "professionalism",
+    title: "Professionalism and Ethics",
+    icon: Sparkles,
+    description: "Upholding the standards of academic and professional conduct.",
     items: [
-      { id: "pd-1", text: "I encourage students to present their work at conferences and seek publication." },
-      { id: "pd-2", text: "I provide guidance on career paths and professional networking." },
-      { id: "pd-3", text: "I help students develop transferable skills such as project management and critical thinking." },
-    ],
-  },
-  {
-    id: "ethical-conduct",
-    title: "Ethical & Professional Conduct",
-    icon: ShieldCheck,
-    description: "Your commitment to upholding academic integrity and professional standards.",
-    items: [
-      { id: "ec-1", text: "I educate students on ethical research practices, including plagiarism and data management." },
-      { id: "ec-2", text: "I model professional behavior and maintain appropriate boundaries." },
-      { id: "ec-3", text: "I am knowledgeable about and adhere to institutional policies and guidelines." },
+      { id: "pe-1", text: "I model ethical research conduct and academic integrity." },
+      { id: "pe-2", text: "I am familiar with and uphold university policies regarding research and supervision." },
+      { id: "pe-3", text: "I help students navigate the process of ethical review (IRB) when necessary." },
+      { id: "pe-4", text: "I provide guidance on future career paths and professional development." },
     ],
   },
 ];
