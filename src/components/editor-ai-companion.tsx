@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import { Wand2, MessageCircle } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { AIAssistantPanel } from "./ai-assistant-panel";
-import { AdvisorAiToolkit } from "./advisor-ai-toolkit";
+import { ReviewerAiToolkit } from "./reviewer-ai-toolkit";
 import { AdvisorReviewPanel } from "./advisor-review-panel";
 import { CommentSidebar } from "./comment-sidebar";
 import { useIsMobile } from "../hooks/use-mobile";
@@ -53,12 +53,13 @@ export function EditorAICompanion({
           )}
           {isAdvisorViewing && (
             <div className="hidden lg:block space-y-6">
-              <AdvisorAiToolkit editor={editor} />
+              <ReviewerAiToolkit editor={editor} />
               {reviewStatus === 'submitted' && <AdvisorReviewPanel documentId={documentId} onReviewSubmit={onReviewSubmit} />}
             </div>
           )}
           {isCriticViewing && (
             <div className="hidden lg:block space-y-6">
+              <ReviewerAiToolkit editor={editor} />
               <CriticReviewPanel documentId={documentId} onReviewSubmit={onReviewSubmit} />
             </div>
           )}

@@ -24,6 +24,7 @@ import { EditorAICompanion } from "./editor-ai-companion";
 import { format } from "date-fns";
 import { CheckCircle, XCircle, Eye, Minimize } from "lucide-react";
 import { Button } from "./ui/button";
+import { CertificateDialog } from "./certificate-dialog";
 
 // Import individual extensions instead of StarterKit
 import Document from '@tiptap/extension-document';
@@ -51,6 +52,7 @@ export function Editor({ documentId }: { documentId: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isExternalReviewDialogOpen, setIsExternalReviewDialogOpen] = useState(false);
+  const [isCertificateDialogOpen, setIsCertificateDialogOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -153,6 +155,10 @@ export function Editor({ documentId }: { documentId: string }) {
   const canSubmit = doc.isOwner && (doc.reviewStatus === 'draft' || doc.reviewStatus === 'needs_revision' || doc.reviewStatus === 'critic_revision_requested');
   const isAwaitingExternal = doc.isOwner && doc.reviewStatus === 'awaiting_external_review';
   const isAdvisorViewing = !doc.isOwner && profile?.role === 'advisor';
+  const canGenerateCertificate = doc.isCriticViewing && doc.reviewStatus === 'approved' && !!doc.certificationDate;
+  const studentName = `${doc.studentProfile?.first_name || ''} ${doc.studentProfile?.last_name || ''}`.trim();
+  const criticName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim();
+  const certificationDate = doc.certificationDate ? format(new Date(doc.certificationDate), "MMMM d, yyyy") : '';
 
   return (
     <>
@@ -190,6 +196,8 @@ export function Editor({ documentId }: { documentId: string }) {
             onExport={handleExport}
             isExporting={isExporting}
             toggleFocusMode={toggleFocusMode}
+            canGenerateCertificate={canGenerateCertificate}
+            onGenerateCertificate={() => setIsCertificateDialogOpen(true)}
           />
           <RichTextEditor editor={editor} />
         </div>
@@ -216,6 +224,17 @@ export function Editor({ documentId }: { documentId: string }) {
         />
 
         <ExternalReviewDialog open={isExternalReviewDialogOpen} onOpenChange={setIsExternalReviewDialogOpen} onExport={handleExport} isExporting={isExporting} />
+        
+        {canGenerateCertificate && (
+          <CertificateDialog
+            open={isCertificateDialogOpen}
+            onOpenChange={setIsCertificateDialogOpen}
+            studentName={studentName}
+            documentTitle={doc.title}
+            criticName={criticName}
+            certificationDate={certificationDate}
+          />
+        )}
       </div>
     </>
   );

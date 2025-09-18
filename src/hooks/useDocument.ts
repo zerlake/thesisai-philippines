@@ -47,6 +47,8 @@ export function useDocument(documentId: string, editor: Editor | null) {
   const [isOffline, setIsOffline] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [reviewHistory, setReviewHistory] = useState<Review[]>([]);
+  const [studentProfile, setStudentProfile] = useState<any>(null);
+  const [certificationDate, setCertificationDate] = useState<string | null>(null);
 
   const debouncedTitle = useDebounce(title, 1000);
   const debouncedContent = useDebounce(content, 1000);
@@ -83,6 +85,9 @@ export function useDocument(documentId: string, editor: Editor | null) {
     setComments(data.comments.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
     // @ts-ignore
     setReviewHistory(data.document_reviews.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+    // @ts-ignore
+    setStudentProfile(data.profiles);
+    setCertificationDate(data.certified_at);
 
     if (editor.getHTML() !== data.content) {
       editor.commands.setContent(data.content || '', { emitUpdate: false });
@@ -149,6 +154,8 @@ export function useDocument(documentId: string, editor: Editor | null) {
     isOffline,
     comments, setComments,
     reviewHistory,
+    studentProfile,
+    certificationDate,
     saveDocument,
     fetchDocumentData,
   };

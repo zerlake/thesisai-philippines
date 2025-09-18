@@ -5,7 +5,7 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { ShareDialog } from "./share-dialog";
-import { Eye, FileDown, Loader2, Save, Send, Share2, Undo2, CheckCircle, XCircle, Maximize } from "lucide-react";
+import { Eye, FileDown, Loader2, Save, Send, Share2, Undo2, CheckCircle, XCircle, Maximize, Award } from "lucide-react";
 
 interface EditorHeaderProps {
   title: string;
@@ -24,12 +24,14 @@ interface EditorHeaderProps {
   onExport: (format: 'docx' | 'pdf') => void;
   isExporting: boolean;
   toggleFocusMode: () => void;
+  canGenerateCertificate: boolean;
+  onGenerateCertificate: () => void;
 }
 
 export function EditorHeader({
   title, onTitleChange, reviewStatus, isOwner, canSubmit, isAwaitingExternal, isSubmitting,
   saveState, documentId, isPublic, onSubmitForReview, onRevertToDraft, onSaveDocument,
-  onExport, isExporting, toggleFocusMode
+  onExport, isExporting, toggleFocusMode, canGenerateCertificate, onGenerateCertificate
 }: EditorHeaderProps) {
 
   const getStatusBadge = (status: string) => {
@@ -56,6 +58,7 @@ export function EditorHeader({
         {getStatusBadge(reviewStatus)}
       </div>
       <div className="flex items-center gap-2">
+        {canGenerateCertificate && <Button onClick={onGenerateCertificate}><Award className="w-4 h-4 mr-2" />Generate Certificate</Button>}
         {isOwner && (
           <>
             {canSubmit && <Button onClick={onSubmitForReview} disabled={isSubmitting || saveState !== 'idle'}><Send className="w-4 h-4 mr-2" />Submit for Review</Button>}

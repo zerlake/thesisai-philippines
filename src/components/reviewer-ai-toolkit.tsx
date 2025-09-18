@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 
-interface AdvisorAiToolkitProps {
+interface ReviewerAiToolkitProps {
   editor: Editor | null;
 }
 
@@ -19,7 +19,7 @@ type StructuredFeedback = {
   improvement: string;
 };
 
-export function AdvisorAiToolkit({ editor }: AdvisorAiToolkitProps) {
+export function ReviewerAiToolkit({ editor }: ReviewerAiToolkitProps) {
   const { session } = useAuth();
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
@@ -122,7 +122,7 @@ export function AdvisorAiToolkit({ editor }: AdvisorAiToolkitProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Advisor AI Toolkit</CardTitle>
+        <CardTitle>Reviewer AI Toolkit</CardTitle>
         <CardDescription>Select text in the document to generate feedback and suggestions.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
