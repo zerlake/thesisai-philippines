@@ -19,7 +19,14 @@ const config = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-outfit)"],
+        sans: ["var(--font-sans)"],
+        serif: ["var(--font-serif)"],
+      },
+      fontSize: {
+        'body': ['clamp(0.875rem, 0.875rem + 0.25vw, 1.125rem)', { lineHeight: '1.6' }], // 14px -> 18px
+        'heading': ['clamp(1.5rem, 1.5rem + 2vw, 2.5rem)', { lineHeight: '1.2' }], // 24px -> 40px
+        'display': ['clamp(3rem, 3rem + 6vw, 6rem)', { lineHeight: '1.1' }], // 48px -> 96px
+        'caption': ['clamp(0.75rem, 0.75rem + 0.25vw, 0.875rem)', { lineHeight: '1.4' }], // 12px -> 14px
       },
       colors: {
         border: "hsl(var(--border))",

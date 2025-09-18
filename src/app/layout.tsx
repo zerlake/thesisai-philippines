@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Outfit, Lora } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -9,9 +9,16 @@ import { LandingFooter } from "@/components/landing-footer";
 import { AuthProvider } from "@/components/auth-provider";
 import { ChunkLoadErrorHandler } from "@/components/chunk-load-error-handler";
 
-const outfit = Outfit({
+const fontSans = Outfit({
   subsets: ["latin"],
-  variable: "--font-outfit",
+  variable: "--font-sans",
+  display: 'swap',
+});
+
+const fontSerif = Lora({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -26,7 +33,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("font-sans antialiased", outfit.variable)}>
+      <body
+        className={cn(
+          "font-sans antialiased",
+          fontSans.variable,
+          fontSerif.variable
+        )}
+      >
         <ChunkLoadErrorHandler />
         <ThemeProvider
           attribute="class"

@@ -89,8 +89,13 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground text-body;
   }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif font-bold text-balance;
+  }
+  h1 { @apply text-display; }
+  h2 { @apply text-heading; }
 }
 
 .hero-bg {

@@ -9,10 +9,10 @@ export function HeroSection() {
       <div className="absolute inset-0 bg-black/60" />
       <div className="relative container flex max-w-5xl flex-col items-center text-center">
         <div className="flex flex-col items-center bg-black/50 backdrop-blur-sm p-8 rounded-lg">
-          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+          <h1 className="text-display font-extrabold tracking-tight text-white">
             Your AI-Powered Academic Co-Pilot
           </h1>
-          <p className="mt-6 max-w-3xl text-lg text-neutral-200 sm:text-xl">
+          <p className="mt-6 max-w-3xl text-body text-neutral-200">
             From <span className="font-medium text-white">balangkas</span> to bibliography, conquer your thesis, dissertation, or capstone project with confidence. ThesisAI helps you outline, draft, cite, and refine your work, so you can focus on what truly matters: your research.
           </p>
         </div>
