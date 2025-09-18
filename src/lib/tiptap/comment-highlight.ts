@@ -1,4 +1,4 @@
-import { Mark, mergeAttributes, RawCommands } from '@tiptap/core';
+import { Mark, mergeAttributes } from '@tiptap/core';
 
 export interface CommentHighlightOptions {
   HTMLAttributes: Record<string, any>;
@@ -48,14 +48,14 @@ export const CommentHighlight = Mark.create<CommentHighlightOptions>({
 
   addCommands() {
     return {
-      setCommentHighlight: (commentId: string) => ({ commands }: { commands: RawCommands }) => {
-        return commands.setMark(this.name, { 'data-comment-id': commentId });
+      setCommentHighlight: (commentId: string) => ({ chain }) => {
+        return chain().setMark(this.name, { 'data-comment-id': commentId }).run();
       },
-      toggleCommentHighlight: (commentId: string) => ({ commands }: { commands: RawCommands }) => {
-        return commands.toggleMark(this.name, { 'data-comment-id': commentId });
+      toggleCommentHighlight: (commentId: string) => ({ chain }) => {
+        return chain().toggleMark(this.name, { 'data-comment-id': commentId }).run();
       },
-      unsetCommentHighlight: () => ({ commands }: { commands: RawCommands }) => {
-        return commands.unsetMark(this.name);
+      unsetCommentHighlight: () => ({ chain }) => {
+        return chain().unsetMark(this.name).run();
       },
     };
   },

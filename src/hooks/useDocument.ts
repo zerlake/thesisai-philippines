@@ -75,7 +75,7 @@ export function useDocument(documentId: string, editor: Editor | null) {
     setReviewHistory(data.document_reviews.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
 
     if (editor.getHTML() !== data.content) {
-      editor.commands.setContent(data.content || '', false);
+      editor.commands.setContent(data.content || '', { emitUpdate: false });
     }
     
     setIsLoading(false);

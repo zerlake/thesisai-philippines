@@ -14,11 +14,12 @@ import { fieldsOfStudy } from "@/lib/fields-of-study";
 interface FieldOfStudySelectorProps {
   value: string;
   onValueChange: (value: string) => void;
+  disabled?: boolean;
 }
 
-export function FieldOfStudySelector({ value, onValueChange }: FieldOfStudySelectorProps) {
+export function FieldOfStudySelector({ value, onValueChange, disabled }: FieldOfStudySelectorProps) {
   return (
-    <Select value={value} onValueChange={onValueChange}>
+    <Select value={value} onValueChange={onValueChange} disabled={disabled}>
       <SelectTrigger>
         <SelectValue placeholder="Select a field of study" />
       </SelectTrigger>
