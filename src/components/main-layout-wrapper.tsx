@@ -11,7 +11,7 @@ export function MainLayoutWrapper({ children }: { children: React.ReactNode }) {
   const { isFocusMode } = useFocusMode();
 
   return (
-    <div className="flex flex-col h-screen bg-background font-sans">
+    <div className="dark flex flex-col h-screen bg-background font-sans text-foreground">
       <div className={cn(isFocusMode && "hidden")}>
         <Header />
       </div>

@@ -43,7 +43,7 @@ export default function RootLayout({
         <SkipToContentLink />
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
