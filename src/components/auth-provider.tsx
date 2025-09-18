@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       for (let i = 0; i < 5; i++) { // Increased retries to 5
         const { data: profileData, error } = await supabase
           .from("profiles")
-          .select("*, documents(count), advisor:advisor_student_relationships!student_id(profiles:advisor_id(*)), user_preferences(*)")
+          .select("*, documents(count), advisor:advisor_student_relationships!student_id(profiles:advisor_id(*)), user_preferences!user_id(*)")
           .eq("id", user.id)
           .single();
 
