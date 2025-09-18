@@ -25,22 +25,22 @@ const steps = [
 
 export function HowItWorksSection() {
   return (
-    <section className="py-16 md:py-24 lg:py-32">
+    <section className="py-16 md:py-24 lg:py-32 bg-slate-900">
       <div className="container">
         <div className="mx-auto mb-12 max-w-3xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Get Started in Minutes</h2>
-          <p className="mt-4 text-muted-foreground">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-white">Get Started in Minutes</h2>
+          <p className="mt-4 text-slate-300">
             Follow our simple, guided process to streamline your writing journey.
           </p>
         </div>
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {steps.map((step) => (
             <div key={step.title} className="text-center">
-              <div className="mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full bg-muted text-primary">
+              <div className="mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full bg-slate-800 text-blue-400">
                 {step.icon}
               </div>
-              <h3 className="text-xl font-semibold">{step.title}</h3>
-              <p className="mt-2 text-muted-foreground">{step.description}</p>
+              <h3 className="text-xl font-semibold text-white">{step.title}</h3>
+              <p className="mt-2 text-slate-300">{step.description}</p>
             </div>
           ))}
         </div>
