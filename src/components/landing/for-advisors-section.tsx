@@ -27,7 +27,7 @@ const features = [
 
 export function ForAdvisorsSection() {
   return (
-    <section className="py-16 md:py-24 lg:py-32 bg-slate-900 text-white">
+    <section className="py-12 md:py-16 bg-slate-900 text-white">
       <div className="container">
         <div className="mx-auto mb-12 max-w-3xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">A Powerful Toolkit for Thesis Advisors</h2>

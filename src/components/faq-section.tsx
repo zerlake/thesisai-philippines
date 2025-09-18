@@ -29,7 +29,7 @@ const faqs = [
 
 export function FaqSection() {
   return (
-    <section className="py-12 md:py-16 lg:py-20 bg-slate-800">
+    <section className="py-12 md:py-16 bg-slate-800">
       <div className="container mx-auto max-w-3xl">
         <div className="mb-12 text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-white">Frequently Asked Questions</h2>
