@@ -13,6 +13,7 @@ import {
   GitBranch,
   Sigma,
   Users,
+  ClipboardList,
 } from "lucide-react";
 import { MethodologyToolCard } from "./methodology-tool-card";
 import { ResearchDesignSelector } from "./methodology-tools/research-design-selector";
@@ -21,6 +22,7 @@ import { SamplingMethodAdvisor } from "./methodology-tools/sampling-method-advis
 import { StatisticalTestAdvisor } from "./methodology-tools/statistical-test-advisor";
 import { InformedConsentGenerator } from "./methodology-tools/informed-consent-generator";
 import { PowerAnalysisCalculator } from "./methodology-tools/power-analysis-calculator";
+import { SurveyQuestionGenerator } from "./methodology-tools/survey-question-generator";
 
 export function MethodologyHelper() {
   return (
@@ -64,6 +66,14 @@ export function MethodologyHelper() {
         icon={GitBranch}
       >
         <SamplingMethodAdvisor />
+      </MethodologyToolCard>
+      
+      <MethodologyToolCard
+        title="Survey Question Generator"
+        description="Generate sample survey questions for your topic based on different question types."
+        icon={ClipboardList}
+      >
+        <SurveyQuestionGenerator />
       </MethodologyToolCard>
 
       <MethodologyToolCard
