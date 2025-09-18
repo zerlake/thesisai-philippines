@@ -98,10 +98,9 @@ export function FlashcardsGenerator() {
     if (!user || flashcards.length === 0 || !topic) return;
     setIsSaving(true);
 
-    let content = `# Flashcards for: ${topic}\n\n---\n\n`;
+    let content = `<h1>Flashcards for: ${topic}</h1><hr>`;
     flashcards.forEach(card => {
-      content += `**Term:** ${card.term}\n`;
-      content += `**Definition:** ${card.definition}\n\n---\n\n`;
+      content += `<h2>${card.term}</h2><p>${card.definition}</p><hr>`;
     });
 
     const { data: newDoc, error } = await supabase
