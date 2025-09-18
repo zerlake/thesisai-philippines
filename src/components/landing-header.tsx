@@ -18,25 +18,25 @@ export function LandingHeader() {
       <nav className="hidden md:flex gap-4 sm:gap-6 items-center">
         <Link
           href="/features"
-          className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
+          className="text-base font-medium text-slate-300 hover:text-white transition-colors"
         >
           Features
         </Link>
         <Link
           href="/pricing"
-          className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
+          className="text-base font-medium text-slate-300 hover:text-white transition-colors"
         >
           Pricing
         </Link>
         <Link
           href="/for-advisors"
-          className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
+          className="text-base font-medium text-slate-300 hover:text-white transition-colors"
         >
           For Advisors
         </Link>
         <Link
           href="/faq"
-          className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
+          className="text-base font-medium text-slate-300 hover:text-white transition-colors"
         >
           FAQ
         </Link>
