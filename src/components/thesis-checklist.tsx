@@ -149,8 +149,8 @@ export function ThesisChecklist() {
                             key={item.id}
                             layout
                             initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, x: 50 }}
+                            animate={{ opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 25 } }}
+                            exit={{ opacity: 0, scale: 0.8, x: 50 }}
                             drag="x"
                             dragConstraints={{ left: 0, right: 0 }}
                             dragElastic={{ left: 0.2, right: 0.2 }}

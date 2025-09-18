@@ -223,12 +223,12 @@ export function DocumentList() {
         <div className="text-center py-16 border-2 border-dashed rounded-lg flex flex-col items-center justify-center">
           <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold">
-            {debouncedSearchTerm ? "No Matching Documents" : "No Documents Yet"}
+            {debouncedSearchTerm ? "No Matching Documents" : "Your Workspace Awaits"}
           </h3>
-          <p className="mt-2 mb-4 text-sm text-muted-foreground">
+          <p className="mt-2 mb-4 text-sm text-muted-foreground max-w-xs">
             {debouncedSearchTerm
-              ? "Try a different search term."
-              : "Click the button above to create your first draft."}
+              ? "No drafts found for that search. Try another keyword!"
+              : "Every great paper begins with a single page. Let's get started."}
           </p>
         </div>
       )}
