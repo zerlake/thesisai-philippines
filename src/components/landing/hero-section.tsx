@@ -4,8 +4,7 @@ import { Button } from "../ui/button";
 export function HeroSection() {
   return (
     <section
-      className="relative bg-slate-900 bg-cover bg-center py-24 md:py-32 lg:py-40"
-      style={{ backgroundImage: `url('https://images.unsplash.com/photo-1548213235-4c48c0862296?q=80&w=1887&auto=format&fit=crop')` }}
+      className="relative hero-bg bg-slate-900 bg-cover bg-center py-24 md:py-32 lg:py-40"
     >
       <div className="absolute inset-0 bg-black/60" />
       <div className="relative container flex max-w-5xl flex-col items-center text-center">
