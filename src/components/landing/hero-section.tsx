@@ -7,13 +7,17 @@ import { ArrowRightIcon } from "lucide-react";
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-slate-900">
-      <div className="absolute inset-0 bg-grid-slate-700/[0.05] [mask-image:linear-gradient(to_bottom,white_5%,transparent_90%)]"></div>
+    <section
+      className="relative bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: "url('/hero-background.png')" }}
+    >
+      <div className="absolute inset-0 bg-black/60" />
       <div className="relative container flex flex-col items-center justify-center text-center py-20 md:py-24 lg:py-28">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
+          className="bg-slate-900/70 p-8 md:p-12 rounded-xl backdrop-blur-sm border border-slate-700"
         >
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
             From Blank Page to Polished Paper
@@ -21,18 +25,15 @@ export function HeroSection() {
           <p className="mt-6 max-w-3xl text-lg text-slate-300">
             ThesisAI is your academic co-pilot, designed to streamline your research journey. Generate outlines, find sources, check for originality, and format citations—all in one intelligent workspace.
           </p>
-        </motion.div>
-        <motion.div
-          className="mt-10 flex flex-wrap justify-center gap-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
-        >
-          <Button size="lg" asChild>
-            <Link href="/register">
-              Get Started for Free <ArrowRightIcon className="ml-2 h-5 w-5" />
-            </Link>
-          </Button>
+          <div
+            className="mt-10 flex flex-wrap justify-center gap-4"
+          >
+            <Button size="lg" asChild>
+              <Link href="/register">
+                Get Started for Free <ArrowRightIcon className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
         </motion.div>
       </div>
     </section>
