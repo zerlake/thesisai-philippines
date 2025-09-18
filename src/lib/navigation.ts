@@ -27,6 +27,7 @@ import {
   BarChart,
   Table,
   Calendar,
+  Palette,
   type LucideIcon,
 } from "lucide-react";
 
@@ -93,6 +94,7 @@ export const studentNavGroups: NavGroup[] = [
   {
     title: "UI Elements",
     items: [
+      { icon: Palette, label: "Colors", href: "/ui-elements/colors" },
       { icon: Component, label: "Alerts", href: "/ui-elements/alerts" },
       { icon: Component, label: "Avatars", href: "/ui-elements/avatars" },
       { icon: Component, label: "Badges", href: "/ui-elements/badges" },
