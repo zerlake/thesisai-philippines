@@ -39,34 +39,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return null;
     }
     try {
-      // Add a more robust retry mechanism to handle potential race conditions on sign-up
-      for (let i = 0; i < 5; i++) { // Increased retries to 5
-        const { data: profileData, error } = await supabase
+      for (let i = 0; i < 5; i++) {
+        const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("*, documents(count), advisor:advisor_student_relationships!student_id(profiles:advisor_id(*)), user_preferences!user_id(*)")
+          .select("*, documents(count), advisor:advisor_student_relationships!student_id(profiles:advisor_id(*))")
           .eq("id", user.id)
           .single();
 
-        if (error && error.code !== 'PGRST116') {
-          // If it's a real error, throw it immediately
-          throw error;
+        if (profileError && profileError.code !== 'PGRST116') {
+          throw profileError;
         }
-        
+
         if (profileData) {
+          const { data: preferencesData, error: preferencesError } = await supabase
+            .from("user_preferences")
+            .select("*")
+            .eq("user_id", user.id)
+            .single();
+          
+          if (preferencesError && preferencesError.code !== 'PGRST116') {
+            console.error("Error fetching user preferences:", preferencesError);
+          }
+
+          // @ts-ignore
+          profileData.user_preferences = preferencesData || null;
           setProfile(profileData);
           return profileData;
         }
 
-        // If profile not found, wait and retry with an increased delay
-        await new Promise(resolve => setTimeout(resolve, 750)); // Increased delay to 750ms
+        await new Promise(resolve => setTimeout(resolve, 750));
       }
       
-      // If loop finishes without returning, profile was not found
       throw new Error("Profile not found after multiple attempts.");
 
     } catch (e: any) {
       toast.error("Could not fetch user profile.");
-      console.error("Error fetching profile:", e.message); // Log the actual error for debugging
+      console.error("Error fetching profile:", e.message);
     }
     setProfile(null);
     return null;
