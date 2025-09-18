@@ -24,7 +24,7 @@ export function RootLayoutClient({ children }: { children: React.ReactNode }) {
 
   if (isPublicPage) {
     return (
-      <div className="flex min-h-dvh flex-col bg-background">
+      <div className="flex min-h-dvh flex-col">
         <LandingHeader />
         <main className="flex-1">{children}</main>
         <LandingFooter />
