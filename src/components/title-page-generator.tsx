@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
@@ -21,8 +21,15 @@ export function TitlePageGenerator() {
     department: "",
     university: "",
     degree: "",
-    date: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }),
+    date: "",
   });
+
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      date: new Date().toLocaleString('default', { month: 'long', year: 'numeric' })
+    }));
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

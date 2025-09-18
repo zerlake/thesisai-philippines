@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAuth } from "./auth-provider";
 import { Skeleton } from "./ui/skeleton";
@@ -51,6 +51,11 @@ export function Editor({ documentId }: { documentId: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isExternalReviewDialogOpen, setIsExternalReviewDialogOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const editor = useEditor({
     extensions: [
@@ -157,7 +162,7 @@ export function Editor({ documentId }: { documentId: string }) {
           {doc.isOwner && (doc.reviewStatus === 'approved' || doc.reviewStatus === 'needs_revision') && latestReview && (
             <Alert variant={doc.reviewStatus === 'approved' ? 'default' : 'destructive'}>
               {doc.reviewStatus === 'approved' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-              <AlertTitle>Feedback from {latestReview.profiles?.first_name || 'your advisor'} on {format(new Date(latestReview.created_at), "MMMM d, yyyy")}</AlertTitle>
+              <AlertTitle>Feedback from {latestReview.profiles?.first_name || 'your advisor'} on {isMounted && format(new Date(latestReview.created_at), "MMMM d, yyyy")}</AlertTitle>
               <AlertDescription>{latestReview.comments || "No comments provided."}</AlertDescription>
             </Alert>
           )}

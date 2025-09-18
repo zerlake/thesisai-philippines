@@ -55,6 +55,11 @@ export function ReferralsPage() {
   const [payoutDetails, setPayoutDetails] = useState("");
   const [isRequestingPayout, setIsRequestingPayout] = useState(false);
   const [referralLink, setReferralLink] = useState("");
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined" && profile?.referral_code) {
@@ -218,7 +223,7 @@ export function ReferralsPage() {
         </Card>
         <Card>
           <CardHeader><CardTitle>Payout History</CardTitle></CardHeader>
-          <CardContent><Table><TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Amount</TableHead><TableHead className="text-right">Status</TableHead></TableRow></TableHeader><TableBody>{isLoading ? <TableRow><TableCell colSpan={3}><Skeleton className="h-10 w-full" /></TableCell></TableRow> : payouts.length > 0 ? payouts.map(p => (<TableRow key={p.id}><TableCell>{format(new Date(p.created_at), 'MMM d, yyyy')}</TableCell><TableCell className="font-medium">₱{Number(p.amount).toFixed(2)}</TableCell><TableCell className="text-right">{getStatusBadge(p.status)}</TableCell></TableRow>)) : <TableRow><TableCell colSpan={3} className="text-center h-24">No payout requests yet.</TableCell></TableRow>}</TableBody></Table></CardContent>
+          <CardContent><Table><TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Amount</TableHead><TableHead className="text-right">Status</TableHead></TableRow></TableHeader><TableBody>{isLoading ? <TableRow><TableCell colSpan={3}><Skeleton className="h-10 w-full" /></TableCell></TableRow> : payouts.length > 0 ? payouts.map(p => (<TableRow key={p.id}><TableCell>{isMounted && format(new Date(p.created_at), 'MMM d, yyyy')}</TableCell><TableCell className="font-medium">₱{Number(p.amount).toFixed(2)}</TableCell><TableCell className="text-right">{getStatusBadge(p.status)}</TableCell></TableRow>)) : <TableRow><TableCell colSpan={3} className="text-center h-24">No payout requests yet.</TableCell></TableRow>}</TableBody></Table></CardContent>
         </Card>
       </div>
     </div>
