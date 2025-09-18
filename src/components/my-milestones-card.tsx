@@ -36,7 +36,7 @@ export function MyMilestonesCard() {
       if (error) {
         toast.error("Failed to load milestone progress.");
       } else {
-        const progressMap = new Map(data.map((item: MilestoneProgress) => [item.milestone_key, item]));
+        const progressMap = new Map<string, MilestoneProgress>(data.map((item: MilestoneProgress) => [item.milestone_key, item]));
         setProgress(progressMap);
       }
       setIsLoading(false);
