@@ -144,6 +144,14 @@
   h2 { @apply text-heading; }
 }
 
-.hero-bg {
-  background-image: url('/hero-background.png');
+@layer utilities {
+  @keyframes pan-bg {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .animate-pan-bg {
+    background-size: 150% auto;
+    animation: pan-bg 60s linear infinite;
+  }
 }
