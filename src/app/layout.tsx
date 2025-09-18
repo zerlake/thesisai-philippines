@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 import { LandingHeader } from "@/components/landing-header";
 import { LandingFooter } from "@/components/landing-footer";
+import { AuthProvider } from "@/components/auth-provider";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -31,12 +32,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="flex min-h-dvh flex-col bg-background">
-            <LandingHeader />
-            <main className="flex-1">{children}</main>
-            <LandingFooter />
-          </div>
-          <Toaster />
+          <AuthProvider>
+            <div className="flex min-h-dvh flex-col bg-background">
+              <LandingHeader />
+              <main className="flex-1">{children}</main>
+              <LandingFooter />
+            </div>
+            <Toaster />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
