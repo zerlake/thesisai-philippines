@@ -18,7 +18,7 @@ export function LandingHeader() {
           Features
         </Link>
         <Button variant="outline" asChild>
-          <Link href="/dashboard">Login</Link>
+          <Link href="/login">Login</Link>
         </Button>
         <ThemeToggle />
       </nav>
