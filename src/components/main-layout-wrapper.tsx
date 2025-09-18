@@ -19,8 +19,8 @@ export function MainLayoutWrapper({ children }: { children: React.ReactNode }) {
         <div className={cn(isFocusMode && "hidden")}>
           <Sidebar />
         </div>
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <main id="main-content" tabIndex={-1} className={cn("flex-1 overflow-y-auto bg-background", isFocusMode ? "p-0" : "p-4 md:p-6")}>
+        <div className="flex flex-col flex-1 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-black animate-pan-bg">
+          <main id="main-content" tabIndex={-1} className={cn("flex-1 overflow-y-auto bg-transparent", isFocusMode ? "p-0" : "p-4 md:p-6")}>
             <div className={cn("mb-6", isFocusMode && "hidden")}>
               <Breadcrumb />
             </div>

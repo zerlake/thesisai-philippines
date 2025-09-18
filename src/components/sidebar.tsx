@@ -33,7 +33,7 @@ export function Sidebar() {
   );
 
   return (
-    <aside className="hidden h-full w-64 flex-col border-r bg-card md:flex">
+    <aside className="hidden h-full w-64 flex-col border-r border-slate-700 bg-card/50 backdrop-blur-sm md:flex">
       <ScrollArea className="flex-1 p-4">
         <nav className="space-y-2">
           {profile?.role === "admin" && (
