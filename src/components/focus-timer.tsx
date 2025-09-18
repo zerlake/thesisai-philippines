@@ -2,12 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useFocusMode } from "@/contexts/focus-mode-context";
+import { Button } from "./ui/button";
+import { Pause, Play, X } from "lucide-react";
 import { toast } from "sonner";
-import { Timer } from "lucide-react";
 
 export function FocusTimer() {
   const { timerDuration, stopTimer } = useFocusMode();
   const [timeLeft, setTimeLeft] = useState(timerDuration);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    setTimeLeft(timerDuration);
+  }, [timerDuration]);
 
   useEffect(() => {
     if (timeLeft <= 0) {
@@ -18,20 +24,29 @@ export function FocusTimer() {
       return;
     }
 
+    if (isPaused) return;
+
     const intervalId = setInterval(() => {
-      setTimeLeft(timeLeft - 1);
+      setTimeLeft(prev => prev - 1);
     }, 1000);
 
     return () => clearInterval(intervalId);
-  }, [timeLeft, stopTimer]);
+  }, [timeLeft, isPaused, stopTimer]);
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
   return (
-    <div className="fixed top-4 left-4 z-50 bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 text-sm font-medium">
-      <Timer className="w-4 h-4 text-primary" />
-      <span>{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</span>
+    <div className="fixed bottom-4 right-4 z-50 bg-background/80 backdrop-blur-sm p-2 rounded-lg shadow-lg border flex items-center gap-2">
+      <div className="font-mono text-lg font-semibold w-16 text-center">
+        {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+      </div>
+      <Button variant="ghost" size="icon" onClick={() => setIsPaused(!isPaused)}>
+        {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+      </Button>
+      <Button variant="ghost" size="icon" onClick={stopTimer}>
+        <X className="w-4 h-4" />
+      </Button>
     </div>
   );
 }

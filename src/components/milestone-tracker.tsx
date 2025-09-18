@@ -6,25 +6,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { thesisMilestones, type Milestone } from "../lib/milestones";
 import { toast } from "sonner";
 import { Skeleton } from "./ui/skeleton";
-import { Check, CheckCircle, Clock, Edit, Save, X } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { Check, CheckCircle, Clock, AlertCircle, Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { format } from "date-fns";
 import { cn } from "../lib/utils";
 import { Button } from "./ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 import { Calendar } from "./ui/calendar";
+import { Checkbox } from "./ui/checkbox";
+import { Label } from "./ui/label";
 
 type MilestoneProgress = {
+  id: string;
   milestone_key: string;
   deadline: string | null;
   completed_at: string | null;
 };
 
 export function MilestoneTracker({ studentId }: { studentId: string }) {
-  const { supabase } = useAuth();
+  const { session, supabase } = useAuth();
+  const user = session?.user;
   const [progress, setProgress] = useState<Map<string, MilestoneProgress>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
-  const [editingKey, setEditingKey] = useState<string | null>(null);
-  const [newDeadline, setNewDeadline] = useState<Date | undefined>(undefined);
+  const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
   useEffect(() => {
     if (!studentId) return;
@@ -33,7 +36,7 @@ export function MilestoneTracker({ studentId }: { studentId: string }) {
       setIsLoading(true);
       const { data, error } = await supabase
         .from("thesis_milestones")
-        .select("milestone_key, deadline, completed_at")
+        .select("*")
         .eq("student_id", studentId);
 
       if (error) {
@@ -47,102 +50,115 @@ export function MilestoneTracker({ studentId }: { studentId: string }) {
     fetchProgress();
   }, [studentId, supabase]);
 
-  const handleSaveMilestone = async (milestoneKey: string) => {
-    const { error } = await supabase
-      .from("thesis_milestones")
-      .upsert({ student_id: studentId, milestone_key: milestoneKey, deadline: newDeadline?.toISOString() }, { onConflict: 'student_id, milestone_key' });
+  const handleUpdateMilestone = async (
+    milestoneKey: string,
+    updates: { deadline?: string | null; completed_at?: string | null }
+  ) => {
+    if (!user) return;
+    setIsUpdating(milestoneKey);
 
-    if (error) {
-      toast.error("Failed to save milestone.");
+    const existingMilestone = progress.get(milestoneKey);
+
+    if (existingMilestone) {
+      const { error } = await supabase
+        .from("thesis_milestones")
+        .update(updates)
+        .eq("id", existingMilestone.id);
+      
+      if (error) {
+        toast.error("Failed to update milestone.");
+      } else {
+        setProgress(prev => new Map(prev).set(milestoneKey, { ...existingMilestone, ...updates }));
+        toast.success("Milestone updated.");
+      }
     } else {
-      toast.success("Milestone updated.");
-      const newProgress = new Map(progress);
-      newProgress.set(milestoneKey, { ...newProgress.get(milestoneKey)!, milestone_key: milestoneKey, deadline: newDeadline?.toISOString() || null });
-      setProgress(newProgress);
-      setEditingKey(null);
-      setNewDeadline(undefined);
+      const { data, error } = await supabase
+        .from("thesis_milestones")
+        .insert({ student_id: studentId, milestone_key: milestoneKey, ...updates })
+        .select()
+        .single();
+      
+      if (error) {
+        toast.error("Failed to set milestone.");
+      } else if (data) {
+        setProgress(prev => new Map(prev).set(milestoneKey, data));
+        toast.success("Milestone set.");
+      }
     }
+    setIsUpdating(null);
   };
 
-  const handleToggleComplete = async (milestoneKey: string) => {
-    const current = progress.get(milestoneKey);
-    const newCompletedAt = current?.completed_at ? null : new Date().toISOString();
-
-    const { error } = await supabase
-      .from("thesis_milestones")
-      .upsert({ student_id: studentId, milestone_key: milestoneKey, completed_at: newCompletedAt }, { onConflict: 'student_id, milestone_key' });
-
-    if (error) {
-      toast.error("Failed to update completion status.");
-    } else {
-      const newProgress = new Map(progress);
-      newProgress.set(milestoneKey, { ...newProgress.get(milestoneKey)!, milestone_key: milestoneKey, completed_at: newCompletedAt });
-      setProgress(newProgress);
-    }
-  };
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Milestone Progress</CardTitle>
+          <CardDescription>Set deadlines and track completion for key thesis milestones.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Milestone Tracker</CardTitle>
-        <CardDescription>Set and track key deadlines for this student.</CardDescription>
+        <CardTitle>Milestone Progress</CardTitle>
+        <CardDescription>Set deadlines and track completion for key thesis milestones.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-2 max-h-96 overflow-y-auto pr-2">
-        {isLoading ? (
-          Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)
-        ) : (
-          thesisMilestones.map((milestone: Milestone) => {
-            const currentProgress = progress.get(milestone.key);
-            const isCompleted = !!currentProgress?.completed_at;
-            const deadline = currentProgress?.deadline ? parseISO(currentProgress.deadline) : null;
-            const isOverdue = deadline && !isCompleted && deadline < new Date();
+      <CardContent className="space-y-2">
+        {thesisMilestones.map((milestone) => {
+          const currentProgress = progress.get(milestone.key);
+          const isCompleted = !!currentProgress?.completed_at;
+          const deadline = currentProgress?.deadline ? new Date(currentProgress.deadline) : null;
+          const isOverdue = deadline && !isCompleted && deadline < new Date();
 
-            return (
-              <div key={milestone.key} className="flex items-center p-2 rounded-md border">
-                <milestone.icon className={cn("w-5 h-5 mr-3 flex-shrink-0", isCompleted ? "text-green-500" : "text-muted-foreground")} />
-                <div className="flex-1">
-                  <p className={cn("font-medium text-sm", isCompleted && "line-through text-muted-foreground")}>{milestone.title}</p>
-                  {editingKey === milestone.key ? (
-                    <div className="flex items-center gap-2 mt-1">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" size="sm" className="text-xs h-7">
-                            {newDeadline ? format(newDeadline, "PPP") : "Set Deadline"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={newDeadline} onSelect={setNewDeadline} initialFocus /></PopoverContent>
-                      </Popover>
-                      <Button size="icon" className="h-7 w-7" onClick={() => handleSaveMilestone(milestone.key)}><Save className="w-4 h-4" /></Button>
-                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditingKey(null)}><X className="w-4 h-4" /></Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      {isCompleted ? (
-                        <><CheckCircle className="w-3 h-3 text-green-500" /> Completed</>
-                      ) : deadline ? (
-                        isOverdue ? (
-                          <><Clock className="w-3 h-3 text-red-500" /> Overdue: {format(deadline, "MMM d")}</>
-                        ) : (
-                          <><Clock className="w-3 h-3" /> Due: {format(deadline, "MMM d")}</>
-                        )
+          return (
+            <div key={milestone.key} className={cn("flex items-center p-3 rounded-md border", isCompleted ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" : "bg-muted/50")}>
+              <div className="flex items-center gap-3 flex-1">
+                <Checkbox
+                  id={`complete-${milestone.key}`}
+                  checked={isCompleted}
+                  onCheckedChange={(checked) => handleUpdateMilestone(milestone.key, { completed_at: checked ? new Date().toISOString() : null })}
+                  disabled={isUpdating === milestone.key}
+                />
+                <div>
+                  <Label htmlFor={`complete-${milestone.key}`} className={cn("font-medium", isCompleted && "line-through text-muted-foreground")}>{milestone.title}</Label>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    {isCompleted ? (
+                      <><Check className="w-3 h-3 text-green-500" /> Completed on {format(new Date(currentProgress.completed_at!), "MMM d, yyyy")}</>
+                    ) : deadline ? (
+                      isOverdue ? (
+                        <><AlertCircle className="w-3 h-3 text-red-500" /> Overdue: {format(deadline, "MMM d, yyyy")}</>
                       ) : (
-                        <span>No deadline set</span>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => { setEditingKey(milestone.key); setNewDeadline(deadline || undefined); }}>
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleToggleComplete(milestone.key)}>
-                    <Check className="w-4 h-4" />
-                  </Button>
+                        <><Clock className="w-3 h-3" /> Due: {format(deadline, "MMM d, yyyy")}</>
+                      )
+                    ) : (
+                      <span>No deadline set</span>
+                    )}
+                  </div>
                 </div>
               </div>
-            );
-          })
-        )}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" disabled={isUpdating === milestone.key}>
+                    {isUpdating === milestone.key ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CalendarIcon className="w-4 h-4 mr-2" />{deadline ? 'Change' : 'Set'} Deadline</>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={deadline || undefined}
+                    onSelect={(date) => handleUpdateMilestone(milestone.key, { deadline: date ? date.toISOString() : null })}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          );
+        })}
       </CardContent>
     </Card>
   );

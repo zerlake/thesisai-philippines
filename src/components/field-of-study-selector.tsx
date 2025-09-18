@@ -8,8 +8,8 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { fieldsOfStudy } from "@/lib/fields-of-study";
+} from "./ui/select";
+import { fieldsOfStudy } from "../lib/fields-of-study";
 
 interface FieldOfStudySelectorProps {
   value: string;
@@ -17,17 +17,21 @@ interface FieldOfStudySelectorProps {
   disabled?: boolean;
 }
 
-export function FieldOfStudySelector({ value, onValueChange, disabled }: FieldOfStudySelectorProps) {
+export function FieldOfStudySelector({
+  value,
+  onValueChange,
+  disabled,
+}: FieldOfStudySelectorProps) {
   return (
-    <Select value={value} onValueChange={onValueChange} disabled={disabled}>
+    <Select onValueChange={onValueChange} value={value} disabled={disabled}>
       <SelectTrigger>
-        <SelectValue placeholder="Select a field of study" />
+        <SelectValue placeholder="Select your field of study" />
       </SelectTrigger>
       <SelectContent>
-        {fieldsOfStudy.map((category) => (
-          <SelectGroup key={category.category}>
-            <SelectLabel>{category.category}</SelectLabel>
-            {category.fields.map((field) => (
+        {fieldsOfStudy.map((group) => (
+          <SelectGroup key={group.category}>
+            <SelectLabel>{group.category}</SelectLabel>
+            {group.fields.map((field) => (
               <SelectItem key={field} value={field}>
                 {field}
               </SelectItem>
