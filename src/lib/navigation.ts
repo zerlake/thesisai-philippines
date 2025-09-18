@@ -29,6 +29,8 @@ import {
   Calendar,
   Palette,
   LayoutTemplate,
+  Users,
+  Banknote,
   type LucideIcon,
 } from "lucide-react";
 
@@ -106,6 +108,17 @@ export const advisorNavGroups: NavGroup[] = [
       { icon: BookOpen, label: "Resources", href: "/resources" },
       { icon: University, label: "University Guides", href: "/university-guides" },
       { icon: BookUser, label: "Advisor Guide", href: "/advisor-guide" },
+    ],
+  },
+];
+
+export const criticNavGroups: NavGroup[] = [
+  {
+    title: "Critic Workspace",
+    items: [
+      { icon: LayoutDashboard, label: "Dashboard", href: "/critic" },
+      { icon: Users, label: "Assigned Students", href: "/critic/students" },
+      { icon: BookOpen, label: "Resources", href: "/resources" },
     ],
   },
 ];

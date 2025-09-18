@@ -41,6 +41,7 @@ export function useDocument(documentId: string, editor: Editor | null) {
   const [reviewStatus, setReviewStatus] = useState('');
   const [isPublic, setIsPublic] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  const [isCriticViewing, setIsCriticViewing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [isOffline, setIsOffline] = useState(false);
@@ -55,7 +56,7 @@ export function useDocument(documentId: string, editor: Editor | null) {
     
     const { data, error } = await supabase
       .from('documents')
-      .select('*, profiles(id), comments(*, profiles(*)), document_reviews(*, profiles(*))')
+      .select('*, profiles(*, critic:critic_student_relationships(critic_id)), comments(*, profiles(*)), document_reviews(*, profiles(*))')
       .eq('id', documentId)
       .single();
 
@@ -68,7 +69,16 @@ export function useDocument(documentId: string, editor: Editor | null) {
     setContent(data.content || '');
     setReviewStatus(data.review_status);
     setIsPublic(data.is_public);
-    setIsOwner(data.user_id === user.id);
+    
+    const ownerId = data.user_id;
+    setIsOwner(ownerId === user.id);
+
+    // @ts-ignore
+    const criticRel = data.profiles?.critic[0];
+    if (criticRel && profile?.id === criticRel.critic_id) {
+      setIsCriticViewing(true);
+    }
+
     // @ts-ignore
     setComments(data.comments.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
     // @ts-ignore
@@ -79,7 +89,7 @@ export function useDocument(documentId: string, editor: Editor | null) {
     }
     
     setIsLoading(false);
-  }, [documentId, user, editor, supabase]);
+  }, [documentId, user, editor, supabase, profile]);
 
   useEffect(() => {
     fetchDocumentData();
@@ -133,6 +143,7 @@ export function useDocument(documentId: string, editor: Editor | null) {
     reviewStatus, setReviewStatus,
     isPublic, setIsPublic,
     isOwner,
+    isCriticViewing,
     isLoading,
     saveState,
     isOffline,

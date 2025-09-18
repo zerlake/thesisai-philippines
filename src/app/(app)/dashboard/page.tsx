@@ -5,6 +5,7 @@ import { AdvisorDashboard } from "@/components/advisor-dashboard";
 import { AdminDashboard } from "@/components/admin-dashboard";
 import { StudentDashboard } from "@/components/student-dashboard";
 import { BrandedLoader } from "@/components/branded-loader";
+import { CriticDashboard } from "@/components/critic-dashboard";
 
 export default function DashboardPage() {
   const { profile } = useAuth();
@@ -13,13 +14,14 @@ export default function DashboardPage() {
     return <BrandedLoader />;
   }
 
-  if (profile.role === 'admin') {
-    return <AdminDashboard />;
+  switch (profile.role) {
+    case 'admin':
+      return <AdminDashboard />;
+    case 'advisor':
+      return <AdvisorDashboard />;
+    case 'critic':
+      return <CriticDashboard />;
+    default:
+      return <StudentDashboard />;
   }
-  
-  if (profile.role === 'advisor') {
-    return <AdvisorDashboard />;
-  }
-
-  return <StudentDashboard />;
 }

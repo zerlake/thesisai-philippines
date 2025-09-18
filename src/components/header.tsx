@@ -23,7 +23,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { cn } from "../lib/utils";
 import { NotificationBell } from "./notification-bell";
-import { studentNavGroups, adminNavItems, advisorNavGroups, type NavItem, type NavGroup } from "../lib/navigation";
+import { studentNavGroups, adminNavItems, advisorNavGroups, criticNavGroups, type NavItem, type NavGroup } from "../lib/navigation";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 
@@ -69,6 +69,38 @@ export function Header() {
     </div>
   );
 
+  const renderNav = () => {
+    switch (profile?.role) {
+      case "admin":
+        return (
+          <div className="mb-4">
+            <h3 className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Admin
+            </h3>
+            {adminNavItems.map((item: NavItem) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                  pathname === item.href && "bg-accent text-accent-foreground"
+                )}
+              >
+                <item.icon className="w-5 h-5" />
+                <span>{item.label}</span>
+              </Link>
+            ))}
+          </div>
+        );
+      case "advisor":
+        return advisorNavGroups.map(renderNavGroup);
+      case "critic":
+        return criticNavGroups.map(renderNavGroup);
+      default:
+        return studentNavGroups.map(renderNavGroup);
+    }
+  };
+
   return (
     <header className="flex items-center justify-between h-16 px-4 md:px-6 border-b bg-card">
       <div className="flex items-center gap-3">
@@ -93,32 +125,7 @@ export function Header() {
             </SheetHeader>
             <ScrollArea className="-mx-4 flex-1">
               <nav className="space-y-2 px-4">
-                {profile?.role === "admin" && (
-                  <div className="mb-4">
-                    <h3 className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      Admin
-                    </h3>
-                    {adminNavItems.map((item: NavItem) => (
-                      <Link
-                        key={item.label}
-                        href={item.href}
-                        className={cn(
-                          "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                          pathname === item.href &&
-                            "bg-accent text-accent-foreground"
-                        )}
-                      >
-                        <item.icon className="w-5 h-5" />
-                        <span>{item.label}</span>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-
-                {profile?.role === "advisor"
-                  ? advisorNavGroups.map(renderNavGroup)
-                  : studentNavGroups.map(renderNavGroup)
-                }
+                {renderNav()}
               </nav>
             </ScrollArea>
           </SheetContent>

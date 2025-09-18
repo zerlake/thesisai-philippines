@@ -11,10 +11,12 @@ import { CommentSidebar } from "./comment-sidebar";
 import { useIsMobile } from "../hooks/use-mobile";
 import { type Editor } from "@tiptap/react";
 import { type Comment } from "@/hooks/useDocument";
+import { CriticReviewPanel } from "./critic-review-panel";
 
 interface EditorAICompanionProps {
   isOwner: boolean;
   isAdvisorViewing: boolean;
+  isCriticViewing: boolean;
   editor: Editor | null;
   documentContent: string;
   documentId: string;
@@ -25,7 +27,7 @@ interface EditorAICompanionProps {
 }
 
 export function EditorAICompanion({
-  isOwner, isAdvisorViewing, editor, documentContent, documentId, reviewStatus,
+  isOwner, isAdvisorViewing, isCriticViewing, editor, documentContent, documentId, reviewStatus,
   onReviewSubmit, comments, setComments
 }: EditorAICompanionProps) {
   const isMobile = useIsMobile();
@@ -53,6 +55,11 @@ export function EditorAICompanion({
             <div className="hidden lg:block space-y-6">
               <AdvisorAiToolkit editor={editor} />
               {reviewStatus === 'submitted' && <AdvisorReviewPanel documentId={documentId} onReviewSubmit={onReviewSubmit} />}
+            </div>
+          )}
+          {isCriticViewing && (
+            <div className="hidden lg:block space-y-6">
+              <CriticReviewPanel documentId={documentId} onReviewSubmit={onReviewSubmit} />
             </div>
           )}
         </div>

@@ -80,6 +80,12 @@ export function Editor({ documentId }: { documentId: string }) {
 
   const doc = useDocument(documentId, editor);
 
+  useEffect(() => {
+    if (editor && !doc.isOwner) {
+      editor.setEditable(false);
+    }
+  }, [editor, doc.isOwner]);
+
   const handleSubmitForReview = async () => {
     if (!doc.isOwner) return;
     if (profile?.external_advisor_name) {
@@ -144,7 +150,7 @@ export function Editor({ documentId }: { documentId: string }) {
   }
 
   const latestReview = doc.reviewHistory[0];
-  const canSubmit = doc.isOwner && (doc.reviewStatus === 'draft' || doc.reviewStatus === 'needs_revision');
+  const canSubmit = doc.isOwner && (doc.reviewStatus === 'draft' || doc.reviewStatus === 'needs_revision' || doc.reviewStatus === 'critic_revision_requested');
   const isAwaitingExternal = doc.isOwner && doc.reviewStatus === 'awaiting_external_review';
   const isAdvisorViewing = !doc.isOwner && profile?.role === 'advisor';
 
@@ -156,9 +162,9 @@ export function Editor({ documentId }: { documentId: string }) {
           <Minimize className="w-4 h-4" />
         </Button>
       )}
-      <div className={`grid ${isAdvisorViewing ? 'lg:grid-cols-[1fr_350px]' : 'lg:grid-cols-[1fr_auto]'} gap-8 max-w-7xl mx-auto ${isFocusMode ? 'p-4 md:p-12' : ''}`}>
+      <div className={`grid ${isAdvisorViewing || doc.isCriticViewing ? 'lg:grid-cols-[1fr_350px]' : 'lg:grid-cols-[1fr_auto]'} gap-8 max-w-7xl mx-auto ${isFocusMode ? 'p-4 md:p-12' : ''}`}>
         <div className="space-y-4">
-          {isAdvisorViewing && <Alert><Eye className="h-4 w-4" /><AlertTitle>Advisor Read-Only Mode</AlertTitle><AlertDescription>You are viewing a student's document. Use the toolkit on the right to generate feedback.</AlertDescription></Alert>}
+          {(isAdvisorViewing || doc.isCriticViewing) && <Alert><Eye className="h-4 w-4" /><AlertTitle>{profile?.role === 'critic' ? 'Critic' : 'Advisor'} Read-Only Mode</AlertTitle><AlertDescription>You are viewing a student's document. Use the toolkit on the right to generate feedback.</AlertDescription></Alert>}
           {doc.isOwner && (doc.reviewStatus === 'approved' || doc.reviewStatus === 'needs_revision') && latestReview && (
             <Alert variant={doc.reviewStatus === 'approved' ? 'default' : 'destructive'}>
               {doc.reviewStatus === 'approved' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
@@ -191,6 +197,7 @@ export function Editor({ documentId }: { documentId: string }) {
         <EditorAICompanion
           isOwner={doc.isOwner}
           isAdvisorViewing={isAdvisorViewing}
+          isCriticViewing={doc.isCriticViewing}
           editor={editor}
           documentContent={doc.content}
           documentId={documentId}
