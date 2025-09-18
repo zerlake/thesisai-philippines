@@ -98,6 +98,36 @@
     --shadow-3: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.2);
     --shadow-4: 0 20px 25px -5px rgb(0 0 0 / 0.2), 0 8px 10px -6px rgb(0 0 0 / 0.2);
   }
+
+  .theme-high-contrast {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 210 100% 50%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 13%;
+    --secondary-foreground: 0 0% 100%;
+    --tertiary: 0 0% 20%;
+    --tertiary-foreground: 0 0% 100%;
+    --muted: 0 0% 13%;
+    --muted-foreground: 0 0% 64%;
+    --accent: 0 0% 13%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 0%;
+    --success: 120 100% 40%;
+    --success-foreground: 0 0% 0%;
+    --warning: 60 100% 50%;
+    --warning-foreground: 0 0% 0%;
+    --info: 190 100% 50%;
+    --info-foreground: 0 0% 0%;
+    --border: 0 0% 40%;
+    --input: 0 0% 13%;
+    --ring: 210 100% 50%;
+  }
 }
  
 @layer base {
