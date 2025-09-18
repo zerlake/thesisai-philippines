@@ -118,6 +118,7 @@ export const criticNavGroups: NavGroup[] = [
     items: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/critic" },
       { icon: Users, label: "Assigned Students", href: "/critic/students" },
+      { icon: Banknote, label: "Billing", href: "/critic/billing" },
       { icon: BookOpen, label: "Resources", href: "/resources" },
     ],
   },

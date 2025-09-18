@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Check, Loader2, MessageSquare, X } from "lucide-react";
 import { toast } from "sonner";
+import { Input } from "./ui/input";
 
 interface CriticReviewPanelProps {
   documentId: string;
@@ -17,6 +18,7 @@ interface CriticReviewPanelProps {
 export function CriticReviewPanel({ documentId, onReviewSubmit }: CriticReviewPanelProps) {
   const { session, supabase } = useAuth();
   const [comments, setComments] = useState("");
+  const [fee, setFee] = useState("250.00");
   const [isLoading, setIsLoading] = useState<"certify" | "revise" | null>(null);
 
   const handleSubmitReview = async (newStatus: "certified" | "critic_revision_requested") => {
@@ -33,6 +35,7 @@ export function CriticReviewPanel({ documentId, onReviewSubmit }: CriticReviewPa
         p_document_id: documentId,
         p_new_status: newStatus,
         p_comments: comments,
+        p_fee: parseFloat(fee) || 0,
       });
 
       if (error) throw error;
@@ -63,7 +66,16 @@ export function CriticReviewPanel({ documentId, onReviewSubmit }: CriticReviewPa
             placeholder="Provide your overall feedback here..."
             value={comments}
             onChange={(e) => setComments(e.target.value)}
-            rows={8}
+            rows={6}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="review-fee">Review Fee (₱)</Label>
+          <Input
+            id="review-fee"
+            type="number"
+            value={fee}
+            onChange={(e) => setFee(e.target.value)}
           />
         </div>
         <div className="flex gap-2">
