@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { LandingHeader } from "@/components/landing-header";
 import { LandingFooter } from "@/components/landing-footer";
 import { AuthProvider } from "@/components/auth-provider";
+import { ChunkLoadErrorHandler } from "@/components/chunk-load-error-handler";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -26,6 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn("font-sans antialiased", outfit.variable)}>
+        <ChunkLoadErrorHandler />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
