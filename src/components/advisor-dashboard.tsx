@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "./auth-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Skeleton } from "./ui/skeleton";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowUp, ArrowDown } from "lucide-react";
 import Link from "next/link";
 import { thesisChecklist, type ChecklistPhase } from "../lib/checklist-items";
 import { Progress } from "./ui/progress";
@@ -32,12 +32,71 @@ type Student = {
   progress: number;
 };
 
+type SortConfig = {
+  key: keyof Student | 'doc_count';
+  direction: 'ascending' | 'descending';
+};
+
 export function AdvisorDashboard() {
   const { session, supabase } = useAuth();
   const user = session?.user;
   const [students, setStudents] = useState<Student[]>([]);
   const [stats, setStats] = useState({ studentCount: 0, approvedDocs: 0, pendingReviews: 0 });
   const [isLoading, setIsLoading] = useState(true);
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'last_name', direction: 'ascending' });
+
+  const sortedStudents = useMemo(() => {
+    let sortableItems = [...students];
+    if (sortConfig !== null) {
+      sortableItems.sort((a, b) => {
+        let aValue, bValue;
+
+        if (sortConfig.key === 'doc_count') {
+          aValue = a.documents[0]?.count || 0;
+          bValue = b.documents[0]?.count || 0;
+        } else if (sortConfig.key === 'progress') {
+          aValue = a.progress;
+          bValue = b.progress;
+        } else {
+          aValue = a[sortConfig.key as keyof Student] || '';
+          bValue = b[sortConfig.key as keyof Student] || '';
+        }
+
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+          if (aValue.toLowerCase() < bValue.toLowerCase()) {
+            return sortConfig.direction === 'ascending' ? -1 : 1;
+          }
+          if (aValue.toLowerCase() > bValue.toLowerCase()) {
+            return sortConfig.direction === 'ascending' ? 1 : -1;
+          }
+        } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+          if (aValue < bValue) {
+            return sortConfig.direction === 'ascending' ? -1 : 1;
+          }
+          if (aValue > bValue) {
+            return sortConfig.direction === 'ascending' ? 1 : -1;
+          }
+        }
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [students, sortConfig]);
+
+  const requestSort = (key: SortConfig['key']) => {
+    let direction: 'ascending' | 'descending' = 'ascending';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (key: SortConfig['key']) => {
+    if (!sortConfig || sortConfig.key !== key) {
+      return null;
+    }
+    return sortConfig.direction === 'ascending' ? <ArrowUp className="w-4 h-4 ml-2" /> : <ArrowDown className="w-4 h-4 ml-2" />;
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -143,9 +202,21 @@ export function AdvisorDashboard() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Documents</TableHead>
-                    <TableHead>Progress</TableHead>
+                    <TableHead>
+                      <Button variant="ghost" onClick={() => requestSort('last_name')}>
+                        Student {getSortIcon('last_name')}
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button variant="ghost" onClick={() => requestSort('doc_count')}>
+                        Documents {getSortIcon('doc_count')}
+                      </Button>
+                    </TableHead>
+                    <TableHead>
+                      <Button variant="ghost" onClick={() => requestSort('progress')}>
+                        Progress {getSortIcon('progress')}
+                      </Button>
+                    </TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -159,8 +230,8 @@ export function AdvisorDashboard() {
                         <TableCell className="text-right"><Skeleton className="h-10 w-24 float-right" /></TableCell>
                       </TableRow>
                     ))
-                  ) : students.length > 0 ? (
-                    students.map((student) => (
+                  ) : sortedStudents.length > 0 ? (
+                    sortedStudents.map((student) => (
                       <TableRow key={student.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
