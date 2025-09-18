@@ -7,8 +7,12 @@ import { motion } from "framer-motion";
 export function HeroSection() {
   return (
     <section
-      className="relative hero-bg bg-slate-900 bg-cover bg-center py-24 md:py-32 lg:py-40"
+      className="relative bg-slate-900 py-24 md:py-32 lg:py-40 overflow-hidden"
     >
+      <div 
+        className="absolute inset-0 bg-cover bg-center animate-pan-bg" 
+        style={{ backgroundImage: "url('/hero-background.png')" }} 
+      />
       <div className="absolute inset-0 bg-black/60" />
       <div className="relative container flex max-w-5xl flex-col items-center text-center">
         <motion.div 
