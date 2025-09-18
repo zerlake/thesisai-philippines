@@ -29,9 +29,6 @@ export function OutlineGenerator() {
     setIsLoading(true);
     setOutline("");
 
-    const requestBody = { topic, field };
-    console.log("OutlineGenerator: Sending request to generate-outline", requestBody);
-
     try {
       if (!session) {
         throw new Error(
@@ -49,11 +46,10 @@ export function OutlineGenerator() {
             apikey:
               "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
           },
-          body: JSON.stringify(requestBody),
+          body: JSON.stringify({ topic, field }),
         }
       );
       
-      console.log("OutlineGenerator: Received response with status:", response.status);
       const data = await response.json();
 
       if (!response.ok) {
@@ -63,7 +59,6 @@ export function OutlineGenerator() {
       }
 
       if (data.outline) {
-        console.log("OutlineGenerator: Successfully received outline.", { length: data.outline.length });
         setOutline(data.outline);
       } else {
         throw new Error(
@@ -71,7 +66,6 @@ export function OutlineGenerator() {
         );
       }
     } catch (error: any) {
-      console.error("OutlineGenerator: An error occurred.", error);
       toast.error(
         error.message ||
           "An unexpected error occurred while generating the outline."
@@ -85,12 +79,14 @@ export function OutlineGenerator() {
     if (!user || !outline || !topic) return;
     setIsSaving(true);
 
+    const htmlOutline = outline.replace(/\n/g, '<br>');
+
     const { data: newDoc, error } = await supabase
       .from("documents")
       .insert({
         user_id: user.id,
         title: `Outline: ${topic}`,
-        content: outline,
+        content: `<h1>Outline for: ${topic}</h1><p>${htmlOutline}</p>`,
       })
       .select("id")
       .single();

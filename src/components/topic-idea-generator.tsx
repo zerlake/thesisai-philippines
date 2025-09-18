@@ -73,10 +73,10 @@ export function TopicIdeaGenerator() {
     if (!user || ideas.length === 0 || !field) return;
     setIsSaving(true);
 
-    let content = `# Thesis Topic Ideas for: ${field}\n\n---\n\n`;
+    let content = `<h1>Thesis Topic Ideas for: ${field}</h1><hr>`;
     ideas.forEach((idea, index) => {
-      content += `## Idea ${index + 1}: ${idea.title}\n\n`;
-      content += `${idea.description}\n\n---\n\n`;
+      content += `<h2>Idea ${index + 1}: ${idea.title}</h2>`;
+      content += `<p>${idea.description}</p><hr>`;
     });
 
     const { data: newDoc, error } = await supabase
