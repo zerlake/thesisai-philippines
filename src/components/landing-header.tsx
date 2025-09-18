@@ -3,27 +3,11 @@
 import Link from "next/link";
 import { BotMessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { UserNav } from "./user-nav";
-import type { Session } from "@supabase/supabase-js";
+import { useAuth } from "./auth-provider";
 
 export function LandingHeader() {
-  const [session, setSession] = useState<Session | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const { session } = useAuth();
 
   return (
     <header className="px-4 lg:px-6 h-16 flex items-center border-b sticky top-0 bg-background/95 backdrop-blur z-10">
