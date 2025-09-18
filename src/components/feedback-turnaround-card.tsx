@@ -43,7 +43,7 @@ export function FeedbackTurnaroundCard() {
         {isLoading ? (
           <Skeleton className="h-24 w-full" />
         ) : (
-          <div className="text-center p-4 bg-muted/50 rounded-lg">
+          <div className="text-center p-4 bg-tertiary rounded-lg">
             <p className="text-4xl font-bold">{avgDays !== null ? avgDays.toFixed(1) : 'N/A'}</p>
             <p className="text-sm text-muted-foreground">
               Average days to provide feedback

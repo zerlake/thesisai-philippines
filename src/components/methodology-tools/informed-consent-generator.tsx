@@ -152,7 +152,7 @@ export function InformedConsentGenerator() {
         <>
           <Separator />
           <div className="relative">
-            <div className="p-4 border rounded-md bg-muted/50 whitespace-pre-wrap font-mono text-sm max-h-96 overflow-y-auto">
+            <div className="p-4 border rounded-md bg-tertiary whitespace-pre-wrap font-mono text-sm max-h-96 overflow-y-auto">
               {generatedForm}
             </div>
             <Button

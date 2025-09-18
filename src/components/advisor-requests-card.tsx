@@ -85,7 +85,7 @@ export function AdvisorRequestsCard() {
         ) : requests.length > 0 ? (
           <div className="space-y-3">
             {requests.map(req => (
-              <div key={req.id} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
+              <div key={req.id} className="flex items-center justify-between p-2 rounded-md bg-tertiary">
                 <div className="flex items-center gap-3">
                   <Avatar>
                     <AvatarFallback>

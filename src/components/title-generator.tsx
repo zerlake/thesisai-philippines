@@ -102,7 +102,7 @@ export function TitleGenerator() {
             ) : (
               <div className="space-y-3">
                 {titles.map((title, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 rounded-md border bg-muted/50">
+                  <div key={index} className="flex items-center justify-between p-3 rounded-md border bg-tertiary">
                     <p className="font-medium flex-1">{title}</p>
                     <Button variant="ghost" size="icon" onClick={() => handleCopy(title)}>
                       <Copy className="w-4 h-4" />

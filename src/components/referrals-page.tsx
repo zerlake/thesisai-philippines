@@ -161,7 +161,7 @@ export function ReferralsPage() {
           <CardHeader><CardTitle>Your Referral Hub</CardTitle></CardHeader>
           <CardContent className="grid md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <div className="p-4 bg-muted/50 rounded-lg space-y-2">
+              <div className="p-4 bg-tertiary rounded-lg space-y-2">
                 <div>
                   <Label>Your Referral Code</Label>
                   <div className="flex items-center justify-between">
@@ -177,12 +177,12 @@ export function ReferralsPage() {
                   </div>
                 </div>
               </div>
-              <div className="p-4 bg-muted/50 rounded-lg space-y-1">
+              <div className="p-4 bg-tertiary rounded-lg space-y-1">
                 <Label>Available Credit Balance</Label>
                 <p className="text-3xl font-bold">₱{Number(profile?.credit_balance || 0).toFixed(2)}</p>
               </div>
             </div>
-            <div className="p-4 bg-muted/50 rounded-lg space-y-3">
+            <div className="p-4 bg-tertiary rounded-lg space-y-3">
               <Label>Send Credits to a Friend</Label>
               <Input type="email" placeholder="Recipient's Email" value={transferEmail} onChange={e => setTransferEmail(e.target.value)} />
               <Input type="number" placeholder="Amount" value={transferAmount} onChange={e => setTransferAmount(e.target.value)} />

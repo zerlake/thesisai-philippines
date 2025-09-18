@@ -120,7 +120,7 @@ export function TitlePageGenerator() {
           </div>
           <div className="space-y-4">
             <Label>Preview</Label>
-            <div className="p-4 border rounded-md bg-muted/50 min-h-[400px] flex items-center justify-center">
+            <div className="p-4 border rounded-md bg-tertiary min-h-[400px] flex items-center justify-center">
               <div className="prose prose-sm" dangerouslySetInnerHTML={{ __html: generatedHtml }} />
             </div>
             <Button onClick={handleSaveAsDraft} disabled={isSaving || !formData.title}>

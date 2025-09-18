@@ -25,14 +25,14 @@ export function AdvisorWorkloadCard({ studentCount, pendingReviews }: AdvisorWor
         <CardDescription>A summary of your advising responsibilities.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
+        <div className="flex items-center justify-between p-3 bg-tertiary rounded-md">
           <div className="flex items-center gap-3">
             <Users className="w-5 h-5 text-muted-foreground" />
             <p>Advised Students</p>
           </div>
           <p className="font-bold text-lg">{studentCount}</p>
         </div>
-        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
+        <div className="flex items-center justify-between p-3 bg-tertiary rounded-md">
           <div className="flex items-center gap-3">
             <Clock className="w-5 h-5 text-muted-foreground" />
             <p>Pending Reviews</p>

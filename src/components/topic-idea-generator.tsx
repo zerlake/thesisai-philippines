@@ -144,7 +144,7 @@ export function TopicIdeaGenerator() {
               ) : (
                 <div className="space-y-6">
                   {ideas.map((idea, index) => (
-                    <Card key={index} className="bg-muted/50">
+                    <Card key={index} className="bg-tertiary">
                       <CardHeader>
                         <CardTitle className="text-lg flex items-start gap-3">
                           <BrainCircuit className="w-6 h-6 mt-1 text-primary" />

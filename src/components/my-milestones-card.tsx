@@ -79,7 +79,7 @@ export function MyMilestonesCard() {
             const isOverdue = deadline && !isCompleted && deadline < new Date();
 
             return (
-              <div key={milestone.key} className={cn("flex items-center p-3 rounded-md border", isCompleted ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" : "bg-muted/50")}>
+              <div key={milestone.key} className={cn("flex items-center p-3 rounded-md border", isCompleted ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" : "bg-tertiary")}>
                 <milestone.icon className={cn("w-5 h-5 mr-4 flex-shrink-0", isCompleted ? "text-green-500" : "text-muted-foreground")} />
                 <div className="flex-1">
                   <p className={cn("font-medium", isCompleted && "line-through text-muted-foreground")}>{milestone.title}</p>

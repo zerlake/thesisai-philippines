@@ -47,7 +47,7 @@ export function CompetencyResultsCard({ results, onReset }: CompetencyResultsCar
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="text-center p-6 bg-muted/50 rounded-lg">
+        <div className="text-center p-6 bg-tertiary rounded-lg">
           <p className="text-sm text-muted-foreground">Overall Competency</p>
           <p className="text-4xl font-bold">{results.overall.toFixed(1)}</p>
           <p className="font-semibold">{getOverallLabel(results.overall)}</p>

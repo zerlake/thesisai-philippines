@@ -120,21 +120,21 @@ export function ConclusionGenerator() {
                 <h4 className="font-semibold">Summary of Findings</h4>
                 <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(results.summary)}><Copy className="w-4 h-4" /></Button>
               </div>
-              <p className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md">{results.summary}</p>
+              <p className="text-sm text-muted-foreground p-3 bg-tertiary rounded-md">{results.summary}</p>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <h4 className="font-semibold">Conclusion</h4>
                 <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(results.conclusion)}><Copy className="w-4 h-4" /></Button>
               </div>
-              <p className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md">{results.conclusion}</p>
+              <p className="text-sm text-muted-foreground p-3 bg-tertiary rounded-md">{results.conclusion}</p>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <h4 className="font-semibold">Recommendations</h4>
                 <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(results.recommendations)}><Copy className="w-4 h-4" /></Button>
               </div>
-              <p className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md whitespace-pre-wrap">{results.recommendations}</p>
+              <p className="text-sm text-muted-foreground p-3 bg-tertiary rounded-md whitespace-pre-wrap">{results.recommendations}</p>
             </div>
           </CardContent>
         </Card>

@@ -158,7 +158,7 @@ export function OutlineGenerator() {
                   <Skeleton className="h-4 w-11/12" />
                 </div>
               ) : (
-                <div className="p-4 border rounded-md bg-muted/50 whitespace-pre-wrap font-mono text-sm">
+                <div className="p-4 border rounded-md bg-tertiary whitespace-pre-wrap font-mono text-sm">
                   {outline}
                 </div>
               )}

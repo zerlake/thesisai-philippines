@@ -81,7 +81,7 @@ export function AtRiskStudentsCard() {
         ) : students.length > 0 ? (
           <div className="space-y-3">
             {students.map(student => (
-              <div key={student.student_id} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
+              <div key={student.student_id} className="flex items-center justify-between p-2 rounded-md bg-tertiary">
                 <div className="flex items-center gap-3">
                   <Avatar>
                     <AvatarImage src={student.avatar_url || undefined} />

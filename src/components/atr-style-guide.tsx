@@ -34,7 +34,7 @@ const atrCitationExamples = [
   {
     type: "Thesis or Dissertation",
     rule: "Author. Year. Title of thesis/dissertation. [Unpublished MS Thesis/PhD Dissertation]. Name of University, Place.",
-    example: "Pascual, C. B. 2019. Bio-ecology and management of the taro beetle, Papuana woodlarkiana Montrouzier (Coleoptera: Scarabaeidae), in Eastern Samar, Philippines. [Unpublished PhD Dissertation]. Visayas State University, Baybay City, Leyte.",
+    example: "Pascual, C. B. 2019. Bio-ecology and management of the taro beetle, Papuana woodlarkiana Montrouzier (Coleoptera: Scarabaidae), in Eastern Samar, Philippines. [Unpublished PhD Dissertation]. Visayas State University, Baybay City, Leyte.",
   },
   {
     type: "Website or Online Source",
@@ -122,7 +122,7 @@ export function AtrStyleGuide() {
                   {item.content.type === 'paragraph-example' && (
                     <div>
                       <p className="text-sm font-semibold mb-2">Example Paragraph:</p>
-                      <div className="p-3 bg-muted/50 rounded">
+                      <div className="p-3 bg-tertiary rounded">
                         <p className="text-muted-foreground">{item.content.text}</p>
                       </div>
                     </div>
@@ -147,7 +147,7 @@ export function AtrStyleGuide() {
                 <AccordionContent>
                   <div className="space-y-2">
                     <p className="text-sm text-muted-foreground"><strong>Rule:</strong> {item.rule}</p>
-                    <div className="p-3 bg-muted/50 rounded-md font-mono text-sm">
+                    <div className="p-3 bg-tertiary rounded-md font-mono text-sm">
                       <p><strong>Example:</strong></p>
                       <p dangerouslySetInnerHTML={{ __html: item.example }} />
                     </div>

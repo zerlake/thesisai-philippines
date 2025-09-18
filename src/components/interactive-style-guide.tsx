@@ -163,7 +163,7 @@ export function InteractiveStyleGuide() {
               </div>
             ))}
           </div>
-          <Card className="bg-muted/50">
+          <Card className="bg-tertiary">
             <CardContent className="p-4">
               <div className="flex justify-between items-start">
                 <div className="font-mono text-sm" dangerouslySetInnerHTML={{ __html: generatedCitation }} />

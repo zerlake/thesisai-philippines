@@ -15,7 +15,7 @@ function escapeRegExp(string: string) {
 
 export function HighlightedText({ text, highlights, className }: HighlightedTextProps) {
   if (!highlights || highlights.length === 0) {
-    return <div className={cn("whitespace-pre-wrap p-4 border rounded-md bg-muted/50", className)}>{text}</div>;
+    return <div className={cn("whitespace-pre-wrap p-4 border rounded-md bg-tertiary", className)}>{text}</div>;
   }
 
   const regex = new RegExp(`(${highlights.map(escapeRegExp).join('|')})`, 'g');
@@ -23,7 +23,7 @@ export function HighlightedText({ text, highlights, className }: HighlightedText
   const parts = text.split(regex);
 
   return (
-    <div className={cn("whitespace-pre-wrap p-4 border rounded-md bg-muted/50 max-h-[400px] overflow-y-auto", className)}>
+    <div className={cn("whitespace-pre-wrap p-4 border rounded-md bg-tertiary max-h-[400px] overflow-y-auto", className)}>
       {parts.map((part, i) => 
         highlights.includes(part) ? (
           <mark key={i} className="bg-destructive/20 rounded px-1 py-0.5">
