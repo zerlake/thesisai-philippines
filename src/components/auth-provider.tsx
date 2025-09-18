@@ -12,6 +12,7 @@ type Profile = {
   role: string;
   user_preferences: {
     dashboard_widgets: { [key: string]: boolean };
+    notification_preferences: { [key: string]: boolean };
   } | null;
   [key: string]: any;
 } | null;

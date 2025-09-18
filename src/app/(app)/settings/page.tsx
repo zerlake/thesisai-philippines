@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AdvisorManagement } from "@/components/advisor-management";
 import { useAuth } from "@/components/auth-provider";
 import { DashboardCustomization } from "@/components/dashboard-customization";
+import { NotificationSettings } from "@/components/notification-settings";
 
 export default function SettingsPage() {
   const { profile } = useAuth();
@@ -24,6 +25,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
+      <NotificationSettings />
       {isStudent && (
         <>
           <AdvisorManagement />
