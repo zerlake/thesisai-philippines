@@ -38,6 +38,7 @@ export default function RootLayout({
           fontSans.variable,
           fontSerif.variable
         )}
+        suppressHydrationWarning
       >
         <SkipToContentLink />
         <ThemeProvider
