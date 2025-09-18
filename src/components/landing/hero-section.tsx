@@ -4,7 +4,8 @@ import { Button } from "../ui/button";
 export function HeroSection() {
   return (
     <section
-      className="relative py-24 md:py-32 lg:py-40"
+      className="relative bg-slate-900 bg-cover bg-center py-24 md:py-32 lg:py-40"
+      style={{ backgroundImage: `url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2070&auto=format&fit=crop')` }}
     >
       <div className="absolute inset-0 bg-black/60" />
       <div className="relative container flex max-w-5xl flex-col items-center text-center">
@@ -18,7 +19,7 @@ export function HeroSection() {
         </div>
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <Button size="lg" asChild>
-            <Link href="/login">Start Writing Now</Link>
+            <Link href="/register">Start Writing Now</Link>
           </Button>
         </div>
       </div>

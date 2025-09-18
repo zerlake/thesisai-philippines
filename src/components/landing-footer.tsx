@@ -2,8 +2,10 @@ import { BotMessageSquare } from "lucide-react";
 import Link from "next/link";
 
 const footerNav = [
-  { name: "Features", href: "#features" },
-  { name: "FAQ", href: "#faq" },
+  { name: "Features", href: "/features" },
+  { name: "For Advisors", href: "/for-advisors" },
+  { name: "Pricing", href: "/pricing" },
+  { name: "FAQ", href: "/faq" },
 ];
 
 export function LandingFooter() {
@@ -28,7 +30,7 @@ export function LandingFooter() {
           </nav>
         </div>
         <div className="mt-6 border-t pt-6 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} ThesisAI. All rights reserved.</p>
+          <p>&copy; 2025 ThesisAI. All rights reserved.</p>
           <p className="mt-1">Built to empower the next generation of Filipino researchers.</p>
         </div>
       </div>
