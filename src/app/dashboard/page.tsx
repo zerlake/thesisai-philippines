@@ -1,3 +1,5 @@
+"use client";
+
 import { MoreHorizontal } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { AddManuscriptDialog } from "@/components/add-manuscript-dialog";
 
 const manuscripts = [
   {
@@ -87,7 +90,7 @@ export default function Dashboard() {
               Manage your assigned manuscripts and track their progress.
             </CardDescription>
           </div>
-          <Button>Add Manuscript</Button>
+          <AddManuscriptDialog />
         </div>
       </CardHeader>
       <CardContent>
