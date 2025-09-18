@@ -1,22 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const outfit = Outfit({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-outfit",
 });
 
 export const metadata: Metadata = {
-  title: "ThesisAI: Manuscript Review Suite",
-  description: "The definitive platform for academic manuscript review.",
+  title: "ThesisAI",
+  description: "Your AI-Powered Academic Co-Pilot.",
 };
 
 export default function RootLayout({
@@ -26,9 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={cn("font-sans antialiased", outfit.variable)}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
