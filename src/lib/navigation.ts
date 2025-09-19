@@ -31,6 +31,7 @@ import {
   LayoutTemplate,
   Users,
   Banknote,
+  FolderLock,
   type LucideIcon,
 } from "lucide-react";
 
@@ -51,6 +52,7 @@ export const studentNavGroups: NavGroup[] = [
     items: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
       { icon: FileText, label: "Drafts", href: "/drafts" },
+      { icon: FolderLock, label: "Data Management", href: "/data-management" },
       { icon: UserCheck, label: "Manage Advisor", href: "/settings?tab=advisor" },
       { icon: ClipboardCheck, label: "Manage Critic", href: "/settings?tab=critic" },
       { icon: CreditCard, label: "Billing", href: "/settings/billing" },
@@ -105,6 +107,7 @@ export const advisorNavGroups: NavGroup[] = [
     items: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/advisor" },
       { icon: FileText, label: "Drafts", href: "/drafts" },
+      { icon: FolderLock, label: "Data Management", href: "/data-management" },
       { icon: CheckSquare, label: "Competency Self-Assessment", href: "/advisor/competency" },
       { icon: BookOpen, label: "Resources", href: "/resources" },
       { icon: University, label: "University Guides", href: "/university-guides" },
