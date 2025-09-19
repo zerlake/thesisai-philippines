@@ -35,6 +35,12 @@ export function LandingHeader() {
           For Advisors
         </Link>
         <Link
+          href="/for-critics"
+          className="text-base font-medium text-slate-300 hover:text-white transition-colors"
+        >
+          For Critics
+        </Link>
+        <Link
           href="/faq"
           className="text-base font-medium text-slate-300 hover:text-white transition-colors"
         >

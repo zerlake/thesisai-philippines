@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookText, User, UserCog, UserCheck } from "lucide-react";
+import { BookText, User, UserCog, UserCheck, FileSignature } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
@@ -14,13 +14,14 @@ import { GoogleSignInButton } from "./google-sign-in-button";
 export function SignInPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleDemoLogin = async (role: 'user' | 'admin' | 'advisor') => {
+  const handleDemoLogin = async (role: 'user' | 'admin' | 'advisor' | 'critic') => {
     setIsSubmitting(true);
     
     const credentials = {
       user: { email: "user@demo.com", firstName: "Regular", lastName: "User" },
       admin: { email: "admin@demo.com", firstName: "Demo", lastName: "Admin" },
       advisor: { email: "advisor@demo.com", firstName: "Demo", lastName: "Advisor" },
+      critic: { email: "critic@demo.com", firstName: "Demo", lastName: "Critic" },
     };
 
     const { email, firstName, lastName } = credentials[role];
@@ -80,6 +81,9 @@ export function SignInPage() {
               </Button>
               <Button variant="outline" className="w-full" onClick={() => handleDemoLogin('advisor')} disabled={isSubmitting}>
                 <UserCheck className="w-4 h-4 mr-2" /> {isSubmitting ? 'Logging in...' : 'Login as Advisor'}
+              </Button>
+              <Button variant="outline" className="w-full" onClick={() => handleDemoLogin('critic')} disabled={isSubmitting}>
+                <FileSignature className="w-4 h-4 mr-2" /> {isSubmitting ? 'Logging in...' : 'Login as Critic'}
               </Button>
               <Button variant="outline" className="w-full" onClick={() => handleDemoLogin('admin')} disabled={isSubmitting}>
                 <UserCog className="w-4 h-4 mr-2" /> {isSubmitting ? 'Logging in...' : 'Login as Admin'}

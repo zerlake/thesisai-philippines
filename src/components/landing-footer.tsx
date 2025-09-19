@@ -5,6 +5,7 @@ const footerNav = [
   { name: "Features", href: "/features" },
   { name: "Pricing", href: "/pricing" },
   { name: "For Advisors", href: "/for-advisors" },
+  { name: "For Critics", href: "/for-critics" },
   { name: "FAQ", href: "/faq" },
 ];
 
