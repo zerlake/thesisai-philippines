@@ -36,7 +36,7 @@ function jaccardSimilarity(setA: string[], setB: string[]): number {
 // --- End Utility Functions ---
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://thesisai-philippines.vercel.app',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 

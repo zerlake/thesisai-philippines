@@ -11,14 +11,6 @@ export default function UniversityGuideDetailPage() {
 
   const guide = universityGuides.find((g: UniversityGuide) => g.slug === slug);
 
-  useEffect(() => {
-    if (guide) {
-      document.title = `${guide.school} | University Guide`;
-    } else if (slug) {
-      document.title = "Guide Not Found | ThesisAI";
-    }
-  }, [guide, slug]);
-
   if (!slug) {
     // Params are not available on initial render, return null or a loader
     return null; 
@@ -27,6 +19,14 @@ export default function UniversityGuideDetailPage() {
   if (!guide) {
     notFound();
   }
+
+  useEffect(() => {
+    if (guide) {
+      document.title = `${guide.school} | University Guide`;
+    } else if (slug) {
+      document.title = "Guide Not Found | ThesisAI";
+    }
+  }, [guide, slug]);
 
   return <div className="p-4"><UniversityGuideDetail guide={guide} /></div>;
 }

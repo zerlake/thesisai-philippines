@@ -202,13 +202,10 @@ export function StudentDashboard() {
       setShowWelcomeModal(true);
     }
 
-    const fetchProfile = async () => {
-      const { data } = await supabase.from("profiles").select("first_name").eq("id", user.id).single();
-      let name = "researcher";
-      if (data && data.first_name) name = data.first_name;
-      else if (user.email) name = user.email.split('@')[0];
-      setDisplayName(name);
-    };
+    let name = "researcher";
+    if (profile && profile.first_name) name = profile.first_name;
+    else if (user.email) name = user.email.split('@')[0];
+    setDisplayName(name);
 
     const fetchLatestDocument = async () => {
       setIsLoadingDoc(true);
@@ -240,11 +237,10 @@ export function StudentDashboard() {
       setIsLoadingStats(false);
     };
 
-    fetchProfile();
     fetchLatestDocument();
     fetchStats();
     getNextAction();
-  }, [user, supabase, getNextAction]);
+  }, [user, supabase, getNextAction, profile]);
 
   const handleModalClose = (open: boolean) => {
     if (!open) {

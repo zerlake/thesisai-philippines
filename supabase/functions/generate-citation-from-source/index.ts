@@ -1,8 +1,10 @@
 // @ts-ignore
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
+// @ts-ignore
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://thesisai-philippines.vercel.app',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
@@ -14,7 +16,8 @@ async function generateCitationWithGemini(sentence: string, sourceUrl: string, a
 
     The citation is for the following sentence, which was found at the given URL. Do your best to find author and date information from the URL if possible, but create plausible placeholders if not available.
 
-    Your entire output MUST be a single, valid JSON object. Do not include any markdown formatting like \`\`\`json or any text outside of the JSON object.
+    Your entire output MUST be a single, valid JSON object. Do not include any markdown formatting like 
+    json or any text outside of the JSON object.
 
     The JSON object must have the following structure:
     {
@@ -68,6 +71,24 @@ serve(async (req: Request) => {
   }
 
   try {
+    const supabaseAdmin = createClient(
+      // @ts-ignore
+      Deno.env.get('SUPABASE_URL') ?? '',
+      // @ts-ignore
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      throw new Error('Missing authorization header')
+    }
+    const jwt = authHeader.replace('Bearer ', '')
+
+    const { data: { user } } = await supabaseAdmin.auth.getUser(jwt)
+    if (!user) {
+      throw new Error('Invalid JWT')
+    }
+
     // @ts-ignore
     const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
     if (!geminiApiKey) {
