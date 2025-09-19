@@ -3,7 +3,7 @@
 import {
   University,
   Users,
-  Timer,
+  Presentation,
   BookCopy,
   Bot,
   FlaskConical,
@@ -36,9 +36,9 @@ const features = [
     description: "Seamlessly submit drafts to your advisor for feedback and to your manuscript critic for final certification, all within the platform.",
   },
   {
-    icon: <Timer className="h-8 w-8" />,
-    title: "Productivity & Study Tools",
-    description: "Prepare for your defense with a presentation generator, study key terms with flashcards, and stay focused with a built-in session timer.",
+    icon: <Presentation className="h-8 w-8" />,
+    title: "Defense Preparation Suite",
+    description: "Generate presentation slides with speaker notes, practice with an AI Q&A simulator, and study key terms with flashcards to build confidence for your defense.",
   },
 ];
 
