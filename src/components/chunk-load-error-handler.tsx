@@ -12,12 +12,13 @@ export function ChunkLoadErrorHandler() {
           if (isChunkLoadError) {
             const lastReloadTime = sessionStorage.getItem(CHUNK_ERROR_RELOAD_KEY);
             const now = Date.now();
+            // Only reload if it's been more than 10 seconds since the last reload
             if (!lastReloadTime || now - parseInt(lastReloadTime) > 10000) {
               sessionStorage.setItem(CHUNK_ERROR_RELOAD_KEY, now.toString());
-              console.error('DYAD: Detected chunk load error via inline script. Forcing a hard refresh.');
-              window.location.reload();
+              console.warn('DYAD: Detected chunk load error. Forcing a hard refresh.');
+              window.location.reload(true); // Force reload from server
             } else {
-              console.error('DYAD: Chunk load error detected, but a recent reload was already attempted. Aborting to prevent a loop.');
+              console.warn('DYAD: Chunk load error detected, but a recent reload was already attempted. Aborting to prevent a loop.');
             }
           }
         }
