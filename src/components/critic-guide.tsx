@@ -80,7 +80,7 @@ const guideSections = [
     content: [
       {
         heading: "How It Works: Your Digital Ledger",
-        text: "ThesisAI does not process payments directly. Instead, it acts as your professional ledger to help you track fees and manage payments for your offline transactions (e.g., GCash, bank transfer).",
+        text: "Payments for your critic services are handled directly between you and the student. ThesisAI acts as your professional ledger to help you track these offline transactions (e.g., GCash, bank transfer).",
       },
       {
         heading: "Setting Your Fee",
