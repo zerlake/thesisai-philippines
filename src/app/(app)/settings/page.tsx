@@ -10,12 +10,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CriticManagement } from "@/components/critic-management";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function SettingsPageContent() {
   const { profile } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const isStudent = profile?.role === 'user';
+
+  // Wait for profile to load before determining the layout
+  if (!profile) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-8">
+        <div className="flex justify-center">
+          <Skeleton className="h-10 w-full max-w-md" />
+        </div>
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
+
+  const isStudent = profile.role === 'user';
   const activeTab = searchParams.get('tab') || 'profile';
 
   const handleTabChange = (value: string) => {
