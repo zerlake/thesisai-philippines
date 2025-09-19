@@ -240,7 +240,7 @@ export function StudentDashboard() {
     fetchLatestDocument();
     fetchStats();
     getNextAction();
-  }, [user, supabase, getNextAction, profile]);
+  }, [user, supabase, getNextAction]);
 
   const handleModalClose = (open: boolean) => {
     if (!open) {
@@ -262,6 +262,16 @@ export function StudentDashboard() {
         </p>
       </div>
 
+      {/* Moved What's Next card to the top */}
+      {widgets.next_action && (
+        <div className="space-y-4">
+          {profile?.plan === 'free' && <UpgradePromptCard />}
+          <WhatsNextCard nextAction={nextAction} isLoading={isLoadingNextAction} />
+          <AdvisorFeedbackCard />
+          <ContextualActions nextAction={nextAction} latestDocument={latestDocument} />
+        </div>
+      )}
+
       {widgets.stats && (isLoadingStats ? (
         <div className="grid gap-4 md:grid-cols-3">
           <Skeleton className="h-28" />
@@ -275,15 +285,6 @@ export function StudentDashboard() {
           <StatCard title="Avg. Words / Doc" value={stats.avgWordCount.toLocaleString()} icon={Baseline} />
         </div>
       ))}
-
-      {widgets.next_action && (
-        <div className="space-y-4">
-          {profile?.plan === 'free' && <UpgradePromptCard />}
-          <WhatsNextCard nextAction={nextAction} isLoading={isLoadingNextAction} />
-          <AdvisorFeedbackCard />
-          <ContextualActions nextAction={nextAction} latestDocument={latestDocument} />
-        </div>
-      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         {widgets.recent_activity && <RecentActivityChart />}
