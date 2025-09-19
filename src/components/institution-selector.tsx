@@ -70,7 +70,7 @@ export function InstitutionSelector({ value, onValueChange }: InstitutionSelecto
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {value
+          {value && value !== 'not-in-list'
             ? selectedInstitutionName
             : loading
             ? "Loading institutions..."
