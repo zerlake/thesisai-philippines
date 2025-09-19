@@ -16,7 +16,6 @@ import { Input } from "./ui/input";
 import { useAuth } from "./auth-provider";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Skeleton } from "./ui/skeleton";
 import { AvatarUpload } from "./avatar-upload";
 
 const formSchema = z.object({
@@ -26,9 +25,8 @@ const formSchema = z.object({
 });
 
 export function SettingsForm() {
-  const { session, supabase, profile } = useAuth();
+  const { session, supabase, profile, refreshProfile } = useAuth();
   const user = session?.user;
-  const [isLoading, setIsLoading] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -41,31 +39,15 @@ export function SettingsForm() {
   });
 
   useEffect(() => {
-    if (!user) return;
-    setIsLoading(true);
-    const fetchProfile = async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("first_name, last_name, avatar_url")
-        .eq("id", user.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') { // PGRST116: row not found
-        toast.error("Failed to load profile.");
-        console.error(error);
-      } else if (data) {
-        form.reset({
-          first_name: data.first_name || "",
-          last_name: data.last_name || "",
-          email: user.email,
-        });
-        setAvatarUrl(data.avatar_url);
-      }
-      setIsLoading(false);
-    };
-
-    fetchProfile();
-  }, [user, supabase, form]);
+    if (profile) {
+      form.reset({
+        first_name: profile.first_name || "",
+        last_name: profile.last_name || "",
+        email: user?.email || "",
+      });
+      setAvatarUrl(profile.avatar_url);
+    }
+  }, [profile, user, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) return;
@@ -84,23 +66,8 @@ export function SettingsForm() {
       console.error(error);
     } else {
       toast.success("Profile updated successfully!");
+      await refreshProfile();
     }
-  }
-
-  if (isLoading) {
-    return (
-      <div className="space-y-8">
-        <div className="flex justify-center -mt-16">
-          <Skeleton className="h-24 w-24 rounded-full border-4 border-background" />
-        </div>
-        <div className="space-y-4 pt-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-24" />
-        </div>
-      </div>
-    );
   }
 
   return (

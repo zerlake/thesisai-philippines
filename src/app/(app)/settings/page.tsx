@@ -17,14 +17,24 @@ function SettingsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Wait for profile to load before determining the layout
   if (!profile) {
     return (
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex justify-center">
           <Skeleton className="h-10 w-full max-w-md" />
         </div>
-        <Skeleton className="h-96 w-full" />
+        <div className="relative mt-8">
+          <Skeleton className="h-32 w-full rounded-t-lg" />
+          <Card className="pt-12">
+            <CardHeader>
+              <Skeleton className="h-6 w-1/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-48 w-full" />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
