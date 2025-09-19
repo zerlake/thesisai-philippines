@@ -75,16 +75,24 @@ const guideSections = [
   },
   {
     value: "billing",
-    title: "4. Managing Billing and Payments",
+    title: "4. Managing Billing and Payments (Offline Transactions)",
     icon: Banknote,
     content: [
       {
-        heading: "Setting Your Fee",
-        text: "When you submit a review, you can set a fee for your services. This fee is recorded in the system for your and the student's reference.",
+        heading: "How It Works: Your Digital Ledger",
+        text: "ThesisAI does not process payments directly. Instead, it acts as your professional ledger to help you track fees and manage payments for your offline transactions (e.g., GCash, bank transfer).",
       },
       {
-        heading: "Tracking Payments",
-        text: "Navigate to the 'Billing' page from your sidebar to see a complete history of all your reviews. You can track total earnings and manually update the payment status of each review from 'Unpaid' to 'Paid' once you receive payment from the student.",
+        heading: "Setting Your Fee",
+        text: "When you certify a document or request revisions using the Critic Review Panel, you will set your professional fee. This action creates a billing record for both you and the student.",
+      },
+      {
+        heading: "Receiving Payment Offline",
+        text: "The student is responsible for paying you directly using your agreed-upon payment method. The platform simply facilitates the record-keeping.",
+      },
+      {
+        heading: "Updating the Payment Status",
+        text: "Once you receive payment, go to the 'Billing' page from your sidebar. Find the corresponding review and use the dropdown menu to change its status from 'Unpaid' to 'Paid'. This updates your earnings dashboard and the student's billing history to reflect that the payment has been recorded.",
       },
     ],
   },
