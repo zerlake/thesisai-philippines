@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Badge } from "./ui/badge";
+import { StudentCriticBillingHistory } from "./student-critic-billing-history";
 
 const plans = [
   {
@@ -177,6 +178,8 @@ export function BillingManagement() {
           </Card>
         ))}
       </div>
+      
+      {profile?.role === 'user' && <StudentCriticBillingHistory />}
     </div>
   );
 }
