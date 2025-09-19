@@ -26,7 +26,7 @@ const formSchema = z.object({
   last_name: z.string().min(1, "Last name is required."),
   email: z.string().email("Invalid email address."),
   password: z.string().min(8, "Password must be at least 8 characters."),
-  role: z.enum(["user", "advisor"]),
+  role: z.enum(["user", "advisor", "critic"]),
   institution_id: z.string().uuid("Please select your institution.").or(z.literal("not-in-list")).optional(),
   institution_name: z.string().optional(),
   
@@ -35,9 +35,10 @@ const formSchema = z.object({
   program: z.string().optional(),
   year_level: z.coerce.number().optional(),
 
-  // Advisor fields
+  // Advisor/Critic fields
   department: z.string().optional(),
   faculty_id_number: z.string().optional(),
+  field_of_expertise: z.string().optional(),
   referral_code: z.string().optional(),
 }).superRefine((data, ctx) => {
   if (data.institution_id === 'not-in-list') {
@@ -49,11 +50,11 @@ const formSchema = z.object({
       });
     }
   }
-  if (data.role === 'advisor') {
+  if (data.role === 'advisor' || data.role === 'critic') {
     if (!data.department || data.department.trim().length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Department is required for advisors.",
+        message: "Department is required for advisors and critics.",
         path: ["department"],
       });
     }
@@ -95,13 +96,14 @@ export function SignUpForm() {
       year_level,
       department,
       faculty_id_number,
+      field_of_expertise,
       referral_code,
       ...commonValues 
     } = values;
 
     const roleSpecificData = role === 'user' 
       ? { student_id_number, program, year_level }
-      : { department, faculty_id_number };
+      : { department, faculty_id_number, field_of_expertise };
 
     const { data, error } = await supabase.auth.signUp({
       email: values.email,
@@ -148,7 +150,7 @@ export function SignUpForm() {
                 <RadioGroup
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  className="flex space-x-4"
+                  className="flex flex-wrap gap-x-4 gap-y-2"
                 >
                   <FormItem className="flex items-center space-x-2 space-y-0">
                     <FormControl>
@@ -161,6 +163,12 @@ export function SignUpForm() {
                       <RadioGroupItem value="advisor" />
                     </FormControl>
                     <FormLabel className="font-normal">Thesis Advisor</FormLabel>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-2 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="critic" />
+                    </FormControl>
+                    <FormLabel className="font-normal">Manuscript Critic</FormLabel>
                   </FormItem>
                 </RadioGroup>
               </FormControl>
@@ -187,11 +195,15 @@ export function SignUpForm() {
           </div>
         )}
 
-        {role === 'advisor' && (
+        {(role === 'advisor' || role === 'critic') && (
           <div className="grid grid-cols-2 gap-4">
             <FormField control={form.control} name="department" render={({ field }) => (<FormItem><FormLabel>Department</FormLabel><FormControl><Input placeholder="e.g., College of Engineering" {...field} /></FormControl><FormMessage /></FormItem>)} />
             <FormField control={form.control} name="faculty_id_number" render={({ field }) => (<FormItem><FormLabel>Faculty ID</FormLabel><FormControl><Input placeholder="(Optional)" {...field} /></FormControl><FormMessage /></FormItem>)} />
           </div>
+        )}
+        
+        {role === 'critic' && (
+          <FormField control={form.control} name="field_of_expertise" render={({ field }) => (<FormItem><FormLabel>Field of Expertise</FormLabel><FormControl><Input placeholder="e.g., Qualitative Research, Statistics" {...field} /></FormControl><FormMessage /></FormItem>)} />
         )}
 
         <FormField
