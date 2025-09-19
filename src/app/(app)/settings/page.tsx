@@ -8,19 +8,19 @@ import { DashboardCustomization } from "@/components/dashboard-customization";
 import { NotificationSettings } from "@/components/notification-settings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CriticManagement } from "@/components/critic-management";
-import { useSearchParams } from "next/navigation";
-import { Suspense, useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
 
 function SettingsPageContent() {
   const { profile } = useAuth();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const isStudent = profile?.role === 'user';
-  const defaultTab = searchParams.get('tab') || 'profile';
-  const [activeTab, setActiveTab] = useState(defaultTab);
+  const activeTab = searchParams.get('tab') || 'profile';
 
-  useEffect(() => {
-    setActiveTab(defaultTab);
-  }, [defaultTab]);
+  const handleTabChange = (value: string) => {
+    router.push(`/settings?tab=${value}`, { scroll: false });
+  };
 
   const profileContent = (
     <div className="space-y-8">
@@ -51,7 +51,7 @@ function SettingsPageContent() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <div className="flex justify-center">
           <TabsList className="grid w-full max-w-md grid-cols-3">
             <TabsTrigger value="profile">Profile</TabsTrigger>
