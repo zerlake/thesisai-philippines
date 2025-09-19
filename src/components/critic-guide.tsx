@@ -64,6 +64,10 @@ const guideSections = [
         text: "From your dashboard's queue, click 'Review & Certify'. This opens the main document editor in a read-only mode. You cannot directly edit the student's text.",
       },
       {
+        heading: "A Note on Editing: Feedback vs. Track Changes",
+        text: "Unlike Microsoft Word's 'Track Changes' feature, you cannot directly edit the student's text. ThesisAI's review process is built on providing feedback through comments and the final review panel. This ensures the student remains the sole author and is responsible for implementing the suggested changes.",
+      },
+      {
         heading: "Using the Reviewer AI Toolkit",
         text: "On the right-hand panel, you'll find the AI Toolkit. Select any portion of text in the document to generate suggestions for improvement, paraphrasing, or to get structured feedback ideas.",
       },
