@@ -272,6 +272,13 @@ export function StudentDashboard() {
         </div>
       )}
 
+      {/* Thesis Checklist placed right after What's Next */}
+      {widgets.checklist && (
+        <div className="lg:col-span-2">
+          <ThesisChecklist />
+        </div>
+      )}
+
       {widgets.stats && (isLoadingStats ? (
         <div className="grid gap-4 md:grid-cols-3">
           <Skeleton className="h-28" />
@@ -288,7 +295,6 @@ export function StudentDashboard() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {widgets.recent_activity && <RecentActivityChart />}
-        {widgets.checklist && <div className="lg:col-span-2"><ThesisChecklist /></div>}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
