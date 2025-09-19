@@ -41,6 +41,13 @@ const formSchema = z.object({
   field_of_expertise: z.string().optional(),
   referral_code: z.string().optional(),
 }).superRefine((data, ctx) => {
+  if ((data.role === 'user' || data.role === 'advisor') && !data.institution_id) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please select your institution.",
+      path: ["institution_id"],
+    });
+  }
   if (data.institution_id === 'not-in-list') {
     if (!data.institution_name || data.institution_name.trim().length === 0) {
       ctx.addIssue({
@@ -182,10 +189,15 @@ export function SignUpForm() {
         </div>
         <FormField control={form.control} name="email" render={({ field }) => (<FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="you@example.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
         <FormField control={form.control} name="password" render={({ field }) => (<FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>)} />
-        <FormField control={form.control} name="institution_id" render={({ field }) => (<FormItem><FormLabel>Institution</FormLabel><FormControl><InstitutionSelector value={field.value || ""} onValueChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
         
-        {institutionId === "not-in-list" && (
-          <FormField control={form.control} name="institution_name" render={({ field }) => (<FormItem><FormLabel>Institution Name</FormLabel><FormControl><Input placeholder="Enter your school's full name" {...field} /></FormControl><FormMessage /></FormItem>)} />
+        {(role === 'user' || role === 'advisor') && (
+          <>
+            <FormField control={form.control} name="institution_id" render={({ field }) => (<FormItem><FormLabel>Institution</FormLabel><FormControl><InstitutionSelector value={field.value || ""} onValueChange={field.onChange} /></FormControl><FormMessage /></FormItem>)} />
+            
+            {institutionId === "not-in-list" && (
+              <FormField control={form.control} name="institution_name" render={({ field }) => (<FormItem><FormLabel>Institution Name</FormLabel><FormControl><Input placeholder="Enter your school's full name" {...field} /></FormControl><FormMessage /></FormItem>)} />
+            )}
+          </>
         )}
 
         {role === 'user' && (
