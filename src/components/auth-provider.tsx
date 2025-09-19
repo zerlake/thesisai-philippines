@@ -29,87 +29,62 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile>(null);
-  const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
 
-  const fetchProfile = useCallback(async (user: User) => {
+  const fetchProfile = useCallback(async (user: User | undefined) => {
     if (!user) {
       setProfile(null);
-      return null;
+      setSession(null);
+      return;
     }
+
     try {
-      for (let i = 0; i < 5; i++) {
-        const { data: profileData, error: profileError } = await supabase
-          .from("profiles")
-          .select("*, documents(count), advisor:advisor_student_relationships!student_id(profiles:advisor_id(*))")
-          .eq("id", user.id)
-          .single();
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("*, user_preferences(*)")
+        .eq("id", user.id)
+        .single();
 
-        if (profileError && profileError.code !== 'PGRST116') {
-          throw profileError;
+      if (profileError) {
+        if (profileError.code === 'PGRST116') {
+          console.error("CRITICAL: User has session but no profile. Signing out.");
+          toast.error("Your user profile could not be found. Please sign in again.");
+          await supabase.auth.signOut();
+          return;
         }
-
-        if (profileData) {
-          const { data: preferencesData, error: preferencesError } = await supabase
-            .from("user_preferences")
-            .select("*")
-            .eq("user_id", user.id)
-            .single();
-          
-          if (preferencesError && preferencesError.code !== 'PGRST116') {
-            console.error("Error fetching user preferences:", preferencesError);
-          }
-
-          // @ts-ignore
-          profileData.user_preferences = preferencesData || null;
-          setProfile(profileData);
-          return profileData;
-        }
-
-        await new Promise(resolve => setTimeout(resolve, 750));
+        throw profileError;
       }
-      
-      throw new Error("Profile not found after multiple attempts.");
 
+      if (profileData) {
+        const preferences = Array.isArray(profileData.user_preferences) ? profileData.user_preferences[0] : profileData.user_preferences;
+        // @ts-ignore
+        profileData.user_preferences = preferences || null;
+        setProfile(profileData);
+      }
     } catch (e: any) {
       toast.error("Could not fetch user profile.");
       console.error("Error fetching profile:", e.message);
+      setProfile(null);
+      await supabase.auth.signOut();
     }
-    setProfile(null);
-    return null;
   }, [supabase]);
 
-  const refreshProfile = useCallback(async () => {
-    if (session?.user) {
-      await fetchProfile(session.user);
-    }
-  }, [session, fetchProfile]);
-
   useEffect(() => {
-    const handleAuthChange = (session: Session | null) => {
+    const handleAuthChange = async (session: Session | null) => {
+      setIsLoading(true);
       setSession(session);
-      if (session?.user) {
-        setAuthStatus('authenticated');
-        fetchProfile(session.user); // Fetch profile in the background
-      } else {
-        setProfile(null);
-        setAuthStatus('unauthenticated');
-      }
+      await fetchProfile(session?.user);
+      setIsLoading(false);
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       handleAuthChange(session);
     });
 
-    supabase.auth.getSession().then(({ data, error }) => {
-      if (error) {
-        console.warn("AuthProvider: Error getting initial session:", error.message);
-        if (error.message.includes("Invalid Refresh Token")) {
-          supabase.auth.signOut();
-        }
-      }
-      handleAuthChange(data?.session || null);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      handleAuthChange(session);
     });
 
     return () => {
@@ -118,7 +93,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase, fetchProfile]);
 
   useEffect(() => {
-    if (authStatus === 'loading') return;
+    if (isLoading) return;
+
+    const authStatus = session && profile ? 'authenticated' : 'unauthenticated';
 
     const publicPaths = ["/", "/login", "/register", "/explore", "/features", "/for-advisors", "/pricing", "/faq", "/university-guides", "/user-guide", "/atr-style-guide"];
     const isPublicPage = publicPaths.some(p => pathname.startsWith(p)) || pathname.startsWith("/share/");
@@ -128,25 +105,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (authStatus === 'unauthenticated' && !isPublicPage) {
       router.push("/login");
-    } else if (authStatus === 'authenticated') {
+    } else if (authStatus === 'authenticated' && profile) {
       if (pathname === "/login" || pathname === "/register" || pathname === "/") {
-        if (profile?.role === "admin") router.push("/admin");
-        else if (profile?.role === "advisor") router.push("/advisor");
+        if (profile.role === "admin") router.push("/admin");
+        else if (profile.role === "advisor") router.push("/advisor");
         else router.push("/dashboard");
-      } else if (isAdminPage && profile?.role !== "admin") {
+      } else if (isAdminPage && profile.role !== "admin") {
         router.push("/dashboard");
-      } else if (isAdvisorPage && profile?.role !== "advisor") {
+      } else if (isAdvisorPage && profile.role !== "advisor") {
         router.push("/dashboard");
-      } else if (isAppPage && (profile?.role === "admin" || profile?.role === "advisor")) {
+      } else if (isAppPage && (profile.role === "admin" || profile.role === "advisor")) {
         router.push(profile.role === "admin" ? "/admin" : "/advisor");
       }
     }
-  }, [authStatus, profile, pathname, router]);
+  }, [isLoading, session, profile, pathname, router]);
+
+  const refreshProfile = useCallback(async () => {
+    if (session?.user) {
+      await fetchProfile(session.user);
+    }
+  }, [session, fetchProfile]);
 
   const publicPaths = ["/", "/login", "/register", "/explore", "/features", "/for-advisors", "/pricing", "/faq", "/university-guides", "/user-guide", "/atr-style-guide"];
   const isPublicPage = publicPaths.some(p => pathname.startsWith(p)) || pathname.startsWith("/share/");
 
-  if (authStatus === 'loading' && !isPublicPage) {
+  if (isLoading && !isPublicPage) {
     return <BrandedLoader />;
   }
 
