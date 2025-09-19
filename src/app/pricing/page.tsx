@@ -46,6 +46,21 @@ const plans = [
     href: "/register",
     highlight: false,
   },
+  {
+    name: "Pro Complete",
+    price: "₱999",
+    description: "Everything in Pro + Advisor, plus manuscript critic services for final review.",
+    features: [
+      "All features from Pro + Advisor",
+      "Connect with a Manuscript Critic",
+      "Get certified by an expert reviewer",
+      "Receive professional editing feedback",
+      "Export certificate of editing"
+    ],
+    buttonText: "Get Complete",
+    href: "/register",
+    highlight: false,
+  },
 ];
 
 export default function PricingPage() {
@@ -60,7 +75,7 @@ export default function PricingPage() {
             Choose the plan that's right for your academic journey.
           </p>
         </div>
-        <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-3 items-start max-w-5xl mx-auto">
+        <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-4 items-start max-w-6xl mx-auto">
           {plans.map((plan) => (
             <div
               key={plan.name}
