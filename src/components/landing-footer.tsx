@@ -16,7 +16,7 @@ export function LandingFooter() {
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
           <div className="flex items-center gap-2">
             <BotMessageSquare className="h-6 w-6 text-white" />
-            <p className="font-semibold text-white">ThesisAI</p>
+            <p className="font-semibold text-white">ThesisAI Philippines</p>
           </div>
           <nav className="flex flex-wrap justify-center gap-4 md:gap-6">
             {footerNav.map((item) => (
@@ -31,7 +31,7 @@ export function LandingFooter() {
           </nav>
         </div>
         <div className="mt-6 border-t border-slate-700 pt-6 text-center text-sm text-slate-400">
-          <p>&copy; 2025 ThesisAI. All rights reserved.</p>
+          <p>&copy; 2025 ThesisAI Philippines. All rights reserved.</p>
           <p className="mt-1">Built to empower the next generation of Filipino researchers.</p>
         </div>
       </div>

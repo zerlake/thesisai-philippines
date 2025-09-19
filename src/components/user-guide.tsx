@@ -108,7 +108,7 @@ export function UserGuide() {
     <div className="max-w-4xl mx-auto space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-3xl">ThesisAI User Guide</CardTitle>
+          <CardTitle className="text-3xl">ThesisAI Philippines User Guide</CardTitle>
           <CardDescription>
             Your complete guide to mastering all the features for your thesis, dissertation, or academic paper.
           </CardDescription>

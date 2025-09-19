@@ -13,7 +13,7 @@ export function LandingHeader() {
     <header className="px-4 lg:px-6 h-16 flex items-center border-b border-slate-700 sticky top-0 bg-slate-900/80 backdrop-blur-sm z-50">
       <Link href="/" className="flex items-center justify-center mr-auto">
         <BotMessageSquare className="h-6 w-6 text-white" />
-        <span className="ml-2 font-bold text-white">ThesisAI</span>
+        <span className="ml-2 font-bold text-white">ThesisAI Philippines</span>
       </Link>
       <nav className="hidden md:flex gap-4 sm:gap-6 items-center">
         <Link

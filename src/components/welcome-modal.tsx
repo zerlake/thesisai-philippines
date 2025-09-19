@@ -46,7 +46,7 @@ export function WelcomeModal({ open, onOpenChange, name }: WelcomeModalProps) {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <DialogHeader>
-            <DialogTitle className="text-2xl">Welcome to ThesisAI, {name}!</DialogTitle>
+            <DialogTitle className="text-2xl">Welcome to ThesisAI Philippines, {name}!</DialogTitle>
             <DialogDescription>
               Your AI-powered co-pilot for academic success is ready. Here's a quick look at what you can do:
             </DialogDescription>

@@ -21,7 +21,7 @@ const fontSerif = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "ThesisAI",
+  title: "ThesisAI Philippines",
   description: "Your AI-Powered Academic Co-Pilot.",
 };
 

@@ -87,7 +87,7 @@ serve(async (req: Request) => {
       }
 
       const chargeData = {
-        name: `ThesisAI - ${planId.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())} Plan`,
+        name: `ThesisAI Philippines - ${planId.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())} Plan`,
         description: `Payment for one month of the ${planId} plan.`,
         local_price: {
           amount: finalPrice.toFixed(2),

@@ -69,11 +69,11 @@ export async function generateMetadata({ params }: SharedDocumentPageProps) {
       .single();
     
     return {
-      title: `${document?.title || 'Shared Document'} | ThesisAI`,
+      title: `${document?.title || 'Shared Document'} | ThesisAI Philippines`,
     };
   } catch (error) {
     return {
-      title: 'Shared Document | ThesisAI',
+      title: 'Shared Document | ThesisAI Philippines',
     };
   }
 }

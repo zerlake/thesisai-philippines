@@ -117,7 +117,7 @@ export function Header() {
               <SheetTitle>
                 <div className="flex items-center gap-3">
                   <BookText className="w-6 h-6" />
-                  <span className="text-lg font-semibold">ThesisAI</span>
+                  <span className="text-lg font-semibold">ThesisAI Philippines</span>
                 </div>
               </SheetTitle>
               <SheetDescription className="sr-only">
@@ -134,7 +134,7 @@ export function Header() {
 
         <div className="hidden md:flex items-center gap-3">
           <BookText className="w-6 h-6" />
-          <h1 className="text-lg font-semibold">ThesisAI</h1>
+          <h1 className="text-lg font-semibold">ThesisAI Philippines</h1>
         </div>
       </div>
       <div className="flex items-center gap-2 md:gap-4">
