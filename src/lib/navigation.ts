@@ -121,7 +121,7 @@ export const criticNavGroups: NavGroup[] = [
     title: "Critic Workspace",
     items: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/critic" },
-      { icon: Users, label: "Assigned Students", href: "/critic/students" },
+      { icon: Users, label: "My Students", href: "/critic/students" },
       { icon: Banknote, label: "Billing", href: "/critic/billing" },
       { icon: BookOpen, label: "Resources", href: "/resources" },
       { icon: BookUser, label: "Critic Guide", href: "/critic-guide" },
