@@ -105,7 +105,10 @@ export function SignUpForm() {
       faculty_id_number,
       field_of_expertise,
       referral_code,
-      ...commonValues 
+      first_name,
+      last_name,
+      email,
+      password
     } = values;
 
     const roleSpecificData = role === 'user' 
@@ -113,14 +116,16 @@ export function SignUpForm() {
       : { department, faculty_id_number, field_of_expertise };
 
     const { data, error } = await supabase.auth.signUp({
-      email: values.email,
-      password: values.password,
+      email: email,
+      password: password,
       options: {
         data: {
-          ...commonValues,
+          first_name,
+          last_name,
           role,
           ...roleSpecificData,
           institution_id: institution_id === 'not-in-list' ? null : institution_id,
+          institution_name: institution_id === 'not-in-list' ? institution_name : (role === 'critic' ? institution_name : undefined),
           referral_code,
         },
       },
@@ -198,6 +203,22 @@ export function SignUpForm() {
               <FormField control={form.control} name="institution_name" render={({ field }) => (<FormItem><FormLabel>Institution Name</FormLabel><FormControl><Input placeholder="Enter your school's full name" {...field} /></FormControl><FormMessage /></FormItem>)} />
             )}
           </>
+        )}
+
+        {role === 'critic' && (
+          <FormField
+            control={form.control}
+            name="institution_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Institution (Optional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., University of the Philippines" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         )}
 
         {role === 'user' && (
