@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -48,12 +51,18 @@ export function InstitutionSelector({ value, onValueChange }: InstitutionSelecto
         <SelectValue placeholder={loading ? "Loading institutions..." : "Select your institution"} />
       </SelectTrigger>
       <SelectContent>
-        {!loading && institutions.map((inst) => (
-          <SelectItem key={inst.id} value={inst.id}>
-            {inst.name}
-          </SelectItem>
-        ))}
-        <SelectItem value="not-in-list">My institution is not on the list</SelectItem>
+        <SelectGroup>
+          <SelectLabel>Approved Institutions</SelectLabel>
+          {!loading && institutions.map((inst) => (
+            <SelectItem key={inst.id} value={inst.id}>
+              {inst.name}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+        <SelectSeparator />
+        <SelectGroup>
+          <SelectItem value="not-in-list">My institution is not on the list</SelectItem>
+        </SelectGroup>
       </SelectContent>
     </Select>
   );
