@@ -21,7 +21,10 @@ export default function DashboardPage() {
       return <AdvisorDashboard />;
     case 'critic':
       return <CriticDashboard />;
-    default:
+    case 'user':
       return <StudentDashboard />;
+    default:
+      // Fallback for any unexpected role, preventing the student dashboard from showing incorrectly.
+      return <BrandedLoader />;
   }
 }

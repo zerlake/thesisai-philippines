@@ -38,7 +38,8 @@ export function Header() {
       if (error) {
         throw error;
       }
-      router.push("/login");
+      // Use window.location to force a full page reload, clearing all state.
+      window.location.href = "/login";
     } catch (error: any) {
       toast.error("Logout failed: " + error.message);
       console.error("Logout error:", error);
