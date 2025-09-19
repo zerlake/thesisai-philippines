@@ -10,7 +10,7 @@ export function BugReportAlert() {
       <AlertTitle>Spotted a Bug?</AlertTitle>
       <AlertDescription>
         This application is in active development. If you encounter any issues or have feedback, please{" "}
-        <a href="mailto:support@app:thesisai.com?subject=Bug%20Report" className="font-semibold underline">
+        <a href="mailto:support@thesisai.com?subject=Bug%20Report" className="font-semibold underline">
           let us know
         </a>
         . Your help is appreciated!
