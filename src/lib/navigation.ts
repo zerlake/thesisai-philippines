@@ -54,49 +54,47 @@ export const studentNavGroups: NavGroup[] = [
       { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
       { icon: FileText, label: "Drafts", href: "/drafts" },
       { icon: FolderLock, label: "Data Management", href: "/data-management" },
-      { icon: UserCheck, label: "Manage Advisor", href: "/settings?tab=advisor" },
-      { icon: ClipboardCheck, label: "Manage Critic", href: "/settings?tab=critic" },
-      { icon: CreditCard, label: "Billing", href: "/settings/billing" },
-      { icon: Gift, label: "Referrals", href: "/settings/referrals" },
-      { icon: BookOpen, label: "Resources", href: "/resources" },
-      { icon: University, label: "University Guides", href: "/university-guides" },
-      { icon: BookUser, label: "User Guide", href: "/user-guide" },
     ],
   },
   {
-    title: "Pre-Writing",
+    title: "Writing Tools",
     items: [
       { icon: BrainCircuit, label: "Topic Ideas", href: "/topic-ideas" },
       { icon: TitleIdeaIcon, label: "Title Generator", href: "/title-generator" },
       { icon: List, label: "Outline", href: "/outline" },
       { icon: FlaskConical, label: "Research", href: "/research" },
-    ],
-  },
-  {
-    title: "Writing Helpers",
-    items: [
       { icon: ClipboardPen, label: "Methodology", href: "/methodology" },
       { icon: ClipboardCheck, label: "Results", href: "/results" },
       { icon: BookCheck, label: "Conclusion", href: "/conclusion" },
+    ],
+  },
+  {
+    title: "Review & Submission",
+    items: [
       { icon: Languages, label: "Paraphraser", href: "/paraphraser" },
-    ],
-  },
-  {
-    title: "Citation Tools",
-    items: [
-      { icon: BookMarked, label: "Citations", href: "/citations" },
-      { icon: BookCopy, label: "Bibliography", href: "/bibliography" },
-    ],
-  },
-  {
-    title: "Review Tools",
-    items: [
-      { icon: FileText, label: "Title Page", href: "/title-page" },
       { icon: Presentation, label: "Presentation", href: "/presentation" },
       { icon: Lightbulb, label: "Flashcards", href: "/flashcards" },
       { icon: MessageCircleQuestion, label: "Q&A Simulator", href: "/qa-simulator" },
       { icon: Baseline, label: "Grammar Check", href: "/grammar-check" },
       { icon: ShieldCheck, label: "Originality Check", href: "/originality-check" },
+      { icon: FileText, label: "Title Page", href: "/title-page" },
+    ],
+  },
+  {
+    title: "Collaboration",
+    items: [
+      { icon: UserCheck, label: "Manage Advisor", href: "/settings?tab=advisor" },
+      { icon: ClipboardCheck, label: "Manage Critic", href: "/settings?tab=critic" },
+      { icon: CreditCard, label: "Billing", href: "/settings/billing" },
+      { icon: Gift, label: "Referrals", href: "/settings/referrals" },
+    ],
+  },
+  {
+    title: "Resources",
+    items: [
+      { icon: BookOpen, label: "Resources", href: "/resources" },
+      { icon: University, label: "University Guides", href: "/university-guides" },
+      { icon: BookUser, label: "User Guide", href: "/user-guide" },
     ],
   },
 ];
