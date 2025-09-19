@@ -60,16 +60,16 @@ const guideSections = [
     icon: Sparkles,
     content: [
       {
-        heading: "Opening a Document",
-        text: "From the queue, click 'Review & Certify' to open a student's document. You will be in a read-only mode, but you can select text to use the AI Toolkit.",
+        heading: "Opening a Document for Review",
+        text: "From your dashboard's queue, click 'Review & Certify'. This opens the main document editor in a read-only mode. You cannot directly edit the student's text.",
       },
       {
         heading: "Using the Reviewer AI Toolkit",
-        text: "Select any portion of text to generate suggestions for improvement, paraphrasing, or summarization. You can also generate structured feedback (positive points and areas for improvement) to help formulate your comments.",
+        text: "On the right-hand panel, you'll find the AI Toolkit. Select any portion of text in the document to generate suggestions for improvement, paraphrasing, or to get structured feedback ideas.",
       },
       {
-        heading: "Using the Critic Review Panel",
-        text: "On the right side of the editor, you'll find the Critic Review Panel. Here you can write your overall comments, set your review fee, and make your final decision to either certify the document or request revisions.",
+        heading: "Submitting Your Final Review",
+        text: "Below the AI Toolkit is the Critic Review Panel. This is where you will write your overall comments, set your professional fee, and make your final decision to either 'Certify Document' or 'Request Revisions'.",
       },
     ],
   },
