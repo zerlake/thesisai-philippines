@@ -1,44 +1,44 @@
 "use client";
 
 import {
-  BarChart3,
+  University,
+  Users,
+  Timer,
   BookCopy,
   Bot,
   FlaskConical,
-  Presentation,
-  ShieldCheck,
 } from "lucide-react";
 
 const features = [
   {
     icon: <Bot className="h-8 w-8" />,
-    title: "AI-Powered Drafting",
-    description: "Generate topic ideas, chapter outlines, and first drafts to overcome writer's block and accelerate your writing process.",
+    title: "AI Writing & Research Suite",
+    description: "From topic ideas and literature synthesis to drafting conclusions, leverage AI at every step of your research process.",
+  },
+  {
+    icon: <University className="h-8 w-8" />,
+    title: "University-Specific Formatting",
+    description: "Access detailed formatting and style guides for major Philippine universities to ensure your manuscript meets exact requirements.",
   },
   {
     icon: <FlaskConical className="h-8 w-8" />,
-    title: "Complete Methodology Suite",
-    description: "Utilize interactive tools for research design, sample size calculation, and finding the right statistical tests for your data.",
+    title: "Methodology & Data Tools",
+    description: "Design your study with interactive advisors for research methods, sampling, and statistical tests. Generate charts and interpret results with ease.",
   },
   {
     icon: <BookCopy className="h-8 w-8" />,
-    title: "Citation & Bibliography",
-    description: "Instantly generate citations and compile a formatted bibliography in APA, MLA, or Chicago style, directly from your research.",
+    title: "Citation & Originality Hub",
+    description: "Generate citations in multiple styles, manage your bibliography, and ensure academic integrity with a powerful originality checker.",
   },
   {
-    icon: <ShieldCheck className="h-8 w-8" />,
-    title: "Plagiarism Prevention",
-    description: "Ensure academic integrity with an integrated originality checker that scans your work against billions of web sources.",
+    icon: <Users className="h-8 w-8" />,
+    title: "Advisor & Critic Collaboration",
+    description: "Seamlessly submit drafts to your advisor for feedback and to your manuscript critic for final certification, all within the platform.",
   },
   {
-    icon: <BarChart3 className="h-8 w-8" />,
-    title: "Data to Discussion",
-    description: "Create charts, interpret complex statistical results, and generate draft conclusions directly from your findings.",
-  },
-  {
-    icon: <Presentation className="h-8 w-8" />,
-    title: "Defense & Study Tools",
-    description: "Automatically create presentation outlines for your defense and generate flashcards to study key concepts from your research.",
+    icon: <Timer className="h-8 w-8" />,
+    title: "Productivity & Study Tools",
+    description: "Prepare for your defense with a presentation generator, study key terms with flashcards, and stay focused with a built-in session timer.",
   },
 ];
 
