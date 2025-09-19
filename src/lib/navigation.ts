@@ -32,6 +32,7 @@ import {
   Users,
   Banknote,
   FolderLock,
+  MessageCircleQuestion,
   type LucideIcon,
 } from "lucide-react";
 
@@ -93,6 +94,7 @@ export const studentNavGroups: NavGroup[] = [
       { icon: FileText, label: "Title Page", href: "/title-page" },
       { icon: Presentation, label: "Presentation", href: "/presentation" },
       { icon: Lightbulb, label: "Flashcards", href: "/flashcards" },
+      { icon: MessageCircleQuestion, label: "Q&A Simulator", href: "/qa-simulator" },
       { icon: Baseline, label: "Grammar Check", href: "/grammar-check" },
       { icon: ShieldCheck, label: "Originality Check", href: "/originality-check" },
     ],
