@@ -57,11 +57,11 @@ const formSchema = z.object({
       });
     }
   }
-  if (data.role === 'advisor' || data.role === 'critic') {
+  if (data.role === 'advisor') {
     if (!data.department || data.department.trim().length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Department is required for advisors and critics.",
+        message: "Department is required for advisors.",
         path: ["department"],
       });
     }
@@ -230,7 +230,13 @@ export function SignUpForm() {
 
         {(role === 'advisor' || role === 'critic') && (
           <div className="grid grid-cols-2 gap-4">
-            <FormField control={form.control} name="department" render={({ field }) => (<FormItem><FormLabel>Department</FormLabel><FormControl><Input placeholder="e.g., College of Engineering" {...field} /></FormControl><FormMessage /></FormItem>)} />
+            <FormField control={form.control} name="department" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Department{role === 'critic' && ' (Optional)'}</FormLabel>
+                <FormControl><Input placeholder="e.g., College of Engineering" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
             <FormField control={form.control} name="faculty_id_number" render={({ field }) => (<FormItem><FormLabel>Faculty ID</FormLabel><FormControl><Input placeholder="(Optional)" {...field} /></FormControl><FormMessage /></FormItem>)} />
           </div>
         )}
