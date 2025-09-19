@@ -17,14 +17,16 @@ function SettingsPageContent() {
   const isStudent = profile?.role === 'user';
   const defaultTab = searchParams.get('tab') || 'profile';
 
+  const numTabs = isStudent ? 3 : 1;
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <Tabs defaultValue={defaultTab} className="w-full">
         <div className="flex justify-center">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
+          <TabsList className={`grid w-full max-w-md grid-cols-${numTabs}`}>
             <TabsTrigger value="profile">Profile</TabsTrigger>
-            {isStudent && <TabsTrigger value="advisor">My Advisor</TabsTrigger>}
-            {isStudent && <TabsTrigger value="critic">My Critic</TabsTrigger>}
+            {isStudent && <TabsTrigger value="advisor">Manage Advisor</TabsTrigger>}
+            {isStudent && <TabsTrigger value="critic">Manage Critic</TabsTrigger>}
           </TabsList>
         </div>
 

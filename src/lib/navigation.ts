@@ -51,8 +51,8 @@ export const studentNavGroups: NavGroup[] = [
     items: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
       { icon: FileText, label: "Drafts", href: "/drafts" },
-      { icon: UserCheck, label: "My Advisor", href: "/settings?tab=advisor" },
-      { icon: ClipboardCheck, label: "My Critic", href: "/settings?tab=critic" },
+      { icon: UserCheck, label: "Manage Advisor", href: "/settings?tab=advisor" },
+      { icon: ClipboardCheck, label: "Manage Critic", href: "/settings?tab=critic" },
       { icon: CreditCard, label: "Billing", href: "/settings/billing" },
       { icon: Gift, label: "Referrals", href: "/settings/referrals" },
       { icon: BookOpen, label: "Resources", href: "/resources" },
