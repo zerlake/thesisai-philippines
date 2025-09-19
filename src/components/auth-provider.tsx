@@ -41,9 +41,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
+      // Step 1: Fetch the main profile data
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
-        .select("*, user_preferences(*)")
+        .select("*")
         .eq("id", user.id)
         .single();
 
@@ -58,9 +59,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (profileData) {
-        const preferences = Array.isArray(profileData.user_preferences) ? profileData.user_preferences[0] : profileData.user_preferences;
+        // Step 2: Fetch user preferences separately
+        const { data: preferencesData, error: preferencesError } = await supabase
+          .from('user_preferences')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        // It's okay if preferences don't exist, so we only throw for other errors
+        if (preferencesError && preferencesError.code !== 'PGRST116') {
+          throw preferencesError;
+        }
+        
+        // Step 3: Combine the data
         // @ts-ignore
-        profileData.user_preferences = preferences || null;
+        profileData.user_preferences = preferencesData || null;
         setProfile(profileData);
       }
     } catch (e: any) {
