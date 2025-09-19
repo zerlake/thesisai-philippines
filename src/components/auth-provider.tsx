@@ -112,23 +112,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const publicPaths = ["/", "/login", "/register", "/explore", "/features", "/for-advisors", "/pricing", "/faq", "/university-guides", "/user-guide", "/atr-style-guide"];
     const isPublicPage = publicPaths.some(p => pathname.startsWith(p)) || pathname.startsWith("/share/");
-    const isAdminPage = pathname.startsWith("/admin");
-    const isAdvisorPage = pathname.startsWith("/advisor");
-    const isAppPage = !isPublicPage && !isAdminPage && !isAdvisorPage;
 
     if (authStatus === 'unauthenticated' && !isPublicPage) {
       router.push("/login");
     } else if (authStatus === 'authenticated' && profile) {
+      const roleHomePages: { [key: string]: string } = {
+        admin: '/admin',
+        advisor: '/advisor',
+        critic: '/critic',
+        user: '/dashboard'
+      };
+      const userHomePage = roleHomePages[profile.role] || '/dashboard';
+
+      // 1. Redirect from public-only pages if logged in
       if (pathname === "/login" || pathname === "/register" || pathname === "/") {
-        if (profile.role === "admin") router.push("/admin");
-        else if (profile.role === "advisor") router.push("/advisor");
-        else router.push("/dashboard");
-      } else if (isAdminPage && profile.role !== "admin") {
-        router.push("/dashboard");
-      } else if (isAdvisorPage && profile.role !== "advisor") {
-        router.push("/dashboard");
-      } else if (isAppPage && (profile.role === "admin" || profile.role === "advisor")) {
-        router.push(profile.role === "admin" ? "/admin" : "/advisor");
+        router.push(userHomePage);
+      }
+      // 2. Role-based page protection
+      else if (pathname.startsWith("/admin") && profile.role !== "admin") {
+        router.push(userHomePage);
+      } else if (pathname.startsWith("/advisor") && profile.role !== "advisor") {
+        router.push(userHomePage);
+      } else if (pathname.startsWith("/critic") && profile.role !== "critic") {
+        router.push(userHomePage);
+      }
+      // 3. Prevent non-students from accessing the student dashboard
+      else if (pathname.startsWith("/dashboard") && profile.role !== "user") {
+        router.push(userHomePage);
       }
     }
   }, [isLoading, session, profile, pathname, router]);
