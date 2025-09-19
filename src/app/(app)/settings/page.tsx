@@ -9,61 +9,72 @@ import { NotificationSettings } from "@/components/notification-settings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CriticManagement } from "@/components/critic-management";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 
 function SettingsPageContent() {
   const { profile } = useAuth();
   const searchParams = useSearchParams();
   const isStudent = profile?.role === 'user';
   const defaultTab = searchParams.get('tab') || 'profile';
+  const [activeTab, setActiveTab] = useState(defaultTab);
 
-  const numTabs = isStudent ? 3 : 1;
+  useEffect(() => {
+    setActiveTab(defaultTab);
+  }, [defaultTab]);
+
+  const profileContent = (
+    <div className="space-y-8">
+      <div className="relative mt-8">
+        <div className="h-32 bg-muted rounded-t-lg"></div>
+        <Card className="pt-12">
+          <CardHeader>
+            <CardTitle>Profile Settings</CardTitle>
+            <CardDescription>Update your personal information.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SettingsForm />
+          </CardContent>
+        </Card>
+      </div>
+      <NotificationSettings />
+      {isStudent && <DashboardCustomization />}
+    </div>
+  );
+
+  if (!isStudent) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-8">
+        {profileContent}
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      <Tabs defaultValue={defaultTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex justify-center">
-          <TabsList className={`grid w-full max-w-md grid-cols-${numTabs}`}>
+          <TabsList className="grid w-full max-w-md grid-cols-3">
             <TabsTrigger value="profile">Profile</TabsTrigger>
-            {isStudent && <TabsTrigger value="advisor">Manage Advisor</TabsTrigger>}
-            {isStudent && <TabsTrigger value="critic">Manage Critic</TabsTrigger>}
+            <TabsTrigger value="advisor">Manage Advisor</TabsTrigger>
+            <TabsTrigger value="critic">Manage Critic</TabsTrigger>
           </TabsList>
         </div>
 
         <TabsContent value="profile">
-          <div className="space-y-8">
-            <div className="relative mt-8">
-              <div className="h-32 bg-muted rounded-t-lg"></div>
-              <Card className="pt-12">
-                <CardHeader>
-                  <CardTitle>Profile Settings</CardTitle>
-                  <CardDescription>Update your personal information.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <SettingsForm />
-                </CardContent>
-              </Card>
-            </div>
-            <NotificationSettings />
-            {isStudent && <DashboardCustomization />}
+          {profileContent}
+        </TabsContent>
+
+        <TabsContent value="advisor">
+          <div className="mt-8">
+            <AdvisorManagement />
           </div>
         </TabsContent>
 
-        {isStudent && (
-          <TabsContent value="advisor">
-            <div className="mt-8">
-              <AdvisorManagement />
-            </div>
-          </TabsContent>
-        )}
-
-        {isStudent && (
-          <TabsContent value="critic">
-            <div className="mt-8">
-              <CriticManagement />
-            </div>
-          </TabsContent>
-        )}
+        <TabsContent value="critic">
+          <div className="mt-8">
+            <CriticManagement />
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );
