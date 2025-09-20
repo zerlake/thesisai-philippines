@@ -170,6 +170,8 @@ export function BillingManagement() {
             <CardFooter>
               {currentPlan === plan.planId ? (
                 <Button disabled className="w-full">Current Plan</Button>
+              ) : plan.planId === 'free' ? (
+                <Button disabled variant="outline" className="w-full">Available</Button>
               ) : (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
