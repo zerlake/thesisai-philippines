@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+Allow: /features
+Allow: /for-advisors
+Allow: /pricing
+Allow: /faq
+Allow: /university-guides
+Allow: /referrals
+Allow: /user-guide
+
+# Disallow admin and user-specific pages
+Disallow: /admin
+Disallow: /settings
+Disallow: /drafts
+Disallow: /share
+
+# Crawl-delay: 10
+
+Sitemap: https://thesisai-philippines.vercel.app/sitemap.xml
+
+# Host: https://thesisai-philippines.vercel.app

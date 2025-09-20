@@ -21,8 +21,60 @@ const fontSerif = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "ThesisAI Philippines",
-  description: "Your AI-Powered Academic Co-Pilot.",
+  title: "ThesisAI Philippines - AI-Powered Academic Writing Assistant",
+  description: "Streamline your thesis writing process with our AI-powered platform. Generate outlines, check originality, format citations, and connect with advisors—all in one workspace designed for Philippine universities.",
+  keywords: [
+    "AI thesis writer",
+    "Philippine manuscript review",
+    "academic citation checker",
+    "thesis writing tool Philippines",
+    "AI research assistant",
+    "online thesis help",
+    "manuscript editing service",
+    "academic writing software",
+    "student research tools"
+  ],
+  authors: [{ name: "ThesisAI Philippines", url: "https://thesisai-philippines.vercel.app" }],
+  creator: "ThesisAI Philippines",
+  publisher: "ThesisAI Philippines",
+  openGraph: {
+    title: "ThesisAI Philippines - AI-Powered Academic Writing Assistant",
+    description: "Streamline your thesis writing process with our AI-powered platform. Generate outlines, check originality, format citations, and connect with advisors—all in one workspace designed for Philippine universities.",
+    url: "https://thesisai-philippines.vercel.app",
+    siteName: "ThesisAI Philippines",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "ThesisAI Philippines - AI-Powered Academic Writing Assistant",
+      },
+    ],
+    locale: "en_PH",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ThesisAI Philippines - AI-Powered Academic Writing Assistant",
+    description: "Streamline your thesis writing process with our AI-powered platform. Generate outlines, check originality, format citations, and connect with advisors—all in one workspace.",
+    images: ["/twitter-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: false,
+      noimageindex: false,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    }
+  },
+  alternates: {
+    canonical: "https://thesisai-philippines.vercel.app",
+  },
 };
 
 export default function RootLayout({
