@@ -25,12 +25,7 @@ export function HeroSection() {
           <p className="mt-6 text-lg text-slate-300">
             ThesisAI is your academic co-pilot, designed to streamline your research journey. Generate outlines, find sources, check for originality, and format citations—all in one intelligent workspace.
           </p>
-          <p className="mt-4 text-sm text-slate-300">
-            <strong>Earn while you learn!</strong> Invite classmates using your referral code and earn credits towards your subscription.
-          </p>
-          <div
-            className="mt-10 flex flex-wrap justify-center gap-4"
-          >
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Button size="lg" asChild>
               <Link href="/register">
                 Get Started for Free <ArrowRightIcon className="ml-2 h-5 w-5" />
@@ -42,6 +37,9 @@ export function HeroSection() {
               </Link>
             </Button>
           </div>
+          <p className="mt-4 text-sm text-slate-300">
+            <strong>Earn while you learn!</strong> Invite classmates using your referral code and earn credits towards your subscription.
+          </p>
         </motion.div>
       </div>
     </section>
