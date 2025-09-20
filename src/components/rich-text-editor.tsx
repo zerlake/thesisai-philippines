@@ -4,7 +4,7 @@ import { EditorContent, type Editor, BubbleMenu } from "@tiptap/react";
 import { EditorToolbar } from "./editor-toolbar";
 import { useState } from "react";
 import { Button } from "./ui/button";
-import { Wand2, TextQuote, Languages } from "lucide-react";
+import { Wand2, TextQuote, Languages, SpellCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "./auth-provider";
 import {
@@ -30,7 +30,10 @@ export function RichTextEditor({ editor }: RichTextEditorProps) {
     const { from, to } = editor.state.selection;
     const originalText = editor.state.doc.textBetween(from, to);
 
-    if (!originalText) return;
+    if (!originalText) {
+      toast.info("Please select some text to improve.");
+      return;
+    }
 
     setIsImproving(true);
     try {
@@ -67,7 +70,10 @@ export function RichTextEditor({ editor }: RichTextEditorProps) {
     const { from, to } = editor.state.selection;
     const originalText = editor.state.doc.textBetween(from, to);
 
-    if (!originalText) return;
+    if (!originalText) {
+      toast.info("Please select some text to summarize.");
+      return;
+    }
 
     setIsSummarizing(true);
     try {
@@ -104,7 +110,10 @@ export function RichTextEditor({ editor }: RichTextEditorProps) {
     const { from, to } = editor.state.selection;
     const originalText = editor.state.doc.textBetween(from, to);
 
-    if (!originalText) return;
+    if (!originalText) {
+      toast.info("Please select some text to rewrite.");
+      return;
+    }
 
     setIsRewriting(true);
     try {
@@ -149,8 +158,8 @@ export function RichTextEditor({ editor }: RichTextEditorProps) {
               disabled={isProcessing}
               variant="ghost"
             >
-              <Wand2 className="w-4 h-4 mr-2" />
-              {isImproving ? "Improving..." : "Improve"}
+              <SpellCheck className="w-4 h-4 mr-2" />
+              {isImproving ? "Fixing..." : "Fix Grammar"}
             </Button>
             <Button
               size="sm"
