@@ -65,6 +65,7 @@ export const studentNavGroups: NavGroup[] = [
       { icon: FlaskConical, label: "Research", href: "/research" },
       { icon: ClipboardPen, label: "Methodology", href: "/methodology" },
       { icon: ClipboardCheck, label: "Results", href: "/results" },
+      { icon: BarChart, label: "Statistical Analysis", href: "/statistical-analysis" },
       { icon: BookCheck, label: "Conclusion", href: "/conclusion" },
     ],
   },

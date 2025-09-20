@@ -2,10 +2,11 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { supabase } from "../integrations/supabase/client";
-import { Session, SupabaseClient, AuthChangeEvent, User } from "@supabase/supabase-js";
+import { Session, SupabaseClient, User } from "@supabase/supabase-js";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { BrandedLoader } from "./branded-loader";
+import { isPublicPage } from "@/lib/public-paths";
 
 type Profile = {
   id: string;
@@ -73,6 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Step 3: Combine the data
         // @ts-ignore
+        // @ts-ignore
         profileData.user_preferences = preferencesData || null;
         setProfile(profileData);
       }
@@ -109,11 +111,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isLoading) return;
 
     const authStatus = session && profile ? 'authenticated' : 'unauthenticated';
+    const isPublic = isPublicPage(pathname);
 
-    const publicPaths = ["/", "/login", "/register", "/explore", "/features", "/for-advisors", "/pricing", "/faq", "/university-guides", "/user-guide", "/atr-style-guide"];
-    const isPublicPage = publicPaths.some(p => pathname.startsWith(p)) || pathname.startsWith("/share/");
-
-    if (authStatus === 'unauthenticated' && !isPublicPage) {
+    if (authStatus === 'unauthenticated' && !isPublic) {
       router.push("/login");
     } else if (authStatus === 'authenticated' && profile) {
       const roleHomePages: { [key: string]: string } = {
@@ -149,10 +149,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [session, fetchProfile]);
 
-  const publicPaths = ["/", "/login", "/register", "/explore", "/features", "/for-advisors", "/pricing", "/faq", "/university-guides", "/user-guide", "/atr-style-guide"];
-  const isPublicPage = publicPaths.some(p => pathname.startsWith(p)) || pathname.startsWith("/share/");
-
-  if (isLoading && !isPublicPage) {
+  if (isLoading && !isPublicPage(pathname)) {
     return <BrandedLoader />;
   }
 

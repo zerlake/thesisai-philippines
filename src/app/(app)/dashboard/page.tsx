@@ -1,3 +1,5 @@
+"use client";
+
 import { useAuth } from "@/components/auth-provider";
 import { AdvisorDashboard } from "@/components/advisor-dashboard";
 import { AdminDashboard } from "@/components/admin-dashboard";

@@ -3,27 +3,12 @@
 import { usePathname } from "next/navigation";
 import { LandingHeader } from "@/components/landing-header";
 import { LandingFooter } from "@/components/landing-footer";
-
-const publicPaths = [
-  "/",
-  "/login",
-  "/register",
-  "/explore",
-  "/features",
-  "/for-advisors",
-  "/for-critics",
-  "/pricing",
-  "/faq",
-  "/university-guides",
-  "/user-guide",
-  "/atr-style-guide",
-];
+import { isPublicPage } from "@/lib/public-paths";
 
 export function RootLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isPublicPage = publicPaths.some(p => pathname === p || (p !== '/' && pathname.startsWith(p))) || pathname.startsWith("/share/");
-
-  if (isPublicPage) {
+  
+  if (isPublicPage(pathname)) {
     return (
       <div className="flex min-h-dvh flex-col">
         <LandingHeader />
