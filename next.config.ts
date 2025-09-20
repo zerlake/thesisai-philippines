@@ -16,21 +16,13 @@ const nextConfig: NextConfig = {
       // Increase chunk load timeout to 30 seconds
       config.output.chunkLoadTimeout = 30000; 
       
-      // Disable chunk splitting for layout to prevent it from being an isolated chunk
+      // Adjust chunk splitting for development to prevent app/layout.js from being an isolated chunk.
+      // By setting default and vendors to false, and removing the explicit 'layout' cache group,
+      // app/layout.tsx should be bundled with the main entry point.
       if (config.optimization && config.optimization.splitChunks) {
         config.optimization.splitChunks.cacheGroups = {
-          ...config.optimization.splitChunks.cacheGroups,
-          layout: {
-            name: 'app_layout',
-            test: /[\\/]src[\\/]app[\\/]layout\.tsx/, // Adjust regex if your layout file path differs
-            chunks: 'all',
-            enforce: true,
-            priority: 100,
-            reuseExistingChunk: true,
-            minSize: 0, // Allow even small chunks
-            maxSize: 5000000, // Large enough to include everything
-          },
-          default: false, // Disable default splitting to ensure layout is handled
+          // Removed the 'layout' cache group that was explicitly creating app/layout.js chunk
+          default: false, // Disable default splitting
           vendors: false, // Disable vendors splitting
         };
       }
