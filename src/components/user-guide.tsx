@@ -22,6 +22,10 @@ import {
   ShieldCheck,
   Sparkles,
   UserCheck,
+  Heart,
+  Trophy,
+  Brain,
+  Languages,
 } from "lucide-react";
 
 const guideSections = [
@@ -79,6 +83,18 @@ const guideSections = [
       {
         heading: "Originality Checker",
         text: "Paste your text to check for potential plagiarism against billions of web pages. The checker highlights potential matches and even allows you to generate a citation for the source on the spot.",
+      },
+      {
+        heading: "New: Topic Ideation Tool",
+        text: "Generate research topics with AI assistance. Our tool suggests feasible, trending topics based on your field of study and checks their originality against existing work to ensure your research is unique.",
+      },
+      {
+        heading: "New: Wellbeing Check-in",
+        text: "Monitor your mental health during your thesis journey. The wellbeing widget allows you to check in daily and track your emotional state throughout your research process.",
+      },
+      {
+        heading: "New: Progress Milestones",
+        text: "Track your progress through key academic milestones. This visual tracker helps you see how far you've come and what's next in your research journey.",
       },
     ],
   },

@@ -49,6 +49,8 @@ import { thesisMilestones } from "../lib/milestones";
 import { ContextualActions } from "./contextual-actions";
 import { WritingStreakCard } from "./writing-streak-card";
 import { UpgradePromptCard } from "./upgrade-prompt-card";
+import { WellbeingWidget } from "./student-dashboard-enhancements";
+import { ProgressMilestones } from "./student-dashboard-enhancements";
 
 const quickAccessItems = [
   {
@@ -138,6 +140,8 @@ const defaultWidgets = {
   writing_streak: true,
   milestones: true,
   quick_access: true,
+  wellbeing: true,
+  progress_milestones: true,
 };
 
 export function StudentDashboard() {
@@ -323,7 +327,10 @@ export function StudentDashboard() {
           </div>
         </div>
       )}
-      
+
+      {widgets.progress_milestones && <ProgressMilestones />}
+      {widgets.wellbeing && <WellbeingWidget />}
+
       <div className="grid gap-6 md:grid-cols-2">
         <UserGuideCard />
         <TestimonialSubmissionCard />
