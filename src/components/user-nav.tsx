@@ -18,49 +18,26 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { LogOut, User as UserIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import type { User } from "@supabase/supabase-js";
-
-type Profile = {
-  first_name: string | null;
-  last_name: string | null;
-  avatar_url: string | null;
-};
+import { useAuth } from "./auth-provider"; // Import useAuth
 
 export function UserNav() {
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const { session, profile } = useAuth(); // Use session and profile from AuthContext
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      if (data.user) {
-        setUser(data.user);
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('first_name, last_name, avatar_url')
-          .eq('id', data.user.id)
-          .single();
-        if (profileData) {
-          setProfile(profileData);
-        }
-      }
-    };
-    fetchUser();
-  }, []);
+  // If no session user or profile, don't render the UserNav
+  if (!session?.user || !profile) {
+    return null;
+  }
+
+  const user = session.user; // Use user from session
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/");
   };
 
-  if (!user) {
-    return null;
-  }
-
   const getInitials = () => {
-    if (!profile) return "?";
+    if (!profile) return "?"; // Should not happen with the above check, but for safety
     const firstNameInitial = profile.first_name ? profile.first_name[0] : "";
     const lastNameInitial = profile.last_name ? profile.last_name[0] : "";
     return `${firstNameInitial}${lastNameInitial}`.toUpperCase();
