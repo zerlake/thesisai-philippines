@@ -7,7 +7,8 @@ export function ChunkLoadErrorHandler() {
         if (error && typeof error.message === 'string') {
           const isChunkLoadError = 
             error.message.includes('Loading chunk') ||
-            error.message.includes('Failed to fetch dynamically imported module');
+            error.message.includes('Failed to fetch dynamically imported module') ||
+            error.message.includes('ChunkLoadError');
 
           if (isChunkLoadError) {
             const lastReloadTime = sessionStorage.getItem(CHUNK_ERROR_RELOAD_KEY);
