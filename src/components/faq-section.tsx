@@ -29,6 +29,22 @@ const faqs = [
     question: "Is my research data secure and private?",
     answer: "Absolutely. We prioritize your privacy and data security. Your documents are encrypted and stored securely. We will never share your research or personal information with third parties.",
   },
+  {
+    question: "I'm struggling to find a good research topic. Can you help?",
+    answer: "Yes! Use our Topic Idea Generator to get three unique and researchable thesis topics based on your field of study. While we can't show what has already been studied at your institution (due to privacy), our AI generates suggestions that balance feasibility with originality within the Philippine academic context.",
+  },
+  {
+    question: "How can I reduce feelings of isolation during my research?",
+    answer: "We understand how challenging research can be when done alone. While we don't have direct peer matching yet, our Resources section includes productivity tips like the Pomodoro Technique and setting realistic daily goals to help manage workload. We're also exploring ways to create safe, moderated communities where students can share experiences without compromising academic integrity.",
+  },
+  {
+    question: "Can ThesisAI help prevent burnout?",
+    answer: "While we can't replace mental health professionals, our platform helps reduce stress by streamlining the research process. Features like the Session Goal Card encourage manageable daily tasks rather than overwhelming word count targets. The Thesis Checklist breaks down the entire project into smaller steps, helping you track progress and maintain momentum. For serious concerns, we recommend seeking support from your institution's counseling services.",
+  },
+  {
+    question: "Why should I trust your citation manager?",
+    answer: "Our citation tools are designed to minimize errors by providing clear examples and templates. However, we emphasize that you should always verify citations against your university's official style guide. No automated tool can catch every nuance, so we encourage using our Citation Manager as a starting point followed by careful manual verification.",
+  }
 ];
 
 export function FaqSection() {

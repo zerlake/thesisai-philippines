@@ -7,6 +7,7 @@ import { Button } from "./ui/button";
 import { Check, Edit, Target } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
+import { toast } from "sonner";
 
 const LOCAL_STORAGE_KEY = "thesis-session-goal";
 
@@ -35,11 +36,20 @@ export function SessionGoalCard() {
   const handleSetGoal = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editText.trim()) return;
+    
+    // Validate goal length - keep it realistic
+    const wordCount = editText.trim().split(/\s+/).length;
+    if (wordCount > 10) {
+      toast.warning("Please make your goal more specific and concise.");
+      return;
+    }
+    
     const newGoal = { text: editText, isCompleted: false };
     setGoal(newGoal);
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newGoal));
     setIsEditing(false);
     setEditText("");
+    toast.success("Session goal set!");
   };
 
   const handleToggleCompletion = (isCompleted: boolean) => {
@@ -67,7 +77,7 @@ export function SessionGoalCard() {
         {!goal || isEditing ? (
           <form onSubmit={handleSetGoal} className="flex items-center gap-2 pt-2">
             <Input
-              placeholder="e.g., Write 500 words..."
+              placeholder="e.g., Write 300 words..."
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
             />

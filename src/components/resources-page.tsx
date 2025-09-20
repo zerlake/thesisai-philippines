@@ -130,6 +130,10 @@ const studentWellbeingTips = [
     {
         title: "Schedule 'No-Thesis' Time",
         content: "Actively schedule time where you are not allowed to think about your thesis. Engage in hobbies, exercise, or spend time with friends and family to recharge your mind."
+    },
+    {
+        title: "Combat Impostor Syndrome",
+        content: "Remember that feeling inadequate doesn't mean you are. Every researcher faces challenges. Focus on your progress, not perfection. Talk to peers—you'll likely discover they feel the same way."
     }
 ];
 
