@@ -33,68 +33,41 @@ serve(async (req: Request) => {
     return new Response(null, { headers: corsHeaders })
   }
 
-  console.log('ensure-demo-user: Function invoked.');
-
   try {
-    const { email, password, firstName, lastName, role } = await req.json() as RequestBody;
-    console.log('ensure-demo-user: Received request for email:', email, 'role:', role);
-
-    if (!email || !password || !firstName || !lastName || !role) {
-      console.error('ensure-demo-user: Missing required fields');
-      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     const supabaseAdmin = createClient(
       // @ts-ignore
       Deno.env.get('SUPABASE_URL') ?? '',
       // @ts-ignore
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    )
+
+    const { email, password, firstName, lastName, role } = await req.json() as RequestBody;
 
     // 1. Delete existing user to ensure a clean state
-    console.log('ensure-demo-user: Listing users to check for existing user...');
     const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-    if (listError) {
-      console.error('ensure-demo-user: Error listing users:', listError);
-      throw listError;
-    }
+    if (listError) throw listError;
+
     const existingUser = users.find((u: { email?: string }) => u.email === email);
     if (existingUser) {
-      console.log('ensure-demo-user: Deleting existing user:', existingUser.id);
-      await supabaseAdmin.auth.admin.deleteUser(existingUser.id, true); // true to hard-delete
-      console.log('ensure-demo-user: Existing user deleted.');
-    } else {
-      console.log('ensure-demo-user: No existing user found.');
+      await supabaseAdmin.auth.admin.deleteUser(existingUser.id, true); // hard-delete
     }
 
     // 2. Create new auth user
-    console.log('ensure-demo-user: Creating new auth user...');
     const { data: { user: newUser }, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
     });
-    if (createError) {
-      console.error('ensure-demo-user: Error creating user:', createError);
-      throw createError;
-    }
-    if (!newUser) {
-      console.error('ensure-demo-user: User creation did not return a user object.');
-      throw new Error("User creation did not return a user object.");
-    }
-    console.log('ensure-demo-user: New user created:', newUser.id);
+    if (createError) throw createError;
+    if (!newUser) throw new Error("User creation did not return a user object.");
 
-    // 3. Upsert the profile to avoid race condition with the trigger
-    console.log('ensure-demo-user: Upserting profile for new user...');
+    // 3. Upsert the profile
     const profileData = {
       id: newUser.id,
       first_name: firstName,
       last_name: lastName,
       role: role,
-      plan: 'pro_plus_advisor', // Assign the top-tier plan to all demo users
+      plan: 'pro_complete', // Assign top-tier plan
       free_student_slots: role === 'advisor' ? 2 : 0,
     };
 
@@ -102,33 +75,21 @@ serve(async (req: Request) => {
       .from('profiles')
       .upsert(profileData, { onConflict: 'id' });
 
-    if (profileError) {
-      console.error('ensure-demo-user: Error upserting profile:', profileError);
-      // Clean up the created auth user if profile creation fails
-      await supabaseAdmin.auth.admin.deleteUser(newUser.id, true);
-      throw profileError;
-    }
-    console.log('ensure-demo-user: Profile upserted successfully.');
+    if (profileError) throw profileError;
 
     return new Response(JSON.stringify({ message: "Demo user ensured successfully" }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
-    });
+    })
 
   } catch (error) {
-    console.error("ensure-demo-user: Full error in ensure-demo-user:", error);
+    console.error("Error in ensure-demo-user function:", error)
     
     let message = "An unknown error occurred.";
     if (error instanceof Error) {
       message = error.message;
     } else if (typeof error === 'object' && error !== null) {
-      if ('message' in error) {
-        message = String((error as { message: unknown }).message);
-      } else {
-        message = `Non-standard error object: ${JSON.stringify(error)}`;
-      }
-    } else {
-      message = `Unexpected error type: ${String(error)}`;
+      message = String((error as { message: unknown }).message || JSON.stringify(error));
     }
 
     return new Response(JSON.stringify({ error: message }), {
