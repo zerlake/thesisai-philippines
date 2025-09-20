@@ -26,7 +26,7 @@ serve(async (req: Request) => {
     return new Response(null, { headers: corsHeaders })
   }
 
-  console.log('ensure-demo-user: Function invoked.'); // Added for debugging
+  console.log('ensure-demo-user: Function invoked.');
 
   try {
     const { email, password, firstName, lastName, role } = await req.json();
