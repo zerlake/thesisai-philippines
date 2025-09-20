@@ -4,11 +4,25 @@ import { usePathname } from "next/navigation";
 import { LandingHeader } from "@/components/landing-header";
 import { LandingFooter } from "@/components/landing-footer";
 import { isPublicPage } from "@/lib/public-paths";
+import { MainLayoutWrapper } from "@/components/main-layout-wrapper"; // Ensure this is imported
 
 export function RootLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  
-  // Temporarily removing conditional rendering to diagnose ChunkLoadError
-  // This will force all pages to load the main app layout structure.
-  return <>{children}</>;
+  const publicPage = isPublicPage(pathname);
+
+  if (publicPage) {
+    return (
+      <>
+        <LandingHeader />
+        {children}
+        <LandingFooter />
+      </>
+    );
+  }
+
+  return (
+    <MainLayoutWrapper>
+      {children}
+    </MainLayoutWrapper>
+  );
 }
