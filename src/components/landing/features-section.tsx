@@ -23,7 +23,7 @@ const features = [
   {
     icon: <FlaskConical className="h-8 w-8" />,
     title: "Methodology & Data Tools",
-    description: "Design your study with interactive advisors for research methods, sampling, and statistical tests. Generate charts and interpret results with ease.",
+    description: "Design your study with interactive advisors for research methods, sampling, and statistical tests. Upload data to run analyses, generate charts, and interpret results with ease.",
   },
   {
     icon: <BookCopy className="h-8 w-8" />,
