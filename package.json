@@ -103,6 +103,11 @@
   "pnpm": {
     "overrides": {
       "react-remove-scroll": "2.7.1"
-    }
+    },
+    "ignoredBuiltDependencies": [
+      "@sentry/cli",
+      "core-js",
+      "sharp"
+    ]
   }
 }

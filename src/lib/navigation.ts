@@ -53,7 +53,6 @@ export const studentNavGroups: NavGroup[] = [
     items: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
       { icon: FileText, label: "Drafts", href: "/drafts" },
-      { icon: FolderLock, label: "Data Management", href: "/data-management" },
     ],
   },
   {
@@ -79,6 +78,12 @@ export const studentNavGroups: NavGroup[] = [
       { icon: Baseline, label: "Grammar Check", href: "/grammar-check" },
       { icon: ShieldCheck, label: "Originality Check", href: "/originality-check" },
       { icon: FileText, label: "Title Page", href: "/title-page" },
+    ],
+  },
+  {
+    title: "Data & Analytics",
+    items: [
+      { icon: FolderLock, label: "Data Management", href: "/data-management" },
     ],
   },
   {
@@ -108,8 +113,18 @@ export const advisorNavGroups: NavGroup[] = [
     items: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/advisor" },
       { icon: FileText, label: "Drafts", href: "/drafts" },
-      { icon: FolderLock, label: "Data Management", href: "/data-management" },
       { icon: CheckSquare, label: "Competency Self-Assessment", href: "/advisor/competency" },
+    ],
+  },
+  {
+    title: "Student Management",
+    items: [
+      { icon: FolderLock, label: "Data Management", href: "/data-management" },
+    ],
+  },
+  {
+    title: "Resources",
+    items: [
       { icon: BookOpen, label: "Resources", href: "/resources" },
       { icon: University, label: "University Guides", href: "/university-guides" },
       { icon: BookUser, label: "Advisor Guide", href: "/advisor-guide" },
