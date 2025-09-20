@@ -200,6 +200,9 @@ importers:
       jspdf:
         specifier: ^2.5.1
         version: 2.5.2
+      jstat:
+        specifier: ^1.9.6
+        version: 1.9.6
       lucide-react:
         specifier: ^0.511.0
         version: 0.511.0(react@19.1.0)
@@ -2762,6 +2765,9 @@ packages:
 
   jspdf@2.5.2:
     resolution: {integrity: sha512-myeX9c+p7znDWPk0eTrujCzNjT+CXdXyk7YmJq5nD5V7uLLKmSXnlQ/Jn/kuo3X09Op70Apm0rQSnFWyGK8uEQ==}
+
+  jstat@1.9.6:
+    resolution: {integrity: sha512-rPBkJbK2TnA8pzs93QcDDPlKcrtZWuuCo2dVR0TFLOJSxhqfWOVCSp8aV3/oSbn+4uY4yw1URtLpHQedtmXfug==}
 
   jszip@2.7.0:
     resolution: {integrity: sha512-JIsRKRVC3gTRo2vM4Wy9WBC3TRcfnIZU8k65Phi3izkvPH975FowRYtKGT6PxevA0XnJ/yO8b0QwV0ydVyQwfw==}
@@ -6303,6 +6309,8 @@ snapshots:
       core-js: 3.45.1
       dompurify: 2.5.8
       html2canvas: 1.4.1
+
+  jstat@1.9.6: {}
 
   jszip@2.7.0:
     dependencies:

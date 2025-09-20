@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Loader2, Play, Info } from "lucide-react";
 import { toast } from "sonner";
 import { Label } from "./ui/label";
+import { useAuth } from "./auth-provider";
 
 interface StatisticalAnalysisPanelProps {
   uploadedData: Record<string, any>[];
@@ -33,6 +34,7 @@ const availableTests = [
 ];
 
 export function StatisticalAnalysisPanel({ uploadedData, columns, setAnalysisResults, analysisResults }: StatisticalAnalysisPanelProps) {
+  const { session, supabase } = useAuth();
   const [selectedIV, setSelectedIV] = useState<string | null>(null);
   const [selectedDV, setSelectedDV] = useState<string | null>(null);
   const [selectedTest, setSelectedTest] = useState<string | null>(null);
@@ -52,65 +54,36 @@ export function StatisticalAnalysisPanel({ uploadedData, columns, setAnalysisRes
       toast.error("Please select variables and a test, and ensure data is uploaded.");
       return;
     }
+    if (!session) {
+      toast.error("You must be logged in to run an analysis.");
+      return;
+    }
 
     setIsLoadingAnalysis(true);
     setAnalysisResults(null);
 
-    // Simulate API call or complex calculation
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const { data, error: functionError } = await supabase.functions.invoke('run-statistical-analysis', {
+        body: {
+          data: uploadedData,
+          iv: selectedIV,
+          dv: selectedDV,
+          testType: selectedTest,
+        }
+      });
 
-    // Dummy results based on selected test
-    let result: AnalysisResult;
-    switch (selectedTest) {
-      case "independent-t-test":
-        result = {
-          test: "Independent Samples T-test",
-          statistic: "t(48) = 2.34",
-          p_value: 0.021,
-          interpretation: "An independent samples t-test revealed a statistically significant difference in [Dependent Variable] between [Group 1] and [Group 2]",
-          details: {
-            group1_mean: 15.2,
-            group2_mean: 12.8,
-            effect_size: "Cohen's d = 0.65 (medium)",
-          },
-        };
-        break;
-      case "pearson-correlation":
-        result = {
-          test: "Pearson Correlation",
-          statistic: "r(48) = 0.54",
-          p_value: 0.001,
-          interpretation: "A Pearson product-moment correlation indicated a strong positive relationship between [Variable 1] and [Variable 2]",
-          details: {
-            correlation_coefficient: 0.54,
-            r_squared: 0.29,
-          },
-        };
-        break;
-      case "chi-square":
-        result = {
-          test: "Chi-Square Test",
-          statistic: "χ²(1) = 9.21",
-          p_value: 0.002,
-          interpretation: "A Chi-Square test for independence showed a significant association between [Categorical Variable 1] and [Categorical Variable 2]",
-          details: {
-            observed_counts: { "Yes/Yes": 20, "Yes/No": 5, "No/Yes": 8, "No/No": 17 },
-          },
-        };
-        break;
-      default:
-        result = {
-          test: "Unknown Test",
-          statistic: "N/A",
-          p_value: 0.999,
-          interpretation: "No specific interpretation available for this test.",
-          details: {},
-        };
+      if (functionError) throw new Error(functionError.message);
+      if (data.error) throw new Error(data.error);
+
+      setAnalysisResults(data);
+      toast.success("Analysis complete!");
+
+    } catch (err: any) {
+      toast.error(err.message || "Failed to run analysis.");
+      console.error(err);
+    } finally {
+      setIsLoadingAnalysis(false);
     }
-
-    setAnalysisResults(result);
-    setIsLoadingAnalysis(false);
-    toast.success("Analysis complete!");
   };
 
   return (
@@ -190,7 +163,7 @@ export function StatisticalAnalysisPanel({ uploadedData, columns, setAnalysisRes
                 <Alert>
                   <AlertTitle>Key Findings</AlertTitle>
                   <AlertDescription>
-                    <p className="font-medium">{analysisResults.interpretation.replace(/\[Dependent Variable\]/g, selectedDV || 'Dependent Variable').replace(/\[Group 1\]/g, `${selectedIV} Group 1`).replace(/\[Group 2\]/g, `${selectedIV} Group 2`).replace(/\[Variable 1\]/g, selectedIV || 'Variable 1').replace(/\[Variable 2\]/g, selectedDV || 'Variable 2').replace(/\[Categorical Variable 1\]/g, selectedIV || 'Categorical Variable 1').replace(/\[Categorical Variable 2\]/g, selectedDV || 'Categorical Variable 2')}</p>
+                    <p className="font-medium">{analysisResults.interpretation}</p>
                     <p className="mt-2"><strong>Statistic:</strong> {analysisResults.statistic}</p>
                     <p><strong>p-value:</strong> {analysisResults.p_value.toFixed(3)}</p>
                     {Object.entries(analysisResults.details).map(([key, value]) => (
