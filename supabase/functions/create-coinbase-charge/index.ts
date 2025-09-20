@@ -11,6 +11,7 @@ const corsHeaders = {
 const PLAN_PRICES: { [key: string]: number } = {
   pro: 499.00,
   pro_plus_advisor: 799.00,
+  pro_complete: 999.00, // Added Pro Complete plan
 };
 
 serve(async (req: Request) => {

@@ -3,7 +3,7 @@
 import { useAuth } from "@/components/auth-provider";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Sparkles, UserCheck, PiggyBank, Loader2 } from "lucide-react";
+import { Check, Sparkles, UserCheck, PiggyBank, Loader2, FileSignature } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
@@ -42,6 +42,9 @@ const plans = [
       "Unlimited Originality Checks",
       "Priority Support",
     ],
+    buttonText: "Go Pro",
+    href: "/register",
+    highlight: true,
     planId: 'pro',
   },
   {
@@ -54,7 +57,26 @@ const plans = [
       "Share documents for feedback",
       "Track milestones with your advisor",
     ],
+    buttonText: "Upgrade Now",
+    href: "/register",
+    highlight: false,
     planId: 'pro_plus_advisor',
+  },
+  {
+    name: "Pro Complete",
+    price: "₱999",
+    description: "Everything in Pro + Advisor, plus manuscript critic services for final review.",
+    features: [
+      "All features from Pro + Advisor",
+      "Connect with a Manuscript Critic",
+      "Get certified by an expert reviewer",
+      "Receive professional editing feedback",
+      "Export certificate of editing"
+    ],
+    buttonText: "Get Complete",
+    href: "/register",
+    highlight: false,
+    planId: 'pro_complete',
   },
 ];
 
@@ -128,7 +150,7 @@ export function BillingManagement() {
         </Alert>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid lg:grid-cols-4 gap-6">
         {plans.map((plan) => (
           <Card key={plan.name} className={cn("flex flex-col", currentPlan === plan.planId && "border-primary")}>
             <CardHeader>
@@ -152,7 +174,7 @@ export function BillingManagement() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button className="w-full" disabled={!!isUpgrading}>
-                      {isUpgrading === plan.planId ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : (plan.planId === 'pro_plus_advisor' ? <UserCheck className="w-4 h-4 mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />)}
+                      {isUpgrading === plan.planId ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : (plan.planId === 'pro_plus_advisor' ? <UserCheck className="w-4 h-4 mr-2" /> : plan.planId === 'pro_complete' ? <FileSignature className="w-4 h-4 mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />)}
                       {isUpgrading === plan.planId ? 'Processing...' : `Upgrade to ${plan.name}`}
                     </Button>
                   </DropdownMenuTrigger>
