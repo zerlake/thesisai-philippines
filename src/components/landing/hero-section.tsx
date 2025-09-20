@@ -35,7 +35,7 @@ export function HeroSection() {
               </Link>
             </Button>
             <Button variant="outline" size="lg" asChild>
-              <Link href="/referrals" className="flex items-center">
+              <Link href="/referrals" className="flex items-center text-white">
                 Learn About Referrals
               </Link>
             </Button>
