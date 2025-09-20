@@ -17,6 +17,8 @@ const widgetConfig = [
   { id: 'writing_streak', label: 'Writing Streak Card' },
   { id: 'milestones', label: 'My Milestones Card' },
   { id: 'quick_access', label: 'Quick Access Tools' },
+  { id: 'wellbeing', label: 'Wellbeing Check-in' },
+  { id: 'progress_milestones', label: 'Progress Milestones Tracker' },
 ];
 
 const defaultWidgets = {
@@ -28,6 +30,8 @@ const defaultWidgets = {
   writing_streak: true,
   milestones: true,
   quick_access: true,
+  wellbeing: true,
+  progress_milestones: true,
 };
 
 export function DashboardCustomization() {
