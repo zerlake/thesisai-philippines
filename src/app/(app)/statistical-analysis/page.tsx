@@ -19,6 +19,7 @@ import { StatisticalTestAdvisor } from "@/components/methodology-tools/statistic
 import { SampleSizeCalculator } from "@/components/methodology-tools/sample-size-calculator";
 import { PowerAnalysisCalculator } from "@/components/methodology-tools/power-analysis-calculator";
 import { KappaCalculator } from "@/components/results-tools/kappa-calculator";
+import { DescriptiveStatisticsPanel } from "@/components/descriptive-statistics-panel"; // Import the new component
 
 export default function StatisticalAnalysisPage() {
   const [uploadedData, setUploadedData] = useState<Record<string, any>[]>([]);
@@ -83,7 +84,7 @@ export default function StatisticalAnalysisPage() {
           <TabsTrigger value="tools">Other Tools</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="data-management" className="mt-4">
+        <TabsContent value="data-management" className="mt-4 space-y-6"> {/* Added space-y-6 here */}
           <Card>
             <CardHeader>
               <CardTitle>Upload Your Data</CardTitle>
@@ -106,6 +107,7 @@ export default function StatisticalAnalysisPage() {
               )}
             </CardContent>
           </Card>
+          <DescriptiveStatisticsPanel uploadedData={uploadedData} columns={columns} /> {/* New component here */}
         </TabsContent>
 
         <TabsContent value="analysis" className="mt-4">
