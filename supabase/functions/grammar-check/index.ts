@@ -2,11 +2,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*', // Temporarily allow all origins for development
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { getCorsHeaders } from '../_shared/cors.ts';
 
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
 
@@ -88,17 +84,10 @@ async function analyzeTextWithGemini(text: string, apiKey: string) {
 }
 
 serve(async (req: Request) => {
-  // Dynamically set CORS headers based on the request origin
-  const origin = req.headers.get('Origin') || '';
-  const allowedOrigins = ['https://thesisai-philippines.vercel.app', 'http://localhost:3000']; // Add localhost for development
-  
-  const currentCorsHeaders = {
-    'Access-Control-Allow-Origin': allowedOrigins.includes(origin) ? origin : 'https://thesisai-philippines.vercel.app',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  };
+  const corsHeaders = getCorsHeaders(req);
 
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: currentCorsHeaders })
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
@@ -130,14 +119,14 @@ serve(async (req: Request) => {
     if (!text) {
       return new Response(JSON.stringify({ error: 'Text to analyze is required' }), {
         status: 400,
-        headers: { ...currentCorsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     const analysisData = await analyzeTextWithGemini(text, geminiApiKey);
 
     return new Response(JSON.stringify(analysisData), {
-      headers: { ...currentCorsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
 
@@ -145,7 +134,7 @@ serve(async (req: Request) => {
     console.error("Error in grammar-check function:", error);
     const message = error instanceof Error ? error.message : "An unknown error occurred.";
     return new Response(JSON.stringify({ error: message }), {
-      headers: { ...currentCorsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });
   }

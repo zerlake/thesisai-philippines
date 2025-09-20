@@ -2,13 +2,11 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://thesisai-philippines.vercel.app',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { getCorsHeaders } from '../_shared/cors.ts';
 
 serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -44,7 +42,13 @@ serve(async (req: Request) => {
       for (const doc of existingDocs) {
         if (doc.content) {
           const docText = doc.content.toLowerCase().replace(/[^a-z0-9\s]/g, '')
-          const similarity = calculateSimilarity(cleanText, docText)
+          const words1 = new Set(cleanText.split(/\s+/).filter(Boolean))
+          const words2 = new Set(docText.split(/\s+/).filter(Boolean))
+          
+          const intersection = [...words1].filter(word => words2.has(word)).length
+          const union = new Set([...words1, ...words2]).size
+          
+          const similarity = union > 0 ? intersection / union : 0
           highestSimilarity = Math.max(highestSimilarity, similarity)
         }
       }

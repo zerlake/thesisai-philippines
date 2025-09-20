@@ -4,11 +4,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 // @ts-ignore
 import { jStat } from 'https://esm.sh/jstat@1.9.6';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://thesisai-philippines.vercel.app',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { getCorsHeaders } from '../_shared/cors.ts';
 
 // Helper function to calculate mean
 function calculateMean(arr: number[]): number {
@@ -124,6 +120,8 @@ function chiSquareTest(observed: number[][]) {
 
 
 serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
