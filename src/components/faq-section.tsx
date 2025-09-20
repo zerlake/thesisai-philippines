@@ -1,69 +1,195 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { BookOpenCheck, ShieldCheck, Users, Coins, GraduationCap, BrainCircuit, Settings2, MessageSquareMore } from "lucide-react";
 
-const faqs = [
+const faqCategories = [
   {
-    question: "What is ThesisAI?",
-    answer: "ThesisAI is an AI-powered academic writing assistant designed to help students and researchers in the Philippines with their thesis, dissertation, or capstone projects. It provides tools for brainstorming, outlining, drafting, citing, and checking for originality.",
+    icon: GraduationCap,
+    title: "Academic Integrity & Research Ethics",
+    items: [
+      {
+        question: "Is using AI tools like ThesisAI considered academic dishonesty?",
+        answer: "No. Our platform is designed to assist in the research process, not replace it. We provide tools for brainstorming, outlining, and improving your writing—similar to how a writing tutor would help. The final work, ideas, and arguments must always be your own. We encourage you to follow your university's academic integrity guidelines."
+      },
+      {
+        question: "Can I use the generated text directly in my thesis?",
+        answer: "You can use the generated text as a starting point or inspiration, but we strongly recommend rewriting it in your own words. The AI-generated content is meant to help overcome writer's block and provide structure, not to be copied verbatim. Always ensure your final work reflects your original thinking and voice."
+      },
+      {
+        question: "How does the Originality Checker work?",
+        answer: "Our checker uses advanced algorithms to compare your text against billions of web pages. It highlights potential matches and suggests citation formats. For maximum accuracy, we recommend running checks before submission and addressing any flagged content by proper paraphrasing and citation."
+      }
+    ]
   },
   {
-    question: "Do you write my thesis for me? Is this a ghostwriting service?",
-    answer: "No, absolutely not. Think of ThesisAI as your AI-Powered Co-Pilot. Its purpose is to assist and enhance your own writing process, not to replace it or produce a final 'AI work' for you. We do not provide ghostwriters or sell pre-written papers. Our platform is designed to help you brainstorm, structure your thoughts, improve your grammar, and check for originality, making your work easier and faster. The final work, ideas, and arguments must always be your own. We are committed to upholding academic integrity and our tools are built to empower you as a researcher, not to circumvent university policies.",
+    icon: BrainCircuit,
+    title: "AI Features & Functionality",
+    items: [
+      {
+        question: "What AI model powers ThesisAI Philippines?",
+        answer: "We use Google's Gemini API for our AI features. This ensures high-quality, contextually relevant assistance while maintaining fast response times. All AI interactions are processed securely through our Supabase Edge Functions."
+      },
+      {
+        question: "Are my documents stored in the AI system?",
+        answer: "No. Your documents remain securely stored in your personal database. When using AI features, only the selected text is temporarily sent to generate suggestions. We do not retain your document content in the AI system after processing."
+      },
+      {
+        question: "How accurate are the statistical test interpretations?",
+        answer: "The AI provides general guidance based on standard statistical practices. However, it's essential to verify the interpretation with your advisor or statistics professor. The tool is designed to help you understand basic concepts, not replace expert statistical consultation."
+      }
+    ]
   },
   {
-    question: "Who is ThesisAI for?",
-    answer: "It's designed for undergraduate and graduate students working on major academic papers, as well as their thesis advisors who want to streamline the mentorship and feedback process.",
+    icon: ShieldCheck,
+    title: "Security & Privacy",
+    items: [
+      {
+        question: "Is my research data secure?",
+        answer: "Yes. All documents are encrypted at rest and in transit. We use industry-standard security practices with Supabase. Your research belongs to you—we will never share it with third parties without your explicit consent."
+      },
+      {
+        question: "Do you sell user data?",
+        answer: "Absolutely not. We have a strict no-data-selling policy. The only data shared is what you explicitly choose to make public (like sharing a document link). Your private documents and personal information are never sold or shared."
+      },
+      {
+        question: "How are passwords protected?",
+        answer: "We use Supabase Auth which implements modern password hashing with bcrypt. Your password is never stored in plain text. We also support secure authentication via Google OAuth to reduce password-related risks."
+      }
+    ]
   },
   {
-    question: "How do I connect with my advisor and manuscript critic?",
-    answer: "You are responsible for connecting with your thesis advisor and manuscript critic. The platform does not assign these roles for you. You can invite your advisor or critic through the 'Manage Advisor' and 'Manage Critic' sections in your settings. If they are registered on ThesisAI, you can send them an invitation directly. If not, you can designate them by name in the system and export your work for offline review. The Pro + Advisor plan allows you to connect with one online advisor, while the Manuscript Critic service enables collaboration with a professional reviewer for final editing certification.",
+    icon: Users,
+    title: "Advisor & Critic Collaboration",
+    items: [
+      {
+        question: "How do I connect with my thesis advisor?",
+        answer: "You can invite your advisor through the 'Manage Advisor' section in settings. If they're registered on ThesisAI, they'll receive a notification. Otherwise, you can designate them by name and export documents for offline review. The Pro + Advisor plan enables full online collaboration."
+      },
+      {
+        question: "What happens when I submit a document for review?",
+        answer: "When you click 'Submit for Review', your document status changes to 'submitted'. Your advisor receives a notification and can access the document through their dashboard. They can then approve it, request revisions, or mark it as approved after feedback."
+      },
+      {
+        question: "Can multiple advisors review my work?",
+        answer: "Currently, you can connect with one primary advisor. For additional feedback, we recommend exporting your document and sharing it directly. Advisors can view your work if they have your public share link, but only your designated advisor can provide official feedback through the platform."
+      }
+    ]
   },
   {
-    question: "Is the content generated by ThesisAI original?",
-    answer: "Yes. Our AI is designed to generate unique content to help you draft your work. We also provide an integrated Originality Checker to ensure your final submission is plagiarism-free and properly cited.",
+    icon: Coins,
+    title: "Pricing & Subscriptions",
+    items: [
+      {
+        question: "What's included in the free plan?",
+        answer: "The free plan includes up to 3 documents, basic AI assistance, and 10 originality checks per month. You can explore all core features and upgrade anytime to unlock unlimited documents and advanced functionality."
+      },
+      {
+        question: "How do referral credits work?",
+        answer: "Earn ₱50 when someone signs up with your code, ₱75 when they upgrade to Pro, and additional earnings when they refer others. Credits can be used to offset subscription costs or transferred to peers. Minimum balance of ₱200.00 must be maintained."
+      },
+      {
+        question: "Can I get a refund?",
+        answer: "Due to the digital nature of our service, we don't offer refunds. However, you can cancel your subscription at any time. Remaining days in your current billing cycle won't be charged again. Contact us for exceptional circumstances."
+      }
+    ]
   },
   {
-    question: "Will my university accept a thesis written with AI assistance?",
-    answer: "ThesisAI is a writing assistant, not a replacement for your own research and critical thinking. It helps with structure, grammar, and overcoming writer's block. Always follow your university's academic integrity guidelines and use the tool responsibly as a supplement to your own work.",
+    icon: Settings2,
+    title: "Technical Support",
+    items: [
+      {
+        question: "Why am I experiencing slow loading?",
+        answer: "Slow loading may occur due to internet connectivity issues. Try refreshing the page. If problems persist, check your network connection. The platform works best with stable internet access. Offline mode allows saving drafts locally and syncing when back online."
+      },
+      {
+        question: "How do I report a bug?",
+        answer: "Use the 'Provide Feedback' link in the footer of any page. Include details about the issue, steps to reproduce, and screenshots if possible. Our team monitors these reports daily and prioritizes critical issues."
+      },
+      {
+        question: "Does ThesisAI work on mobile devices?",
+        answer: "Yes! Our responsive design works on tablets and smartphones. While the full editing experience is optimized for larger screens, you can access documents, reviews, and most features on mobile. Use landscape mode for better editing experience."
+      }
+    ]
   },
   {
-    question: "Is my research data secure and private?",
-    answer: "Absolutely. We prioritize your privacy and data security. Your documents are encrypted and stored securely. We will never share your research or personal information with third parties.",
+    icon: BookOpenCheck,
+    title: "University-Specific Guidance",
+    items: [
+      {
+        question: "How do I format my paper for [University Name]?",
+        answer: "Visit the University Guides section to find specific formatting requirements for major Philippine universities. Each guide includes margin specifications, font requirements, citation styles, and sample layouts. You can also use our interactive style guide to generate properly formatted citations."
+      },
+      {
+        question: "What if my university isn't listed?",
+        answer: "If your institution isn't in our database, use the 'Request to Add' feature in the University Guides section. Our team reviews submissions weekly. In the meantime, consult your university's official style manual or thesis handbook for accurate formatting."
+      },
+      {
+        question: "How do I cite sources in APA 7th edition?",
+        answer: "Use our Citation Manager to generate and save properly formatted citations. The tool follows APA 7th edition guidelines for author names, publication dates, titles, and source information. Always double-check against the official APA manual for complex cases."
+      }
+    ]
   },
   {
-    question: "I'm struggling to find a good research topic. Can you help?",
-    answer: "Yes! Use our Topic Idea Generator to get three unique and researchable thesis topics based on your field of study. While we can't show what has already been studied at your institution (due to privacy), our AI generates suggestions that balance feasibility with originality within the Philippine academic context.",
-  },
-  {
-    question: "How can I reduce feelings of isolation during my research?",
-    answer: "We understand how challenging research can be when done alone. While we don't have direct peer matching yet, our Resources section includes productivity tips like the Pomodoro Technique and setting realistic daily goals to help manage workload. We're also exploring ways to create safe, moderated communities where students can share experiences without compromising academic integrity.",
-  },
-  {
-    question: "Can ThesisAI help prevent burnout?",
-    answer: "While we can't replace mental health professionals, our platform helps reduce stress by streamlining the research process. Features like the Session Goal Card encourage manageable daily tasks rather than overwhelming word count targets. The Thesis Checklist breaks down the entire project into smaller steps, helping you track progress and maintain momentum. For serious concerns, we recommend seeking support from your institution's counseling services.",
-  },
-  {
-    question: "Why should I trust your citation manager?",
-    answer: "Our citation tools are designed to minimize errors by providing clear examples and templates. However, we emphasize that you should always verify citations against your university's official style guide. No automated tool can catch every nuance, so we encourage using our Citation Manager as a starting point followed by careful manual verification.",
+    icon: MessageSquareMore,
+    title: "General Questions",
+    items: [
+      {
+        question: "Can I collaborate with classmates?",
+        answer: "Direct collaboration between students isn't supported to maintain academic integrity. However, you can share non-sensitive parts of your research through public links or export sections for peer feedback. Remember to avoid sharing entire drafts that might compromise originality."
+      },
+      {
+        question: "How often should I save my work?",
+        answer: "Your work is automatically saved every few seconds. However, we recommend manually saving important milestones. The autosave feature ensures minimal data loss, but regular manual saves provide peace of mind during extensive writing sessions."
+      },
+      {
+        question: "Is there a mobile app?",
+        answer: "Currently, ThesisAI is web-based and accessible through any browser. A dedicated mobile app is planned for future development. The responsive web interface works well on mobile devices, though we recommend using desktop for intensive writing tasks."
+      }
+    ]
   }
 ];
 
 export function FaqSection() {
   return (
     <section className="py-12 md:py-16 bg-slate-800">
-      <div className="container mx-auto max-w-3xl">
+      <div className="container mx-auto max-w-4xl px-4">
         <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-white">Frequently Asked Questions</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-white">Comprehensive FAQ</h2>
+          <p className="mt-4 text-slate-300">
+            Find answers to common questions about using ThesisAI Philippines
+          </p>
         </div>
-        <Accordion type="single" collapsible className="w-full">
-          {faqs.map((faq, index) => (
-            <AccordionItem value={`item-${index}`} key={index} className="border-b-slate-700">
-              <AccordionTrigger className="text-left text-lg font-medium text-white hover:no-underline">{faq.question}</AccordionTrigger>
-              <AccordionContent className="text-base text-slate-300 pt-2">
-                {faq.answer}
-              </AccordionContent>
-            </AccordionItem>
+
+        <div className="space-y-8">
+          {faqCategories.map((category) => (
+            <Card key={category.title} className="bg-slate-900 border-slate-700">
+              <CardHeader className="border-b border-slate-700">
+                <div className="flex items-center gap-3">
+                  <category.icon className="w-6 h-6 text-blue-400" />
+                  <CardTitle className="text-xl text-white">{category.title}</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <Accordion type="single" collapsible>
+                  {category.items.map((faq, index) => (
+                    <AccordionItem 
+                      value={`item-${category.title}-${index}`} 
+                      key={`${category.title}-${index}`}
+                      className="border-b border-slate-700"
+                    >
+                      <AccordionTrigger className="text-left text-base font-medium text-white hover:no-underline">
+                        {faq.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-base text-slate-300 pt-2 pb-4">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </CardContent>
+            </Card>
           ))}
-        </Accordion>
+        </div>
       </div>
     </section>
   );
