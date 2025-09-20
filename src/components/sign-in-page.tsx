@@ -28,7 +28,10 @@ export function SignInPage() {
     const password = "ThisIsADemoPassword123";
 
     const { error: ensureError } = await supabase.functions.invoke('ensure-demo-user', {
-      body: { email, password, firstName, lastName, role },
+      body: JSON.stringify({ email, password, firstName, lastName, role }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     if (ensureError) {

@@ -1,6 +1,7 @@
 const ALLOWED_ORIGINS = [
   'https://thesisai-philippines.vercel.app',
   'http://localhost:3000', // For local development
+  'http://localhost:32100', // For local development on port 32100
 ];
 
 export function getCorsHeaders(request: Request) {

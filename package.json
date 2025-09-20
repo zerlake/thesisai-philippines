@@ -97,6 +97,7 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "postcss": "latest",
+    "supabase": "^2.40.7",
     "tailwindcss": "latest",
     "typescript": "latest"
   },

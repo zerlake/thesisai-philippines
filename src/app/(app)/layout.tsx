@@ -1,7 +1,8 @@
 "use client";
 
+// Removed FocusModeProvider import
 import { MainLayoutWrapper } from "@/components/main-layout-wrapper";
-import { FocusModeProvider } from "@/contexts/focus-mode-context";
+// Removed FocusModeProvider import
 
 export default function AppLayout({
   children,
@@ -9,10 +10,10 @@ export default function AppLayout({
   children: React.ReactNode;
 }) {
   return (
-    <FocusModeProvider>
-      <MainLayoutWrapper>
-        {children}
-      </MainLayoutWrapper>
-    </FocusModeProvider>
+    // Removed FocusModeProvider wrapper
+    <MainLayoutWrapper>
+      {children}
+    </MainLayoutWrapper>
+    // Removed FocusModeProvider wrapper
   );
 }
