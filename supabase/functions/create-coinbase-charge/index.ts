@@ -2,7 +2,22 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-import { getCorsHeaders } from '../_shared/cors.ts';
+
+// Inlined CORS utility
+const ALLOWED_ORIGINS = [
+  'https://thesisai-philippines.vercel.app',
+  'http://localhost:3000', // For local development
+];
+
+function getCorsHeaders(request: Request) {
+  const origin = request.headers.get('Origin');
+  const allowOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]; // Default to Vercel URL
+
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cc-webhook-signature',
+  };
+}
 
 const PLAN_PRICES: { [key: string]: number } = {
   pro: 499.00,
@@ -59,12 +74,14 @@ serve(async (req: Request) => {
         .eq('id', user.id);
       if (updateError) throw updateError;
 
+      // Log credit usage, no chargeId as no Coinbase charge was made
       const { error: logError } = await supabaseAdmin
         .from('credit_usage')
         .insert({
           user_id: user.id,
           amount_used: planPrice,
-          description: `Applied to ${planId.replace('_', ' ')} subscription purchase.`
+          description: `Applied to ${planId.replace('_', ' ')} subscription purchase.`,
+          // source_charge_id is omitted as no external charge was created
         });
       if (logError) console.error("Failed to log credit usage:", logError.message);
 
@@ -118,7 +135,29 @@ serve(async (req: Request) => {
       }
 
       const responseData = await response.json();
+      const chargeId = responseData.data.id; // Define chargeId here
+
+      // Log credit usage with the actual chargeId
+      if (creditToUse > 0) {
+        const { error: logError } = await supabaseAdmin
+          .from('credit_usage')
+          .insert({
+            user_id: user.id,
+            amount_used: creditToUse,
+            description: `Applied to ${planId.replace('_', ' ')} subscription purchase.`,
+            source_charge_id: chargeId,
+          });
+        if (logError) console.error("Failed to log credit usage:", logError.message);
+      }
       
+      // Reset credit balance after use
+      const { error: creditUpdateError } = await supabaseAdmin
+        .from('profiles')
+        .update({ credit_balance: 0 })
+        .eq('id', user.id);
+      if (creditUpdateError) console.error(`Failed to reset credit balance for user ${user.id}:`, creditUpdateError.message);
+      
+
       return new Response(JSON.stringify({ hosted_url: responseData.data.hosted_url }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,

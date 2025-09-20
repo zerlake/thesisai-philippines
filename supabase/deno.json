@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "cors_headers": "./functions/_shared/cors.ts"
+  }
+}
