@@ -9,7 +9,8 @@ import { toast } from "sonner";
 import { AlertTriangle, Loader2, Sparkles } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 import { Separator } from "./ui/separator";
-import { Alert, AlertDescription } from "./ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 type ScoreResults = {
   focus: number;
@@ -20,12 +21,29 @@ type ScoreResults = {
   overall: number;
 };
 
+type Tips = {
+  focus: string;
+  development: string;
+  audience: string;
+  cohesion: string;
+  languageAndStyle: string;
+};
+
 type AnalysisResult = {
   scores: ScoreResults;
-  writingStrength: string;
+  overallFeedback: string;
+  tips: Tips;
 };
 
 const MINIMUM_WORD_COUNT = 25;
+
+const criterionDescriptions: { [key: string]: string } = {
+  focus: "Is the writing centered on a clear, consistent main idea?",
+  development: "Are the ideas well-supported with evidence, examples, and details?",
+  audience: "Is the tone and language appropriate for an academic audience?",
+  cohesion: "Do the ideas flow logically? Are transitions used effectively?",
+  languageAndStyle: "Is the grammar correct? Is the sentence structure varied and the word choice precise?",
+};
 
 export function GrammarChecker() {
   const { session, supabase } = useAuth();
@@ -71,11 +89,11 @@ export function GrammarChecker() {
   };
 
   const scoreItems = results ? [
-    { label: "Focus", value: results.scores.focus },
-    { label: "Development", value: results.scores.development },
-    { label: "Audience", value: results.scores.audience },
-    { label: "Cohesion", value: results.scores.cohesion },
-    { label: "Language and style", value: results.scores.languageAndStyle },
+    { label: "Focus", key: "focus", value: results.scores.focus, tip: results.tips.focus },
+    { label: "Development", key: "development", value: results.scores.development, tip: results.tips.development },
+    { label: "Audience", key: "audience", value: results.scores.audience, tip: results.tips.audience },
+    { label: "Cohesion", key: "cohesion", value: results.scores.cohesion, tip: results.tips.cohesion },
+    { label: "Language and style", key: "languageAndStyle", value: results.scores.languageAndStyle, tip: results.tips.languageAndStyle },
   ] : [];
 
   return (
@@ -144,8 +162,18 @@ export function GrammarChecker() {
               <Separator />
               <div className="space-y-2 mt-4">
                 {scoreItems.map(item => (
-                  <div key={item.label} className="flex justify-between text-sm">
-                    <p>{item.label}</p>
+                  <div key={item.key} className="flex justify-between text-sm">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="link" className="p-0 h-auto text-sm font-medium">
+                          {item.label}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80">
+                        <p className="text-sm font-semibold mb-2">{item.label}</p>
+                        <p className="text-xs text-muted-foreground">{criterionDescriptions[item.key]}</p>
+                      </PopoverContent>
+                    </Popover>
                     <p className="font-medium">{item.value.toFixed(1)}/5</p>
                   </div>
                 ))}
@@ -153,8 +181,18 @@ export function GrammarChecker() {
             </Card>
             <div className="space-y-4">
               <div>
-                <h4 className="font-semibold">Writing Strength</h4>
-                <p className="text-muted-foreground">{results.writingStrength}</p>
+                <h4 className="font-semibold">Overall Feedback</h4>
+                <p className="text-muted-foreground">{results.overallFeedback}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold">Specific Tips for Improvement</h4>
+                <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+                  {scoreItems.map(item => (
+                    <li key={item.key}>
+                      <strong>{item.label}:</strong> {item.tip}
+                    </li>
+                  ))}
+                </ul>
               </div>
               <div>
                 <h4 className="font-semibold">Next Steps</h4>

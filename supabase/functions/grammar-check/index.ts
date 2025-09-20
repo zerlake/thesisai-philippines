@@ -22,7 +22,8 @@ async function analyzeTextWithGemini(text: string, apiKey: string) {
     - Language and Style: Is the grammar correct? Is the sentence structure varied and the word choice precise?
 
     Also, provide an overall score which is the average of the five criteria, rounded to one decimal place.
-    Finally, provide a concise, actionable "Writing Strength" feedback (2-3 sentences) that identifies the single most important area for improvement.
+    Provide a concise, actionable "overallFeedback" (2-3 sentences) that summarizes the main strengths and areas for improvement.
+    Finally, for each of the five criteria, provide a specific, actionable "tip" (1-2 sentences) that directly addresses how to improve that particular aspect of the writing.
 
     Your entire output MUST be a single, valid JSON object. Do not include any markdown formatting like 
     json or any text outside of the JSON object.
@@ -37,7 +38,14 @@ async function analyzeTextWithGemini(text: string, apiKey: string) {
         "languageAndStyle": number,
         "overall": number
       },
-      "writingStrength": "string"
+      "overallFeedback": "string",
+      "tips": {
+        "focus": "string",
+        "development": "string",
+        "audience": "string",
+        "cohesion": "string",
+        "languageAndStyle": "string"
+      }
     }
 
     Text to analyze: "${text}"
