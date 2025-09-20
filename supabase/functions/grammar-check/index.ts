@@ -137,6 +137,26 @@ serve(async (req: Request) => {
 
     const analysisData = await analyzeTextWithGemini(text, geminiApiKey);
 
+    // Save analysis results to grammar_check_history
+    const supabaseUserClient = createClient(
+      // @ts-ignore
+      Deno.env.get('SUPABASE_URL') ?? '',
+      // @ts-ignore
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: `Bearer ${jwt}` } } }
+    )
+
+    const { error: saveError } = await supabaseUserClient.from('grammar_check_history').insert({
+      user_id: user.id,
+      text_preview: text.substring(0, 200), // Save a preview of the text
+      scores: analysisData.scores,
+      overall_feedback: analysisData.overallFeedback,
+    });
+
+    if (saveError) {
+      console.error('Failed to save grammar check history:', saveError);
+    }
+
     return new Response(JSON.stringify(analysisData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,

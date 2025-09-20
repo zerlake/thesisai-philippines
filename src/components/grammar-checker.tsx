@@ -1,16 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Textarea } from "./ui/textarea";
 import { useAuth } from "./auth-provider";
 import { toast } from "sonner";
-import { AlertTriangle, Loader2, Sparkles } from "lucide-react";
+import { AlertTriangle, History, Loader2, Sparkles, Trash2 } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 import { Separator } from "./ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import { formatDistanceToNow } from "date-fns";
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 type ScoreResults = {
   focus: number;
@@ -35,6 +38,14 @@ type AnalysisResult = {
   tips: Tips;
 };
 
+type HistoryItem = {
+  id: string;
+  created_at: string;
+  text_preview: string;
+  scores: ScoreResults;
+  overall_feedback: string;
+};
+
 const MINIMUM_WORD_COUNT = 25;
 
 const criterionDescriptions: { [key: string]: string } = {
@@ -47,12 +58,44 @@ const criterionDescriptions: { [key: string]: string } = {
 
 export function GrammarChecker() {
   const { session, supabase } = useAuth();
+  const user = session?.user;
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [results, setResults] = useState<AnalysisResult | null>(null);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
 
   const wordCount = inputText.split(/\s+/).filter(Boolean).length;
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchHistory = async () => {
+      setIsLoadingHistory(true);
+      const { data, error } = await supabase
+        .from("grammar_check_history")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (error) {
+        toast.error("Failed to load grammar check history.");
+        console.error(error);
+      } else {
+        setHistory(data || []);
+      }
+      setIsLoadingHistory(false);
+    };
+
+    fetchHistory();
+  }, [user, supabase]);
 
   const handleCheck = async () => {
     if (wordCount < MINIMUM_WORD_COUNT) {
@@ -78,6 +121,15 @@ export function GrammarChecker() {
 
       setResults(data);
       toast.success("Analysis complete!");
+      // Refresh history after a new check
+      const { data: newHistory, error: historyError } = await supabase
+        .from("grammar_check_history")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (historyError) console.error("Failed to refresh history:", historyError);
+      else setHistory(newHistory || []);
 
     } catch (err: any) {
       const errorMessage = err.message || 'An unknown error occurred.';
@@ -88,6 +140,23 @@ export function GrammarChecker() {
     }
   };
 
+  const handleDeleteHistoryItem = async (id: string) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from("grammar_check_history")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id);
+
+    if (error) {
+      toast.error("Failed to delete history item.");
+      console.error(error);
+    } else {
+      setHistory(history.filter(item => item.id !== id));
+      toast.success("History item deleted.");
+    }
+  };
+
   const scoreItems = results ? [
     { label: "Focus", key: "focus", value: results.scores.focus, tip: results.tips.focus },
     { label: "Development", key: "development", value: results.scores.development, tip: results.tips.development },
@@ -95,6 +164,11 @@ export function GrammarChecker() {
     { label: "Cohesion", key: "cohesion", value: results.scores.cohesion, tip: results.tips.cohesion },
     { label: "Language and style", key: "languageAndStyle", value: results.scores.languageAndStyle, tip: results.tips.languageAndStyle },
   ] : [];
+
+  const chartData = history.map(item => ({
+    date: isMounted ? formatDistanceToNow(new Date(item.created_at), { addSuffix: false }) : '',
+    overallScore: item.scores.overall,
+  })).reverse(); // Reverse to show oldest first on chart
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -204,6 +278,60 @@ export function GrammarChecker() {
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3"><History className="w-5 h-5" />Grammar Check History</CardTitle>
+          <CardDescription>Your last 5 writing analyses and overall score trend.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoadingHistory ? (
+            <Skeleton className="h-48 w-full" />
+          ) : history.length > 0 ? (
+            <div className="space-y-4">
+              <div className="h-[200px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="date" />
+                    <YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]} />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="overallScore" stroke="#8884d8" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Preview</TableHead>
+                    <TableHead className="text-right">Overall Score</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {history.map(item => (
+                    <TableRow key={item.id}>
+                      <TableCell>{isMounted && formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}</TableCell>
+                      <TableCell className="text-muted-foreground text-sm max-w-xs truncate">{item.text_preview}</TableCell>
+                      <TableCell className="text-right font-medium">{item.scores.overall.toFixed(1)}/5</TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteHistoryItem(item.id)}>
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No grammar check history yet. Run an analysis to see your progress!
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
