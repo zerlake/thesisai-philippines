@@ -128,7 +128,7 @@ export default function StatisticalAnalysisPage() {
               <CardDescription>Generate charts from your data.</CardDescription>
             </CardHeader>
             <CardContent>
-              <ChartGenerator />
+              <ChartGenerator uploadedData={uploadedData} columns={columns} />
             </CardContent>
           </Card>
         </TabsContent>
