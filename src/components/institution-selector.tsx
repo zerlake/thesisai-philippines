@@ -88,7 +88,7 @@ export function InstitutionSelector({ value, onValueChange }: InstitutionSelecto
                 <CommandItem
                   key={institution.id}
                   value={institution.name}
-                  onSelect={(currentValue) => {
+                  onSelect={(currentValue: string) => {
                     const selectedId = allOptions.find(
                       (inst) => inst.name.toLowerCase() === currentValue.toLowerCase()
                     )?.id;

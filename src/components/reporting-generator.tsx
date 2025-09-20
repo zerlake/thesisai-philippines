@@ -94,7 +94,7 @@ export function ReportingGenerator({ analysisResults }: ReportingGeneratorProps)
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label>Reporting Style</Label>
-          <Select value={selectedStyle} onValueChange={(value) => setSelectedStyle(value as keyof typeof reportTemplates)}>
+          <Select value={selectedStyle} onValueChange={(value: string) => setSelectedStyle(value as keyof typeof reportTemplates)}>
             <SelectTrigger><SelectValue placeholder="Select style" /></SelectTrigger>
             <SelectContent>
               {Object.entries(reportTemplates).map(([key, template]) => (

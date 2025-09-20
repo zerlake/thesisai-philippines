@@ -22,7 +22,7 @@ import { EditorHeader } from "./editor-header";
 import { EditorStatusBar } from "./editor-status-bar";
 import { EditorAICompanion } from "./editor-ai-companion";
 import { format } from "date-fns";
-import { CheckCircle, XCircle, Eye, Minimize } from "lucide-react";
+import { CheckCircle, XCircle, Eye, Minimize, Award } from "lucide-react";
 import { Button } from "./ui/button";
 import { CertificateDialog } from "./certificate-dialog";
 
@@ -129,7 +129,7 @@ export function Editor({ documentId }: { documentId: string }) {
     } else {
       const pdf = new jsPDF();
       pdf.html(editor?.view.dom as HTMLElement, {
-        callback: (pdfDoc) => { pdfDoc.save(`${doc.title || 'document'}.pdf`); },
+        callback: (pdfDoc: jsPDF) => { pdfDoc.save(`${doc.title || 'document'}.pdf`); },
         x: 15, y: 15,
         width: 170, windowWidth: 650
       });
