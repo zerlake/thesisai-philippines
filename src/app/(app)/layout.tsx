@@ -1,19 +1,15 @@
 "use client";
 
-// Removed FocusModeProvider import
-import { MainLayoutWrapper } from "@/components/main-layout-wrapper";
-// Removed FocusModeProvider import
-
 export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    // Removed FocusModeProvider wrapper
-    <MainLayoutWrapper>
+    // The MainLayoutWrapper is now provided by RootLayoutClient for all non-public pages.
+    // This layout simply renders its children, which will be the actual page content.
+    <>
       {children}
-    </MainLayoutWrapper>
-    // Removed FocusModeProvider wrapper
+    </>
   );
 }
