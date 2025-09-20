@@ -19,6 +19,7 @@ import { StatisticalTestAdvisor } from "@/components/methodology-tools/statistic
 import { SampleSizeCalculator } from "@/components/methodology-tools/sample-size-calculator";
 import { PowerAnalysisCalculator } from "@/components/methodology-tools/power-analysis-calculator";
 import { KappaCalculator } from "@/components/results-tools/kappa-calculator";
+import { CodeNotebook } from "@/components/code-notebook"; // Import the new component
 
 export default function StatisticalAnalysisPage() {
   const [uploadedData, setUploadedData] = useState<Record<string, any>[]>([]);
@@ -75,12 +76,13 @@ export default function StatisticalAnalysisPage() {
       </div>
 
       <Tabs defaultValue="data-management">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6"> {/* Increased grid-cols to 6 */}
           <TabsTrigger value="data-management">Data Management</TabsTrigger>
           <TabsTrigger value="analysis">Analysis</TabsTrigger>
           <TabsTrigger value="visualization">Visualization</TabsTrigger>
           <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
           <TabsTrigger value="tools">Other Tools</TabsTrigger>
+          <TabsTrigger value="code-notebook">Code Notebook</TabsTrigger> {/* New tab */}
         </TabsList>
 
         <TabsContent value="data-management" className="mt-4">
@@ -175,6 +177,10 @@ export default function StatisticalAnalysisPage() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="code-notebook" className="mt-4"> {/* New tab content */}
+          <CodeNotebook />
         </TabsContent>
       </Tabs>
     </div>
