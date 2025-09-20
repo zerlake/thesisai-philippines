@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-import { getCorsHeaders } from '../_shared/cors.js' // Using shared CORS utility
+import { getCorsHeaders } from '../_shared/cors.js' // Corrected import path
 
 interface SerpApiResult {
   organic_results?: Array<{
@@ -31,6 +31,10 @@ interface PlagiarismResult {
 
 // Helper function for delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+interface RequestBody {
+  text: string;
+}
 
 serve(async (req: Request) => {
   const corsHeaders = getCorsHeaders(req);
@@ -70,7 +74,7 @@ serve(async (req: Request) => {
       );
     }
 
-    const { text } = await req.json()
+    const { text } = await req.json() as RequestBody;
 
     if (!text || typeof text !== 'string') {
       return new Response(
@@ -124,7 +128,7 @@ serve(async (req: Request) => {
               console.error(`SerpApi error for sentence (retry ${retries}): ${response.status}`);
               throw new Error(`SerpApi responded with status ${response.status}`);
             }
-            data = await response.json();
+            data = await response.json() as SerpApiResult;
           } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
             console.error(`Retry ${retries + 1} for sentence: ${sentence.substring(0, 50)} - Error: ${message}`);

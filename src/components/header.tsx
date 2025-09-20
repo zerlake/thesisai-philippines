@@ -59,11 +59,11 @@ export function Header() {
           key={item.label}
           href={item.href}
           className={cn(
-            "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground",
             pathname === item.href && "bg-accent text-accent-foreground"
           )}
         >
-          <item.icon className="w-5 h-5" />
+          <item.icon className="h-5 w-5" />
           <span>{item.label}</span>
         </Link>
       ))}
@@ -83,11 +83,11 @@ export function Header() {
                 key={item.label}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                  "flex items-center gap-3 px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                   pathname === item.href && "bg-accent text-accent-foreground"
                 )}
               >
-                <item.icon className="w-5 h-5" />
+                <item.icon className="h-5 w-5" />
                 <span>{item.label}</span>
               </Link>
             ))}

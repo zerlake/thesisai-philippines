@@ -2,13 +2,17 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-import { getCorsHeaders } from '../_shared/cors.js' // Using shared CORS utility
+import { getCorsHeaders } from '../_shared/cors.js' // Corrected import path
 
 const PLAN_PRICES: { [key: string]: number } = {
   pro: 499.00,
   pro_plus_advisor: 799.00,
   pro_complete: 999.00, // Added Pro Complete plan
 };
+
+interface RequestBody {
+  planId: string;
+}
 
 serve(async (req: Request) => {
   const corsHeaders = getCorsHeaders(req);
@@ -31,7 +35,7 @@ serve(async (req: Request) => {
     const { data: { user } } = await supabaseAdmin.auth.getUser(jwt);
     if (!user) throw new Error('Invalid JWT');
 
-    const { planId } = await req.json();
+    const { planId } = await req.json() as RequestBody;
     if (!planId || !PLAN_PRICES[planId]) {
       throw new Error('Invalid plan ID provided.');
     }
@@ -115,11 +119,11 @@ serve(async (req: Request) => {
       });
 
       if (!response.ok) {
-        const errorBody = await response.json();
+        const errorBody = await response.json() as { error?: { message: string } };
         throw new Error(`Coinbase API error: ${errorBody.error?.message || 'Unknown error'}`);
       }
 
-      const responseData = await response.json();
+      const responseData = await response.json() as { data: { id: string, hosted_url: string } };
       const chargeId = responseData.data.id; // Define chargeId here
 
       // Log credit usage with the actual chargeId

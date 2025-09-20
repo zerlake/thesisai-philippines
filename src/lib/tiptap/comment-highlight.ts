@@ -27,7 +27,7 @@ export const CommentHighlight = Mark.create<CommentHighlightOptions>({
     return {
       'data-comment-id': {
         default: null,
-        parseHTML: (element: HTMLElement) => element.getAttribute('data-comment-id'),
+        parseHTML: (element) => element.getAttribute('data-comment-id'),
         renderHTML: (attributes: Record<string, any>) => {
           if (!attributes['data-comment-id']) {
             return {};

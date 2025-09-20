@@ -4,7 +4,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 // @ts-ignore
 import { jStat } from 'https://esm.sh/jstat@1.9.6';
-import { getCorsHeaders } from '../_shared/cors.js' // Using shared CORS utility
+import { getCorsHeaders } from '../_shared/cors.js' // Corrected import path
 
 // Helper function to calculate mean
 function calculateMean(arr: number[]): number {
@@ -118,6 +118,12 @@ function chiSquareTest(observed: number[][]) {
   return { chi2Statistic, df, pValue: 1 - pValue, expected };
 }
 
+interface RequestBody {
+  data: Record<string, any>[];
+  iv: string;
+  dv: string;
+  testType: string;
+}
 
 serve(async (req: Request) => {
   const corsHeaders = getCorsHeaders(req);
@@ -140,7 +146,7 @@ serve(async (req: Request) => {
     const { data: { user } } = await supabaseAdmin.auth.getUser(jwt)
     if (!user) throw new Error('Invalid JWT')
 
-    const { data, iv, dv, testType } = await req.json();
+    const { data, iv, dv, testType } = await req.json() as RequestBody;
 
     if (!data || !Array.isArray(data) || data.length === 0) {
       return new Response(JSON.stringify({ error: 'Data is required for analysis.' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });

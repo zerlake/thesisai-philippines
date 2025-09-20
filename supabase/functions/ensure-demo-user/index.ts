@@ -2,7 +2,15 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-import { getCorsHeaders } from '../_shared/cors.js' // Using shared CORS utility
+import { getCorsHeaders } from '../_shared/cors.js' // Corrected import path
+
+interface RequestBody {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+}
 
 serve(async (req: Request) => {
   const corsHeaders = getCorsHeaders(req);
@@ -14,7 +22,7 @@ serve(async (req: Request) => {
   console.log('ensure-demo-user: Function invoked.');
 
   try {
-    const { email, password, firstName, lastName, role } = await req.json();
+    const { email, password, firstName, lastName, role } = await req.json() as RequestBody;
     console.log('ensure-demo-user: Received request for email:', email, 'role:', role);
 
     if (!email || !password || !firstName || !lastName || !role) {

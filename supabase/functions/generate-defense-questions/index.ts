@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-import { getCorsHeaders } from '../_shared/cors.js' // Using shared CORS utility
+import { getCorsHeaders } from '../_shared/cors.js' // Corrected import path
 
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
 
@@ -83,12 +83,12 @@ async function generateQuestionsWithGemini(textContent: string, apiKey: string) 
   });
 
   if (!response.ok) {
-    const errorBody = await response.json();
+    const errorBody = await response.json() as { error?: { message: string } };
     console.error("Gemini API Error:", errorBody);
     throw new Error(`Gemini API request failed: ${errorBody.error?.message || 'Unknown error'}`);
   }
 
-  const data = await response.json();
+  const data = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
   const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
   if (!generatedText) {
@@ -97,6 +97,10 @@ async function generateQuestionsWithGemini(textContent: string, apiKey: string) 
   }
 
   return JSON.parse(generatedText);
+}
+
+interface RequestBody {
+  textContent: string;
 }
 
 serve(async (req: Request) => {
@@ -131,7 +135,7 @@ serve(async (req: Request) => {
       throw new Error("GEMINI_API_KEY is not set in Supabase project secrets.");
     }
 
-    const { textContent } = await req.json();
+    const { textContent } = await req.json() as RequestBody;
     if (!textContent) {
       return new Response(JSON.stringify({ error: 'Text content is required' }), {
         status: 400,

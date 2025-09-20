@@ -2,7 +2,21 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-import { getCorsHeaders } from '../_shared/cors.js' // Using shared CORS utility
+import { getCorsHeaders } from '../_shared/cors.js' // Corrected import path
+
+interface SerpApiResult {
+  organic_results?: Array<{
+    result_id: string;
+    title: string;
+    link: string;
+    publication_info?: { summary: string };
+    snippet: string;
+  }>;
+}
+
+interface RequestBody {
+  query: string;
+}
 
 serve(async (req: Request) => {
   const corsHeaders = getCorsHeaders(req);
@@ -36,7 +50,7 @@ serve(async (req: Request) => {
       throw new Error("SERPAPI_KEY is not set in Supabase project secrets.");
     }
 
-    const { query } = await req.json();
+    const { query } = await req.json() as RequestBody;
     if (!query) {
       return new Response(JSON.stringify({ error: 'Search query is required' }), {
         status: 400,
@@ -48,11 +62,11 @@ serve(async (req: Request) => {
     
     const serpApiResponse = await fetch(searchUrl);
     if (!serpApiResponse.ok) {
-      const errorBody = await serpApiResponse.json();
+      const errorBody = await serpApiResponse.json() as { error?: string };
       throw new Error(`SerpApi request failed: ${errorBody.error || 'Unknown error'}`);
     }
 
-    const results = await serpApiResponse.json();
+    const results = await serpApiResponse.json() as SerpApiResult;
     const papers = results.organic_results?.map((result: any) => ({
       id: result.result_id,
       title: result.title,

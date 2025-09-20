@@ -2,7 +2,21 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-import { getCorsHeaders } from '../_shared/cors.js' // Using shared CORS utility
+import { getCorsHeaders } from '../_shared/cors.js' // Corrected import path
+
+interface CreateRequestPayload {
+  advisor_email: string;
+}
+
+interface RespondRequestPayload {
+  request_id: string;
+}
+
+interface RequestBody {
+  action: 'create' | 'accept' | 'decline';
+  advisor_email?: string;
+  request_id?: string;
+}
 
 serve(async (req: Request) => {
   const corsHeaders = getCorsHeaders(req);
@@ -25,10 +39,10 @@ serve(async (req: Request) => {
     const { data: { user } } = await supabaseAdmin.auth.getUser(jwt)
     if (!user) throw new Error('Invalid JWT')
 
-    const { action, ...payload } = await req.json()
+    const { action, ...payload } = await req.json() as RequestBody;
 
     if (action === 'create') {
-      const { advisor_email } = payload;
+      const { advisor_email } = payload as CreateRequestPayload;
       if (!advisor_email) throw new Error("Advisor email is required.");
 
       // Check if advisor exists and has the correct role
@@ -45,7 +59,7 @@ serve(async (req: Request) => {
     }
 
     if (action === 'accept' || action === 'decline') {
-      const { request_id } = payload;
+      const { request_id } = payload as RespondRequestPayload;
       if (!request_id) throw new Error("Request ID is required.");
 
       // Verify the user is the intended advisor

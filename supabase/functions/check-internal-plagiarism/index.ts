@@ -3,7 +3,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
-import { getCorsHeaders } from '../_shared/cors.js' // Fixed import path
+import { getCorsHeaders } from '../_shared/cors.js' // Corrected import path
 
 // Note: The plagiarism-utils functions are copied here because Edge Functions are self-contained.
 // In a real-world scenario with shared code, Deno Deploy supports import maps.
@@ -38,6 +38,11 @@ function jaccardSimilarity(setA: string[], setB: string[]): number {
 }
 // --- End Utility Functions ---
 
+interface RequestBody {
+  text: string;
+  sourceDocumentId?: string;
+}
+
 serve(async (req: Request) => {
   const corsHeaders = getCorsHeaders(req);
 
@@ -46,7 +51,7 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { text, sourceDocumentId } = await req.json();
+    const { text, sourceDocumentId } = await req.json() as RequestBody;
     if (!text) {
       return new Response(JSON.stringify({ error: 'Text is required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }

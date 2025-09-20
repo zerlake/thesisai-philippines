@@ -2,7 +2,12 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-import { getCorsHeaders } from '../_shared/cors.js' // Using shared CORS utility
+import { getCorsHeaders } from '../_shared/cors.js' // Corrected import path
+
+interface RequestBody {
+  targetUserId: string;
+  newRole: 'admin' | 'user' | 'advisor';
+}
 
 serve(async (req: Request) => {
   const corsHeaders = getCorsHeaders(req);
@@ -43,7 +48,7 @@ serve(async (req: Request) => {
       })
     }
 
-    const { targetUserId, newRole } = await req.json()
+    const { targetUserId, newRole } = await req.json() as RequestBody;
     if (!targetUserId || !newRole || !['admin', 'user', 'advisor'].includes(newRole)) {
       return new Response(JSON.stringify({ error: 'Invalid request body' }), {
         status: 400,

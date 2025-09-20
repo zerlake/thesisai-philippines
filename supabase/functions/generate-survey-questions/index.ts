@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-import { getCorsHeaders } from '../_shared/cors.js' // Using shared CORS utility
+import { getCorsHeaders } from '../_shared/cors.js' // Corrected import path
 
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
 
@@ -43,12 +43,12 @@ async function generateQuestionsWithGemini(topic: string, questionType: string, 
   });
 
   if (!response.ok) {
-    const errorBody = await response.json();
+    const errorBody = await response.json() as { error?: { message: string } };
     console.error("Gemini API Error:", errorBody);
     throw new Error(`Gemini API request failed: ${errorBody.error?.message || 'Unknown error'}`);
   }
 
-  const data = await response.json();
+  const data = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>, questions?: string[] };
   const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
   if (!generatedText) {
@@ -57,6 +57,11 @@ async function generateQuestionsWithGemini(topic: string, questionType: string, 
   }
 
   return JSON.parse(generatedText);
+}
+
+interface RequestBody {
+  topic: string;
+  questionType: string;
 }
 
 serve(async (req: Request) => {
@@ -91,7 +96,7 @@ serve(async (req: Request) => {
       throw new Error("GEMINI_API_KEY is not set in Supabase project secrets.");
     }
 
-    const { topic, questionType } = await req.json();
+    const { topic, questionType } = await req.json() as RequestBody;
     if (!topic || !questionType) {
       return new Response(JSON.stringify({ error: 'Topic and question type are required' }), {
         status: 400,

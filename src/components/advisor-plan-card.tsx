@@ -73,7 +73,7 @@ export function AdvisorPlanCard() {
               type="email"
               placeholder="student@email.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
               disabled={isLoading}
             />
             <Button onClick={handleInvite} disabled={isLoading || !email.trim()}>

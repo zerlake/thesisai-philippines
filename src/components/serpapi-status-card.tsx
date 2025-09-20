@@ -43,9 +43,9 @@ export function SerpApiStatusCard() {
         );
         const data = await response.json();
         if (!response.ok) {
-          throw new Error(data.error || "Failed to fetch SerpApi status.");
+          throw new Error((data as { error?: string }).error || "Failed to fetch SerpApi status.");
         }
-        setStatus(data);
+        setStatus(data as SerpApiStatus);
       } catch (err: any) {
         setError(err.message);
         toast.error(err.message);

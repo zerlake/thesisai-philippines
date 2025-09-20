@@ -4,7 +4,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0' // Fixed: Added 'from'
 // @ts-ignore
 import { crypto } from "https://deno.land/std@0.159.0/crypto/mod.ts";
-import { getCorsHeaders } from '../_shared/cors.js' // Using shared CORS utility
+import { getCorsHeaders } from '../_shared/cors.js' // Corrected import path
 
 async function verifySignature(secret: string, payload: string, signature: string): Promise<boolean> {
   const encoder = new TextEncoder();
@@ -21,6 +21,23 @@ async function verifySignature(secret: string, payload: string, signature: strin
     .join("");
   
   return hexSignature === signature;
+}
+
+interface CoinbaseEvent {
+  type: string;
+  data: {
+    id: string;
+    metadata: {
+      user_id: string;
+      plan: string;
+      credit_used?: string;
+    };
+    pricing: {
+      local: {
+        amount: string;
+      };
+    };
+  };
 }
 
 serve(async (req: Request) => {
@@ -52,7 +69,7 @@ serve(async (req: Request) => {
     }
 
     // 3. Process the event
-    const event = JSON.parse(body).event;
+    const event = JSON.parse(body).event as CoinbaseEvent;
     console.log(`Received Coinbase event: ${event.type}`);
 
     if (event.type === 'charge:confirmed') {

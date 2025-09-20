@@ -2,7 +2,11 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-import { getCorsHeaders } from '../_shared/cors.js' // Fixed import path
+import { getCorsHeaders } from '../_shared/cors.js' // Corrected import path
+
+interface RequestBody {
+  student_email: string;
+}
 
 serve(async (req: Request) => {
   const corsHeaders = getCorsHeaders(req);
@@ -37,7 +41,7 @@ serve(async (req: Request) => {
     }
 
     // 3. Get student email and find their profile
-    const { student_email } = await req.json()
+    const { student_email } = await req.json() as RequestBody;
     if (!student_email) throw new Error('Student email is required.')
 
     const { data: studentUser, error: studentUserError } = await supabaseAdmin.auth.admin.getUserByEmail(student_email);

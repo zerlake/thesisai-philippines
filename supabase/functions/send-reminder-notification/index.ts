@@ -2,7 +2,11 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-import { getCorsHeaders } from '../_shared/cors.js' // Using shared CORS utility
+import { getCorsHeaders } from '../_shared/cors.js' // Corrected import path
+
+interface RequestBody {
+  student_id: string;
+}
 
 serve(async (req: Request) => {
   const corsHeaders = getCorsHeaders(req);
@@ -27,7 +31,7 @@ serve(async (req: Request) => {
     if (!advisorUser) throw new Error('Invalid JWT')
 
     // 2. Get student_id from payload
-    const { student_id } = await req.json()
+    const { student_id } = await req.json() as RequestBody;
     if (!student_id) throw new Error('Student ID is required.')
 
     // 3. Verify relationship (SECURITY CHECK)

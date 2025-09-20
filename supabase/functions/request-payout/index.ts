@@ -2,7 +2,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-import { getCorsHeaders } from '../_shared/cors.js' // Using shared CORS utility
+import { getCorsHeaders } from '../_shared/cors.js' // Corrected import path
+
+interface RequestBody {
+  amount: number;
+  method: string;
+  details: string;
+}
 
 serve(async (req: Request) => {
   const corsHeaders = getCorsHeaders(req);
@@ -12,7 +18,7 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { amount, method, details } = await req.json();
+    const { amount, method, details } = await req.json() as RequestBody;
     if (!amount || typeof amount !== 'number' || amount <= 0 || !method || !details) {
       throw new Error('A valid amount, payout method, and details are required.');
     }

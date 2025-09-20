@@ -2,7 +2,21 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-import { getCorsHeaders } from '../_shared/cors.js' // Using shared CORS utility
+import { getCorsHeaders } from '../_shared/cors.js' // Corrected import path
+
+interface CreateRequestPayload {
+  critic_email: string;
+}
+
+interface RespondRequestPayload {
+  request_id: string;
+}
+
+interface RequestBody {
+  action: 'create' | 'accept' | 'decline';
+  critic_email?: string;
+  request_id?: string;
+}
 
 serve(async (req: Request) => {
   const corsHeaders = getCorsHeaders(req);
@@ -25,11 +39,11 @@ serve(async (req: Request) => {
     const { data: { user } } = await supabaseAdmin.auth.getUser(jwt)
     if (!user) throw new Error('Invalid JWT')
 
-    const { action, ...payload } = await req.json()
+    const { action, ...payload } = await req.json() as RequestBody;
 
     // Student action: create a request
     if (action === 'create') {
-      const { critic_email } = payload;
+      const { critic_email } = payload as CreateRequestPayload;
       if (!critic_email) throw new Error("Critic email is required.");
 
       // Check if critic exists and has the correct role
@@ -47,7 +61,7 @@ serve(async (req: Request) => {
 
     // Critic action: accept or decline a request
     if (action === 'accept' || action === 'decline') {
-      const { request_id } = payload;
+      const { request_id } = payload as RespondRequestPayload;
       if (!request_id) throw new Error("Request ID is required.");
 
       // Verify the user is the intended critic
