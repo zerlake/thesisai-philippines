@@ -2,24 +2,14 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-// @ts-ignore
-import cors from 'https://esm.sh/cors@1.0.1'; // Import the cors package
+import { getCorsHeaders } from '../_shared/cors.js' // Fixed import path
 
 serve(async (req: Request) => {
-  // Use the cors middleware
-  const response = await cors(req, {
-    origin: ['https://thesisai-philippines.vercel.app', 'http://localhost:3000'], // Restrict to specific domains
-    methods: ['POST', 'GET', 'OPTIONS'],
-    allowedHeaders: ['authorization', 'x-client-info', 'apikey', 'content-type', 'x-cc-webhook-signature'],
-  });
+  const corsHeaders = getCorsHeaders(req);
 
-  // If it's an OPTIONS request, return the response from cors middleware
   if (req.method === 'OPTIONS') {
-    return response;
+    return new Response(null, { headers: corsHeaders })
   }
-
-  // Extract CORS headers from the response to include in subsequent responses
-  const corsHeaders = Object.fromEntries(response.headers.entries());
 
   try {
     const supabaseAdmin = createClient(

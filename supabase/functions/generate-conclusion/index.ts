@@ -2,22 +2,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
-
-// Inlined CORS utility
-const ALLOWED_ORIGINS = [
-  'https://thesisai-philippines.vercel.app',
-  'http://localhost:3000', // For local development
-];
-
-function getCorsHeaders(request: Request) {
-  const origin = request.headers.get('Origin');
-  const allowOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]; // Default to Vercel URL
-
-  return {
-    'Access-Control-Allow-Origin': allowOrigin,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cc-webhook-signature',
-  };
-}
+import { getCorsHeaders } from '../_shared/cors.js' // Using shared CORS utility
 
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
 
@@ -26,7 +11,7 @@ async function generateConclusionWithGemini(findings: string, apiKey: string) {
     You are an expert academic writing assistant. Your task is to write the key sections of a thesis's final chapter (Chapter V) based on a provided summary of research findings.
 
     Your entire output MUST be a single, valid JSON object. Do not include any markdown formatting like 
-    json or any text outside of the JSON object.
+    or any text outside of the JSON object.
 
     The JSON object must have the following structure:
     {

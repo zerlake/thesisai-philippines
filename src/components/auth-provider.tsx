@@ -95,11 +95,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      handleAuthChange(session);
+      try {
+        handleAuthChange(session);
+      } catch (error) {
+        console.error("Error in onAuthStateChange handler:", error);
+        handleAuthChange(null);
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       handleAuthChange(session);
+    }).catch((error) => {
+      console.error("Error getting session:", error);
+      handleAuthChange(null);
     });
 
     return () => {

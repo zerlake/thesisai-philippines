@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/auth-provider";
 import { SkipToContentLink } from "@/components/skip-to-content-link";
 import { RootLayoutClient } from "@/components/root-layout-client";
+import { ChunkLoadErrorHandler } from "@/components/chunk-load-error-handler";
 
 const fontSans = Outfit({
   subsets: ["latin"],
@@ -92,6 +93,7 @@ export default function RootLayout({
         )}
         suppressHydrationWarning
       >
+        <ChunkLoadErrorHandler />
         <SkipToContentLink />
         <ThemeProvider
           attribute="class"
