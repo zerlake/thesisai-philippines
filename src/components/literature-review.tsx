@@ -41,7 +41,7 @@ export function LiteratureReview() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState("scholar");
+  const [activeTab, setActiveTab] = useState("arxiv"); // Changed default to arxiv
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,10 +57,17 @@ export function LiteratureReview() {
         throw new Error("Authentication session not found. Please log in again.");
       }
 
-      const functionName = activeTab === "web" ? "search-web" : "search-google-scholar";
+      // Determine which tool to call on the arxiv-mcp-server
+      // For now, we'll assume 'search_papers' is the primary search tool
+      const toolName = "search_papers";
+      const toolArguments = {
+        query: topic,
+        max_results: 10, // Default max results
+        // Add other arguments like categories, date_from, date_to if needed
+      };
 
       const response = await fetch(
-        `https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/${functionName}`,
+        `https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/call-arxiv-mcp-server`,
         {
           method: "POST",
           headers: {
@@ -68,7 +75,7 @@ export function LiteratureReview() {
             Authorization: `Bearer ${session.access_token}`,
             apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
           },
-          body: JSON.stringify({ query: topic }),
+          body: JSON.stringify({ toolName, toolArguments }),
         }
       );
 
@@ -79,7 +86,13 @@ export function LiteratureReview() {
       }
 
       if (data.papers) {
-        setPapers(data.papers);
+        setPapers(data.papers.map((p: any) => ({
+          id: p.id,
+          title: p.title,
+          link: p.url, // Assuming 'url' from arxiv-mcp-server maps to 'link'
+          publication_info: p.published, // Using 'published' as publication info
+          snippet: p.abstract, // Using 'abstract' as snippet
+        })));
       } else {
         throw new Error("The search did not return the expected data. Please try again.");
       }
@@ -178,12 +191,12 @@ export function LiteratureReview() {
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="scholar">Google Scholar</TabsTrigger>
-              <TabsTrigger value="web">Web Search</TabsTrigger>
+              <TabsTrigger value="arxiv">ArXiv</TabsTrigger>
+              <TabsTrigger value="other">Other Sources (Coming Soon)</TabsTrigger>
             </TabsList>
           </Tabs>
           <form onSubmit={handleSearch} className="flex items-center gap-2 mt-4">
-            <Input id="topic" placeholder="e.g., AI in Philippine Higher Education" value={topic} onChange={(e) => setTopic(e.target.value)} disabled={isLoading} />
+            <Input id="topic" placeholder="e.g., Transformer architecture in NLP" value={topic} onChange={(e) => setTopic(e.target.value)} disabled={isLoading} />
             <Button type="submit" disabled={isLoading || !topic || !session}><Search className="w-4 h-4 mr-2" />{isLoading ? "Searching..." : "Search"}</Button>
           </form>
         </CardContent>
