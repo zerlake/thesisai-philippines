@@ -106,7 +106,7 @@ export function ChartGenerator({ uploadedData = [], columns = [] }: ChartGenerat
 
         {useUploadedData && uploadedData.length > 0 ? (
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Using uploaded data from "{columns.join(', ')}".</p>
+            <p className="text-sm text-muted-foreground">Using uploaded data from &quot;{columns.join(', ')}&quot;.</p>
             <div className="space-y-2">
               <Label>Category (X-axis) Column</Label>
               <Select value={categoryColumn || ""} onValueChange={setCategoryColumn}>

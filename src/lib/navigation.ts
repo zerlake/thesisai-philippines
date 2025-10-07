@@ -66,6 +66,7 @@ export const studentNavGroups: NavGroup[] = [
       { icon: ClipboardCheck, label: "Results", href: "/results" },
       { icon: BarChart, label: "Statistical Analysis", href: "/statistical-analysis" },
       { icon: BookCheck, label: "Conclusion", href: "/conclusion" },
+      { icon: FileText, label: "PDF & Document Analysis", href: "/document-analyzer" },
     ],
   },
   {

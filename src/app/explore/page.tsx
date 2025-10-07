@@ -10,7 +10,7 @@ export default function ExplorePage() {
             Coming Soon
           </h1>
           <p className="mt-6 text-lg text-muted-foreground">
-            The Explore page is currently under construction. Soon, you'll be able to discover and read work shared by the ThesisAI community right here.
+            The Explore page is currently under construction. Soon, you&apos;ll be able to discover and read work shared by the ThesisAI community right here.
           </p>
         </div>
       </div>

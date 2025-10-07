@@ -43,7 +43,7 @@ export function WhatsNextCard({ nextAction, isLoading }: WhatsNextCardProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-3">
           <Icon className="w-6 h-6" />
-          <span>What's Next?</span>
+          <span>What&apos;s Next?</span>
         </CardTitle>
       </CardHeader>
       <CardContent>

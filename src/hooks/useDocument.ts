@@ -140,7 +140,7 @@ export function useDocument(documentId: string, editor: Editor | null) {
     if (!isLoading) {
       saveDocument();
     }
-  }, [debouncedTitle, debouncedContent]);
+  }, [debouncedTitle, debouncedContent, isLoading, saveDocument]);
 
   return {
     title, setTitle,

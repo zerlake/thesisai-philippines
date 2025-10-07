@@ -296,8 +296,8 @@ const AdvisorResources = () => (
 
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><BookUser className="w-5 h-5" /> Student's Perspective</CardTitle>
-        <CardDescription>View the platform's features from a student's point of view to better understand their workflow and the tools available to them.</CardDescription>
+        <CardTitle className="flex items-center gap-2"><BookUser className="w-5 h-5" /> Student&apos;s Perspective</CardTitle>
+        <CardDescription>View the platform&apos;s features from a student&apos;s point of view to better understand their workflow and the tools available to them.</CardDescription>
       </CardHeader>
       <CardContent>
         <Link href="/user-guide">

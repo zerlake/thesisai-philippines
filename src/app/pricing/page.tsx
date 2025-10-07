@@ -72,7 +72,7 @@ export default function PricingPage() {
             Simple, Transparent Pricing
           </h2>
           <p className="mt-4 text-slate-300">
-            Choose the plan that's right for your academic journey.
+            Choose the plan that&apos;s right for your academic journey.
           </p>
         </div>
         <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-4 items-start max-w-6xl mx-auto">

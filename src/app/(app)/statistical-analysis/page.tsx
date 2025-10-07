@@ -101,7 +101,7 @@ export default function StatisticalAnalysisPage() {
                   <Info className="h-4 w-4" />
                   <AlertTitle>Data Loaded</AlertTitle>
                   <AlertDescription>
-                    {uploadedData.length} rows and {columns.length} columns loaded. You can now proceed to the "Analysis" tab.
+                    {uploadedData.length} rows and {columns.length} columns loaded. You can now proceed to the &quot;Analysis&quot; tab.
                   </AlertDescription>
                 </Alert>
               )}

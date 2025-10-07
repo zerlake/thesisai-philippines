@@ -54,7 +54,7 @@ export function CertificateDialog({ open, onOpenChange, studentName, documentTit
             <div className="border-4 border-blue-800 p-8 h-full flex flex-col items-center justify-center text-center">
               <h1 className="text-4xl font-serif text-blue-900">Certificate of Editing</h1>
               <p className="mt-8 text-lg">This is to certify that the manuscript entitled</p>
-              <h2 className="text-2xl font-semibold my-4">"{documentTitle}"</h2>
+              <h2 className="text-2xl font-semibold my-4">&quot;{documentTitle}&quot;</h2>
               <p className="text-lg">by</p>
               <h3 className="text-3xl font-bold my-4">{studentName}</h3>
               <p className="text-lg">has been reviewed and edited for grammar, style, and clarity.</p>

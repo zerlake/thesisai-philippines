@@ -66,7 +66,7 @@ export function AdvisorPlanCard() {
         <div>
           <p className="text-sm font-medium mb-2">Invite a Student</p>
           <p className="text-xs text-muted-foreground mb-2">
-            Using a free slot allows you to connect with a student on the Free plan. If you run out of slots, you can still connect with students who have a 'Pro + Advisor' plan.
+            Using a free slot allows you to connect with a student on the Free plan. If you run out of slots, you can still connect with students who have a &apos;Pro + Advisor&apos; plan.
           </p>
           <div className="flex gap-2">
             <Input

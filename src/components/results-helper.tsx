@@ -125,12 +125,12 @@ export function ResultsHelper() {
             </TabsList>
             <TabsContent value="quantitative" className="mt-4">
               <p className="text-sm text-muted-foreground">
-                <strong className="text-foreground">Example Snippet (PH Context):</strong> "Table 2 shows the respondents' assessment of the new school portal. The overall weighted mean was 4.21, with a verbal interpretation of 'Very Satisfied'. The indicator 'Ease of Navigation' received the highest mean (4.52), while 'Mobile Accessibility' received the lowest (3.89). This suggests that while users are generally pleased, improvements are needed for mobile users."
+                <strong className="text-foreground">Example Snippet (PH Context):</strong> &quot;Table 2 shows the respondents&apos; assessment of the new school portal. The overall weighted mean was 4.21, with a verbal interpretation of &apos;Very Satisfied&apos;. The indicator &apos;Ease of Navigation&apos; received the highest mean (4.52), while &apos;Mobile Accessibility&apos; received the lowest (3.89). This suggests that while users are generally pleased, improvements are needed for mobile users.&quot;
               </p>
             </TabsContent>
             <TabsContent value="qualitative" className="mt-4">
               <p className="text-sm text-muted-foreground">
-                <strong className="text-foreground">Example Snippet (PH Context):</strong> "Three major themes emerged from the interviews with jeepney drivers regarding the PUV Modernization program: (1) Economic Anxiety (Pag-aalala sa Kita), (2) Cultural Identity (Kulturang Jeepney), and (3) Uncertainty about the Future (Kawalang-katiyakan). As one participant stated, 'Hindi lang ito sasakyan, buhay na namin ito' (This isn't just a vehicle, this is our life)."
+                <strong className="text-foreground">Example Snippet (PH Context):</strong> &quot;Three major themes emerged from the interviews with jeepney drivers regarding the PUV Modernization program: (1) Economic Anxiety (Pag-aalala sa Kita), (2) Cultural Identity (Kulturang Jeepney), and (3) Uncertainty about the Future (Kawalang-katiyakan). As one participant stated, &apos;Hindi lang ito sasakyan, buhay na namin ito&apos; (This isn&apos;t just a vehicle, this is our life).&quot;
               </p>
             </TabsContent>
           </Tabs>

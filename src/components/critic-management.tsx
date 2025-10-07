@@ -232,7 +232,7 @@ export function CriticManagement() {
           <TabsContent value="online" className="pt-4 space-y-4">
             <p className="text-sm text-muted-foreground">Send an invitation to your critic if they are registered on ThesisAI. This allows them to review and certify your document on the platform.</p>
             <div className="space-y-2">
-              <Label htmlFor="critic-email">Critic's Email</Label>
+              <Label htmlFor="critic-email">Critic&apos;s Email</Label>
               <Input id="critic-email" type="email" placeholder="critic@university.edu" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} />
             </div>
             <Button onClick={handleSendRequest} disabled={isSubmitting || !inviteEmail}>
@@ -243,7 +243,7 @@ export function CriticManagement() {
           <TabsContent value="offline" className="pt-4 space-y-4">
             <p className="text-sm text-muted-foreground">If your critic is not on ThesisAI, you can designate them here. You will be able to export your work for them to review offline.</p>
             <div className="space-y-2">
-              <Label htmlFor="critic-name">Critic's Name</Label>
+              <Label htmlFor="critic-name">Critic&apos;s Name</Label>
               <Input id="critic-name" placeholder="e.g., Dr. Maria Santos" value={externalName} onChange={e => setExternalName(e.target.value)} />
             </div>
             <Button onClick={handleSetExternalCritic} disabled={isSubmitting || !externalName}>

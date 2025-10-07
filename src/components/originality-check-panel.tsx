@@ -223,12 +223,12 @@ export function OriginalityCheckPanel({ documentContent, documentId }: Originali
                 {webResults.matches.map((match, index) => (
                   <AccordionItem key={index} value={`item-${index}`}>
                     <AccordionTrigger className="text-left text-xs">
-                      <span className="truncate pr-2">"{match.sentence}"</span>
+                      <span className="truncate pr-2">&quot;{match.sentence}&quot;</span>
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="space-y-3 pt-2">
                         <div className="p-2 bg-destructive/10 border-l-4 border-destructive rounded">
-                          <p className="text-xs">"{match.sentence}"</p>
+                          <p className="text-xs">&quot;{match.sentence}&quot;</p>
                         </div>
                         <div className="space-y-1">
                           {match.sources.map((source, sourceIndex) => (

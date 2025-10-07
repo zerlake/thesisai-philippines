@@ -63,7 +63,7 @@ export default function UniversityGuidesPage() {
         <CardHeader>
           <CardTitle className="text-3xl">University-Specific Guides</CardTitle>
           <CardDescription>
-            Select your institution or search for keywords (e.g., "APA", "margins") to find relevant guidelines.
+            Select your institution or search for keywords (e.g., &quot;APA&quot;, &quot;margins&quot;) to find relevant guidelines.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -99,7 +99,7 @@ export default function UniversityGuidesPage() {
         ) : (
           <Card>
             <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">No guides found for "{searchTerm}".</p>
+              <p className="text-muted-foreground">No guides found for &quot;{searchTerm}&quot;.</p>
             </CardContent>
           </Card>
         )}

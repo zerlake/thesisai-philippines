@@ -48,7 +48,7 @@ export function WelcomeModal({ open, onOpenChange, name }: WelcomeModalProps) {
           <DialogHeader>
             <DialogTitle className="text-2xl">Welcome to ThesisAI Philippines, {name}!</DialogTitle>
             <DialogDescription>
-              Your AI-powered co-pilot for academic success is ready. Here's a quick look at what you can do:
+              Your AI-powered co-pilot for academic success is ready. Here&apos;s a quick look at what you can do:
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -56,7 +56,7 @@ export function WelcomeModal({ open, onOpenChange, name }: WelcomeModalProps) {
               <motion.div
                 key={feature.title}
                 initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.2 + index * 0.1 }}
                 className="flex items-start gap-4"
               >
@@ -72,7 +72,7 @@ export function WelcomeModal({ open, onOpenChange, name }: WelcomeModalProps) {
           </div>
           <DialogFooter>
             <Button onClick={() => onOpenChange(false)} className="w-full">
-              Let's Get Started
+              Let&apos;s Get Started
             </Button>
           </DialogFooter>
         </motion.div>

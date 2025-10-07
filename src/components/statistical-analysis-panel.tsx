@@ -97,7 +97,7 @@ export function StatisticalAnalysisPanel({ uploadedData, columns, setAnalysisRes
           <Alert variant="info">
             <Info className="h-4 w-4" />
             <AlertTitle>No Data Uploaded</AlertTitle>
-            <AlertDescription>Please upload a CSV or XLSX file in the "Data Management" tab to begin analysis.</AlertDescription>
+            <AlertDescription>Please upload a CSV or XLSX file in the &quot;Data Management&quot; tab to begin analysis.</AlertDescription>
           </Alert>
         ) : (
           <>

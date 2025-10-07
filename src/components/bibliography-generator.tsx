@@ -158,7 +158,7 @@ export function BibliographyGenerator() {
           <BookCopy className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-2 text-sm font-semibold">No Citations Found</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Go to the "Citations" page to generate and save sources first.
+            Go to the &quot;Citations&quot; page to generate and save sources first.
           </p>
         </div>
       )}

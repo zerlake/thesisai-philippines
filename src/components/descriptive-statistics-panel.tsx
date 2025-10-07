@@ -48,7 +48,7 @@ export function DescriptiveStatisticsPanel({ uploadedData, columns }: Descriptiv
         <Info className="h-4 w-4" />
         <AlertTitle>No Data for Descriptive Statistics</AlertTitle>
         <AlertDescription>
-          Upload a CSV or XLSX file in the "Data Management" tab to see descriptive statistics.
+          Upload a CSV or XLSX file in the &quot;Data Management&quot; tab to see descriptive statistics.
         </AlertDescription>
       </Alert>
     );

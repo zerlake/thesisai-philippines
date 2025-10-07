@@ -107,6 +107,18 @@ const quickAccessItems = [
     description: "Scan for plagiarism.",
     href: "/originality-check",
   },
+  {
+    icon: FileText,
+    title: "Reference Manager",
+    description: "Manage your citations.",
+    href: "/references",
+  },
+  {
+    icon: FileText,
+    title: "PDF & Document Analysis",
+    description: "Analyze your documents.",
+    href: "/document-analyzer",
+  },
 ];
 
 type Document = {
@@ -244,7 +256,7 @@ export function StudentDashboard() {
     fetchLatestDocument();
     fetchStats();
     getNextAction();
-  }, [user, supabase, getNextAction]);
+  }, [user, getNextAction, profile, supabase]);
 
   const handleModalClose = (open: boolean) => {
     if (!open) {
@@ -262,7 +274,7 @@ export function StudentDashboard() {
           Welcome back, <span className="text-primary">{displayName}</span>!
         </h1>
         <p className="text-muted-foreground">
-          Here's your action plan and project overview.
+          Here&apos;s your action plan and project overview.
         </p>
       </div>
 

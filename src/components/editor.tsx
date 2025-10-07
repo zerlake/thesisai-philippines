@@ -170,7 +170,7 @@ export function Editor({ documentId }: { documentId: string }) {
       )}
       <div className={`grid ${isAdvisorViewing || doc.isCriticViewing ? 'lg:grid-cols-[1fr_350px]' : 'lg:grid-cols-[1fr_auto]'} gap-8 max-w-7xl mx-auto ${isFocusMode ? 'p-4 md:p-12' : ''}`}>
         <div className="space-y-4">
-          {(isAdvisorViewing || doc.isCriticViewing) && <Alert><Eye className="h-4 w-4" /><AlertTitle>{profile?.role === 'critic' ? 'Critic' : 'Advisor'} Read-Only Mode</AlertTitle><AlertDescription>You are viewing a student's document. Use the toolkit on the right to generate feedback.</AlertDescription></Alert>}
+          {(isAdvisorViewing || doc.isCriticViewing) && <Alert><Eye className="h-4 w-4" /><AlertTitle>{profile?.role === 'critic' ? 'Critic' : 'Advisor'} Read-Only Mode</AlertTitle><AlertDescription>You are viewing a student&apos;s document. Use the toolkit on the right to generate feedback.</AlertDescription></Alert>}
           {doc.isOwner && (doc.reviewStatus === 'approved' || doc.reviewStatus === 'needs_revision') && latestReview && (
             <Alert variant={doc.reviewStatus === 'approved' ? 'default' : 'destructive'}>
               {doc.reviewStatus === 'approved' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}

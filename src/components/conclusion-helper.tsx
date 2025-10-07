@@ -108,17 +108,17 @@ export function ConclusionHelper() {
             </TabsList>
             <TabsContent value="for-researchers" className="mt-4">
               <p className="text-sm text-muted-foreground">
-                <strong className="text-foreground">Example Snippet:</strong> "Future researchers are encouraged to conduct a longitudinal study to track the long-term effects of social media usage on the political engagement of Filipino youth. A comparative study between urban and rural areas is also recommended."
+                <strong className="text-foreground">Example Snippet:</strong> &quot;Future researchers are encouraged to conduct a longitudinal study to track the long-term effects of social media usage on the political engagement of Filipino youth. A comparative study between urban and rural areas is also recommended.&quot;
               </p>
             </TabsContent>
             <TabsContent value="for-practitioners" className="mt-4">
               <p className="text-sm text-muted-foreground">
-                <strong className="text-foreground">Example Snippet:</strong> "It is recommended that school counselors and psychologists integrate modules on digital wellness and critical media consumption into their student guidance programs to mitigate the risks of misinformation."
+                <strong className="text-foreground">Example Snippet:</strong> &quot;It is recommended that school counselors and psychologists integrate modules on digital wellness and critical media consumption into their student guidance programs to mitigate the risks of misinformation.&quot;
               </p>
             </TabsContent>
             <TabsContent value="for-policy" className="mt-4">
               <p className="text-sm text-muted-foreground">
-                <strong className="text-foreground">Example Snippet:</strong> "The findings suggest that the Commission on Higher Education (CHED) may consider reviewing and updating the curriculum for journalism and communication programs to include mandatory courses on digital fact-checking and verification."
+                <strong className="text-foreground">Example Snippet:</strong> &quot;The findings suggest that the Commission on Higher Education (CHED) may consider reviewing and updating the curriculum for journalism and communication programs to include mandatory courses on digital fact-checking and verification.&quot;
               </p>
             </TabsContent>
           </Tabs>

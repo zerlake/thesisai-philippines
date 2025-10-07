@@ -278,10 +278,10 @@ export function OriginalityChecker() {
                 <Accordion type="single" collapsible className="w-full max-h-[600px] overflow-y-auto pr-2">
                   {webResults.matches.map((match, index) => (
                     <AccordionItem key={index} value={`item-${index}`}>
-                      <AccordionTrigger className="text-left"><div className="flex items-start gap-2 flex-1"><Badge variant="destructive" className="mt-1 flex-shrink-0">Match {index + 1}</Badge><span className="text-sm line-clamp-2">"{match.sentence}"</span></div></AccordionTrigger>
+                      <AccordionTrigger className="text-left"><div className="flex items-start gap-2 flex-1"><Badge variant="destructive" className="mt-1 flex-shrink-0">Match {index + 1}</Badge><span className="text-sm line-clamp-2">&quot;{match.sentence}&quot;</span></div></AccordionTrigger>
                       <AccordionContent>
                         <div className="space-y-3 pt-2">
-                          <div className="p-3 bg-destructive/10 border-l-4 border-destructive rounded"><p className="text-sm font-medium">Matched Text:</p><p className="text-sm mt-1">"{match.sentence}"</p></div>
+                          <div className="p-3 bg-destructive/10 border-l-4 border-destructive rounded"><p className="text-sm font-medium">Matched Text:</p><p className="text-sm mt-1">&quot;{match.sentence}&quot;</p></div>
                           <div>
                             <p className="text-sm font-medium mb-2">Found in these sources:</p>
                             <div className="space-y-2">{match.sources.map((source, sourceIndex) => (<div key={sourceIndex} className="flex items-center gap-2 p-2 bg-muted/50 rounded"><ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" /><a href={source.url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-sm flex-1 truncate">{source.title || source.url}</a></div>))}</div>

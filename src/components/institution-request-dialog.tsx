@@ -49,7 +49,7 @@ export function InstitutionRequestDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="link" className="h-auto p-1 text-sm">
-          Can't find your school? Request to add it.
+          Can&apos;t find your school? Request to add it.
         </Button>
       </DialogTrigger>
       <DialogContent>

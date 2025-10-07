@@ -53,13 +53,13 @@ export function UniversityGuideDetail({ guide }: UniversityGuideDetailProps) {
             <div>
               <p className="text-sm font-semibold mb-2">Before (Informal):</p>
               <div className="p-3 bg-red-50 border-l-4 border-red-400 text-red-800 rounded">
-                <p className="italic">"{content.before}"</p>
+                <p className="italic">&quot;{content.before}&quot;</p>
               </div>
             </div>
             <div>
               <p className="text-sm font-semibold mb-2">After (Academic Tone):</p>
               <div className="p-3 bg-green-50 border-l-4 border-green-400 text-green-800 rounded">
-                <p>"{content.after}"</p>
+                <p>&quot;{content.after}&quot;</p>
               </div>
             </div>
           </div>

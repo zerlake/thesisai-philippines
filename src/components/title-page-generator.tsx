@@ -98,7 +98,7 @@ export function TitlePageGenerator() {
               <Input id="title" name="title" value={formData.title} onChange={handleInputChange} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="author">Author's Full Name</Label>
+              <Label htmlFor="author">Author&apos;s Full Name</Label>
               <Input id="author" name="author" value={formData.author} onChange={handleInputChange} />
             </div>
             <div className="space-y-2">

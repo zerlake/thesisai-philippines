@@ -29,7 +29,7 @@ export function ExternalReviewDialog({
         <DialogHeader>
           <DialogTitle>Prepare for External Review</DialogTitle>
           <DialogDescription>
-            Export your document to share with your external advisor. After exporting, the document status will be updated to "Awaiting External Review".
+            Export your document to share with your external advisor. After exporting, the document status will be updated to &quot;Awaiting External Review&quot;.
           </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-4 pt-4">

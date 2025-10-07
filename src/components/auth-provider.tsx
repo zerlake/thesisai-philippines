@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(null);
       await supabase.auth.signOut();
     }
-  }, [supabase]);
+  }, []);
 
   useEffect(() => {
     const handleAuthChange = async (session: Session | null) => {
@@ -113,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase, fetchProfile]);
+  }, [fetchProfile]);
 
   useEffect(() => {
     if (isLoading) return;

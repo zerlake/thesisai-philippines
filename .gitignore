@@ -42,3 +42,9 @@ next-env.d.ts
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Checkpoints
+/.checkpoints/
+
+# Supabase temp files
+/supabase/.temp/

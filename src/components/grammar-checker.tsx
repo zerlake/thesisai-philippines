@@ -176,7 +176,7 @@ export function GrammarChecker() {
         <CardHeader>
           <CardTitle>Grammar & Writing Check</CardTitle>
           <CardDescription>
-            Get AI-powered feedback on your writing's focus, development, cohesion, and more.
+            Get AI-powered feedback on your writing&apos;s focus, development, cohesion, and more.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

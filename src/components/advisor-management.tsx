@@ -244,7 +244,7 @@ export function AdvisorManagement() {
           <TabsContent value="online" className="pt-4 space-y-4">
             <p className="text-sm text-muted-foreground">Send an invitation to your advisor if they are registered on ThesisAI. This requires the <strong>Pro + Advisor</strong> plan.</p>
             <div className="space-y-2">
-              <Label htmlFor="advisor-email">Advisor's Email</Label>
+              <Label htmlFor="advisor-email">Advisor&apos;s Email</Label>
               <Input id="advisor-email" type="email" placeholder="advisor@university.edu" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} />
             </div>
             <Button onClick={handleSendRequest} disabled={isSubmitting || !inviteEmail}>
@@ -255,7 +255,7 @@ export function AdvisorManagement() {
           <TabsContent value="offline" className="pt-4 space-y-4">
             <p className="text-sm text-muted-foreground">If your advisor is not on ThesisAI, you can designate them here. You will be able to export your work for them to review offline.</p>
             <div className="space-y-2">
-              <Label htmlFor="advisor-name">Advisor's Name</Label>
+              <Label htmlFor="advisor-name">Advisor&apos;s Name</Label>
               <Input id="advisor-name" placeholder="e.g., Dr. Juan Dela Cruz" value={externalName} onChange={e => setExternalName(e.target.value)} />
             </div>
             <Button onClick={handleSetExternalAdvisor} disabled={isSubmitting || !externalName}>

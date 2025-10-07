@@ -34,8 +34,8 @@ export function HeroSection() {
                 Get Started for Free <ArrowRightIcon className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button variant="outline" size="lg" asChild>
-              <Link href="/referrals" className="flex items-center text-white">
+            <Button variant="outline" size="lg" asChild style={{ color: 'white' }}>
+              <Link href="/referrals" className="flex items-center">
                 Learn About Referrals
               </Link>
             </Button>

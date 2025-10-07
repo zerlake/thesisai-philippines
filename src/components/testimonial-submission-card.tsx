@@ -57,7 +57,7 @@ export function TestimonialSubmissionCard() {
           <span>Share Your Experience</span>
         </CardTitle>
         <CardDescription>
-          Has ThesisAI helped you? We'd love to hear about it! Your feedback may be featured on our landing page.
+          Has ThesisAI helped you? We&apos;d love to hear about it! Your feedback may be featured on our landing page.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
