@@ -1,0 +1,66 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "AI Gateway API",
+    "version": "1.0.0",
+    "description": "Internal API for interacting with third-party LLMs via a centralized gateway."
+  },
+  "paths": {
+    "/api/ai/generate": {
+      "post": {
+        "summary": "Generate text using a specified AI model",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "enum": [
+                      "generate_title",
+                      "generate_outline",
+                      "paraphrase_text",
+                      "check_grammar"
+                    ]
+                  },
+                  "prompt": {
+                    "type": "string"
+                  },
+                  "context": {
+                    "type": "string"
+                  }
+                },
+                "required": ["task", "prompt"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful generation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., invalid task)"
+          },
+          "500": {
+            "description": "Internal server error or error from the upstream LLM provider"
+          }
+        }
+      }
+    }
+  }
+}

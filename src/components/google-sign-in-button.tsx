@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { GoogleIcon } from "@/components/icons/google-icon";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client-with-error-handling";
 import { toast } from "sonner";
 
 interface GoogleSignInButtonProps {

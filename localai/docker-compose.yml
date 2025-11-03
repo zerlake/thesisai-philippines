@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+  localai:
+    image: localai/localai:latest-aio-cpu
+    container_name: thesis-localai
+    ports:
+      - "8080:8080"
+    environment:
+      - DEBUG=true
+      - MODELS_PATH=/models
+      - THREADS=4
+      - CONTEXT_SIZE=2048
+    volumes:
+      - ./models:/models
+      - ./images:/tmp/generated/images
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/readyz"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 10m

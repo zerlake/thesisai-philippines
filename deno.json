@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext", "deno.ns"],
+    "strict": true,
+    "jsx": "react-jsx",
+    "target": "esnext"
+  },
+  "importMap": "import_map.json",
+  "nodeModulesDir": "auto",
+  "tasks": {
+    "test": "deno test --allow-all --import-map=import_map.json supabase/"
+  }
+}

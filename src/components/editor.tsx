@@ -46,8 +46,12 @@ import HardBreak from '@tiptap/extension-hard-break';
 export function Editor({ documentId }: { documentId: string }) {
   const { profile, supabase } = useAuth();
   const { isFocusMode, toggleFocusMode, isTimerActive } = useFocusMode();
-
+  const [isClient, setIsClient] = useState(false);
   const [wordCount, setWordCount] = useState(0);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   const [characterCount, setCharacterCount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -60,6 +64,7 @@ export function Editor({ documentId }: { documentId: string }) {
   }, []);
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       Document, Paragraph, Text, Heading.configure({ levels: [2, 3, 4] }),
       Bold, Italic, Strike, BulletList, OrderedList, ListItem, History,

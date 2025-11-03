@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
+import { callOpenRouterWithFallback } from '../_shared/openrouter.ts'
 
 const getCorsHeaders = (req: Request) => {
   const ALLOWED_ORIGINS = [
@@ -18,19 +19,15 @@ const getCorsHeaders = (req: Request) => {
   };
 }
 
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
-
-async function generateTitlesWithGemini(summary: string, apiKey: string) {
-  const prompt = `
-    You are an expert academic editor. Your task is to generate 5 creative and academic thesis titles based on the provided summary or abstract.
+async function generateTitlesWithOpenRouter(summary: string, apiKey: string) {
+  const prompt = `You are an expert academic editor. Your task is to generate 5 creative and academic thesis titles based on the provided summary or abstract.
 
     Provide a mix of title styles:
     - A descriptive title
     - An interrogative (question-based) title
     - A declarative title making a clear statement
 
-    Your entire output MUST be a single, valid JSON object. Do not include any markdown formatting like 
-    or any text outside of the JSON object.
+    Your entire output MUST be a single, valid JSON object. Do not include any markdown formatting like \`\`\`json or any text outside of the JSON object.
 
     The JSON object must have the following structure:
     {
@@ -43,38 +40,22 @@ async function generateTitlesWithGemini(summary: string, apiKey: string) {
 
     Thesis Summary: "${summary}"
 
-    Generate the JSON object now.
-  `;
+    Generate the JSON object now.`;
 
-  const response = await fetch(`${GEMINI_API_URL}${apiKey}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      contents: [{
-        parts: [{
-          text: prompt,
-        }],
-      }],
-    }),
-  });
+  // Use the fallback system to try different models
+  const generatedText = await callOpenRouterWithFallback(
+    apiKey,
+    prompt,
+    "You are a helpful academic assistant that responds in valid JSON format only."
+  );
 
-  if (!response.ok) {
-    const errorBody = await response.json() as { error?: { message: string } };
-    console.error("Gemini API Error:", errorBody);
-    throw new Error(`Gemini API request failed: ${errorBody.error?.message || 'Unknown error'}`);
+  // Extract JSON from response
+  const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    return JSON.parse(jsonMatch[0]);
+  } else {
+    throw new Error("Failed to extract JSON from OpenRouter response.");
   }
-
-  const data = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>, titles?: string[] };
-  const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!generatedText) {
-    console.error("Invalid response structure from Gemini:", data);
-    throw new Error("Failed to parse the titles from the Gemini API response.");
-  }
-
-  return JSON.parse(generatedText);
 }
 
 interface RequestBody {
@@ -108,9 +89,9 @@ serve(async (req: Request) => {
     }
 
     // @ts-ignore
-    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!geminiApiKey) {
-      throw new Error("GEMINI_API_KEY is not set in Supabase project secrets.");
+    const openrouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
+    if (!openrouterApiKey) {
+      throw new Error("OPENROUTER_API_KEY is not set in Supabase project secrets.");
     }
 
     const { summary } = await req.json() as RequestBody;
@@ -121,7 +102,7 @@ serve(async (req: Request) => {
       });
     }
 
-    const titleData = await generateTitlesWithGemini(summary, geminiApiKey);
+    const titleData = await generateTitlesWithOpenRouter(summary, openrouterApiKey);
 
     return new Response(JSON.stringify(titleData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -129,7 +110,7 @@ serve(async (req: Request) => {
     });
 
   } catch (error) {
-    console.error("Error in generate-titles function:", error);
+    console.error("Error in generate-titles function (OpenRouter):", error);
     const message = error instanceof Error ? error.message : "An unknown error occurred.";
     return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

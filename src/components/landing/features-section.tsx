@@ -44,13 +44,13 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="bg-slate-900 py-12 md:py-16">
+    <section id="features" className="py-12 md:py-16 bg-background">
       <div className="container">
         <div className="mx-auto mb-12 max-w-3xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-white">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-foreground">
             Everything You Need to Succeed
           </h2>
-          <p className="mt-4 text-slate-300">
+          <p className="mt-4 text-muted-foreground">
             A complete toolkit designed for the modern student researcher, from
             initial idea to final defense.
           </p>
@@ -59,13 +59,13 @@ export function FeaturesSection() {
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="flex flex-col items-center text-center p-6 rounded-lg bg-slate-800/50 border border-slate-700"
+              className="flex flex-col items-center text-center p-6 rounded-lg bg-card border border-border"
             >
               <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white">
                 {feature.icon}
               </div>
-              <h3 className="text-xl font-semibold text-white">{feature.title}</h3>
-              <p className="mt-2 text-slate-300">
+              <h3 className="text-xl font-semibold text-foreground">{feature.title}</h3>
+              <p className="mt-2 text-muted-foreground">
                 {feature.description}
               </p>
             </div>

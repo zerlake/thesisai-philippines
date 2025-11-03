@@ -23,6 +23,15 @@ export function RichTextEditor({ editor }: RichTextEditorProps) {
   const [isImproving, setIsImproving] = useState(false);
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [isRewriting, setIsRewriting] = useState(false);
+  
+  if (!editor) {
+    return null;
+  }
+
+  // Set immediatelyRender to false to avoid hydration mismatches
+  editor.setOptions({
+    immediatelyRender: false,
+  });
 
   const handleImproveText = async () => {
     if (!editor || !session) return;
@@ -44,7 +53,6 @@ export function RichTextEditor({ editor }: RichTextEditorProps) {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
-            apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
           },
           body: JSON.stringify({ text: originalText }),
         }
@@ -84,7 +92,6 @@ export function RichTextEditor({ editor }: RichTextEditorProps) {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
-            apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
           },
           body: JSON.stringify({ text: originalText }),
         }
@@ -124,7 +131,6 @@ export function RichTextEditor({ editor }: RichTextEditorProps) {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
-            apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
           },
           body: JSON.stringify({ text: originalText, mode }),
         }

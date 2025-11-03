@@ -15,6 +15,8 @@ const getCorsHeaders = (req: Request) => {
   return {
     'Access-Control-Allow-Origin': allowOrigin,
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cc-webhook-signature',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Max-Age': '86400', // 24 hours
   };
 }
 
@@ -36,32 +38,63 @@ serve(async (req: Request) => {
   console.log('ensure-demo-user function invoked for:', req.url); // Added logging
 
   try {
-    const supabaseAdmin = createClient(
-      // @ts-ignore
-      Deno.env.get('SUPABASE_URL') ?? '',
-      // @ts-ignore
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    // Validate environment variables
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !serviceRoleKey) {
+      console.error('Missing Supabase configuration environment variables');
+      throw new Error('Missing Supabase configuration environment variables');
+    }
+
+    console.log('Creating Supabase client with provided URLs'); // Debug logging
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
     const { email, password, firstName, lastName, role } = await req.json() as RequestBody;
 
-    // 1. Delete existing user to ensure a clean state
-    const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-    if (listError) throw listError;
+    console.log(`Attempting to ensure demo user: ${email}, role: ${role}`); // Debug logging
 
-    const existingUser = users.find((u: { email?: string }) => u.email === email);
-    if (existingUser) {
-      await supabaseAdmin.auth.admin.deleteUser(existingUser.id, true); // hard-delete
+    // 1. Check for existing user with the same email
+    // Only proceed with user listing if needed for cleanup
+    let existingUser = null;
+    
+    // Try to get existing user by email - Supabase doesn't have a direct search by email,
+    // so we'll try to list all users and find by email
+    const { data: listData, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    if (listError) {
+      console.warn("Could not list users: ", listError.message);
+      // Continue without cleanup if we can't list users
+    } else if (listData && Array.isArray(listData.users)) {
+      existingUser = listData.users.find((u: any) => u.email === email) || null;
+      if (existingUser) {
+        console.log(`Found existing user to delete: ${existingUser.id}`); // Debug logging
+        const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(existingUser.id, true); // hard-delete
+        if (deleteError) {
+          console.warn("Could not delete existing user: ", deleteError.message);
+        } else {
+          console.log(`Successfully deleted existing user: ${existingUser.id}`); // Debug logging
+        }
+      }
     }
 
     // 2. Create new auth user
+    console.log('Creating new user...'); // Debug logging
     const { data: { user: newUser }, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
     });
-    if (createError) throw createError;
-    if (!newUser) throw new Error("User creation did not return a user object.");
+    
+    if (createError) {
+      console.error("Error creating user:", createError);
+      throw createError;
+    }
+    
+    if (!newUser) {
+      throw new Error("User creation did not return a user object.");
+    }
+
+    console.log(`User created successfully: ${newUser.id}`); // Debug logging
 
     // 3. Upsert the profile
     const profileData = {
@@ -73,28 +106,41 @@ serve(async (req: Request) => {
       free_student_slots: role === 'advisor' ? 2 : 0,
     };
 
+    console.log('Upserting profile...'); // Debug logging
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .upsert(profileData, { onConflict: 'id' });
 
-    if (profileError) throw profileError;
+    if (profileError) {
+      console.error("Error upserting profile:", profileError);
+      throw profileError;
+    }
 
-    return new Response(JSON.stringify({ message: "Demo user ensured successfully" }), {
+    console.log("Demo user created successfully:", newUser.id);
+    
+    return new Response(JSON.stringify({ 
+      message: "Demo user ensured successfully",
+      userId: newUser.id
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
-    })
+    });
 
   } catch (error) {
-    console.error("Error in ensure-demo-user function:", error)
+    console.error("Error in ensure-demo-user function:", error);
     
     let message = "An unknown error occurred.";
     if (error instanceof Error) {
       message = error.message;
     } else if (typeof error === 'object' && error !== null) {
-      message = String((error as { message: unknown }).message || JSON.stringify(error));
+      // Handle potential non-Error objects
+      message = String((error as { message?: string }).message || JSON.stringify(error));
     }
 
-    return new Response(JSON.stringify({ error: message }), {
+    return new Response(JSON.stringify({ 
+      error: message,
+      timestamp: new Date().toISOString()
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });

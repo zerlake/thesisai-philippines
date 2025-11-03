@@ -130,18 +130,33 @@
   }
 }
  
-@layer base {
+  @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
   body {
-    @apply bg-background text-foreground text-body;
+    @apply bg-background text-foreground text-base leading-relaxed;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif font-bold text-balance;
+    @apply font-serif font-bold;
   }
-  h1 { @apply text-display; }
-  h2 { @apply text-heading; }
+  h1 { @apply text-4xl md:text-5xl font-bold; }
+  h2 { @apply text-3xl md:text-4xl font-semibold; }
+}
+
+@layer components {
+  .border-default {
+    border-color: hsl(var(--border));
+  }
+  .text-body {
+    @apply text-base leading-relaxed tracking-tight;
+  }
+  .text-display {
+    @apply text-4xl md:text-5xl font-bold tracking-tight;
+  }
+  .text-heading {
+    @apply text-3xl md:text-4xl font-semibold tracking-tight;
+  }
 }
 
 @layer utilities {

@@ -63,7 +63,16 @@ export function useDocument(documentId: string, editor: Editor | null) {
       .single();
 
     if (error) {
+      console.error('Error fetching document:', error);
       toast.error('Failed to load document.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!data) {
+      console.warn('No document found with ID:', documentId);
+      toast.error('Document not found.');
+      setIsLoading(false);
       return;
     }
 
@@ -82,9 +91,9 @@ export function useDocument(documentId: string, editor: Editor | null) {
     }
 
     // @ts-ignore
-    setComments(data.comments.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+    setComments(data.comments?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) || []);
     // @ts-ignore
-    setReviewHistory(data.document_reviews.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+    setReviewHistory(data.document_reviews?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) || []);
     // @ts-ignore
     setStudentProfile(data.profiles);
     setCertificationDate(data.certified_at);
@@ -115,8 +124,10 @@ export function useDocument(documentId: string, editor: Editor | null) {
       if (thisDoc) {
         toast.loading("Syncing offline changes...", { id: 'syncing' });
         const { error } = await supabase.from('documents').update({ title: thisDoc.title, content: thisDoc.content }).eq('id', documentId);
-        if (error) toast.error("Failed to sync offline changes.");
-        else {
+        if (error) {
+          console.error('Error syncing offline changes:', error);
+          toast.error("Failed to sync offline changes.");
+        } else {
           await deleteOfflineDocument(documentId);
           toast.success("Offline changes synced!", { id: 'syncing' });
         }
@@ -127,6 +138,7 @@ export function useDocument(documentId: string, editor: Editor | null) {
     setSaveState('saving');
     const { error } = await supabase.from('documents').update({ title, content }).eq('id', documentId);
     if (error) {
+      console.error('Error saving document:', error);
       toast.error('Failed to save document.');
       setSaveState('idle');
     } else {

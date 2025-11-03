@@ -1,0 +1,2 @@
+$env:DENO_ENV="test"
+node C:\Users\Projects\thesis-ai\node_modules\deno\bin.cjs test --allow-all --import-map C:\Users\Projects\thesis-ai\supabase\deno.json supabase/ > ./.tmp/deno-test-output.log 2>&1

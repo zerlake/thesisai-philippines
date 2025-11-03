@@ -173,22 +173,22 @@ const faqCategories = [
 
 export function FaqSection() {
   return (
-    <section className="py-12 md:py-16 bg-slate-800">
+    <section className="py-12 md:py-16 bg-background">
       <div className="container mx-auto max-w-4xl px-4">
         <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-white">Comprehensive FAQ</h2>
-          <p className="mt-4 text-slate-300">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-foreground">Comprehensive FAQ</h2>
+          <p className="mt-4 text-muted-foreground">
             Find answers to common questions about using ThesisAI Philippines
           </p>
         </div>
 
         <div className="space-y-8">
           {faqCategories.map((category) => (
-            <Card key={category.title} className="bg-slate-900 border-slate-700">
-              <CardHeader className="border-b border-slate-700">
+            <Card key={category.title} className="bg-card border-border">
+              <CardHeader className="border-b border-border">
                 <div className="flex items-center gap-3">
                   <category.icon className="w-6 h-6 text-blue-400" />
-                  <CardTitle className="text-xl text-white">{category.title}</CardTitle>
+                  <CardTitle className="text-xl text-foreground">{category.title}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="pt-6">
@@ -197,12 +197,12 @@ export function FaqSection() {
                     <AccordionItem 
                       value={`item-${category.title}-${index}`} 
                       key={`${category.title}-${index}`}
-                      className="border-b border-slate-700"
+                      className="border-b border-border"
                     >
-                      <AccordionTrigger className="text-left text-base font-medium text-white hover:no-underline">
+                      <AccordionTrigger className="text-left text-base font-medium text-foreground hover:no-underline">
                         {faq.question}
                       </AccordionTrigger>
-                      <AccordionContent className="text-base text-slate-300 pt-2 pb-4">
+                      <AccordionContent className="text-base text-muted-foreground pt-2 pb-4">
                         {faq.answer}
                       </AccordionContent>
                     </AccordionItem>

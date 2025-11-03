@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { supabase } from "../integrations/supabase/client";
+import { supabase } from "../integrations/supabase/client-with-error-handling";
 import { Session, SupabaseClient, User } from "@supabase/supabase-js";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -61,21 +61,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (profileData) {
         // Step 2: Fetch user preferences separately
+        // Validate user ID format before making the query
+        const userId = user.id;
+        if (!userId || typeof userId !== 'string' || userId.trim() === '') {
+          console.warn("Invalid user ID for preferences query:", userId);
+          profileData.user_preferences = null;
+          setProfile(profileData);
+          return;
+        }
+
         const { data: preferencesData, error: preferencesError } = await supabase
           .from('user_preferences')
           .select('*')
-          .eq('user_id', user.id)
-          .single();
+          .eq('user_id', userId)
+          .maybeSingle();
 
-        // It's okay if preferences don't exist, so we only throw for other errors
-        if (preferencesError && preferencesError.code !== 'PGRST116') {
-          throw preferencesError;
+        // It's okay if preferences don't exist or if there are content negotiation issues, so we only throw for other errors
+        if (preferencesError) {
+          // Handle specific error codes and status that indicate non-critical issues
+          if (preferencesError.code === 'PGRST116' || // Row not found
+              preferencesError.status === 406 ||     // Not acceptable (content negotiation)
+              preferencesError.status === 404 ||     // Not found
+              preferencesError.code === '42P01') {   // Undefined table (in case migration hasn't fully propagated)
+            console.debug("User preferences not found or not accessible:", preferencesError.message);
+            profileData.user_preferences = null;
+          } else {
+            console.error("Error fetching user preferences:", preferencesError);
+            // Don't throw on preferences error, just continue without preferences
+            profileData.user_preferences = null;
+          }
+        } else {
+          profileData.user_preferences = preferencesData || null;
         }
         
         // Step 3: Combine the data
         // @ts-ignore
-        // @ts-ignore
-        profileData.user_preferences = preferencesData || null;
         setProfile(profileData);
       }
     } catch (e: any) {
@@ -136,7 +156,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (pathname === "/login" || pathname === "/register" || pathname === "/") {
         router.push(userHomePage);
       }
-      // 2. Role-based page protection
+      // 2. If user is authenticated but viewing a page that doesn't match their role, redirect to their home page
+      else if (
+        (pathname.startsWith("/admin") && profile.role !== "admin") ||
+        (pathname.startsWith("/advisor") && profile.role !== "advisor") ||
+        (pathname.startsWith("/critic") && profile.role !== "critic") ||
+        (pathname.startsWith("/dashboard") && profile.role !== "user")
+      ) {
+        router.push(userHomePage);
+      }
+      // 3. Redirect authenticated users who land on a generic page to their home page
+      else if (
+        pathname === "/" || 
+        pathname === "/login" || 
+        pathname === "/register" || 
+        pathname === "/pricing" || 
+        pathname === "/faq" || 
+        pathname === "/features" ||
+        pathname.startsWith("/landing") ||
+        pathname.startsWith("/university-guides") ||
+        pathname.startsWith("/explore") ||
+        pathname.startsWith("/for-")
+        // Add other public pages that should redirect to role dashboard when logged in
+      ) {
+        router.push(userHomePage);
+      }
+      // 4. Role-based page protection
       else if (pathname.startsWith("/admin") && profile.role !== "admin") {
         router.push(userHomePage);
       } else if (pathname.startsWith("/advisor") && profile.role !== "advisor") {
@@ -144,7 +189,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else if (pathname.startsWith("/critic") && profile.role !== "critic") {
         router.push(userHomePage);
       }
-      // 3. Prevent non-students from accessing the student dashboard
+      // 5. Prevent non-students from accessing the student dashboard
       else if (pathname.startsWith("/dashboard") && profile.role !== "user") {
         router.push(userHomePage);
       }

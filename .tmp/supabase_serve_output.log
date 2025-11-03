@@ -1,0 +1,10 @@
+Setting up Edge Functions runtime...
+2025-10-23T13:47:53.654071339Z Serving functions on http://127.0.0.1:54321/functions/v1/<function-name>
+2025-10-23T13:47:53.654135487Z  - http://127.0.0.1:54321/functions/v1/admin-function
+2025-10-23T13:47:53.654147411Z  - http://127.0.0.1:54321/functions/v1/advisor-invite-student
+2025-10-23T13:47:53.654157856Z  - http://127.0.0.1:54321/functions/v1/call-arxiv-mcp-server
+2025-10-23T13:47:53.654164141Z  - http://127.0.0.1:54321/functions/v1/check-internal-plagiarism
+2025-10-23T13:47:53.654169132Z  - http://127.0.0.1:54321/functions/v1/check-originality
+2025-10-23T13:47:53.654174493Z ... and 38 more functions
+2025-10-23T13:47:53.654179300Z Using supabase-edge-runtime-1.69.12 (compatible with Deno v2.1.4)
+^C

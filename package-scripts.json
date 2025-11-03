@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "clean": "rm -rf .next node_modules package-lock.json && pnpm install",
+    "dev:force": "rm -rf .next && next dev",
+    "postinstall": "node ./scripts/fix-supabase-bin.js"
+  }
+}

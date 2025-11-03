@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
+import { callOpenRouterWithFallback } from '../_shared/openrouter.ts'
 
 const getCorsHeaders = (req: Request) => {
   const ALLOWED_ORIGINS = [
@@ -18,11 +19,8 @@ const getCorsHeaders = (req: Request) => {
   };
 }
 
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
-
-async function improveTextWithGemini(text: string, apiKey: string) {
-  const prompt = `
-    You are an expert academic editor. Your task is to revise the following text to improve its clarity, conciseness, and academic tone.
+async function improveTextWithOpenRouter(text: string, apiKey: string) {
+  const prompt = `You are an expert academic editor. Your task is to revise the following text to improve its clarity, conciseness, and academic tone.
     - Correct any grammatical errors.
     - Rephrase awkward sentences.
     - Ensure the language is formal and objective.
@@ -31,38 +29,14 @@ async function improveTextWithGemini(text: string, apiKey: string) {
 
     Original text: "${text}"
 
-    Improved text:
-  `;
+    Improved text:`;
 
-  const response = await fetch(`${GEMINI_API_URL}${apiKey}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      contents: [{
-        parts: [{
-          text: prompt,
-        }],
-      }],
-    }),
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.json() as { error?: { message: string } };
-    console.error("Gemini API Error:", errorBody);
-    throw new Error(`Gemini API request failed: ${errorBody.error?.message || 'Unknown error'}`);
-  }
-
-  const data = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
-  const improvedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!improvedText) {
-    console.error("Invalid response structure from Gemini:", data);
-    throw new Error("Failed to parse the improved text from the Gemini API response.");
-  }
-
-  return improvedText.trim();
+  // Use the fallback system to try different models
+  return await callOpenRouterWithFallback(
+    apiKey,
+    prompt,
+    "You are a helpful academic assistant that specializes in text improvement and editing."
+  );
 }
 
 interface RequestBody {
@@ -96,9 +70,9 @@ serve(async (req: Request) => {
     }
 
     // @ts-ignore
-    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!geminiApiKey) {
-      throw new Error("GEMINI_API_KEY is not set in Supabase project secrets.");
+    const openrouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
+    if (!openrouterApiKey) {
+      throw new Error("OPENROUTER_API_KEY is not set in Supabase project secrets.");
     }
 
     const { text } = await req.json() as RequestBody;
@@ -109,7 +83,7 @@ serve(async (req: Request) => {
       });
     }
 
-    const improvedText = await improveTextWithGemini(text, geminiApiKey);
+    const improvedText = await improveTextWithOpenRouter(text, openrouterApiKey);
 
     return new Response(JSON.stringify({ improvedText }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -117,7 +91,7 @@ serve(async (req: Request) => {
     });
 
   } catch (error) {
-    console.error("Error in improve-writing function:", error);
+    console.error("Error in improve-writing function (OpenRouter):", error);
     const message = error instanceof Error ? error.message : "An unknown error occurred.";
     return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { Badge } from "./ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { cn } from "../lib/utils";
-import { SerpApiStatusCard } from "./serpapi-status-card";
 import { BugReportAlert } from "./bug-report-alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Button } from "./ui/button";
@@ -45,10 +44,11 @@ export function AdminDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
+      // Fetch data separately to avoid complex join issues
       const [profilesRes, assignmentsRes, requestsRes, testimonialsRes, payoutsRes] = await Promise.all([
         supabase.from("profiles").select("id, first_name, last_name, role"),
         supabase.from("advisor_student_relationships").select("student_id, advisor_id"),
-        supabase.from("institution_requests").select("*, profiles:requested_by(first_name, last_name)").eq("status", "pending"),
+        supabase.from("institution_requests").select("*").eq("status", "pending"), // Separate request query
         supabase.from("testimonials").select("*, profiles:user_id(first_name, last_name)").eq("status", "pending"),
         supabase.from("payout_requests").select("*, user_id, profiles:user_id(first_name, last_name)").eq("status", "pending")
       ]);
@@ -62,7 +62,40 @@ export function AdminDashboard() {
       const assignmentMap = new Map<string, string>();
       (assignmentsRes.data || []).forEach((a: { student_id: string, advisor_id: string }) => { assignmentMap.set(a.student_id, a.advisor_id); });
       setAssignments(assignmentMap);
-      setRequests(requestsRes.data as InstitutionRequest[] || []);
+      
+      // Process requests and fetch related profiles separately to avoid join issues
+      const requests = requestsRes.data as InstitutionRequest[] || [];
+      if (requests.length > 0) {
+        // Get unique requester IDs
+        const userIds = Array.from(new Set(requests.map(r => r.requested_by).filter(Boolean) as string[]));
+        if (userIds.length > 0) {
+          const { data: profilesData, error: profilesError } = await supabase
+            .from("profiles")
+            .select("id, first_name, last_name")
+            .in("id", userIds);
+          
+          if (profilesError) {
+            console.error("Error fetching requester profiles:", profilesError);
+            // Set requests without profile data if profile fetch fails
+            setRequests(requests.map(req => ({ ...req, profiles: null })));
+          } else {
+            // Create a map of profiles by ID for efficient lookup
+            const profileMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+            // Add profile data to each request
+            setRequests(requests.map(req => ({
+              ...req,
+              profiles: req.requested_by ? profileMap.get(req.requested_by) || null : null
+            })));
+          }
+        } else {
+          // No user IDs to fetch, just set the requests
+          setRequests(requests);
+        }
+      } else {
+        // No requests to process
+        setRequests([]);
+      }
+      
       setTestimonials(testimonialsRes.data as Testimonial[] || []);
       const fetchedPayouts = payoutsRes.data as PayoutRequest[] || [];
       setPayouts(fetchedPayouts);
@@ -186,7 +219,7 @@ export function AdminDashboard() {
       )}
       <div className="space-y-8">
         <div><h1 className="text-3xl font-bold">Admin Dashboard</h1><p className="text-muted-foreground">System overview and user management.</p></div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"><SerpApiStatusCard /></div>
+
         <Tabs defaultValue="users">
           <TabsList>
             <TabsTrigger value="users">User Management</TabsTrigger>

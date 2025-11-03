@@ -21,14 +21,11 @@ import { cn } from '../lib/utils';
 import { Input } from './ui/input';
 import { Checkbox } from './ui/checkbox';
 import { useRouter } from 'next/navigation';
+import { Paper } from '../types';
+import { SemanticScholarApi, CoreApi, CrossrefApi, OpenAlexApi } from '../lib/academic-apis';
 
-type Paper = {
-  id: string;
-  title: string;
-  link: string;
-  publication_info: string;
-  snippet: string;
-};
+// Helper function to delay execution
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export function LiteratureReview() {
   const { session, supabase } = useAuth();
@@ -36,16 +33,28 @@ export function LiteratureReview() {
   const router = useRouter();
   const [topic, setTopic] = useState("");
   const [papers, setPapers] = useState<Paper[]>([]);
+  const lastRequestTime = useRef<number>(0);
   const [selectedPapers, setSelectedPapers] = useState<Paper[]>([]);
   const [synthesizedText, setSynthesizedText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState("arxiv"); // Changed default to arxiv
+  const [activeTab, setActiveTab] = useState("arxiv");
+  
+  // Initialize API clients
+  const apiClients = {
+    'semantic-scholar': new SemanticScholarApi(),
+    'core': new CoreApi(),
+    'crossref': new CrossrefApi(),
+    'openalex': new OpenAlexApi()
+  };
 
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    if (!topic) return;
+    if (!topic) {
+      toast.error("Please enter a search topic");
+      return;
+    }
 
     setIsLoading(true);
     setPapers([]);
@@ -57,48 +66,72 @@ export function LiteratureReview() {
         throw new Error("Authentication session not found. Please log in again.");
       }
 
-      // Determine which tool to call on the arxiv-mcp-server
-      // For now, we'll assume 'search_papers' is the primary search tool
-      const toolName = "search_papers";
-      const toolArguments = {
-        query: topic,
-        max_results: 10, // Default max results
-        // Add other arguments like categories, date_from, date_to if needed
-      };
-
-      const response = await fetch(
-        `https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/call-arxiv-mcp-server`,
-        {
-          method: "POST",
+      // Rate limiting
+      const now = Date.now();
+      const timeSinceLastRequest = now - lastRequestTime.current;
+      if (timeSinceLastRequest < 3000) {
+        await delay(3000 - timeSinceLastRequest);
+      }
+      
+      let results: Paper[] = [];
+      
+      if (activeTab === 'arxiv') {
+        // Existing arXiv search
+        const query = encodeURIComponent(topic);
+        const apiUrl = `https://export.arxiv.org/api/query?search_query=all:${query}&start=0&max_results=10&sortBy=relevance`;
+        
+        lastRequestTime.current = Date.now();
+        const arxivResponse = await fetch(apiUrl, {
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-            apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
+            'Accept': 'application/xml',
           },
-          body: JSON.stringify({ toolName, toolArguments }),
+          mode: 'cors'
+        });
+        
+        if (!arxivResponse.ok) {
+          throw new Error(`arXiv API request failed with status ${arxivResponse.status}`);
         }
-      );
+        
+        const arxivData = await arxivResponse.text();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(arxivData, "text/xml");
+        const entries = xmlDoc.getElementsByTagName("entry");
+        
+        if (entries.length === 0) {
+          throw new Error("No papers found matching your search criteria.");
+        }
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || `Request failed with status ${response.status}`);
-      }
-
-      if (data.papers) {
-        setPapers(data.papers.map((p: any) => ({
-          id: p.id,
-          title: p.title,
-          link: p.url, // Assuming 'url' from arxiv-mcp-server maps to 'link'
-          publication_info: p.published, // Using 'published' as publication info
-          snippet: p.abstract, // Using 'abstract' as snippet
-        })));
+        results = Array.from(entries).map((entry) => {
+          const id = entry.getElementsByTagName("id")[0]?.textContent || "";
+          const arxivId = id.split("/abs/")[1] || id;
+          return {
+            id: arxivId,
+            title: entry.getElementsByTagName("title")[0]?.textContent?.trim() || "Untitled",
+            link: `https://arxiv.org/abs/${arxivId}`,
+            publication_info: entry.getElementsByTagName("published")[0]?.textContent || "",
+            snippet: entry.getElementsByTagName("summary")[0]?.textContent?.trim() || "No abstract available",
+            source: 'arxiv'
+          };
+        });
       } else {
-        throw new Error("The search did not return the expected data. Please try again.");
+        // Use the selected alternative source
+        const api = apiClients[activeTab as keyof typeof apiClients];
+        if (!api) {
+          throw new Error("Selected source is not available.");
+        }
+        results = await api.search(topic);
       }
+      
+      setPapers(results);
     } catch (error: any) {
-      console.error(error);
-      toast.error(error.message || "An unexpected error occurred.");
+      console.error("Search failed:", error);
+      setPapers([]);
+      
+      if (error.message === "Failed to fetch") {
+        toast.error("Unable to connect to the search service. Please try again later.");
+      } else {
+        toast.error(`Search failed: ${error.message}`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -131,7 +164,6 @@ export function LiteratureReview() {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
-            apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
           },
           body: JSON.stringify({ papers: selectedPapers.map(p => ({ title: p.title, snippet: p.snippet })) }),
         }
@@ -190,9 +222,12 @@ export function LiteratureReview() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="arxiv">ArXiv</TabsTrigger>
-              <TabsTrigger value="other">Other Sources (Coming Soon)</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="arxiv">arXiv</TabsTrigger>
+              <TabsTrigger value="semantic-scholar">Semantic Scholar</TabsTrigger>
+              <TabsTrigger value="core">CORE</TabsTrigger>
+              <TabsTrigger value="crossref">Crossref</TabsTrigger>
+              <TabsTrigger value="openalex">OpenAlex</TabsTrigger>
             </TabsList>
           </Tabs>
           <form onSubmit={handleSearch} className="flex items-center gap-2 mt-4">
@@ -233,8 +268,16 @@ export function LiteratureReview() {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent><p className="text-sm text-muted-foreground ml-8">{paper.snippet}</p></CardContent>
-                <CardFooter><a href={paper.link} target="_blank" rel="noopener noreferrer" className="w-full"><Button variant="outline" className="w-full">View Source <ArrowUpRight className="w-4 h-4 ml-2" /></Button></a></CardFooter>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground ml-8">{paper.snippet}</p>
+                </CardContent>
+                <CardFooter>
+                  <a href={paper.link} target="_blank" rel="noopener noreferrer" className="w-full">
+                    <Button variant="outline" className="w-full">
+                      View Source <ArrowUpRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </a>
+                </CardFooter>
               </Card>
             ))}
           </div>

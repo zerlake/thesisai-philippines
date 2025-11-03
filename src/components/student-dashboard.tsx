@@ -225,16 +225,40 @@ export function StudentDashboard() {
 
     const fetchLatestDocument = async () => {
       setIsLoadingDoc(true);
-      const { data } = await supabase.from("documents").select("id, title, updated_at").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(1).single();
-      if (data) setLatestDocument(data);
+      const { data, error } = await supabase
+        .from("documents")
+        .select("id, title, updated_at")
+        .eq("user_id", user.id)
+        .order("updated_at", { ascending: false })
+        .limit(1);
+      if (error) {
+        console.error("Error fetching latest document:", error);
+        toast.error("Failed to load latest document.");
+      } else if (data && data.length > 0) {
+        // Use the first (most recent) document
+        setLatestDocument(data[0]);
+      } else {
+        // No documents found, set to null
+        setLatestDocument(null);
+      }
       setIsLoadingDoc(false);
     };
 
     const fetchStats = async () => {
       setIsLoadingStats(true);
-      const { data: documents, error } = await supabase.from("documents").select("content, updated_at").eq("user_id", user.id);
+      const { data: documents, error } = await supabase
+        .from("documents")
+        .select("content, updated_at")
+        .eq("user_id", user.id);
       if (error) {
+        console.error("Error fetching documents stats:", error);
         toast.error("Failed to load project stats.");
+        setIsLoadingStats(false);
+        return;
+      }
+      if (!documents) {
+        // No documents found, set defaults
+        setStats({ docCount: 0, wordCount: 0, avgWordCount: 0, recentWordCount: 0 });
         setIsLoadingStats(false);
         return;
       }

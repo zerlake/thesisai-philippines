@@ -13,7 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client-with-error-handling";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -37,6 +37,8 @@ export function SignInForm() {
     if (error) {
       toast.error(error.message);
     }
+    // On successful sign-in, the auth provider will automatically redirect to the appropriate dashboard
+    // based on the user's role. We don't need to explicitly redirect here.
   }
 
   return (

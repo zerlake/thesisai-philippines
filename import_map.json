@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "cors_headers": "./supabase/functions/_shared/cors.ts",
+    "utils/": "./supabase/functions/_shared/utils/",
+    "openai": "npm:openai@4.12.0"
+  }
+}

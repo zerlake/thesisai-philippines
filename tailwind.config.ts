@@ -22,11 +22,27 @@ const config = {
         sans: ["var(--font-sans)"],
         serif: ["var(--font-serif)"],
       },
+      border: {
+        DEFAULT: "hsl(var(--border))",
+      },
+      borderColor: {
+        DEFAULT: "hsl(var(--border))",
+      },
       fontSize: {
-        'body': ['clamp(0.875rem, 0.875rem + 0.25vw, 1.125rem)', { lineHeight: '1.6' }], // 14px -> 18px
-        'heading': ['clamp(1.5rem, 1.5rem + 2vw, 2.5rem)', { lineHeight: '1.2' }], // 24px -> 40px
-        'display': ['clamp(3rem, 3rem + 6vw, 6rem)', { lineHeight: '1.1' }], // 48px -> 96px
-        'caption': ['clamp(0.75rem, 0.75rem + 0.25vw, 0.875rem)', { lineHeight: '1.4' }], // 12px -> 14px
+        'body': ['1rem', {
+          lineHeight: '1.5',
+          letterSpacing: '-0.01em',
+        }],
+        'display': ['2.5rem', {
+          lineHeight: '1.2',
+          letterSpacing: '-0.02em',
+          fontWeight: '700',
+        }],
+        'heading': ['2rem', {
+          lineHeight: '1.3',
+          letterSpacing: '-0.015em',
+          fontWeight: '600',
+        }],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -42,25 +58,9 @@ const config = {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
         },
-        tertiary: {
-          DEFAULT: "hsl(var(--tertiary))",
-          foreground: "hsl(var(--tertiary-foreground))",
-        },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
-        },
-        success: {
-          DEFAULT: "hsl(var(--success))",
-          foreground: "hsl(var(--success-foreground))",
-        },
-        warning: {
-          DEFAULT: "hsl(var(--warning))",
-          foreground: "hsl(var(--warning-foreground))",
-        },
-        info: {
-          DEFAULT: "hsl(var(--info))",
-          foreground: "hsl(var(--info-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -79,6 +79,8 @@ const config = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
+
+
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 0.25rem)",

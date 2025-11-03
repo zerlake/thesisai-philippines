@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { Outfit, Lora } from "next/font/google";
-import "../globals.css";
+import { Inter } from "next/font/google";
+import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -9,19 +9,13 @@ import { SkipToContentLink } from "@/components/skip-to-content-link";
 import { RootLayoutClient } from "@/components/root-layout-client";
 import { ChunkLoadErrorHandler } from "@/components/chunk-load-error-handler";
 
-const fontSans = Outfit({
+const fontSans = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
-  display: 'swap',
-});
-
-const fontSerif = Lora({
-  subsets: ["latin"],
-  variable: "--font-serif",
-  display: 'swap',
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://thesis-ai.com'),
   title: "ThesisAI Philippines - AI-Powered Academic Writing Assistant",
   description: "Streamline your thesis writing process with our AI-powered platform. Generate outlines, check originality, format citations, and connect with advisors—all in one workspace designed for Philippine universities.",
   keywords: [
@@ -88,8 +82,7 @@ export default function RootLayout({
       <body
         className={cn(
           "font-sans antialiased",
-          fontSans.variable,
-          fontSerif.variable
+          fontSans.variable
         )}
         suppressHydrationWarning
       >
@@ -97,7 +90,7 @@ export default function RootLayout({
         <SkipToContentLink />
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >

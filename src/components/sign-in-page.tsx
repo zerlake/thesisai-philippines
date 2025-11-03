@@ -5,7 +5,7 @@ import { BookText, User, UserCog, UserCheck, FileSignature } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client-with-error-handling";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SignInForm } from "@/components/sign-in-form";
 import Link from "next/link";

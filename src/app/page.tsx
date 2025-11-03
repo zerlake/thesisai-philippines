@@ -7,7 +7,7 @@ import { AiToolkitSection } from "@/components/ai-toolkit-section";
 
 export default function LandingPage() {
   return (
-    <div className="bg-slate-900 text-white" itemScope itemType="https://schema.org/WebApplication">
+    <div className="bg-background text-foreground" itemScope itemType="https://schema.org/WebApplication">
       <meta itemProp="name" content="ThesisAI Philippines" />
       <meta itemProp="description" content="AI-powered academic writing assistant for Philippine students" />
       <meta itemProp="applicationCategory" content="Education" />
