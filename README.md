@@ -1,17 +1,65 @@
+# ThesisAI Philippines
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+An AI-powered academic writing assistant designed for Philippine universities, helping students streamline their thesis writing process.
+
+## Security
+
+This application implements comprehensive security measures including:
+
+- JWT-based authentication with Supabase
+- Role-based access control (RBAC)
+- Security headers (CSP, X-Frame-Options, etc.)
+- Input validation and sanitization
+- Rate limiting on API endpoints
+- CORS protection
+- Secure error handling
+
+For detailed security information, see [SECURITY.md](./SECURITY.md).
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ 
+- pnpm (recommended) or npm
+- Supabase account
+- Required API keys (see Environment Variables)
+
+### Environment Variables
+
+Copy `.env.example` to `.env.local` and fill in the required values:
 
 ```bash
-npm run dev
+cp .env.example .env.local
+```
+
+Required variables:
+- `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Your Supabase anonymous key
+- `SUPABASE_SERVICE_ROLE_KEY` - Your Supabase service role key (keep secure!)
+- `SENTRY_DSN` - Your Sentry DSN for error tracking
+- `GEMINI_API_KEY` - Google Gemini API key for AI features
+
+See `.env.example` for a complete list.
+
+### Installation
+
+First, install dependencies:
+
+```bash
+pnpm install
 # or
-yarn dev
-# or
+npm install
+```
+
+Then, run the development server:
+
+```bash
 pnpm dev
 # or
-bun dev
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

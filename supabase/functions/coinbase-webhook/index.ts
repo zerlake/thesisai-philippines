@@ -12,11 +12,20 @@ const getCorsHeaders = (req: Request) => {
     'http://localhost:32100',
   ];
   const origin = req.headers.get('Origin');
-  const allowOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const allowOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : null;
+
+  if (!allowOrigin) {
+    return {
+      'Access-Control-Allow-Origin': 'null',
+      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cc-webhook-signature',
+    };
+  }
 
   return {
     'Access-Control-Allow-Origin': allowOrigin,
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cc-webhook-signature',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Max-Age': '86400',
   };
 }
 
@@ -74,12 +83,18 @@ serve(async (req: Request) => {
     const body = await req.text();
     
     if (!signature) {
-      throw new Error("Webhook signature is missing.");
+      return new Response(JSON.stringify({ error: 'Signature verification failed' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const isValid = await verifySignature(webhookSecret, body, signature);
     if (!isValid) {
-      throw new Error("Webhook signature is invalid.");
+      return new Response(JSON.stringify({ error: 'Signature verification failed' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // 3. Process the event
@@ -158,7 +173,9 @@ serve(async (req: Request) => {
 
   } catch (error) {
     console.error("Error in Coinbase webhook handler:", error);
-    const message = error instanceof Error ? error.message : "An unknown error occurred.";
+    const message = process.env.NODE_ENV === 'development' && error instanceof Error 
+      ? error.message 
+      : "Webhook processing failed";
     return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
