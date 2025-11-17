@@ -10,11 +10,20 @@ const getCorsHeaders = (req: Request) => {
     'http://localhost:32100',
   ];
   const origin = req.headers.get('Origin');
-  const allowOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const allowOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : null;
+
+  if (!allowOrigin) {
+    return {
+      'Access-Control-Allow-Origin': 'null',
+      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    };
+  }
 
   return {
     'Access-Control-Allow-Origin': allowOrigin,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cc-webhook-signature',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Max-Age': '86400',
   };
 }
 
@@ -80,6 +89,46 @@ interface RequestBody {
   field: string;
 }
 
+const MAX_TOPIC_LENGTH = 500;
+const MAX_FIELD_LENGTH = 200;
+
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+function checkRateLimit(userId: string, maxRequests: number = 10, windowMs: number = 60000): { allowed: boolean; retryAfter?: number } {
+  const now = Date.now();
+  const record = rateLimitStore.get(userId);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitStore.set(userId, {
+      count: 1,
+      resetTime: now + windowMs,
+    });
+    return { allowed: true };
+  }
+  
+  if (record.count >= maxRequests) {
+    return {
+      allowed: false,
+      retryAfter: Math.ceil((record.resetTime - now) / 1000),
+    };
+  }
+  
+  record.count += 1;
+  return { allowed: true };
+}
+
+function sanitizeInput(input: string, maxLength: number): string {
+  if (typeof input !== 'string') {
+    throw new Error('Input must be a string');
+  }
+  
+  if (input.length > maxLength) {
+    throw new Error(`Input exceeds maximum length of ${maxLength} characters`);
+  }
+  
+  return input.trim();
+}
+
 serve(async (req: Request) => {
   const corsHeaders = getCorsHeaders(req);
 
@@ -97,28 +146,56 @@ serve(async (req: Request) => {
 
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
-      throw new Error('Missing authorization header')
+      return new Response(JSON.stringify({ error: 'Authentication required' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
     const jwt = authHeader.replace('Bearer ', '')
 
     const { data: { user } } = await supabaseAdmin.auth.getUser(jwt)
     if (!user) {
-      throw new Error('Invalid JWT')
+      return new Response(JSON.stringify({ error: 'Invalid authentication' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const rateLimit = checkRateLimit(user.id);
+    if (!rateLimit.allowed) {
+      return new Response(JSON.stringify({ 
+        error: 'Rate limit exceeded. Please try again later.',
+        retryAfter: rateLimit.retryAfter 
+      }), {
+        status: 429,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+          'Retry-After': String(rateLimit.retryAfter)
+        },
+      });
     }
 
     // @ts-ignore
     const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
     if (!geminiApiKey) {
-      throw new Error("GEMINI_API_KEY is not set in Supabase project secrets. Please add it in your project settings.");
+      return new Response(JSON.stringify({ error: 'Service configuration error' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    const { topic, field } = await req.json() as RequestBody;
-    if (!topic || !field) {
+    const body = await req.json() as RequestBody;
+    
+    if (!body.topic || !body.field) {
       return new Response(JSON.stringify({ error: 'Topic and field of study are required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    const topic = sanitizeInput(body.topic, MAX_TOPIC_LENGTH);
+    const field = sanitizeInput(body.field, MAX_FIELD_LENGTH);
 
     const outline = await generateOutlineWithGemini(topic, field, geminiApiKey);
 
@@ -129,7 +206,9 @@ serve(async (req: Request) => {
 
   } catch (error) {
     console.error("Error in generate-outline function:", error);
-    const message = error instanceof Error ? error.message : "An unknown error occurred.";
+    const message = process.env.NODE_ENV === 'development' && error instanceof Error 
+      ? error.message 
+      : "An error occurred while processing your request.";
     return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
