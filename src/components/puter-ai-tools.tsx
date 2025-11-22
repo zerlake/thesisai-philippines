@@ -15,9 +15,10 @@ import { puterAIFacade } from '@/lib/puter-ai-facade';
 interface PuterAIToolsProps {
   editor: any; // Tiptap editor instance
   session: any; // Supabase session
+  supabaseClient?: any; // Supabase client for AI function calls
 }
 
-export function PuterAITools({ editor, session }: PuterAIToolsProps) {
+export function PuterAITools({ editor, session, supabaseClient }: PuterAIToolsProps) {
   const { puterReady, isAuthenticated, signIn, checkAuth } = usePuterContext();
   const [isProcessing, setIsProcessing] = useState({
     improve: false,
@@ -91,7 +92,7 @@ export function PuterAITools({ editor, session }: PuterAIToolsProps) {
       const response = await puterAIFacade.call(
         'improve-writing',
         { text: originalText },
-        session?.user ? { functions: { invoke: async () => ({}) } } : undefined,
+        supabaseClient,
         { timeout: 30000, retries: 2 }
       );
 
@@ -142,7 +143,7 @@ export function PuterAITools({ editor, session }: PuterAIToolsProps) {
       const response = await puterAIFacade.call(
         'summarize-text',
         { text: originalText },
-        session?.user ? { functions: { invoke: async () => ({}) } } : undefined,
+        supabaseClient,
         { timeout: 30000, retries: 2 }
       );
 
@@ -193,7 +194,7 @@ export function PuterAITools({ editor, session }: PuterAIToolsProps) {
       const response = await puterAIFacade.call(
         'improve-writing',
         { text: originalText },
-        session?.user ? { functions: { invoke: async () => ({}) } } : undefined,
+        supabaseClient,
         { timeout: 30000, retries: 2 }
       );
 

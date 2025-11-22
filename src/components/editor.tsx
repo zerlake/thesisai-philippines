@@ -1,32 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
-import { useAuth } from "./auth-provider";
-import { Skeleton } from "./ui/skeleton";
-import { RichTextEditor } from "./rich-text-editor";
-import { saveAs } from "file-saver";
-// @ts-ignore
-import htmlDocx from "html-docx-js/dist/html-docx";
-import jsPDF from "jspdf";
-import { useEditor } from "@tiptap/react";
-import CharacterCount from "@tiptap/extension-character-count";
-import BubbleMenuExtension from "@tiptap/extension-bubble-menu";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
-import { ExternalReviewDialog } from "./external-review-dialog";
-import { CommentHighlight } from "@/lib/tiptap/comment-highlight";
-import { useFocusMode } from "@/contexts/focus-mode-context";
-import { FocusTimer } from "./focus-timer";
-import { useDocument } from "@/hooks/useDocument";
-import { EditorHeader } from "./editor-header";
-import { EditorStatusBar } from "./editor-status-bar";
-import { EditorAICompanion } from "./editor-ai-companion";
-import { format } from "date-fns";
-import { CheckCircle, XCircle, Eye, Minimize, Award } from "lucide-react";
-import { Button } from "./ui/button";
-import { CertificateDialog } from "./certificate-dialog";
-
-// Import individual extensions instead of StarterKit
+import { useEditor, EditorContent } from '@tiptap/react';
+import { EditorToolbar } from './editor-toolbar';
 import Document from '@tiptap/extension-document';
 import Paragraph from '@tiptap/extension-paragraph';
 import Text from '@tiptap/extension-text';
@@ -38,204 +13,120 @@ import BulletList from '@tiptap/extension-bullet-list';
 import OrderedList from '@tiptap/extension-ordered-list';
 import ListItem from '@tiptap/extension-list-item';
 import History from '@tiptap/extension-history';
-import HorizontalRule from '@tiptap/extension-horizontal-rule';
-import Dropcursor from '@tiptap/extension-dropcursor';
-import Gapcursor from '@tiptap/extension-gapcursor';
-import HardBreak from '@tiptap/extension-hard-break';
+import { useEffect, useState } from 'react';
+import { PuterAITools } from './puter-ai-tools';
+import { useAuth } from './auth-provider';
+import { supabase } from '@/integrations/supabase/client';
 
 export function Editor({ documentId }: { documentId: string }) {
-  const { profile, supabase } = useAuth();
-  const { isFocusMode, toggleFocusMode, isTimerActive } = useFocusMode();
-
-  const [wordCount, setWordCount] = useState(0);
-  const [characterCount, setCharacterCount] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const [isExternalReviewDialogOpen, setIsExternalReviewDialogOpen] = useState(false);
-  const [isCertificateDialogOpen, setIsCertificateDialogOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+  const { session, isLoading } = useAuth();
+  const [isClient, setIsClient] = useState(false);
+  const [content, setContent] = useState('');
 
   useEffect(() => {
-    setIsMounted(true);
+    setIsClient(true);
   }, []);
 
+  useEffect(() => {
+    if (!documentId) return;
+
+    const loadDocument = async () => {
+      const { data, error } = await supabase
+        .from('documents')
+        .select('content')
+        .eq('id', documentId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading document:', error);
+        // Using toast would require importing it, but this creates a circular dependency issue
+        return;
+      }
+
+      if (data && data.content) {
+        setContent(data.content);
+      } else {
+        setContent(`<h1>Chapter I: The Problem and Its Background</h1>
+<p>This chapter presents the background of the study, statement of the problem, objectives, scope and limitations, significance of the study, and definition of terms.</p>
+<h2>Introduction</h2>
+<p>In recent years, the increasing demand for technological advancement has created new challenges and opportunities in the academic environment. Educational institutions are now faced with the need to integrate digital tools and platforms to enhance the learning experience.</p>
+<h2>Statement of the Problem</h2>
+<p>This study aims to address the following research questions:</p>
+<ol>
+<li>How do students perceive the effectiveness of AI-assisted academic writing tools?</li>
+<li>What are the challenges faced by students using AI-powered thesis writing platforms?</li>
+<li>To what extent do these platforms improve the quality and efficiency of academic writing?</li>
+</ol>
+<h2>Objectives of the Study</h2>
+<p>The specific objectives of this study are to:</p>
+<ul>
+<li>Assess the effectiveness of AI-assisted writing tools in thesis preparation</li>
+<li>Identify the challenges and benefits of using academic writing platforms</li>
+<li>Determine the impact of these tools on writing productivity and quality</li>
+</ul>
+<h2>Scope and Limitations</h2>
+<p>This study focuses on college students enrolled in thesis writing courses who utilize AI-powered academic writing platforms. The research is limited to students from public universities in the Philippines.</p>
+<h2>Significance of the Study</h2>
+<p>The findings of this study will benefit students, instructors, and educational administrators. Students will gain insights into optimizing their use of AI writing tools. Instructors will understand how to better integrate these tools into their curricula. Administrators will be equipped with information to make decisions about adopting such technologies.</p>
+<h2>Definition of Terms</h2>
+<p>For clarity, the following terms are defined:</p>
+<ul>
+<li><strong>AI Writing Tools:</strong> Artificial intelligence-powered platforms designed to assist in academic writing</li>
+<li><strong>Academic Writing:</strong> Formal writing practiced in educational institutions</li>
+<li><strong>Thesis Writing:</strong> The process of preparing and writing a formal academic thesis or dissertation</li>
+</ul>`);
+      }
+    };
+
+    loadDocument();
+  }, [documentId]);
+
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
-      Document, Paragraph, Text, Heading.configure({ levels: [2, 3, 4] }),
-      Bold, Italic, Strike, BulletList, OrderedList, ListItem, History,
-      HorizontalRule, Dropcursor, Gapcursor, HardBreak,
-      CharacterCount, BubbleMenuExtension, CommentHighlight.configure({
-        HTMLAttributes: { class: 'comment-highlight' },
-      }),
+      Document,
+      Paragraph,
+      Text,
+      Heading.configure({ levels: [2, 3, 4] }),
+      Bold,
+      Italic,
+      Strike,
+      BulletList,
+      OrderedList,
+      ListItem,
+      History,
     ],
+    content: content,
     editorProps: {
       attributes: {
-        class: "prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl m-5 focus:outline-none min-h-[calc(100vh-350px)]",
+        class: 'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none min-h-[500px] w-full p-5 bg-white text-gray-900',
       },
     },
-    onUpdate({ editor }) {
-      doc.setContent(editor.getHTML());
-      setWordCount((editor.storage as any).characterCount.words());
-      setCharacterCount((editor.storage as any).characterCount.characters());
+    onUpdate: ({ editor }) => {
+      const newContent = editor.getHTML();
+      setContent(newContent);
     },
   });
 
-  const doc = useDocument(documentId, editor);
-
   useEffect(() => {
-    if (editor && !doc.isOwner) {
-      editor.setEditable(false);
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
     }
-  }, [editor, doc.isOwner]);
+  }, [content, editor]);
 
-  const handleSubmitForReview = async () => {
-    if (!doc.isOwner) return;
-    if (profile?.external_advisor_name) {
-      setIsExternalReviewDialogOpen(true);
-      return;
-    }
-    if (!profile?.advisor) {
-      toast.error("You must connect with an advisor in your settings before submitting for review.");
-      return;
-    }
-    setIsSubmitting(true);
-    const { error } = await supabase.from("documents").update({ review_status: 'submitted' }).eq("id", documentId);
-    if (error) toast.error("Failed to submit for review.");
-    else {
-      toast.success("Document submitted for review!");
-      doc.setReviewStatus('submitted');
-    }
-    setIsSubmitting(false);
-  };
-
-  const handleRevertToDraft = async () => {
-    if (!doc.isOwner) return;
-    setIsSubmitting(true);
-    const { error } = await supabase.from("documents").update({ review_status: 'draft' }).eq("id", documentId);
-    if (error) toast.error("Failed to revert to draft.");
-    else {
-      toast.success("Document is now a draft and can be edited.");
-      doc.setReviewStatus('draft');
-    }
-    setIsSubmitting(false);
-  };
-
-  const handleExport = async (format: 'docx' | 'pdf') => {
-    setIsExporting(true);
-    if (format === 'docx') {
-      const contentHtml = `<h1>${doc.title}</h1>${doc.content}`;
-      const converted = htmlDocx.asBlob(contentHtml);
-      saveAs(converted, `${doc.title || 'document'}.docx`);
-    } else {
-      const pdf = new jsPDF();
-      pdf.html(editor?.view.dom as HTMLElement, {
-        callback: (pdfDoc: jsPDF) => { pdfDoc.save(`${doc.title || 'document'}.pdf`); },
-        x: 15, y: 15,
-        width: 170, windowWidth: 650
-      });
-    }
-    
-    if (profile?.external_advisor_name && doc.reviewStatus !== 'awaiting_external_review') {
-      const { error } = await supabase.from("documents").update({ review_status: 'awaiting_external_review' }).eq("id", documentId);
-      if (error) toast.error("Failed to update document status.");
-      else {
-        toast.success("Document status updated to 'Awaiting External Review'.");
-        doc.setReviewStatus('awaiting_external_review');
-      }
-    }
-    setIsExternalReviewDialogOpen(false);
-    setIsExporting(false);
-  };
-
-  if (doc.isLoading || !editor) {
-    return <Skeleton className="h-screen w-full" />;
+  if (!isClient || isLoading) {
+    return null;
   }
 
-  const latestReview = doc.reviewHistory[0];
-  const canSubmit = doc.isOwner && (doc.reviewStatus === 'draft' || doc.reviewStatus === 'needs_revision' || doc.reviewStatus === 'critic_revision_requested');
-  const isAwaitingExternal = doc.isOwner && doc.reviewStatus === 'awaiting_external_review';
-  const isAdvisorViewing = !doc.isOwner && profile?.role === 'advisor';
-  const canGenerateCertificate = doc.isCriticViewing && doc.reviewStatus === 'approved' && !!doc.certificationDate;
-  const studentName = `${doc.studentProfile?.first_name || ''} ${doc.studentProfile?.last_name || ''}`.trim();
-  const criticName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim();
-  const certificationDate = doc.certificationDate ? format(new Date(doc.certificationDate), "MMMM d, yyyy") : '';
-
   return (
-    <>
-      {isTimerActive && <FocusTimer />}
-      {isFocusMode && (
-        <Button onClick={toggleFocusMode} variant="outline" size="icon" className="fixed top-4 right-4 z-50" title="Exit Focus Mode">
-          <Minimize className="w-4 h-4" />
-        </Button>
-      )}
-      <div className={`grid ${isAdvisorViewing || doc.isCriticViewing ? 'lg:grid-cols-[1fr_350px]' : 'lg:grid-cols-[1fr_auto]'} gap-8 max-w-7xl mx-auto ${isFocusMode ? 'p-4 md:p-12' : ''}`}>
-        <div className="space-y-4">
-          {(isAdvisorViewing || doc.isCriticViewing) && <Alert><Eye className="h-4 w-4" /><AlertTitle>{profile?.role === 'critic' ? 'Critic' : 'Advisor'} Read-Only Mode</AlertTitle><AlertDescription>You are viewing a student&apos;s document. Use the toolkit on the right to generate feedback.</AlertDescription></Alert>}
-          {doc.isOwner && (doc.reviewStatus === 'approved' || doc.reviewStatus === 'needs_revision') && latestReview && (
-            <Alert variant={doc.reviewStatus === 'approved' ? 'default' : 'destructive'}>
-              {doc.reviewStatus === 'approved' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-              <AlertTitle>Feedback from {latestReview.profiles?.first_name || 'your advisor'} on {isMounted && format(new Date(latestReview.created_at), "MMMM d, yyyy")}</AlertTitle>
-              <AlertDescription>{latestReview.comments || "No comments provided."}</AlertDescription>
-            </Alert>
-          )}
-
-          <EditorHeader
-            title={doc.title}
-            onTitleChange={doc.setTitle}
-            reviewStatus={doc.reviewStatus}
-            isOwner={doc.isOwner}
-            canSubmit={canSubmit}
-            isAwaitingExternal={isAwaitingExternal}
-            isSubmitting={isSubmitting}
-            saveState={doc.saveState}
-            documentId={documentId}
-            isPublic={doc.isPublic}
-            onSubmitForReview={handleSubmitForReview}
-            onRevertToDraft={handleRevertToDraft}
-            onSaveDocument={() => doc.saveDocument(true)}
-            onExport={handleExport}
-            isExporting={isExporting}
-            toggleFocusMode={toggleFocusMode}
-            canGenerateCertificate={canGenerateCertificate}
-            onGenerateCertificate={() => setIsCertificateDialogOpen(true)}
-          />
-          <RichTextEditor editor={editor} />
+    <div className="flex flex-col gap-4">
+      <EditorToolbar editor={editor} />
+      {editor && session && (
+        <div className="flex gap-1 bg-background p-1 rounded-lg shadow-lg border">
+          <PuterAITools editor={editor} session={session} supabaseClient={supabase} />
         </div>
-
-        <EditorAICompanion
-          isOwner={doc.isOwner}
-          isAdvisorViewing={isAdvisorViewing}
-          isCriticViewing={doc.isCriticViewing}
-          editor={editor}
-          documentContent={doc.content}
-          documentId={documentId}
-          reviewStatus={doc.reviewStatus}
-          onReviewSubmit={doc.fetchDocumentData}
-          comments={doc.comments}
-          setComments={doc.setComments}
-        />
-
-        <EditorStatusBar
-          wordCount={wordCount}
-          characterCount={characterCount}
-          saveState={doc.saveState}
-          isOwner={doc.isOwner}
-          isOffline={doc.isOffline}
-        />
-
-        <ExternalReviewDialog open={isExternalReviewDialogOpen} onOpenChange={setIsExternalReviewDialogOpen} onExport={handleExport} isExporting={isExporting} />
-        
-        {canGenerateCertificate && (
-          <CertificateDialog
-            open={isCertificateDialogOpen}
-            onOpenChange={setIsCertificateDialogOpen}
-            studentName={studentName}
-            documentTitle={doc.title}
-            criticName={criticName}
-            certificationDate={certificationDate}
-          />
-        )}
-      </div>
-    </>
+      )}
+      <EditorContent editor={editor} />
+    </div>
   );
 }
