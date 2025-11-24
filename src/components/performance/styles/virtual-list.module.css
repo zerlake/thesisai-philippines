@@ -1,0 +1,79 @@
+/* Virtual List Styles */
+
+.container {
+  position: relative;
+  overflow: hidden;
+}
+
+.scroller {
+  overflow-y: auto;
+  overflow-x: hidden;
+  will-change: transform;
+  -webkit-overflow-scrolling: touch;
+}
+
+.content {
+  position: relative;
+  width: 100%;
+  contain: layout style paint;
+}
+
+/* Smooth scrolling behavior */
+.scroller {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.scroller::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scroller::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroller::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.scroller::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+  background-clip: padding-box;
+}
+
+/* Performance optimizations */
+.scroller * {
+  box-sizing: border-box;
+}
+
+/* Prevent flickering during scroll */
+.scroller {
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Reduce motion support */
+@media (prefers-reduced-motion: reduce) {
+  .scroller {
+    scroll-behavior: auto;
+  }
+}
+
+/* Dark mode scrollbar */
+@media (prefers-color-scheme: dark) {
+  .scroller {
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+
+  .scroller::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .scroller::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
