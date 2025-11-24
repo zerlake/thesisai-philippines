@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puter AI Paraphraser - Live Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #d0d0d0;
+        }
+
+        .status-box {
+            padding: 16px;
+            border-radius: 6px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .status-box.show {
+            display: block;
+        }
+
+        .status-box.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .status-box.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .status-box.loading {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .result-card h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-card .mode-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .result-text {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #555;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            padding: 12px;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .result-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+            font-size: 12px;
+        }
+
+        .stat {
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+
+        .stat-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-icon {
+            color: #28a745;
+        }
+
+        .error-icon {
+            color: #dc3545;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #0c5460;
+        }
+
+        .info-box strong {
+            color: #667eea;
+        }
+
+        .authentication-prompt {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .authentication-prompt button {
+            background: #667eea;
+            color: white;
+            padding: 16px 32px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Puter AI Paraphraser</h1>
+            <p>Real-time AI paraphrasing with multiple transformation modes</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Authentication Status -->
+            <div id="authStatus" class="info-box">
+                ⏳ Initializing Puter SDK...
+            </div>
+
+            <!-- Input Section -->
+            <div class="section">
+                <h2>📝 Original Text</h2>
+                <div class="form-group">
+                    <textarea id="inputText" placeholder="Enter text to paraphrase...">The rapid advancement of artificial intelligence has transformed multiple sectors of society, including healthcare, finance, and education. Machine learning algorithms enable systems to learn from data without explicit programming, leading to more efficient and accurate decision-making processes. However, ethical concerns regarding data privacy and algorithmic bias remain significant challenges that must be addressed.</textarea>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="processText('paraphrase')" id="btnParaphrase">
+                        📝 Paraphrase
+                    </button>
+                    <button class="btn-primary" onclick="processText('formal')" id="btnFormal">
+                        📋 Make Formal
+                    </button>
+                    <button class="btn-primary" onclick="processText('simple')" id="btnSimple">
+                        ✨ Simplify
+                    </button>
+                    <button class="btn-primary" onclick="processText('expanded')" id="btnExpanded">
+                        📚 Expand
+                    </button>
+                </div>
+
+                <div id="statusMessage" class="status-box"></div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="section">
+                <h2>🎯 Results</h2>
+                <div id="resultsContainer" class="results-grid">
+                    <div style="grid-column: 1 / -1; text-align: center; color: #999; padding: 40px;">
+                        Click a transformation button above to see results...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://puter.com/dist/puter.js"></script>
+    <script>
+        // State
+        let results = {};
+        let isProcessing = false;
+        let authenticated = false;
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', initializePuter);
+
+        async function initializePuter() {
+            try {
+                // Wait for Puter to load
+                let attempts = 0;
+                while (!window.puter && attempts < 50) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+
+                if (!window.puter) {
+                    updateAuthStatus('❌ Puter SDK failed to load. Please refresh the page.', 'error');
+                    disableButtons();
+                    return;
+                }
+
+                // Check authentication
+                try {
+                    const user = await window.puter.auth.getUser();
+                    if (user && user.username) {
+                        authenticated = true;
+                        updateAuthStatus(`✓ Authenticated as ${user.username}. Ready to paraphrase!`, 'success');
+                    } else {
+                        updateAuthStatus('⚠️ Not authenticated. Please sign in to use AI features.', 'error');
+                        promptSignIn();
+                    }
+                } catch (error) {
+                    updateAuthStatus('⚠️ Not authenticated. Please sign in to use AI features.', 'error');
+                    promptSignIn();
+                }
+            } catch (error) {
+                console.error('Initialization error:', error);
+                updateAuthStatus(`❌ Error: ${error.message}`, 'error');
+                disableButtons();
+            }
+        }
+
+        function updateAuthStatus(message, type = 'info') {
+            const authStatus = document.getElementById('authStatus');
+            authStatus.textContent = message;
+            authStatus.className = `info-box ${type === 'error' ? 'error-bg' : ''}`;
+        }
+
+        function disableButtons() {
+            document.querySelectorAll('.btn-primary').forEach(btn => {
+                btn.disabled = true;
+            });
+        }
+
+        function promptSignIn() {
+            const section = document.querySelector('.section');
+            if (!authenticated) {
+                const prompt = document.createElement('div');
+                prompt.className = 'authentication-prompt';
+                prompt.innerHTML = `
+                    <h3>Sign In Required</h3>
+                    <p>Please sign in with Puter to use AI paraphrasing features.</p>
+                    <button class="btn-primary" onclick="signInWithPuter()" style="margin-top: 20px;">
+                        Sign In with Puter
+                    </button>
+                `;
+                section.insertBefore(prompt, section.firstChild);
+            }
+        }
+
+        async function signInWithPuter() {
+            try {
+                await window.puter.auth.signIn();
+                authenticated = true;
+                updateAuthStatus('✓ Successfully authenticated!', 'success');
+                // Reload to refresh
+                location.reload();
+            } catch (error) {
+                updateAuthStatus(`❌ Sign-in failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function processText(mode) {
+            if (!authenticated) {
+                updateAuthStatus('⚠️ Please sign in first to use AI features.', 'error');
+                return;
+            }
+
+            if (isProcessing) {
+                return;
+            }
+
+            const inputText = document.getElementById('inputText').value.trim();
+            if (!inputText) {
+                showStatus('❌ Please enter some text to paraphrase.', 'error');
+                return;
+            }
+
+            if (inputText.length > 8000) {
+                showStatus('❌ Text is too long. Maximum 8000 characters.', 'error');
+                return;
+            }
+
+            isProcessing = true;
+            disableButtons();
+            showStatus(`⏳ Processing with ${mode} mode...`, 'loading');
+
+            try {
+                const result = await paraphraseWithPuter(inputText, mode);
+                results[mode] = result;
+                renderResults();
+                showStatus(`✓ Successfully processed with ${mode} mode!`, 'success');
+            } catch (error) {
+                console.error(`Error in ${mode} mode:`, error);
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                isProcessing = false;
+                enableButtons();
+            }
+        }
+
+        async function paraphraseWithPuter(text, mode) {
+            if (!window.puter || !window.puter.ai || !window.puter.ai.chat) {
+                throw new Error('Puter AI service is not available');
+            }
+
+            const systemPrompts = {
+                paraphrase: `You are an expert academic editor. Your task is to paraphrase the following text.
+- The new version should have a different sentence structure and use different vocabulary.
+- It must retain the original meaning and academic tone.
+- Return only the paraphrased text, with no additional comments or explanations.`,
+
+                formal: `You are an expert academic editor. Your task is to rewrite the following text to make it more formal and suitable for a thesis.
+- Elevate the vocabulary and sentence structure.
+- Ensure the core meaning is preserved.
+- Return only the rewritten text, with no additional comments or explanations.`,
+
+                simple: `You are an expert academic editor. Your task is to simplify the following text.
+- Make it easier to understand for a general audience.
+- Use clearer, more direct language.
+- Retain the key information and core meaning.
+- Return only the simplified text, with no additional comments or explanations.`,
+
+                expanded: `You are an expert academic editor. Your task is to expand on the following text.
+- Add more detail, context, or examples to elaborate on the core idea.
+- The length should be slightly longer but not excessively so.
+- Maintain a consistent academic tone.
+- Return only the expanded text, with no additional comments or explanations.`
+            };
+
+            const systemPrompt = systemPrompts[mode] || systemPrompts.paraphrase;
+            const prompt = `${systemPrompt}\n\nText to process:\n\n"${text}"`;
+
+            const startTime = Date.now();
+            const response = await window.puter.ai.chat({
+                prompt,
+                temperature: 0.7,
+                max_tokens: 2000
+            });
+
+            const duration = Date.now() - startTime;
+
+            // Extract text from response
+            let resultText = '';
+            if (typeof response === 'string') {
+                resultText = response;
+            } else if (response && typeof response === 'object') {
+                resultText = 
+                    response.choices?.[0]?.message?.content ||
+                    response.choices?.[0]?.text ||
+                    response.response ||
+                    response.text ||
+                    response.content ||
+                    response.answer ||
+                    response.result ||
+                    String(response);
+            }
+
+            if (!resultText || resultText.trim() === '') {
+                throw new Error('AI returned an empty response');
+            }
+
+            return {
+                mode,
+                text: resultText.trim(),
+                originalLength: text.length,
+                resultLength: resultText.trim().length,
+                duration,
+                timestamp: new Date().toLocaleTimeString()
+            };
+        }
+
+        function renderResults() {
+            const container = document.getElementById('resultsContainer');
+            
+            if (Object.keys(results).length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; color: #999; padding: 40px;">
+                        Click a transformation button above to see results...
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = Object.entries(results).map(([mode, result]) => `
+                <div class="result-card">
+                    <h3>
+                        <span class="mode-badge">${mode.toUpperCase()}</span>
+                    </h3>
+                    <div class="result-text">${escapeHtml(result.text)}</div>
+                    <div class="result-stats">
+                        <div class="stat">
+                            <div class="stat-label">Original</div>
+                            <div class="stat-value">${result.originalLength} chars</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Result</div>
+                            <div class="stat-value">${result.resultLength} chars</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Change</div>
+                            <div class="stat-value">${((result.resultLength / result.originalLength - 1) * 100).toFixed(1)}%</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Time</div>
+                            <div class="stat-value">${result.duration}ms</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusBox = document.getElementById('statusMessage');
+            statusBox.textContent = message;
+            statusBox.className = `status-box show ${type}`;
+        }
+
+        function enableButtons() {
+            document.querySelectorAll('.btn-primary').forEach(btn => {
+                btn.disabled = false;
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

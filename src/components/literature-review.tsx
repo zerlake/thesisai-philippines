@@ -1,23 +1,14 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from './ui/card';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
-import { Alert, AlertDescription } from './ui/alert';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
-import { Badge } from './ui/badge';
-import { Loader2, CheckCircle, AlertTriangle, ExternalLink, History, Download, RefreshCw, Quote, Save, Library, Globe, ArrowUpRight, FilePlus2, Search, Sparkles } from 'lucide-react';
+import { Sparkles, ArrowUpRight, FilePlus2, Search } from 'lucide-react';
 import { useAuth } from './auth-provider';
 import { toast } from 'sonner';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { formatDistanceToNow } from 'date-fns';
 import { Skeleton } from './ui/skeleton';
-import { toPng } from 'html-to-image';
-import jsPDF from 'jspdf';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import Link from 'next/link';
-import { cn } from '../lib/utils';
+import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
 import { Input } from './ui/input';
 import { Checkbox } from './ui/checkbox';
 import { useRouter } from 'next/navigation';

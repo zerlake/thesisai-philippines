@@ -16,8 +16,10 @@ import {
   Loader2,
 } from "lucide-react";
 import { useAuth } from "./auth-provider";
+import { callPuterAI } from "@/lib/puter-ai-wrapper";
 import { toast } from "sonner";
 import { type Editor } from "@tiptap/react";
+import { createSanitizedHtml } from "@/lib/html-sanitizer";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Separator } from "./ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -44,7 +46,7 @@ export function AIAssistantPanel({
   documentContent,
   documentId,
 }: AIAssistantPanelProps) {
-  const { session } = useAuth();
+  const { session, supabase } = useAuth();
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
   const [generatedContentType, setGeneratedContentType] = useState<
@@ -63,22 +65,13 @@ export function AIAssistantPanel({
     }
 
     try {
-      const response = await fetch(
-        `https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/${functionName}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-            apikey:
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
-          },
-          body: JSON.stringify(body),
-        }
-      );
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || `Failed to call ${functionName}.`);
+      const { data, error } = await supabase.functions.invoke(functionName, {
+        body: body
+      });
+      
+      if (error) {
+        throw new Error(error.message || `Failed to call ${functionName}.`);
+      }
       return data;
     } catch (error: any) {
       toast.error(error.message);
@@ -91,27 +84,50 @@ export function AIAssistantPanel({
   const handleImprove = async () => {
     if (!editor) return;
     setIsLoading("improve");
-    const data = await callAIFunction("improve-writing", {
-      text: documentContent,
-    });
-    if (data && data.improvedText) {
-      editor.commands.setContent(data.improvedText);
+    
+    try {
+      const prompt = `You are an expert academic editor. Your task is to revise the following text to improve its clarity, conciseness, and academic tone.
+- Correct any grammatical errors.
+- Rephrase awkward sentences.
+- Ensure the language is formal and objective.
+- Do not change the core meaning of the text.
+- Return only the improved text, with no additional comments or explanations.
+
+Text to improve:
+"${documentContent}"
+
+Improved text:`;
+
+      const improvedText = await callPuterAI(prompt, { temperature: 0.5, max_tokens: 3000 });
+      editor.commands.setContent(improvedText);
       toast.success("Document improved successfully!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to improve document");
+    } finally {
+      setIsLoading(null);
     }
-    setIsLoading(null);
   };
 
   const handleSummarize = async () => {
     setIsLoading("summarize");
     setGeneratedContent(null);
-    const data = await callAIFunction("summarize-text", {
-      text: documentContent,
-    });
-    if (data && data.summarizedText) {
-      setGeneratedContent(data.summarizedText);
+    
+    try {
+      const prompt = `You are an expert academic editor. Your task is to summarize the provided text. Keep the core meaning and important information. Make it concise while maintaining an academic tone. Return only the summarized text, with no additional comments or explanations.
+
+Text to summarize:
+"${documentContent}"
+
+Summary:`;
+
+      const summarizedText = await callPuterAI(prompt, { temperature: 0.5, max_tokens: 1500 });
+      setGeneratedContent(summarizedText);
       setGeneratedContentType("Summary");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to summarize document");
+    } finally {
+      setIsLoading(null);
     }
-    setIsLoading(null);
   };
 
   const handleGenerateAbstract = async () => {
@@ -307,7 +323,7 @@ export function AIAssistantPanel({
               </AlertTitle>
               <AlertDescription
                 className="mt-2 max-h-48 overflow-y-auto prose dark:prose-invert prose-sm"
-                dangerouslySetInnerHTML={{ __html: generatedContent }}
+                dangerouslySetInnerHTML={createSanitizedHtml(generatedContent)}
               />
             </Alert>
           </>

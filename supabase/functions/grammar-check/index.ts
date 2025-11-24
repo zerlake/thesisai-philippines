@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
+import { callPuterAI } from '../_shared/puter-ai.ts';
 
 const getCorsHeaders = (req: Request) => {
   const ALLOWED_ORIGINS = [
@@ -18,22 +19,31 @@ const getCorsHeaders = (req: Request) => {
   };
 }
 
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
-
-async function analyzeTextWithGemini(text: string, apiKey: string) {
+async function analyzeTextWithPuter(text: string) {
   const prompt = `
-    You are an expert academic writing coach. Analyze the following text based on five criteria: Focus, Development, Audience, Cohesion, and Language and Style.
+    You are an expert academic writing coach. Analyze the following text based on multiple criteria.
 
-    For each criterion, provide a score from 1 to 5 (can be a decimal like 3.5).
+    CORE CRITERIA (required):
     - Focus: Is the writing centered on a clear, consistent main idea?
     - Development: Are the ideas well-supported with evidence, examples, and details?
     - Audience: Is the tone and language appropriate for an academic audience?
     - Cohesion: Do the ideas flow logically? Are transitions used effectively?
     - Language and Style: Is the grammar correct? Is the sentence structure varied and the word choice precise?
 
-    Also, provide an overall score which is the average of the five criteria, rounded to one decimal place.
+    EXTENDED CRITERIA (provide scores for these as well):
+    - Clarity & Precision: How clearly are ideas expressed? Is vocabulary precise and appropriate?
+    - Originality & Creativity: Does the writing present unique insights, arguments, or presentation styles?
+    - Structure & Organization: Is the text logically organized with clear introduction, body, and conclusion?
+    - Grammar & Mechanics: Are grammar, punctuation, spelling, and formatting consistent and correct?
+    - Argument Strength & Evidence: How effective are arguments? Is evidence adequate and convincing?
+    - Engagement & Tone: Does the writing engage the target audience? Is the tone appropriate for the purpose?
+    - Conciseness & Redundancy: Is the writing economical with words? Are there unnecessary repetitions or verbosity?
+    - Readability Metrics: What is the overall readability level? Consider sentence length and complexity.
+
+    For each criterion, provide a score from 1 to 5 (can be a decimal like 3.5).
+    Provide an overall score which is the average of ALL scores, rounded to one decimal place.
     Provide a concise, actionable "overallFeedback" (2-3 sentences) that summarizes the main strengths and areas for improvement.
-    Finally, for each of the five criteria, provide a specific, actionable "tip" (1-2 sentences) that directly addresses how to improve that particular aspect of the writing.
+    For each criterion, provide a specific, actionable "tip" (1-2 sentences) that directly addresses how to improve that particular aspect.
 
     Your entire output MUST be a single, valid JSON object. Do not include any markdown formatting like 
     json or any text outside of the JSON object.
@@ -46,6 +56,14 @@ async function analyzeTextWithGemini(text: string, apiKey: string) {
         "audience": number,
         "cohesion": number,
         "languageAndStyle": number,
+        "clarity": number,
+        "originality": number,
+        "structure": number,
+        "grammar": number,
+        "argumentStrength": number,
+        "engagement": number,
+        "conciseness": number,
+        "readability": number,
         "overall": number
       },
       "overallFeedback": "string",
@@ -54,7 +72,15 @@ async function analyzeTextWithGemini(text: string, apiKey: string) {
         "development": "string",
         "audience": "string",
         "cohesion": "string",
-        "languageAndStyle": "string"
+        "languageAndStyle": "string",
+        "clarity": "string",
+        "originality": "string",
+        "structure": "string",
+        "grammar": "string",
+        "argumentStrength": "string",
+        "engagement": "string",
+        "conciseness": "string",
+        "readability": "string"
       }
     }
 
@@ -63,35 +89,55 @@ async function analyzeTextWithGemini(text: string, apiKey: string) {
     Generate the JSON object now.
   `;
 
-  const response = await fetch(`${GEMINI_API_URL}${apiKey}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      contents: [{
-        parts: [{
-          text: prompt,
-        }],
-      }],
-    }),
-  });
+  const systemPrompt = 'You are an expert academic writing coach specializing in thesis analysis.';
 
-  if (!response.ok) {
-    const errorBody = await response.json() as { error?: { message: string } };
-    console.error("Gemini API Error:", errorBody);
-    throw new Error(`Gemini API request failed: ${errorBody.error?.message || 'Unknown error'}`);
+  try {
+    const generatedText = await callPuterAI(prompt, {
+      systemPrompt,
+      temperature: 0.7,
+      max_tokens: 2000,
+    });
+
+    if (!generatedText) {
+      throw new Error("Failed to get analysis from Puter AI");
+    }
+
+    // Extract JSON from the response (in case it includes additional text)
+    const jsonStart = generatedText.indexOf('{');
+    const jsonEnd = generatedText.lastIndexOf('}') + 1;
+    const jsonString = jsonStart !== -1 && jsonEnd !== 0 
+      ? generatedText.substring(jsonStart, jsonEnd)
+      : generatedText;
+    
+    const result = JSON.parse(jsonString);
+    
+    // Ensure all required dimensions are present
+    const requiredScores = ['focus', 'development', 'audience', 'cohesion', 'languageAndStyle', 
+                            'clarity', 'originality', 'structure', 'grammar', 'argumentStrength', 
+                            'engagement', 'conciseness', 'readability'];
+    
+    for (const dimension of requiredScores) {
+      if (result.scores[dimension] === undefined) {
+        console.warn(`Missing dimension: ${dimension}, assigning default score of 3`);
+        result.scores[dimension] = 3;
+        result.tips[dimension] = result.tips[dimension] || 'Review this aspect of your writing for improvement.';
+      }
+    }
+    
+    // Recalculate overall if needed
+    const allScores = Object.entries(result.scores)
+      .filter(([key]) => key !== 'overall')
+      .map(([_, value]) => value as number);
+    
+    if (allScores.length > 0) {
+      result.scores.overall = Math.round((allScores.reduce((a, b) => a + b, 0) / allScores.length) * 10) / 10;
+    }
+    
+    return result;
+  } catch (error) {
+    console.error("Puter AI Error:", error);
+    throw new Error(`Failed to analyze text: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-
-  const data = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>, scores: any, overallFeedback: string };
-  const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!generatedText) {
-    console.error("Invalid response structure from Gemini:", data);
-    throw new Error("Failed to parse the analysis from the Gemini API response.");
-  }
-
-  return JSON.parse(generatedText);
 }
 
 interface RequestBody {
@@ -125,9 +171,10 @@ serve(async (req: Request) => {
     }
 
     // @ts-ignore
-    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!geminiApiKey) {
-      throw new Error("GEMINI_API_KEY is not set in Supabase project secrets.");
+    // Puter API key is optional, will use defaults if not set
+    const hasPuterApiKey = !!Deno.env.get("PUTER_API_KEY");
+    if (!hasPuterApiKey) {
+      console.warn("PUTER_API_KEY not set, using default Puter configuration");
     }
 
     const { text } = await req.json() as RequestBody;
@@ -138,7 +185,7 @@ serve(async (req: Request) => {
       });
     }
 
-    const analysisData = await analyzeTextWithGemini(text, geminiApiKey);
+    const analysisData = await analyzeTextWithPuter(text);
 
     // Save analysis results to grammar_check_history
     const supabaseUserClient = createClient(

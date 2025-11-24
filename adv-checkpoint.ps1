@@ -30,7 +30,7 @@ function Save-Checkpoint {
 
 function List-Checkpoints {
     Write-Host "Available checkpoints:"
-    Get-ChildItem -Path $checkpointsRoot | ForEach-Object { Write-Host "  $" }
+    Get-ChildItem -Path $checkpointsRoot | ForEach-Object { Write-Host "  $($_.Name)" }
 }
 
 function Restore-Checkpoint {

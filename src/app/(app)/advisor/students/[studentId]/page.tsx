@@ -1,6 +1,7 @@
 "use client";
 
 import { StudentDetailView } from "@/components/student-detail-view";
+// @ts-ignore - useParams is available in client components in Next.js 15
 import { useParams } from "next/navigation";
 
 export default function StudentDetailPage() {

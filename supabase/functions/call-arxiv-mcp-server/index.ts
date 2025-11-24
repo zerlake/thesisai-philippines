@@ -70,20 +70,55 @@ serve(async (req: Request) => {
     });
 
     if (!mcpResponse.ok) {
-      const errorBody = await mcpResponse.json();
-      throw new Error(`ArXiv MCP Server error: ${errorBody.error || mcpResponse.statusText}`);
+      let errorBody;
+      try {
+        errorBody = await mcpResponse.json();
+      } catch (parseError) {
+        // If response is not JSON, get text content
+        const errorText = await mcpResponse.text();
+        console.error("Non-JSON error response:", errorText);
+        throw new Error(`ArXiv MCP Server error: ${mcpResponse.status} - ${errorText}`);
+      }
+      
+      // Handle different possible error formats
+      let errorMessage = mcpResponse.statusText;
+      if (errorBody && typeof errorBody === 'object') {
+        if (errorBody.error) {
+          errorMessage = errorBody.error;
+        } else if (errorBody.message) {
+          errorMessage = errorBody.message;
+        } else if (errorBody.detail) {  // Common in some APIs
+          errorMessage = errorBody.detail;
+        } else {
+          // Try to stringify the full error object to see its content
+          errorMessage = JSON.stringify(errorBody);
+        }
+      } else if (typeof errorBody === 'string') {
+        errorMessage = errorBody;
+      }
+      
+      console.error("MCP Server error response:", errorBody);
+      throw new Error(`ArXiv MCP Server error: ${errorMessage}`);
     }
 
     const mcpData = await mcpResponse.json();
+    console.log("MCP Server response data:", mcpData);
 
     // The MCP server returns a list of TextContent. We expect the first item to be the JSON result.
     const resultTextContent = mcpData[0]?.text;
     if (!resultTextContent) {
-      throw new Error("ArXiv MCP Server did not return expected text content.");
+      console.error("MCP Server response structure unexpected:", mcpData);
+      throw new Error(`ArXiv MCP Server did not return expected text content. Received: ${JSON.stringify(mcpData)}`);
     }
 
     // Parse the JSON string from the TextContent
-    const parsedResult = JSON.parse(resultTextContent);
+    let parsedResult;
+    try {
+      parsedResult = JSON.parse(resultTextContent);
+    } catch (parseError) {
+      console.error("Failed to parse MCP result as JSON:", resultTextContent);
+      throw new Error(`Failed to parse MCP server result as JSON: ${resultTextContent}`);
+    }
 
     return new Response(JSON.stringify(parsedResult), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

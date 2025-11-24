@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from "react";
 import { useAuth } from "./auth-provider";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+
 import { Skeleton } from "./ui/skeleton";
 import { toast } from "sonner";
 import { Timer, Users } from "lucide-react";

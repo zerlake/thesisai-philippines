@@ -9,9 +9,11 @@ import { toast } from "sonner";
 import { Copy, Wand2 } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 import { Label } from "./ui/label";
+import { useAuthReady } from "@/hooks/use-auth-ready";
 
 export function TitleGenerator() {
   const { session } = useAuth();
+  const { isReady } = useAuthReady();
   const [summary, setSummary] = useState("");
   const [titles, setTitles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -21,6 +23,12 @@ export function TitleGenerator() {
       toast.error("Please enter a summary or abstract first.");
       return;
     }
+    
+    if (!isReady) {
+      toast.error("Please wait while your session is loading...");
+      return;
+    }
+    
     if (!session) {
       toast.error("You must be logged in to use this feature.");
       return;
@@ -37,7 +45,7 @@ export function TitleGenerator() {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
-            apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
+            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
           },
           body: JSON.stringify({ summary }),
         }

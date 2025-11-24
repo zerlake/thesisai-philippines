@@ -1,17 +1,19 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Textarea } from "./ui/textarea";
 import { useAuth } from "./auth-provider";
+import { useAuthReady } from "@/hooks/use-auth-ready";
 import { toast } from "sonner";
-import { AlertTriangle, History, Loader2, Sparkles, Trash2 } from "lucide-react";
+import { AlertTriangle, History, Loader2, Sparkles, Trash2, ChevronDown } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 import { Separator } from "./ui/separator";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Alert, AlertDescription } from "./ui/alert";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import { Label } from "./ui/label";
 import { formatDistanceToNow } from "date-fns";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
@@ -22,6 +24,15 @@ type ScoreResults = {
   cohesion: number;
   languageAndStyle: number;
   overall: number;
+  // Extended rating dimensions
+  clarity?: number;
+  originality?: number;
+  structure?: number;
+  grammar?: number;
+  argumentStrength?: number;
+  engagement?: number;
+  conciseness?: number;
+  readability?: number;
 };
 
 type Tips = {
@@ -30,6 +41,15 @@ type Tips = {
   audience: string;
   cohesion: string;
   languageAndStyle: string;
+  // Extended tips
+  clarity?: string;
+  originality?: string;
+  structure?: string;
+  grammar?: string;
+  argumentStrength?: string;
+  engagement?: string;
+  conciseness?: string;
+  readability?: string;
 };
 
 type AnalysisResult = {
@@ -54,6 +74,15 @@ const criterionDescriptions: { [key: string]: string } = {
   audience: "Is the tone and language appropriate for an academic audience?",
   cohesion: "Do the ideas flow logically? Are transitions used effectively?",
   languageAndStyle: "Is the grammar correct? Is the sentence structure varied and the word choice precise?",
+  // Extended dimensions
+  clarity: "How clearly are ideas expressed? Is vocabulary precise and appropriate?",
+  originality: "Does the writing present unique insights, arguments, or presentation styles?",
+  structure: "Is the text logically organized with clear introduction, body, and conclusion?",
+  grammar: "Are grammar, punctuation, spelling, and formatting consistent and correct?",
+  argumentStrength: "How effective are arguments? Is evidence adequate and convincing?",
+  engagement: "Does the writing engage the target audience? Is the tone appropriate for the purpose?",
+  conciseness: "Is the writing economical with words? Are there unnecessary repetitions or verbosity?",
+  readability: "What is the overall readability level? (Flesch-Kincaid equivalent)",
 };
 
 export function GrammarChecker() {
@@ -66,12 +95,22 @@ export function GrammarChecker() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
+  const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
 
   const wordCount = inputText.split(/\s+/).filter(Boolean).length;
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const addSampleData = () => {
+    const sampleText = `Introduction: The Impact of Social Media Usage on Academic Performance of Senior High School Students in the Philippines
+
+Research Problem: With the proliferation of digital technology and social media platforms, concerns have been raised about their impact on students' academic performance. Studies have shown mixed results regarding the relationship between social media usage and academic achievement, with some indicating negative correlations while others suggest potential benefits for collaborative learning. In the Philippine context, the K-12 educational reforms have emphasized the importance of digital literacy while also highlighting the need for balanced technology use. During the pandemic, the reliance on digital platforms for education increased dramatically, further blurring the lines between educational and recreational technology use. This study aims to investigate the specific relationship between social media usage patterns and academic performance among Grade 12 students in selected schools in Region III, providing insights that could inform educational policies and student guidance programs.`;
+    
+    setInputText(sampleText);
+    toast.success("Sample text added! Click 'Analyze Text' to see the writing feedback in action.");
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -157,13 +196,26 @@ export function GrammarChecker() {
     }
   };
 
-  const scoreItems = results ? [
+  const baseScoreItems = results ? [
     { label: "Focus", key: "focus", value: results.scores.focus, tip: results.tips.focus },
     { label: "Development", key: "development", value: results.scores.development, tip: results.tips.development },
     { label: "Audience", key: "audience", value: results.scores.audience, tip: results.tips.audience },
     { label: "Cohesion", key: "cohesion", value: results.scores.cohesion, tip: results.tips.cohesion },
-    { label: "Language and style", key: "languageAndStyle", value: results.scores.languageAndStyle, tip: results.tips.languageAndStyle },
+    { label: "Language and Style", key: "languageAndStyle", value: results.scores.languageAndStyle, tip: results.tips.languageAndStyle },
   ] : [];
+
+  const extendedScoreItems = results ? [
+    results.scores.clarity !== undefined ? { label: "Clarity & Precision", key: "clarity", value: results.scores.clarity, tip: results.tips.clarity } : null,
+    results.scores.originality !== undefined ? { label: "Originality & Creativity", key: "originality", value: results.scores.originality, tip: results.tips.originality } : null,
+    results.scores.structure !== undefined ? { label: "Structure & Organization", key: "structure", value: results.scores.structure, tip: results.tips.structure } : null,
+    results.scores.grammar !== undefined ? { label: "Grammar & Mechanics", key: "grammar", value: results.scores.grammar, tip: results.tips.grammar } : null,
+    results.scores.argumentStrength !== undefined ? { label: "Argument Strength & Evidence", key: "argumentStrength", value: results.scores.argumentStrength, tip: results.tips.argumentStrength } : null,
+    results.scores.engagement !== undefined ? { label: "Engagement & Tone", key: "engagement", value: results.scores.engagement, tip: results.tips.engagement } : null,
+    results.scores.conciseness !== undefined ? { label: "Conciseness & Redundancy", key: "conciseness", value: results.scores.conciseness, tip: results.tips.conciseness } : null,
+    results.scores.readability !== undefined ? { label: "Readability Metrics", key: "readability", value: results.scores.readability, tip: results.tips.readability } : null,
+  ].filter((item): item is { label: string; key: string; value: number; tip: string | undefined } => item !== null) : [];
+
+  const allScoreItems = [...baseScoreItems, ...extendedScoreItems];
 
   const chartData = history.map(item => ({
     date: isMounted ? formatDistanceToNow(new Date(item.created_at), { addSuffix: false }) : '',
@@ -180,7 +232,19 @@ export function GrammarChecker() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex justify-between items-center mb-2">
+            <Label htmlFor="text-input">Text for Analysis</Label>
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm"
+              onClick={addSampleData}
+            >
+              Add Sample
+            </Button>
+          </div>
           <Textarea
+            id="text-input"
             placeholder="Paste your text here for analysis..."
             className="min-h-[250px] resize-y"
             value={inputText}
@@ -223,60 +287,125 @@ export function GrammarChecker() {
       )}
 
       {results && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Feedback</CardTitle>
-          </CardHeader>
-          <CardContent className="grid md:grid-cols-[250px_1fr] gap-8">
-            <Card className="p-4 bg-muted/50">
-              <div className="flex justify-between items-baseline mb-2">
-                <p className="font-bold">Overall</p>
-                <p className="text-2xl font-bold">{results.scores.overall.toFixed(1)}</p>
-              </div>
-              <Separator />
-              <div className="space-y-2 mt-4">
-                {scoreItems.map(item => (
-                  <div key={item.key} className="flex justify-between text-sm">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="link" className="p-0 h-auto text-sm font-medium">
-                          {item.label}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-80">
-                        <p className="text-sm font-semibold mb-2">{item.label}</p>
-                        <p className="text-xs text-muted-foreground">{criterionDescriptions[item.key]}</p>
-                      </PopoverContent>
-                    </Popover>
-                    <p className="font-medium">{item.value.toFixed(1)}/5</p>
-                  </div>
-                ))}
-              </div>
-            </Card>
-            <div className="space-y-4">
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>Your Feedback</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
               <div>
-                <h4 className="font-semibold">Overall Feedback</h4>
+                <h4 className="font-semibold mb-2">Overall Feedback</h4>
                 <p className="text-muted-foreground">{results.overallFeedback}</p>
               </div>
-              <div>
-                <h4 className="font-semibold">Specific Tips for Improvement</h4>
-                <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-                  {scoreItems.map(item => (
-                    <li key={item.key}>
-                      <strong>{item.label}:</strong> {item.tip}
-                    </li>
-                  ))}
-                </ul>
+              <div className="p-6 bg-primary/5 rounded-lg border">
+                <div className="flex justify-between items-baseline">
+                  <p className="text-lg font-semibold">Overall Score</p>
+                  <p className="text-4xl font-bold text-primary">{results.scores.overall.toFixed(1)}</p>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">Average of all 13 writing dimensions</p>
               </div>
-              <div>
-                <h4 className="font-semibold">Next Steps</h4>
-                <p className="text-muted-foreground">
-                  Consider using the AI tools in the editor to improve specific sections. Highlight text to get suggestions for improving, summarizing, or rewriting.
-                </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Detailed Breakdown (1-5 Scale)</CardTitle>
+              <CardDescription>
+                Comprehensive analysis across all writing quality dimensions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="font-semibold mb-4 text-sm">Core Dimensions</h4>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {baseScoreItems.map(item => (
+                      <div key={item.key} className="space-y-2 p-4 rounded-lg bg-muted/50">
+                        <div className="flex justify-between items-baseline">
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="link" className="p-0 h-auto text-sm font-semibold justify-start">
+                                {item.label}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80">
+                              <p className="text-sm font-semibold mb-2">{item.label}</p>
+                              <p className="text-xs text-muted-foreground">{criterionDescriptions[item.key]}</p>
+                            </PopoverContent>
+                          </Popover>
+                          <span className="text-lg font-bold text-primary">{item.value.toFixed(1)}/5</span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2">
+                          <div 
+                            className="bg-blue-500 h-2 rounded-full transition-all"
+                            style={{ width: `${(item.value / 5) * 100}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">{item.tip}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {extendedScoreItems.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-4 text-sm">Extended Dimensions (Advanced Analysis)</h4>
+                    <div className="space-y-2">
+                      {extendedScoreItems.map(item => (
+                        <div key={item.key} className="border rounded-lg overflow-hidden">
+                          <button
+                            onClick={() => setExpandedAccordion(expandedAccordion === item.key ? null : item.key)}
+                            className="w-full p-4 flex justify-between items-center hover:bg-muted/50 transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <ChevronDown 
+                                className={`w-4 h-4 transition-transform ${expandedAccordion === item.key ? 'rotate-180' : ''}`}
+                              />
+                              <div className="text-left">
+                                <p className="font-semibold text-sm">{item.label}</p>
+                              </div>
+                            </div>
+                            <span className="text-lg font-bold text-primary">{item.value.toFixed(1)}/5</span>
+                          </button>
+                          
+                          {expandedAccordion === item.key && (
+                            <div className="px-4 pb-4 border-t bg-muted/30 space-y-3">
+                              <div className="w-full bg-muted rounded-full h-2">
+                                <div 
+                                  className="bg-green-500 h-2 rounded-full transition-all"
+                                  style={{ width: `${(item.value / 5) * 100}%` }}
+                                />
+                              </div>
+                              <div>
+                                <p className="text-xs font-medium text-muted-foreground mb-1">What this measures:</p>
+                                <p className="text-sm text-muted-foreground">{criterionDescriptions[item.key]}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs font-medium text-muted-foreground mb-1">Improvement tip:</p>
+                                <p className="text-sm text-muted-foreground">{item.tip}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Next Steps</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Consider using the AI tools in the editor to improve specific sections. Highlight text to get suggestions for improving, summarizing, or rewriting. Focus on the dimensions with lower scores for the most impact.
+              </p>
+            </CardContent>
+          </Card>
+        </>
       )}
 
       <Card>

@@ -1,7 +1,7 @@
 "use client";
 
-import { DocumentList } from "@/components/document-list";
+import { NewDocumentList } from "@/components/new-document-list";
 
-export default function DraftsPage() {
-  return <DocumentList />;
+export default function NewDraftsPage() {
+  return <NewDocumentList />;
 }

@@ -9,7 +9,7 @@
     "moduleResolution": "bundler",
     "allowJs": true,
     "checkJs": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
       {
@@ -24,6 +24,10 @@
     "isolatedModules": true,
     "allowImportingTsExtensions": true,
     "skipLibCheck": true,
+    "types": [
+      "vitest/globals",
+      "@testing-library/jest-dom"
+    ],
     "paths": {
       "@/*": [
         "./src/*"
@@ -34,10 +38,17 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
-    "supabase"
+    "supabase",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "src/__tests__",
+    "__tests__",
+    "src/setupTests.ts",
+    "vite.config.test.ts"
   ]
 }

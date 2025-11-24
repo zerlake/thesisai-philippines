@@ -8,16 +8,12 @@ import {
 } from "./ui/accordion";
 import {
   Card,
-  CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "./ui/card";
 import {
-  BookUser,
-  CheckCircle,
   LayoutDashboard,
-  MessageSquare,
   ShieldCheck,
   Sparkles,
   Banknote,

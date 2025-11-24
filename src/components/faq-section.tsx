@@ -1,6 +1,7 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { BookOpenCheck, ShieldCheck, Users, Coins, GraduationCap, BrainCircuit, Settings2, MessageSquareMore, BarChart3 } from "lucide-react";
+import { BookOpenCheck, ShieldCheck, Users, Coins, GraduationCap, BrainCircuit, Settings2, MessageSquareMore, BarChart3, Search, HelpCircle } from "lucide-react";
+import { Button } from "./ui/button";
 
 const faqCategories = [
   {
@@ -16,8 +17,16 @@ const faqCategories = [
         answer: "You can use the generated text as a starting point or inspiration, but we strongly recommend rewriting it in your own words. The AI-generated content is meant to help overcome writer's block and provide structure, not to be copied verbatim. Always ensure your final work reflects your original thinking and voice."
       },
       {
+        question: "What about plagiarism?",
+        answer: "ThesisAI serves as a research writing assistant, but should not substitute your own research efforts. We strongly advise against submitting AI-generated content directly as your own work without significant revision, expansion, and proper citation of sources. Remember that AI tools like ThesisAI are intended to assist in your writing journey, but you remain accountable for using the generated content ethically and responsibly. These AI tools give educators a chance to emphasize to students the importance of submitting only their own original work. Our goal is to inspire students to cultivate their own thoughts and use AI tools to complement their research rather than substitute the research process. Ultimately, we're dedicated to encouraging ethical writing practices and ensuring our platform supports genuine academic research. We urge users to employ ThesisAI responsibly and always provide appropriate attribution."
+      },
+      {
         question: "How does the Originality Checker work?",
         answer: "Our checker uses advanced algorithms to compare your text against billions of web pages. It highlights potential matches and suggests citation formats. For maximum accuracy, we recommend running checks before submission and addressing any flagged content by proper paraphrasing and citation."
+      },
+      {
+        question: "How do collaborative literature reviews work?",
+        answer: "Our Collaborative Literature Review tool enables research teams to work together on literature analysis. Team members can annotate papers, tag themes, create shared coding schemes, and develop themes collectively. The tool includes features such as shared annotation boards, collaborative tagging, consensus tracking, and conflict resolution mechanisms. This is ideal for thesis groups, research teams, and collaborative projects where multiple people need to contribute to the literature review process."
       }
     ]
   },
@@ -27,7 +36,7 @@ const faqCategories = [
     items: [
       {
         question: "What AI model powers ThesisAI Philippines?",
-        answer: "We use Google's Gemini API for our AI features. This ensures high-quality, contextually relevant assistance while maintaining fast response times. All AI interactions are processed securely through our Supabase Edge Functions."
+        answer: "We use Puter AI for our AI features. This ensures high-quality, contextually relevant assistance while maintaining fast response times. All AI interactions are processed securely through our Supabase Edge Functions with direct Puter AI integration."
       },
       {
         question: "Are my documents stored in the AI system?",
@@ -36,6 +45,14 @@ const faqCategories = [
       {
         question: "How accurate are the statistical test interpretations?",
         answer: "The AI provides general guidance based on standard statistical practices. However, it's essential to verify the interpretation with your advisor or statistics professor. The tool is designed to help you understand basic concepts, not replace expert statistical consultation."
+      },
+      {
+        question: "How does the Research Problem Identifier work?",
+        answer: "Our Research Problem Identifier uses AI to analyze your research topic, surfaces Philippine-specific issues using official datasets (PSA, DepEd, DOH, NEDA, etc.), identifies literature gaps, and generates well-structured research problem statements with context, gap, and significance sections."
+      },
+      {
+        question: "Can I analyze PDFs directly in the browser?",
+        answer: "Yes! Our PDF & Document Analysis tool processes files entirely in your browser using client-side processing. Your documents never leave your device, ensuring maximum privacy and security. The tool extracts text, summaries, and keywords directly in your browser."
       }
     ]
   },
@@ -148,6 +165,10 @@ const faqCategories = [
       {
         question: "How do I cite sources in APA 7th edition?",
         answer: "Use our Citation Manager to generate and save properly formatted citations. The tool follows APA 7th edition guidelines for author names, publication dates, titles, and source information. Always double-check against the official APA manual for complex cases."
+      },
+      {
+        question: "What is the University Format Checker?",
+        answer: "Our University Format Checker allows you to select your specific university and run an automated format compliance check against their specific requirements. The tool provides detailed feedback on formatting issues and suggestions for corrections, helping ensure your thesis meets your institution's standards."
       }
     ]
   },
@@ -157,7 +178,7 @@ const faqCategories = [
     items: [
       {
         question: "Can I collaborate with classmates?",
-        answer: "Direct collaboration between students isn't supported to maintain academic integrity. However, you can share non-sensitive parts of your research through public links or export sections for peer feedback. Remember to avoid sharing entire drafts that might compromise originality."
+        answer: "Yes! We offer several collaboration tools that maintain academic integrity. Use our Collaborative Literature Review tool to work together on literature analysis, annotation, and theme development. You can also use our shared annotation features, collaborative coding tools, and group analysis tools that allow multiple researchers to contribute meaningfully to shared research projects while maintaining individual accountability."
       },
       {
         question: "How often should I save my work?",
@@ -166,6 +187,22 @@ const faqCategories = [
       {
         question: "Is there a mobile app?",
         answer: "Currently, ThesisAI is web-based and accessible through any browser. A dedicated mobile app is planned for future development. The responsive web interface works well on mobile devices, though we recommend using desktop for intensive writing tasks."
+      },
+      {
+        question: "What tools are available for research conceptualization?",
+        answer: "We offer several tools for the conceptualization phase including a Variable Mapping Tool to define and visualize research variables, a Research Problem Identifier that surfaces Philippine-specific issues using official datasets, and structured proposal templates aligned with Philippine university standards."
+      },
+      {
+        question: "What is the Research Article Analyzer?",
+        answer: "The Research Article Analyzer is a specialized tool for deep analysis of academic research articles. It provides structured extraction of title, authors, methodology, findings, and conclusions. The tool includes annotation features, literature review matrices, collaboration tools for group work, and export options for use in your thesis writing process."
+      },
+      {
+        question: "How does the Collaborative Literature Review feature work?",
+        answer: "The Collaborative Literature Review feature allows multiple researchers to work together on analyzing literature. Team members can annotate papers, tag them with themes, create shared coding schemes, and build literature synthesis matrices together. The feature includes real-time collaboration, conflict resolution tools, consensus tracking, and export options for use in your thesis. Perfect for thesis groups, research teams, or any collaborative research project."
+      },
+      {
+        question: "What tools are available for group research projects?",
+        answer: "We offer several collaboration tools for group research: 1) Collaborative Literature Review for joint analysis of research papers; 2) Shared Annotation Tools for team-based paper review; 3) Collaborative Coding for qualitative research; 4) Group Analysis Tools for collective data interpretation; 5) Team Workspace for shared project management. These tools are designed to enhance teamwork while maintaining individual accountability in research."
       }
     ]
   }
@@ -173,37 +210,67 @@ const faqCategories = [
 
 export function FaqSection() {
   return (
-    <section className="py-12 md:py-16 bg-slate-800">
-      <div className="container mx-auto max-w-4xl px-4">
+    <section className="py-16 md:py-24 bg-gradient-to-b from-slate-800 to-slate-900">
+      <div className="container mx-auto max-w-5xl px-4">
+        {/* Header */}
         <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-white">Comprehensive FAQ</h2>
-          <p className="mt-4 text-slate-300">
-            Find answers to common questions about using ThesisAI Philippines
+          <div className="flex items-center justify-center mb-4">
+            <HelpCircle className="w-8 h-8 text-blue-400" />
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
+            Frequently Asked Questions
+          </h2>
+          <p className="mt-4 text-lg text-slate-300 max-w-2xl mx-auto">
+            Everything you need to know about ThesisAI Philippines, from features and pricing to academic integrity and technical support.
           </p>
         </div>
 
-        <div className="space-y-8">
+        {/* Quick Search CTA */}
+        <div className="mb-12 max-w-2xl mx-auto">
+          <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50 flex items-center gap-3">
+            <Search className="w-5 h-5 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search FAQs..."
+              className="flex-1 bg-transparent text-white placeholder-slate-400 outline-none text-sm"
+            />
+          </div>
+        </div>
+
+        {/* FAQ Categories */}
+        <div className="space-y-6">
           {faqCategories.map((category) => (
-            <Card key={category.title} className="bg-slate-900 border-slate-700">
-              <CardHeader className="border-b border-slate-700">
-                <div className="flex items-center gap-3">
-                  <category.icon className="w-6 h-6 text-blue-400" />
-                  <CardTitle className="text-xl text-white">{category.title}</CardTitle>
+            <Card key={category.title} className="bg-slate-800/50 border border-slate-700/50 hover:border-slate-600/50 transition-colors overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 border-b border-slate-700/50 py-5">
+                <div className="flex items-center gap-4">
+                  <div className="p-2.5 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-600/20">
+                    <category.icon className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl text-white">{category.title}</CardTitle>
+                    <p className="text-sm text-slate-400 mt-1">{category.items.length} questions</p>
+                  </div>
                 </div>
               </CardHeader>
-              <CardContent className="pt-6">
-                <Accordion type="single" collapsible>
+              <CardContent className="pt-0">
+                <Accordion type="single" collapsible className="divide-y divide-slate-700/50">
                   {category.items.map((faq, index) => (
                     <AccordionItem 
                       value={`item-${category.title}-${index}`} 
                       key={`${category.title}-${index}`}
-                      className="border-b border-slate-700"
+                      className="border-0"
                     >
-                      <AccordionTrigger className="text-left text-base font-medium text-white hover:no-underline">
-                        {faq.question}
+                      <AccordionTrigger className="text-left font-semibold text-white hover:text-blue-400 hover:no-underline py-4 px-0 group">
+                        <span className="text-base flex items-start gap-3">
+                          <span className="text-blue-400/60 group-hover:text-blue-400 transition-colors mt-1">Q</span>
+                          <span>{faq.question}</span>
+                        </span>
                       </AccordionTrigger>
-                      <AccordionContent className="text-base text-slate-300 pt-2 pb-4">
-                        {faq.answer}
+                      <AccordionContent className="text-slate-300 text-base pb-4 pl-8 pr-0">
+                        <div className="flex gap-3">
+                          <span className="text-purple-400/60 flex-shrink-0 mt-1">A</span>
+                          <div>{faq.answer}</div>
+                        </div>
                       </AccordionContent>
                     </AccordionItem>
                   ))}
@@ -211,6 +278,22 @@ export function FaqSection() {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* CTA Section */}
+        <div className="mt-16 p-8 md:p-12 rounded-xl bg-gradient-to-r from-blue-500/10 to-purple-600/10 border border-blue-500/20 text-center">
+          <h3 className="text-2xl font-bold text-white mb-3">Still have questions?</h3>
+          <p className="text-slate-300 mb-6 max-w-xl mx-auto">
+            Can't find the answer you're looking for? Our support team is here to help.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button asChild className="bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg hover:shadow-purple-500/50">
+              <a href="mailto:support@thesisai.ph">Contact Support</a>
+            </Button>
+            <Button variant="outline" asChild className="border-slate-600 text-white hover:bg-slate-800">
+              <a href="#">View Documentation</a>
+            </Button>
+          </div>
         </div>
       </div>
     </section>

@@ -1,8 +1,8 @@
 "use client";
 
 import { BookText } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { SignUpForm } from "@/components/sign-up-form";
+import { Card, CardContent } from "@/components/ui/card";
+import { SignUpFormWizard } from "@/components/sign-up-form-wizard";
 import Link from "next/link";
 
 export function RegisterPage() {
@@ -17,12 +17,8 @@ export function RegisterPage() {
           </p>
         </div>
         <Card>
-          <CardHeader>
-            <CardTitle>Sign Up</CardTitle>
-            <CardDescription>Fill in your details to get started.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SignUpForm />
+          <CardContent className="pt-6">
+            <SignUpFormWizard />
           </CardContent>
         </Card>
         <p className="text-center text-sm text-muted-foreground">

@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { BarChart, Upload, Info } from "lucide-react";
+import { BarChart, Info } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import * as XLSX from 'xlsx';
 import { StatisticalAnalysisPanel, type AnalysisResult } from "@/components/statistical-analysis-panel";
 import { ReportingGenerator } from "@/components/reporting-generator";
 import { CommonErrorsDetector } from "@/components/common-errors-detector";
@@ -16,7 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ChartGenerator } from "@/components/results-tools/chart-generator";
 import { ResultsInterpreter } from "@/components/results-tools/results-interpreter";
 import { StatisticalTestAdvisor } from "@/components/methodology-tools/statistical-test-advisor";
-import { SampleSizeCalculator } from "@/components/methodology-tools/sample-size-calculator";
+;
 import { PowerAnalysisCalculator } from "@/components/methodology-tools/power-analysis-calculator";
 import { KappaCalculator } from "@/components/results-tools/kappa-calculator";
 import { DescriptiveStatisticsPanel } from "@/components/descriptive-statistics-panel"; // Import the new component
@@ -27,15 +25,17 @@ export default function StatisticalAnalysisPage() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult | null>(null);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     setFileName(file.name);
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
+        // Lazy-load XLSX only when needed
+        const XLSX = await import('xlsx');
         const data = e.target?.result;
         const workbook = XLSX.read(data, { type: 'binary' });
         const sheetName = workbook.SheetNames[0];

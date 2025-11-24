@@ -1,0 +1,217 @@
+/**
+ * Puter SDK Loader - Ensures Puter SDK is fully initialized before use
+ * Handles timing conflicts with async script loading and multiple SDK initialization attempts
+ */
+
+interface PuterSDKWaitOptions {
+  maxWaitTime?: number; // Maximum time to wait in ms (default: 10000)
+  checkInterval?: number; // How often to check if SDK is ready (default: 100)
+  requireAuth?: boolean; // If true, wait for auth to be ready (default: false)
+}
+
+/**
+ * Wait for Puter SDK to be fully loaded and available
+ */
+export async function waitForPuterSDK(options: PuterSDKWaitOptions = {}): Promise<void> {
+  const {
+    maxWaitTime = 10000,
+    checkInterval = 100,
+    requireAuth = false,
+  } = options;
+
+  const startTime = Date.now();
+
+  return new Promise((resolve, reject) => {
+    const checkSDK = () => {
+      const elapsed = Date.now() - startTime;
+
+      // Check if Puter SDK is available
+      if (typeof window !== 'undefined' && window.puter) {
+        // Check if AI service is available
+        if (window.puter.ai && typeof window.puter.ai.chat === 'function') {
+          // If auth is required, also check for auth
+          if (requireAuth && window.puter.auth && typeof window.puter.auth.getUser === 'function') {
+            console.debug('[Puter SDK Loader] SDK and Auth fully loaded');
+            resolve();
+            return;
+          } else if (!requireAuth) {
+            console.debug('[Puter SDK Loader] AI SDK fully loaded');
+            resolve();
+            return;
+          }
+        }
+      }
+
+      // Check timeout
+      if (elapsed > maxWaitTime) {
+        const sdkStatus = {
+          windowPuter: typeof window !== 'undefined' && !!window.puter,
+          puterAI: typeof window !== 'undefined' && window.puter && !!window.puter.ai,
+          puterAIChat: typeof window !== 'undefined' && window.puter && window.puter.ai && typeof window.puter.ai.chat === 'function',
+          puterAuth: typeof window !== 'undefined' && window.puter && !!window.puter.auth,
+          elapsedMs: elapsed,
+        };
+        console.warn('[Puter SDK Loader] SDK initialization timeout. Status:', sdkStatus);
+        reject(new Error(`Puter SDK failed to initialize within ${maxWaitTime}ms`));
+        return;
+      }
+
+      // Check again after interval
+      setTimeout(checkSDK, checkInterval);
+    };
+
+    checkSDK();
+  });
+}
+
+/**
+ * Check if Puter SDK is currently available
+ */
+export function isPuterSDKReady(): boolean {
+  if (typeof window === 'undefined') return false;
+  return !!(window.puter && window.puter.ai && typeof window.puter.ai.chat === 'function');
+}
+
+/**
+ * Check if Puter Auth is currently available
+ */
+export function isPuterAuthReady(): boolean {
+  if (typeof window === 'undefined') return false;
+  return !!(window.puter && window.puter.auth && typeof window.puter.auth.getUser === 'function');
+}
+
+/**
+ * Get Puter SDK with safety checks
+ */
+export function getPuterSDK(): typeof window.puter | null {
+  if (typeof window === 'undefined') return null;
+  if (!window.puter) return null;
+  return window.puter;
+}
+
+/**
+ * Call Puter AI with guaranteed SDK availability
+ */
+export async function callPuterAIWithSDKCheck(
+  prompt: string,
+  options: {
+    temperature?: number;
+    max_tokens?: number;
+    timeout?: number;
+  } = {}
+): Promise<any> {
+  try {
+    // Ensure SDK is ready
+    try {
+      await waitForPuterSDK({ maxWaitTime: 5000 });
+    } catch (sdkError) {
+      console.error('[Puter AI Call] SDK failed to initialize:', sdkError);
+      // Provide helpful error message
+      throw new Error(
+        'AI service is not available. The Puter SDK failed to load. ' +
+        'Please refresh the page or try again in a few moments. ' +
+        'If the problem persists, check your internet connection.'
+      );
+    }
+
+    const sdk = getPuterSDK();
+    if (!sdk || !sdk.ai || typeof sdk.ai.chat !== 'function') {
+      throw new Error(
+        'Puter AI SDK is not properly initialized. ' +
+        'Please refresh the page to reload the AI service.'
+      );
+    }
+
+    // Call the AI
+    let result;
+    try {
+      // Ensure prompt is properly formatted string
+      const safePrompt = typeof prompt === 'string' ? prompt.trim() : String(prompt);
+      
+      if (!safePrompt) {
+        throw new Error('Prompt cannot be empty');
+      }
+
+      console.debug('[Puter AI Call] Sending request with:', {
+        promptLength: safePrompt.length,
+        temperature: options.temperature ?? 0.7,
+        max_tokens: options.max_tokens ?? 2000,
+        timeout: options.timeout ?? 30000,
+      });
+
+      result = await Promise.race([
+        sdk.ai.chat({
+          prompt: safePrompt,
+          temperature: options.temperature ?? 0.7,
+          max_tokens: options.max_tokens ?? 2000,
+        }),
+        // Add timeout
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Puter AI call timed out')), options.timeout ?? 30000)
+        ),
+      ]);
+
+      console.debug('[Puter AI Call] Received result:', { resultType: typeof result, resultKeys: result && typeof result === 'object' ? Object.keys(result) : undefined });
+    } catch (callError) {
+      console.error('[Puter AI Call] Chat API call failed:', callError);
+      
+      // Safe error message extraction
+      const errorMessage = callError instanceof Error 
+        ? callError.message 
+        : String(callError);
+      
+      if (errorMessage && errorMessage.includes('timed out')) {
+        throw new Error('The AI service took too long to respond. Please try again.');
+      }
+      
+      // If it's an empty object, provide a helpful error
+      if (callError && typeof callError === 'object' && Object.keys(callError).length === 0) {
+        throw new Error('The AI service returned an error. Please try again in a moment.');
+      }
+      
+      throw callError;
+    }
+
+    // Validate result
+    if (!result) {
+      throw new Error('Puter AI returned no response. The service may be temporarily unavailable.');
+    }
+
+    // Check if result is an error response from Puter (success: false)
+    if (result && typeof result === 'object' && (result as any).success === false) {
+      const errorMsg = (result as any).error || 'Unknown error';
+      console.error('[Puter AI Call] Puter returned error response:', errorMsg);
+      throw new Error(`AI service error: ${errorMsg}`);
+    }
+
+    // Check if result is an empty object
+    if (typeof result === 'object' && Object.keys(result).length === 0) {
+      throw new Error(
+        'Puter AI returned an empty response. The service may be temporarily unavailable. ' +
+        'Please try again in a few moments.'
+      );
+    }
+
+    // If result is a string starting with error indicators, throw
+    if (typeof result === 'string' && result.toLowerCase().includes('error')) {
+      throw new Error('Puter AI returned an error: ' + result);
+    }
+
+    return result;
+  } catch (error) {
+    // Log detailed error info for debugging
+    const errorDetails = {
+      error,
+      errorType: typeof error,
+      errorKeys: error && typeof error === 'object' ? Object.keys(error) : undefined,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      timestamp: new Date().toISOString(),
+    };
+    console.warn('[Puter AI Call] Error details:', errorDetails);
+
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Failed to call Puter AI: ' + String(error));
+  }
+}

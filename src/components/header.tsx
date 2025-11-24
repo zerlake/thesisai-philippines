@@ -17,12 +17,12 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { useAuth } from "./auth-provider";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { cn } from "../lib/utils";
-import { NotificationBell } from "./notification-bell";
+import { AuthenticatedNotificationBell } from "./authenticated-notification-bell";
 import { studentNavGroups, adminNavItems, advisorNavGroups, criticNavGroups, type NavItem, type NavGroup } from "../lib/navigation";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
@@ -30,7 +30,6 @@ import { ScrollArea } from "./ui/scroll-area";
 export function Header() {
   const { supabase, session, profile } = useAuth();
   const pathname = usePathname();
-  const router = useRouter();
 
   const handleLogout = async () => {
     try {
@@ -138,7 +137,7 @@ export function Header() {
         </div>
       </div>
       <div className="flex items-center gap-2 md:gap-4">
-        <NotificationBell />
+        <AuthenticatedNotificationBell />
 
         <ThemeToggle />
 

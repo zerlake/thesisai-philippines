@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "./auth-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { Skeleton } from "./ui/skeleton";
+;
 import { AlertTriangle, ArrowRight } from "lucide-react";
-import { Button } from "./ui/button";
+;
 import Link from "next/link";
 
 type FeedbackDoc = {

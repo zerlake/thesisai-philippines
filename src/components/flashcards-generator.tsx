@@ -17,6 +17,7 @@ import { Label } from "./ui/label";
 import { useAuth } from "./auth-provider";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useAuthReady } from "@/hooks/use-auth-ready";
 
 function Flashcard({ term, definition }: { term: string; definition: string }) {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -43,6 +44,7 @@ function Flashcard({ term, definition }: { term: string; definition: string }) {
 
 export function FlashcardsGenerator() {
   const { session, supabase } = useAuth();
+  const { isReady } = useAuthReady();
   const user = session?.user;
   const router = useRouter();
   const [topic, setTopic] = useState("");
@@ -50,9 +52,74 @@ export function FlashcardsGenerator() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  const addSampleData = () => {
+    // Sample flashcards for a thesis on "The Impact of Social Media on Academic Performance"
+    const sampleTopic = "The Impact of Social Media on Academic Performance";
+    setTopic(sampleTopic);
+    
+    const sampleFlashcards = [
+      {
+        term: "Digital Citizenship",
+        definition: "The responsible and ethical use of technology, including understanding how to behave appropriately online and the implications of one's actions in digital spaces."
+      },
+      {
+        term: "Academic Integrity",
+        definition: "The moral code or ethical policy governing academic conduct, including honesty, trust, fairness, respect, and responsibility in scholarly activities."
+      },
+      {
+        term: "Cognitive Load Theory",
+        definition: "A theory that describes how the human brain processes information, suggesting that working memory is limited and instruction should avoid overloading it."
+      },
+      {
+        term: "E-Learning Platforms",
+        definition: "Digital environments used to deliver educational content and facilitate learning through internet-based technologies and tools."
+      },
+      {
+        term: "Student Engagement",
+        definition: "The degree of attention, curiosity, interest, and passion that students show when learning or are participating in academic activities."
+      },
+      {
+        term: "Social Media Influence",
+        definition: "The impact of social networking sites and platforms on student behaviors, attitudes, and academic outcomes, including both positive and negative effects."
+      },
+      {
+        term: "Time Management Skills",
+        definition: "The ability to effectively organize and plan how to divide time between different academic tasks and social media use to maximize productivity."
+      },
+      {
+        term: "Research Methodology",
+        definition: "The systematic approach used to conduct research, including data collection methods, analysis techniques, and theoretical frameworks."
+      },
+      {
+        term: "Statistical Analysis",
+        definition: "The process of collecting, exploring, and presenting large amounts of data to reveal patterns and trends related to research questions."
+      },
+      {
+        term: "Thesis Writing",
+        definition: "The process of composing an extended piece of academic writing based on research, presenting an argument or analysis on a specific topic."
+      },
+      {
+        term: "Literature Review",
+        definition: "A comprehensive survey of scholarly sources on a specific topic, providing an overview of current knowledge and identifying gaps in research."
+      },
+      {
+        term: "Peer Review Process",
+        definition: "The evaluation of scientific, academic, or professional work by others working in the same field to ensure quality and validity."
+      }
+    ];
+    
+    setFlashcards(sampleFlashcards);
+    toast.success("Sample flashcards added! Explore all 12 cards using the carousel navigation.");
+  };
+
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!topic) return;
+    
+    if (!isReady) {
+      toast.error("Please wait while your session is loading...");
+      return;
+    }
 
     setIsLoading(true);
     setFlashcards([]);
@@ -69,7 +136,7 @@ export function FlashcardsGenerator() {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
-            apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
+            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
           },
           body: JSON.stringify({ topic }),
         }
@@ -135,7 +202,17 @@ export function FlashcardsGenerator() {
         <CardContent>
           <form onSubmit={handleGenerate} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="topic">Project Topic</Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="topic">Project Topic</Label>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={addSampleData}
+                >
+                  Add Sample
+                </Button>
+              </div>
               <Input
                 id="topic"
                 placeholder="e.g., The Impact of AI on Higher Education"

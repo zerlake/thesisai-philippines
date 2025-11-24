@@ -22,6 +22,7 @@ const fontSerif = Lora({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://thesisai-philippines.vercel.app"),
   title: "ThesisAI Philippines - AI-Powered Academic Writing Assistant",
   description: "Streamline your thesis writing process with our AI-powered platform. Generate outlines, check originality, format citations, and connect with advisors—all in one workspace designed for Philippine universities.",
   keywords: [
@@ -85,6 +86,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Puter SDK - loaded globally for AI features */}
+        <script src="https://js.puter.com/v2/" async />
+      </head>
       <body
         className={cn(
           "font-sans antialiased",

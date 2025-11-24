@@ -7,7 +7,12 @@ import { ChunkLoadErrorHandler } from "@/components/chunk-load-error-handler";
 
 export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
   useEffect(() => {
-    Sentry.captureException(error);
+    try {
+      Sentry.captureException(error);
+    } catch (e) {
+      // Sentry might not be initialized yet
+      console.error("Global error:", error);
+    }
   }, [error]);
 
   return (

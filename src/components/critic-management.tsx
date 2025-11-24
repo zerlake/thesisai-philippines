@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, User, UserPlus, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation"; // Reserved for future navigation
 
 type Critic = {
   id: string;
@@ -30,7 +30,7 @@ type PendingRequest = {
 export function CriticManagement() {
   const { session, supabase, profile, refreshProfile } = useAuth();
   const user = session?.user;
-  const router = useRouter();
+  // const router = useRouter(); // Reserved for future navigation
 
   const [critic, setCritic] = useState<Critic | null>(null);
   const [pendingRequest, setPendingRequest] = useState<PendingRequest | null>(null);

@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puter Paraphraser Connection Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-badge.loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .test-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+        }
+
+        .test-section h2 {
+            color: #007bff;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .test-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .test-item.passed {
+            border-left: 4px solid #28a745;
+            background: #f8fff9;
+        }
+
+        .test-item.failed {
+            border-left: 4px solid #dc3545;
+            background: #fff8f9;
+        }
+
+        .test-item.loading {
+            border-left: 4px solid #ffc107;
+            background: #fffef9;
+        }
+
+        .test-item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .test-item-name {
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .test-item-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+
+        .test-item.passed .test-item-status {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .test-item.failed .test-item-status {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .test-item.loading .test-item-status {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .test-item-message {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .test-item-duration {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .test-input {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .test-input textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button.primary {
+            background: #007bff;
+            color: white;
+        }
+
+        button.primary:hover:not(:disabled) {
+            background: #0056b3;
+        }
+
+        button.success {
+            background: #28a745;
+            color: white;
+        }
+
+        button.success:hover:not(:disabled) {
+            background: #218838;
+        }
+
+        button.danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        button.danger:hover:not(:disabled) {
+            background: #c82333;
+        }
+
+        .output {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #333;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .icon.passed {
+            color: #28a745;
+        }
+
+        .icon.failed {
+            color: #dc3545;
+        }
+
+        .icon.loading {
+            color: #ffc107;
+        }
+
+        .summary {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 4px;
+            color: #004085;
+        }
+
+        .summary p {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            🤖 Puter Paraphraser Connection Test
+            <span id="statusBadge" class="status-badge loading">Checking...</span>
+        </h1>
+
+        <!-- Status Section -->
+        <div class="test-section">
+            <h2>System Status</h2>
+            <div id="statusContainer"></div>
+        </div>
+
+        <!-- Sample Data Section -->
+        <div class="test-section">
+            <h2>Test Data</h2>
+            <p style="margin-bottom: 15px; color: #666;">
+                Click on a sample text below to load it, then click "Paraphrase" to test Puter AI.
+            </p>
+            <div class="button-group">
+                <button class="primary" onclick="loadSample('standard')">Standard Sample</button>
+                <button class="primary" onclick="loadSample('formal')">Formal Sample</button>
+                <button class="primary" onclick="loadSample('technical')">Technical Sample</button>
+                <button class="primary" onclick="loadSample('short')">Short Sample</button>
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="test-section">
+            <h2>Input Text</h2>
+            <div class="test-input">
+                <textarea id="inputText" placeholder="Enter text to paraphrase..."></textarea>
+                <div class="button-group">
+                    <button class="success" onclick="testParaphrase('standard')">Paraphrase (Standard)</button>
+                    <button class="success" onclick="testParaphrase('formal')">Make Formal</button>
+                    <button class="success" onclick="testParaphrase('simple')">Simplify</button>
+                    <button class="success" onclick="testParaphrase('expand')">Expand</button>
+                    <button class="danger" onclick="clearOutput()">Clear Output</button>
+                </div>
+                <div id="output" class="output" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Test Results Section -->
+        <div class="test-section">
+            <h2>Test Results</h2>
+            <div id="resultsContainer"></div>
+        </div>
+
+        <!-- Summary Section -->
+        <div id="summaryContainer"></div>
+    </div>
+
+    <script>
+        // Sample data
+        const SAMPLE_DATA = {
+            standard: `The rapid advancement of artificial intelligence has transformed multiple sectors of society, including healthcare, finance, and education. Machine learning algorithms enable systems to learn from data without explicit programming, leading to more efficient and accurate decision-making processes. However, ethical concerns regarding data privacy and algorithmic bias remain significant challenges that must be addressed.`,
+            
+            formal: `AI is changing things. It's used in many areas like hospitals and schools. The technology learns from examples instead of being told what to do. This makes it work better. But there are problems with privacy and fairness that need fixing.`,
+            
+            technical: `Neural networks process data through interconnected layers of artificial neurons. Each neuron performs a weighted sum of inputs followed by a non-linear activation function. Backpropagation algorithms adjust these weights during training to minimize loss functions.`,
+            
+            short: `Globalization has increased cultural exchange between nations through technology, trade, and migration. Different perspectives and traditions now interact more frequently.`
+        };
+
+        const testResults = [];
+
+        // Initialize tests on page load
+        async function initializeTests() {
+            await checkPuterAvailability();
+            await checkAuthentication();
+            updateUI();
+        }
+
+        async function checkPuterAvailability() {
+            const startTime = performance.now();
+            
+            try {
+                // Wait for Puter to load
+                let attempts = 0;
+                while (!window.puter && attempts < 50) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+
+                if (!window.puter) {
+                    testResults.push({
+                        name: 'Puter SDK Availability',
+                        status: 'failed',
+                        message: 'Puter SDK not loaded. Make sure the Puter script is loaded in your HTML.',
+                        duration: performance.now() - startTime
+                    });
+                    return;
+                }
+
+                if (!window.puter.ai || !window.puter.ai.chat) {
+                    testResults.push({
+                        name: 'Puter SDK Availability',
+                        status: 'failed',
+                        message: 'Puter AI service not available.',
+                        duration: performance.now() - startTime
+                    });
+                    return;
+                }
+
+                testResults.push({
+                    name: 'Puter SDK Availability',
+                    status: 'passed',
+                    message: 'Puter SDK loaded and AI service is available',
+                    duration: performance.now() - startTime
+                });
+            } catch (error) {
+                testResults.push({
+                    name: 'Puter SDK Availability',
+                    status: 'failed',
+                    message: `Error: ${error.message}`,
+                    duration: performance.now() - startTime
+                });
+            }
+        }
+
+        async function checkAuthentication() {
+            const startTime = performance.now();
+            
+            try {
+                if (!window.puter?.auth) {
+                    testResults.push({
+                        name: 'Puter Authentication',
+                        status: 'failed',
+                        message: 'Puter SDK not available',
+                        duration: performance.now() - startTime
+                    });
+                    return;
+                }
+
+                const user = await window.puter.auth.getUser();
+                
+                if (!user || (typeof user === 'object' && Object.keys(user).length === 0)) {
+                    testResults.push({
+                        name: 'Puter Authentication',
+                        status: 'failed',
+                        message: 'Not authenticated. Please sign in to Puter.',
+                        duration: performance.now() - startTime
+                    });
+                    return;
+                }
+
+                testResults.push({
+                    name: 'Puter Authentication',
+                    status: 'passed',
+                    message: `Authenticated as: ${user.username || 'User'}`,
+                    duration: performance.now() - startTime
+                });
+            } catch (error) {
+                testResults.push({
+                    name: 'Puter Authentication',
+                    status: 'failed',
+                    message: `Auth error: ${error.message}`,
+                    duration: performance.now() - startTime
+                });
+            }
+        }
+
+        function updateUI() {
+            // Update status badge
+            const statusBadge = document.getElementById('statusBadge');
+            const hasPassed = testResults.some(r => r.status === 'passed');
+            const hasFailed = testResults.some(r => r.status === 'failed');
+
+            if (hasFailed) {
+                statusBadge.className = 'status-badge disconnected';
+                statusBadge.textContent = 'Disconnected';
+            } else if (hasPassed) {
+                statusBadge.className = 'status-badge connected';
+                statusBadge.textContent = 'Connected';
+            }
+
+            // Update status container
+            const statusContainer = document.getElementById('statusContainer');
+            statusContainer.innerHTML = testResults.map(result => `
+                <div class="test-item ${result.status}">
+                    <div class="test-item-header">
+                        <span class="test-item-name">
+                            <span class="icon ${result.status}">
+                                ${result.status === 'passed' ? '✓' : result.status === 'failed' ? '✗' : '⏳'}
+                            </span>
+                            ${result.name}
+                        </span>
+                        <span class="test-item-status">${result.status}</span>
+                    </div>
+                    <div class="test-item-message">${result.message}</div>
+                    <div class="test-item-duration">Duration: ${result.duration.toFixed(2)}ms</div>
+                </div>
+            `).join('');
+
+            // Update results container
+            const resultsContainer = document.getElementById('resultsContainer');
+            const passed = testResults.filter(r => r.status === 'passed').length;
+            const failed = testResults.filter(r => r.status === 'failed').length;
+            const total = testResults.length;
+
+            resultsContainer.innerHTML = `
+                <div class="summary">
+                    <p><strong>Total Tests:</strong> ${total}</p>
+                    <p><strong>Passed:</strong> ${passed}</p>
+                    <p><strong>Failed:</strong> ${failed}</p>
+                </div>
+            `;
+
+            // Update summary
+            const summaryContainer = document.getElementById('summaryContainer');
+            if (failed === 0 && passed > 0) {
+                summaryContainer.innerHTML = `
+                    <div class="test-section" style="border-left-color: #28a745; background: #f8fff9;">
+                        <h2 style="color: #28a745;">✓ Connection Successful</h2>
+                        <p>Puter AI service is connected and ready to use. You can now test the paraphrasing tool.</p>
+                    </div>
+                `;
+            } else if (failed > 0) {
+                summaryContainer.innerHTML = `
+                    <div class="test-section" style="border-left-color: #dc3545; background: #fff8f9;">
+                        <h2 style="color: #dc3545;">✗ Connection Failed</h2>
+                        <p>There are issues connecting to Puter. Please check:</p>
+                        <ul style="margin-left: 20px;">
+                            <li>Is Puter SDK loaded? (Check browser console)</li>
+                            <li>Are you authenticated with Puter?</li>
+                            <li>Is your internet connection working?</li>
+                            <li>Is the Puter service available?</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+
+        function loadSample(type) {
+            document.getElementById('inputText').value = SAMPLE_DATA[type];
+            document.getElementById('output').style.display = 'none';
+            document.getElementById('output').innerHTML = '';
+        }
+
+        async function testParaphrase(mode) {
+            const inputText = document.getElementById('inputText').value.trim();
+            const outputEl = document.getElementById('output');
+
+            if (!inputText) {
+                outputEl.innerHTML = 'Error: Please enter some text to paraphrase.';
+                outputEl.style.display = 'block';
+                return;
+            }
+
+            if (!window.puter || !window.puter.ai) {
+                outputEl.innerHTML = 'Error: Puter not available. Please reload the page.';
+                outputEl.style.display = 'block';
+                return;
+            }
+
+            outputEl.innerHTML = '⏳ Processing...';
+            outputEl.style.display = 'block';
+
+            try {
+                const prompts = {
+                    standard: `You are an expert academic editor. Your task is to paraphrase the following text.
+- The new version should have a different sentence structure and use different vocabulary.
+- It must retain the original meaning and academic tone.
+- Return only the paraphrased text, with no additional comments or explanations.
+
+Original text: "${inputText}"
+
+Paraphrased text:`,
+                    formal: `You are an expert academic editor. Your task is to rewrite the following text to make it more formal and suitable for a thesis.
+- Elevate the vocabulary and sentence structure.
+- Ensure the core meaning is preserved.
+- Return only the rewritten text, with no additional comments or explanations.
+
+Original text: "${inputText}"
+
+Formal text:`,
+                    simple: `You are an expert academic editor. Your task is to simplify the following text.
+- Make it easier to understand for a general audience.
+- Use clearer, more direct language.
+- Retain the key information and core meaning.
+- Return only the simplified text, with no additional comments or explanations.
+
+Original text: "${inputText}"
+
+Simplified text:`,
+                    expand: `You are an expert academic editor. Your task is to expand on the following text.
+- Add more detail, context, or examples to elaborate on the core idea.
+- The length should be slightly longer but not excessively so.
+- Maintain a consistent academic tone.
+- Return only the expanded text, with no additional comments or explanations.
+
+Original text: "${inputText}"
+
+Expanded text:`
+                };
+
+                const startTime = performance.now();
+                const result = await window.puter.ai.chat({
+                    prompt: prompts[mode],
+                    temperature: 0.7,
+                    max_tokens: 2000
+                });
+                const duration = performance.now() - startTime;
+
+                // Extract text from response
+                let paraphrasedText = '';
+                if (result.choices?.[0]?.message?.content) {
+                    paraphrasedText = result.choices[0].message.content;
+                } else if (result.choices?.[0]?.text) {
+                    paraphrasedText = result.choices[0].text;
+                } else if (result.response) {
+                    paraphrasedText = result.response;
+                } else if (result.text) {
+                    paraphrasedText = result.text;
+                } else if (result.content) {
+                    paraphrasedText = result.content;
+                }
+
+                if (!paraphrasedText) {
+                    throw new Error('Empty response from Puter');
+                }
+
+                outputEl.innerHTML = `✓ Success (${duration.toFixed(0)}ms)\n\n${paraphrasedText}`;
+                outputEl.style.display = 'block';
+            } catch (error) {
+                outputEl.innerHTML = `✗ Error: ${error.message}\n\nFull error:\n${JSON.stringify(error, null, 2)}`;
+                outputEl.style.display = 'block';
+            }
+        }
+
+        function clearOutput() {
+            document.getElementById('output').innerHTML = '';
+            document.getElementById('output').style.display = 'none';
+        }
+
+        // Run tests on load
+        window.addEventListener('load', initializeTests);
+    </script>
+</body>
+</html>

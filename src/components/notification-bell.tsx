@@ -30,45 +30,116 @@ export function NotificationBell() {
   }, []);
 
   useEffect(() => {
-    if (!session) return;
+    if (!session?.user) {
+      setIsLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+    let channel: any = null;
 
     const fetchNotifications = async () => {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from("notifications")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(10);
+      try {
+         setIsLoading(true);
 
-      if (error) {
-        toast.error("Failed to fetch notifications.");
-      } else {
-        setNotifications(data || []);
-        setUnreadCount(data.filter(n => !n.is_read).length);
+        const { data, error } = await supabase
+          .from("notifications")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(10);
+
+        if (!isMounted) return;
+
+        if (error) {
+          console.error("Failed to fetch notifications:", error);
+          toast.error("Failed to fetch notifications.");
+          setNotifications([]);
+          setUnreadCount(0);
+        } else {
+          setNotifications(data || []);
+          setUnreadCount(data?.filter(n => !n.is_read).length || 0);
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error("Error fetching notifications:", err);
+          setNotifications([]);
+          setUnreadCount(0);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
-      setIsLoading(false);
     };
 
-    fetchNotifications();
+    const setupRealtime = async () => {
+      try {
+        await fetchNotifications();
 
-    const channel = supabase
-      .channel('public:notifications')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${session.user.id}` },
-        (payload) => {
-          const newNotification = payload.new as Notification;
-          setNotifications(prev => [newNotification, ...prev.slice(0, 9)]);
-          setUnreadCount(prev => prev + 1);
-          toast.info(newNotification.message);
+        // Only setup Realtime if we have a valid session with access token
+        if (!session?.access_token || !session?.user?.id) {
+          return;
         }
-      )
-      .subscribe();
+
+        // Verify the token is still valid before subscribing
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
+          return;
+        }
+
+        channel = supabase
+          .channel(`notifications:${session.user.id}`, {
+            config: {
+              broadcast: { self: false }
+            }
+          })
+          .on(
+            'postgres_changes',
+            { 
+              event: 'INSERT', 
+              schema: 'public', 
+              table: 'notifications', 
+              filter: `user_id=eq.${session.user.id}` 
+            },
+            (payload) => {
+              if (!isMounted) return;
+              const newNotification = payload.new as Notification;
+              setNotifications(prev => [newNotification, ...prev.slice(0, 9)]);
+              setUnreadCount(prev => prev + 1);
+              toast.info(newNotification.message);
+            }
+          )
+          .subscribe((status) => {
+            if (!isMounted) return;
+
+            if (status === 'CHANNEL_ERROR') {
+               // Silently log, don't show error toast
+             } else if (status === 'TIMED_OUT') {
+             } else if (status === 'SUBSCRIBED') {
+             }
+          });
+      } catch (err: any) {
+        if (!isMounted) return;
+
+        // Silently handle authentication errors
+        if (err?.message?.includes("Refresh Token") || err?.message?.includes("Invalid") || err?.message?.includes("JWT")) {
+          return;
+        }
+
+        // Log other errors but don't crash
+      }
+    };
+
+    setupRealtime();
 
     return () => {
-      supabase.removeChannel(channel);
+      isMounted = false;
+      if (channel) {
+        supabase.removeChannel(channel).catch((err) => {
+        });
+      }
     };
-  }, [session, supabase]);
+  }, [session?.user?.id, session?.user, session?.access_token, supabase]);
 
   const handleMarkAllAsRead = async () => {
     if (!session || unreadCount === 0) return;

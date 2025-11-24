@@ -8,7 +8,7 @@ interface AvatarUploadProps {
   onUpload: (url: string) => void;
 }
 
-export function AvatarUpload({ currentAvatarUrl, onUpload }: AvatarUploadProps) {
+export function AvatarUpload({ currentAvatarUrl }: AvatarUploadProps) {
   const { profile } = useAuth();
 
   const getInitials = () => {

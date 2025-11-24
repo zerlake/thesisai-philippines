@@ -18,53 +18,48 @@ const getCorsHeaders = (req: Request) => {
   };
 }
 
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
+async function generateAbstractWithPuter(content: string): Promise<string> {
+  const prompt = `You are an expert academic writer. Generate a concise, professional abstract (150-250 words) for the following thesis content:
 
-async function generateAbstractWithGemini(content: string, apiKey: string) {
-  const prompt = `
-    You are an expert academic editor. Your task is to generate a concise, structured abstract for the following thesis document.
-    The abstract should be a single paragraph and must include:
-    1. A brief introduction to the topic and problem.
-    2. An overview of the methodology used.
-    3. A summary of the key findings.
-    4. The main conclusions and implications of the research.
+"${content}"
 
-    Return only the generated abstract text, with no additional comments or explanations.
+Provide only the abstract text, without any preamble or explanation.`;
 
-    Original Document Content: "${content.substring(0, 4000)}..."
+  try {
+    const response = await Promise.race([
+      fetch('https://api.puter.com/v1/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt,
+          temperature: 0.5,
+          max_tokens: 500,
+        }),
+      }).then(r => r.json()),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timed out')), 30000)
+      ),
+    ]) as any;
 
-    Generated Abstract:
-  `;
+    if (typeof response === 'string') {
+      return response;
+    }
+    
+    if (response.response) {
+      return response.response;
+    }
+    
+    if (response.text) {
+      return response.text;
+    }
 
-  const response = await fetch(`${GEMINI_API_URL}${apiKey}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      contents: [{
-        parts: [{
-          text: prompt,
-        }],
-      }],
-    }),
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.json() as { error?: { message: string } };
-    console.error("Gemini API Error:", errorBody);
-    throw new Error(`Gemini API request failed: ${errorBody.error?.message || 'Unknown error'}`);
+    throw new Error('Invalid response format');
+  } catch (error) {
+    console.error("Puter AI Error:", error);
+    throw new Error(`Failed to generate abstract: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-
-  const data = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
-  const abstract = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!abstract) {
-    console.error("Invalid response structure from Gemini:", data);
-    throw new Error("Failed to parse the abstract from the Gemini API response.");
-  }
-
-  return abstract.trim();
 }
 
 interface RequestBody {
@@ -97,21 +92,15 @@ serve(async (req: Request) => {
       throw new Error('Invalid JWT')
     }
 
-    // @ts-ignore
-    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!geminiApiKey) {
-      throw new Error("GEMINI_API_KEY is not set in Supabase project secrets.");
-    }
-
     const { content } = await req.json() as RequestBody;
     if (!content) {
-      return new Response(JSON.stringify({ error: 'Document content is required' }), {
+      return new Response(JSON.stringify({ error: 'Content is required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const abstract = await generateAbstractWithGemini(content, geminiApiKey);
+    const abstract = await generateAbstractWithPuter(content);
 
     return new Response(JSON.stringify({ abstract }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

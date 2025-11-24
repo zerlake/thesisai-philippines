@@ -1,0 +1,434 @@
+/* Widget Gallery Styles */
+
+.gallery {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 20px;
+  padding: 20px;
+  background: #fafbfc;
+  border-radius: 12px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* Search Container */
+.searchContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+}
+
+.clearButton {
+  position: absolute;
+  right: 12px;
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.clearButton:hover {
+  color: #666;
+}
+
+/* Category Tabs */
+.categoryTabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.categoryTab {
+  padding: 8px 12px;
+  border: 1px solid #e1e4e8;
+  background: white;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.categoryTab:hover {
+  border-color: #0969da;
+  color: #0969da;
+  background: #f3f8ff;
+}
+
+.categoryTab.active {
+  border-color: #0969da;
+  background: #0969da;
+  color: white;
+}
+
+/* Widgets Container */
+.widgetsContainer {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.widgetsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 8px 0;
+}
+
+/* Widget Card */
+.widgetCard {
+  position: relative;
+  padding: 16px;
+  background: white;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  cursor: grab;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.widgetCard:hover {
+  border-color: #0969da;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.widgetCard:active {
+  cursor: grabbing;
+}
+
+.widgetCard.hovered {
+  border-color: #0969da;
+  background: #f3f8ff;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.widgetName {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.widgetDescription {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.widgetMeta {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #999;
+}
+
+.category {
+  display: inline-block;
+}
+
+.size {
+  margin-left: auto;
+  color: #999;
+}
+
+/* Hover Overlay */
+.hoverOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(9, 105, 218, 0.05);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.widgetCard:hover .hoverOverlay {
+  opacity: 1;
+}
+
+.dragHint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dragIcon {
+  font-size: 16px;
+}
+
+.dragText {
+  font-size: 12px;
+  font-weight: 500;
+  color: #0969da;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  margin: 0;
+}
+
+.emptyMessage {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.emptySubtext {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* Info Panel (Sidebar) */
+.infoPanel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 300px;
+  height: 100vh;
+  background: white;
+  border-left: 1px solid #e1e4e8;
+  padding: 20px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.infoPanelContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.infoPanelTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.infoPanelDescription {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.infoPanelSection {
+  padding: 12px;
+  background: #f6f8fa;
+  border-radius: 6px;
+}
+
+.infoPanelSectionTitle {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #666;
+  margin: 0 0 6px 0;
+}
+
+.infoPanelValue {
+  font-size: 13px;
+  color: #1a1a1a;
+  margin: 0;
+  font-family: 'Courier New', monospace;
+}
+
+.featuresList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.featuresList li {
+  font-size: 13px;
+  color: #666;
+}
+
+.dragHintText {
+  font-size: 12px;
+  color: #0969da;
+  margin: 0;
+  padding: 12px;
+  background: #f3f8ff;
+  border-radius: 6px;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .infoPanel {
+    display: none;
+  }
+  
+  .widgetsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .gallery {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .title {
+    font-size: 18px;
+  }
+  
+  .widgetsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  
+  .categoryTabs {
+    gap: 6px;
+  }
+  
+  .categoryTab {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gallery {
+    padding: 8px;
+    gap: 8px;
+  }
+  
+  .title {
+    font-size: 16px;
+  }
+  
+  .subtitle {
+    font-size: 12px;
+  }
+  
+  .widgetsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+  }
+  
+  .cardContent {
+    gap: 4px;
+  }
+  
+  .icon {
+    font-size: 24px;
+  }
+  
+  .widgetName {
+    font-size: 12px;
+  }
+  
+  .widgetDescription {
+    display: none;
+  }
+  
+  .widgetMeta {
+    margin-top: 4px;
+  }
+}
+
+/* Scrollbar Styling */
+.widgetsContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
+.widgetsContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.widgetsContainer::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.widgetsContainer::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Print Styles */
+@media print {
+  .gallery {
+    display: none;
+  }
+}

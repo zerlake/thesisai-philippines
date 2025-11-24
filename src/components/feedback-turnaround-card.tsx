@@ -5,7 +5,7 @@ import { useAuth } from "@/components/auth-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
 import { toast } from "sonner";
-import { Timer } from "lucide-react";
+;
 
 export function FeedbackTurnaroundCard() {
   const { session, supabase } = useAuth();

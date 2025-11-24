@@ -30,7 +30,7 @@ export function Breadcrumb() {
             <Link href="/dashboard">Dashboard</Link>
           </BreadcrumbLink>
         </BreadcrumbItem>
-        {pathSegments.map((segment, index) => {
+        {pathSegments.map((segment: string, index: number) => {
           const href = `/${pathSegments.slice(0, index + 1).join('/')}`;
           const isLast = index === pathSegments.length - 1;
           

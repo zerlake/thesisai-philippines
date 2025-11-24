@@ -5,9 +5,6 @@ import { useAuth } from "@/components/auth-provider";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   Table,

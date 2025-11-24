@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
-import { Skeleton } from "./ui/skeleton";
+;
 import { BarChart3, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 

@@ -13,6 +13,7 @@ import { GoogleSignInButton } from "./google-sign-in-button";
 
 export function SignInPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
 
   const handleDemoLogin = async (role: 'user' | 'admin' | 'advisor' | 'critic') => {
     setIsSubmitting(true);
@@ -76,18 +77,36 @@ export function SignInPage() {
             </div>
             <div className="space-y-2">
               <GoogleSignInButton label="Sign in with Google" />
-              <Button variant="outline" className="w-full" onClick={() => handleDemoLogin('user')} disabled={isSubmitting}>
-                <User className="w-4 h-4 mr-2" /> {isSubmitting ? 'Logging in...' : 'Login as User'}
-              </Button>
-              <Button variant="outline" className="w-full" onClick={() => handleDemoLogin('advisor')} disabled={isSubmitting}>
-                <UserCheck className="w-4 h-4 mr-2" /> {isSubmitting ? 'Logging in...' : 'Login as Advisor'}
-              </Button>
-              <Button variant="outline" className="w-full" onClick={() => handleDemoLogin('critic')} disabled={isSubmitting}>
-                <FileSignature className="w-4 h-4 mr-2" /> {isSubmitting ? 'Logging in...' : 'Login as Critic'}
-              </Button>
-              <Button variant="outline" className="w-full" onClick={() => handleDemoLogin('admin')} disabled={isSubmitting}>
-                <UserCog className="w-4 h-4 mr-2" /> {isSubmitting ? 'Logging in...' : 'Login as Admin'}
-              </Button>
+              
+              {/* Demo Accounts Section */}
+              <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
+                <button
+                  type="button"
+                  onClick={() => setShowDemoAccounts(!showDemoAccounts)}
+                  className="text-sm font-semibold text-blue-900 hover:text-blue-700 w-full text-left flex items-center justify-between"
+                >
+                  <span>🎯 Try Demo Accounts</span>
+                  <span className="text-lg">{showDemoAccounts ? '▼' : '▶'}</span>
+                </button>
+                
+                {showDemoAccounts && (
+                  <div className="space-y-2 mt-3">
+                    <p className="text-xs text-blue-800 mb-3">Test the platform with different roles:</p>
+                    <Button variant="outline" className="w-full text-xs h-9" onClick={() => handleDemoLogin('user')} disabled={isSubmitting}>
+                      <User className="w-3 h-3 mr-2" /> {isSubmitting ? 'Logging in...' : 'Demo: Student'}
+                    </Button>
+                    <Button variant="outline" className="w-full text-xs h-9" onClick={() => handleDemoLogin('advisor')} disabled={isSubmitting}>
+                      <UserCheck className="w-3 h-3 mr-2" /> {isSubmitting ? 'Logging in...' : 'Demo: Advisor'}
+                    </Button>
+                    <Button variant="outline" className="w-full text-xs h-9" onClick={() => handleDemoLogin('critic')} disabled={isSubmitting}>
+                      <FileSignature className="w-3 h-3 mr-2" /> {isSubmitting ? 'Logging in...' : 'Demo: Critic'}
+                    </Button>
+                    <Button variant="outline" className="w-full text-xs h-9" onClick={() => handleDemoLogin('admin')} disabled={isSubmitting}>
+                      <UserCog className="w-3 h-3 mr-2" /> {isSubmitting ? 'Logging in...' : 'Demo: Admin'}
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/components/auth-provider";
@@ -10,7 +10,7 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatCard } from "./stat-card";
-import { Banknote, CheckCircle, Hourglass } from "lucide-react";
+import { CheckCircle, Hourglass } from "lucide-react";
 
 type CriticReview = {
   id: string;

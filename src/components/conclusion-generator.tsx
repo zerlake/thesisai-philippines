@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useAuth } from "./auth-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useRouter } from "next/navigation";
+import { useAuthReady } from "@/hooks/use-auth-ready";
 
 type ConclusionResult = {
   summary: string;
@@ -18,6 +19,7 @@ type ConclusionResult = {
 
 export function ConclusionGenerator() {
   const { session, supabase } = useAuth();
+  const { isReady } = useAuthReady();
   const user = session?.user;
   const router = useRouter();
   const [findings, setFindings] = useState("");
@@ -26,6 +28,11 @@ export function ConclusionGenerator() {
   const [results, setResults] = useState<ConclusionResult | null>(null);
 
   const handleGenerate = async () => {
+    if (!isReady) {
+      toast.error("Please wait while your session is loading...");
+      return;
+    }
+    
     if (!session) {
       toast.error("You must be logged in to use this feature.");
       return;

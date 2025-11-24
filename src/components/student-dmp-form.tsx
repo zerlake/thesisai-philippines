@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from "react";
 import { useAuth } from "./auth-provider";
@@ -11,10 +11,9 @@ import { Switch } from "./ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { toast } from "sonner";
-import { Loader2, Save, Send } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Save, Send } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 
 const defaultDmpData = {

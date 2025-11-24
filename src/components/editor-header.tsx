@@ -5,7 +5,7 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { ShareDialog } from "./share-dialog";
-import { Eye, FileDown, Loader2, Save, Send, Share2, Undo2, CheckCircle, XCircle, Maximize, Award } from "lucide-react";
+import { Award, Send, RotateCcw as Undo2, Loader2, CheckCircle, Save, Share2, FileDown, Maximize } from "lucide-react";
 
 interface EditorHeaderProps {
   title: string;

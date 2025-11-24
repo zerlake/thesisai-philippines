@@ -13,6 +13,7 @@ import { Label } from "./ui/label";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
 import { Copy } from "lucide-react";
+import { createSanitizedHtml } from "@/lib/html-sanitizer";
 import { toast } from "sonner";
 
 const citationStyles = {
@@ -166,7 +167,7 @@ export function InteractiveStyleGuide() {
           <Card className="bg-tertiary">
             <CardContent className="p-4">
               <div className="flex justify-between items-start">
-                <div className="font-mono text-sm" dangerouslySetInnerHTML={{ __html: generatedCitation }} />
+                <div className="font-mono text-sm" dangerouslySetInnerHTML={createSanitizedHtml(generatedCitation)} />
                 <Button variant="ghost" size="icon" onClick={handleCopy}><Copy className="w-4 h-4" /></Button>
               </div>
             </CardContent>

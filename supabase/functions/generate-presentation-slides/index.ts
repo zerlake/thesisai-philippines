@@ -18,9 +18,9 @@ const getCorsHeaders = (req: Request) => {
   };
 }
 
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
+const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-async function generateSlidesWithGemini(chapterContent: string, apiKey: string) {
+async function generateSlidesWithOpenRouter(chapterContent: string, apiKey: string) {
   const prompt = `
     You are an expert academic presentation coach. Your task is to analyze the following chapter from a thesis and generate a series of presentation slides.
 
@@ -29,7 +29,7 @@ async function generateSlidesWithGemini(chapterContent: string, apiKey: string) 
     2. An array of 3-5 short, impactful bullet points that summarize the key information.
     3. A detailed paragraph of speaker notes that elaborates on the bullet points, suitable for oral delivery.
 
-    Your entire output MUST be a single, valid JSON object. Do not include any markdown formatting like 
+    Your entire response must be a single, valid JSON object. Do not include any markdown formatting like 
     json or any text outside of the JSON object.
 
     The JSON object must be an array of slide objects, with the following structure:
@@ -50,35 +50,49 @@ async function generateSlidesWithGemini(chapterContent: string, apiKey: string) 
     Generate the JSON object now.
   `;
 
-  const response = await fetch(`${GEMINI_API_URL}${apiKey}`, {
+  const response = await fetch(OPENROUTER_API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': 'https://thesisai-philippines.vercel.app',
+      'X-Title': 'ThesisAI Philippines',
     },
     body: JSON.stringify({
-      contents: [{
-        parts: [{
-          text: prompt,
-        }],
-      }],
+      model: "openai/gpt-3.5-turbo",
+      messages: [
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
     }),
   });
 
   if (!response.ok) {
     const errorBody = await response.json() as { error?: { message: string } };
-    console.error("Gemini API Error:", errorBody);
-    throw new Error(`Gemini API request failed: ${errorBody.error?.message || 'Unknown error'}`);
+    console.error("OpenRouter API Error:", errorBody);
+    throw new Error(`OpenRouter API request failed: ${errorBody.error?.message || 'Unknown error'}`);
   }
 
-  const data = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>, slides?: any[] };
-  const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  const data = await response.json() as { 
+    choices?: Array<{ message?: { content?: string } }> 
+  };
+  
+  const generatedText = data.choices?.[0]?.message?.content;
 
   if (!generatedText) {
-    console.error("Invalid response structure from Gemini:", data);
-    throw new Error("Failed to parse the presentation from the Gemini API response.");
+    console.error("Invalid response structure from OpenRouter:", data);
+    throw new Error("Failed to parse the presentation from the OpenRouter API response.");
   }
 
-  return JSON.parse(generatedText);
+  // Extract the JSON from the response (in case it includes other text)
+  const jsonStart = generatedText.indexOf('[');
+  const jsonEnd = generatedText.lastIndexOf(']') + 1;
+  const jsonString = jsonStart !== -1 && jsonEnd !== 0 
+    ? generatedText.substring(jsonStart, jsonEnd)
+    : generatedText;
+  
+  return JSON.parse(jsonString);
 }
 
 interface RequestBody {
@@ -112,9 +126,9 @@ serve(async (req: Request) => {
     }
 
     // @ts-ignore
-    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!geminiApiKey) {
-      throw new Error("GEMINI_API_KEY is not set in Supabase project secrets.");
+    const openRouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
+    if (!openRouterApiKey) {
+      throw new Error("OPENROUTER_API_KEY is not set in Supabase project secrets.");
     }
 
     const { chapterContent } = await req.json() as RequestBody;
@@ -125,7 +139,7 @@ serve(async (req: Request) => {
       });
     }
 
-    const slides = await generateSlidesWithGemini(chapterContent, geminiApiKey);
+    const slides = await generateSlidesWithOpenRouter(chapterContent, openRouterApiKey);
 
     return new Response(JSON.stringify({ slides }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

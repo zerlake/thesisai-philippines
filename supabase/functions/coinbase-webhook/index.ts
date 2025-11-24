@@ -37,6 +37,38 @@ async function verifySignature(secret: string, payload: string, signature: strin
   return hexSignature === signature;
 }
 
+// Security utilities
+function validateUserId(userId: string): boolean {
+  if (!userId || typeof userId !== 'string') {
+    return false;
+  }
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(userId);
+}
+
+function validatePlan(plan: string): string {
+  if (!plan || typeof plan !== 'string') {
+    throw new Error('Plan must be a string');
+  }
+  const validPlans = ['free', 'basic', 'pro', 'premium', 'enterprise'];
+  const normalized = plan.toLowerCase().trim();
+  if (!validPlans.includes(normalized)) {
+    throw new Error(`Invalid plan. Allowed plans: ${validPlans.join(', ')}`);
+  }
+  return normalized;
+}
+
+function validateAmount(amount: unknown): number {
+  const num = Number(amount);
+  if (isNaN(num) || !isFinite(num)) {
+    throw new Error('Amount must be a valid number');
+  }
+  if (num < 0) {
+    throw new Error('Amount must be non-negative');
+  }
+  return num;
+}
+
 interface CoinbaseEvent {
   type: string;
   data: {
@@ -94,9 +126,14 @@ serve(async (req: Request) => {
       const chargeId = event.data.id;
       const creditUsed = parseFloat(metadata.credit_used || '0');
 
-      if (!userId || !plan || isNaN(chargeAmount)) {
-        throw new Error("Missing user_id, plan, or charge amount in webhook metadata.");
+      // Validate all inputs
+      if (!validateUserId(userId)) {
+        throw new Error("Invalid user_id format in webhook metadata.");
       }
+
+      const validatedPlan = validatePlan(plan);
+      const validatedAmount = validateAmount(chargeAmount);
+      const validatedCredit = validateAmount(creditUsed);
 
       // 4. Create an admin client to update user data
       const supabaseAdmin = createClient(
@@ -109,7 +146,7 @@ serve(async (req: Request) => {
       // 5. Update the user's profile with their new plan
       const { error: updateError } = await supabaseAdmin
         .from('profiles')
-        .update({ plan: plan })
+        .update({ plan: validatedPlan })
         .eq('id', userId);
 
       if (updateError) {
@@ -118,7 +155,7 @@ serve(async (req: Request) => {
       console.log(`Successfully upgraded user ${userId} to plan ${plan}.`);
 
       // 6. Handle credit usage if any was applied
-      if (creditUsed > 0) {
+      if (validatedCredit > 0) {
         const { error: creditUpdateError } = await supabaseAdmin
           .from('profiles')
           .update({ credit_balance: 0 }) // All remaining credit was used
@@ -129,18 +166,18 @@ serve(async (req: Request) => {
           .from('credit_usage')
           .insert({
             user_id: userId,
-            amount_used: creditUsed,
-            description: `Applied to ${plan.replace('_', ' ')} subscription purchase.`,
+            amount_used: validatedCredit,
+            description: `Applied to ${validatedPlan.replace('_', ' ')} subscription purchase.`,
             source_charge_id: chargeId,
           });
         if (logError) console.error(`Failed to log credit usage for user ${userId}:`, logError.message);
-        console.log(`Logged ${creditUsed} credit usage for user ${userId}.`);
+        console.log(`Logged ${validatedCredit} credit usage for user ${userId}.`);
       }
 
       // 7. Distribute referral credits based on the cash amount paid
       const { error: referralError } = await supabaseAdmin.rpc('distribute_referral_credits', {
         p_user_id: userId,
-        p_charge_amount: chargeAmount,
+        p_charge_amount: validatedAmount,
         p_source_charge_id: chargeId
       });
 

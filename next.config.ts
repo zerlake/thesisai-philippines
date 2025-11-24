@@ -1,65 +1,220 @@
 import {withSentryConfig} from "@sentry/nextjs";
+import withBundleAnalyzer from '@next/bundle-analyzer';
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  webpack: (config, { dev, isServer }) => {
-    if (process.env.NODE_ENV === "development") {
-      config.module.rules.push({
-        test: /\.(jsx|tsx)$/,
-        exclude: /node_modules/,
-        enforce: "pre",
-        use: "@dyad-sh/nextjs-webpack-component-tagger",
-      });
-    }
-
-    if (dev) {
-      // Increase chunk load timeout to 30 seconds
-      config.output.chunkLoadTimeout = 30000; 
-      
-      // Adjust chunk splitting for development to prevent app/layout.js from being an isolated chunk.
-      // By setting default and vendors to false, and removing the explicit 'layout' cache group,
-      // app/layout.tsx should be bundled with the main entry point.
-      if (config.optimization && config.optimization.splitChunks) {
-        config.optimization.splitChunks.cacheGroups = {
-          // Removed the 'layout' cache group that was explicitly creating app/layout.js chunk
-          default: false, // Disable default splitting
-          vendors: false, // Disable vendors splitting
-        };
-      }
-    }
-    return config;
+// CDN and geographic configuration for AMP cache optimization
+const CDN_REGIONS = {
+  us: {
+    primary: "cdn-us.example.com",
+    secondary: "cdn-us-backup.example.com",
+    cache_ttl: 3600, // 1 hour for dynamic content
+  },
+  eu: {
+    primary: "cdn-eu.example.com",
+    secondary: "cdn-eu-backup.example.com",
+    cache_ttl: 3600,
+  },
+  apac: {
+    primary: "cdn-apac.example.com",
+    secondary: "cdn-apac-backup.example.com",
+    cache_ttl: 3600,
   },
 };
 
-export default withSentryConfig(nextConfig, {
-  // For all available options, see:
-  // https://www.npmjs.com/package/@sentry/webpack-plugin#options
+// AMP cache headers and prerendering config
+const AMP_PRERENDER_PATHS = [
+  "/",
+  "/dashboard",
+  "/help",
+  "/privacy",
+  "/terms",
+];
 
+const nextConfig: NextConfig = {
+  // Use legacy webpack builder to avoid Turbopack workUnitAsyncStorage issues in Next.js 16
+  typescript: {
+    tsconfigPath: './tsconfig.json',
+  },
+  
+  // Enable AMP mode and experimental optimizations
+  experimental: {
+    optimizePackageImports: [
+      "@radix-ui",
+      "@tiptap/react",
+      "@tiptap/core",
+      "recharts",
+    ],
+    // Disable scroll restoration to work around Next.js 16 prerendering issues
+    // scrollRestoration: true,
+    optimizeCss: true, // Optimize CSS loading
+    // Disable client trace metadata to avoid workUnitAsyncStorage issues
+    clientTraceMetadata: [],
+  },
+
+  // Optimize image handling for CDN
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+    // Enable AVIF for modern browsers, fallback to WebP
+    formats: ["image/avif", "image/webp"],
+    // Aggressive caching for static assets
+    minimumCacheTTL: 31536000, // 1 year for hashed files
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Configure device sizes for responsive images
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    // Configure image sizes for optimization
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
+
+  // Headers for AMP cache and CDN optimization
+  async headers() {
+    return [
+      {
+        // AMP cache optimization headers
+        source: "/:path(.*\\.amp\\.html)$",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+          },
+          {
+            key: "X-Amp-Cache",
+            value: "true",
+          },
+          {
+            key: "Vary",
+            value: "Accept-Encoding, Accept, X-Accept-Encoding",
+          },
+        ],
+      },
+      {
+        // Static assets with long TTL for CDN
+        source: "/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+          {
+            key: "CDN-Cache-Control",
+            value: "max-age=31536000",
+          },
+        ],
+      },
+      {
+        // Pre-rendered pages with shorter TTL
+        source: "/:path((?!api|_next).*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+          },
+          {
+            key: "X-Cache-Status",
+            value: "HIT",
+          },
+          {
+            key: "Vary",
+            value: "Accept-Encoding",
+          },
+        ],
+      },
+    ];
+  },
+
+  // Rewrites for CDN failover and geographic routing
+  async rewrites() {
+    return {
+      beforeFiles: [
+        // Route to appropriate CDN based on path
+        {
+          source: "/api/cdn/:path*",
+          destination: "/api/cdn-proxy?path=/:path*",
+        },
+      ],
+      fallback: [
+        // Fallback to secondary CDN if primary fails
+        {
+          source: "/:path*",
+          destination: "/:path*",
+        },
+      ],
+    };
+  },
+
+  // Redirects for AMP pages
+  async redirects() {
+    return [
+      {
+        source: "/amp/:path*",
+        destination: "/:path*",
+        permanent: true,
+      },
+    ];
+  },
+
+  webpack: (config, { dev, isServer }) => {
+    if (dev) {
+      // Increase chunk load timeout to 30 seconds
+      config.output.chunkLoadTimeout = 30000;
+
+      // Adjust chunk splitting for development
+      if (config.optimization && config.optimization.splitChunks) {
+        config.optimization.splitChunks.cacheGroups = {
+          default: false,
+          vendors: false,
+        };
+      }
+    }
+
+    // Optimize for production builds
+    if (!dev && isServer) {
+      // Enable aggressive tree-shaking
+      config.optimization = {
+        ...config.optimization,
+        usedExports: true,
+        sideEffects: false,
+      };
+    }
+
+    return config;
+  },
+
+
+
+  // Compress static files
+  compress: true,
+
+  // Enable PoweredBy header removal for security
+  poweredByHeader: false,
+
+  // Set production source maps for debugging
+  productionBrowserSourceMaps: true,
+
+  // Enable trailing slashes for CDN compatibility
+  trailingSlash: false,
+
+  // Revalidate ISR pages
+  onDemandEntries: {
+    maxInactiveAge: 60 * 1000, // 60s
+    pagesBufferLength: 5,
+  },
+};
+
+const bundleAnalyzerConfig = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+export default withSentryConfig(bundleAnalyzerConfig(nextConfig), {
   org: "personal-0oh",
-
   project: "javascript-nextjs",
-
-  // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
-
-  // For all available options, see:
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-
-  // Upload a larger set of source maps for prettier stack traces (increases build time)
   widenClientFileUpload: true,
-
-  // Uncomment to route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
-  // This can increase your server load as well as your hosting bill.
-  // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
-  // side errors will fail.
-  // tunnelRoute: "/monitoring",
-
-  // Automatically tree-shake Sentry logger statements to reduce bundle size
   disableLogger: true,
-
-  // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
-  // See the following for more information:
-  // https://docs.sentry.io/product/crons/
-  // https://vercel.com/docs/cron-jobs
   automaticVercelMonitors: true,
 });

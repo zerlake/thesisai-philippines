@@ -8,24 +8,15 @@ import {
 } from "./ui/accordion";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "./ui/card";
 import {
-  BookOpen,
   BrainCircuit,
-  FileText,
-  FlaskConical,
   LayoutDashboard,
-  ShieldCheck,
   Sparkles,
   UserCheck,
-  Heart,
-  Trophy,
-  Brain,
-  Languages,
 } from "lucide-react";
 
 const guideSections = [

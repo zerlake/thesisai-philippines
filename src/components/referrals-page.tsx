@@ -5,7 +5,7 @@ import { useAuth } from "@/components/auth-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Copy, Gift, PiggyBank, Send, ArrowRight, ArrowLeft, Loader2, Banknote, Link as LinkIcon } from "lucide-react";
+import { Copy, Send, ArrowRight, ArrowLeft, Loader2, Banknote, Link as LinkIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { format } from "date-fns";
@@ -117,22 +117,57 @@ export function ReferralsPage() {
 
   const handlePayoutRequest = async () => {
     const amount = parseFloat(payoutAmount);
-    if (!payoutDetails || !amount || amount < 500) { toast.error("Please enter valid details and an amount of at least ₱500."); return; }
-    if (amount > (profile?.credit_balance || 0)) { toast.error("Insufficient credit balance."); return; }
+    const MIN_PAYOUT = 500;
+    const MAX_PAYOUT = 50000; // Reasonable upper limit
+    const MINIMUM_REMAINING_BALANCE = 200;
+    const creditBalance = profile?.credit_balance || 0;
+
+    // Validation checks
+    if (!payoutAmount || isNaN(amount)) {
+      toast.error("Please enter a valid payout amount.");
+      return;
+    }
+
+    if (amount < MIN_PAYOUT) {
+      toast.error(`Minimum payout amount is ₱${MIN_PAYOUT}.`);
+      return;
+    }
+
+    if (amount > MAX_PAYOUT) {
+      toast.error(`Maximum payout amount is ₱${MAX_PAYOUT}. Please submit multiple requests if needed.`);
+      return;
+    }
+
+    if (!payoutDetails || payoutDetails.trim().length === 0) {
+      toast.error(`Please enter your ${payoutMethod === 'GCash' ? 'GCash number' : 'PayPal email'}.`);
+      return;
+    }
+
+    if (amount > creditBalance) {
+      toast.error(`Insufficient credit balance. You have ₱${creditBalance.toFixed(2)} available.`);
+      return;
+    }
+
+    const remainingBalance = creditBalance - amount;
+    if (remainingBalance < MINIMUM_REMAINING_BALANCE) {
+      toast.error(`You must maintain a minimum balance of ₱${MINIMUM_REMAINING_BALANCE}. You can request up to ₱${(creditBalance - MINIMUM_REMAINING_BALANCE).toFixed(2)}.`);
+      return;
+    }
+
     if (!session) return;
 
     setIsRequestingPayout(true);
     try {
       const { error } = await supabase.functions.invoke('request-payout', { body: { amount, method: payoutMethod, details: payoutDetails } });
       if (error) throw new Error(error.message);
-      toast.success("Payout request submitted successfully!");
+      toast.success("Payout request submitted successfully! You will receive the funds within 3-5 business days.");
       setPayoutAmount("");
       setPayoutDetails("");
       await refreshProfile();
       // Manually add to payouts list for immediate UI update
       setPayouts(prev => [{ id: 'temp', amount, status: 'pending', created_at: new Date().toISOString(), payout_method: payoutMethod }, ...prev]);
     } catch (err: any) {
-      toast.error(err.message || "Payout request failed.");
+      toast.error(`Payout request failed: ${err.message || "Please try again."}`);
     } finally {
       setIsRequestingPayout(false);
     }

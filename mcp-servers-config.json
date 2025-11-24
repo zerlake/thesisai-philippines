@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "serena": {
+      "command": "uvx",
+      "args": [
+        "--from", "git+https://github.com/oraios/serena",
+        "serena", "start-mcp-server",
+        "--llm-provider", "puter",
+        "--puter-endpoint", "http://localhost:8000"
+      ],
+      "env": {
+        "SERENA_URL": "http://127.0.0.1:24282",
+        "PUTER_LOCAL_ENDPOINT": "http://localhost:8000",
+        "LLM_PROVIDER": "puter",
+        "PUTER_API_KEY": "${PUTER_API_KEY}"
+      }
+    }
+  }
+}

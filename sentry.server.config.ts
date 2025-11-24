@@ -4,15 +4,21 @@
 
 import * as Sentry from "@sentry/nextjs";
 
-Sentry.init({
-  dsn: "https://d1e235fa48e5d919100103a13c0d2754@o4510045051748352.ingest.us.sentry.io/4510045132029952",
+// Only initialize during runtime, not during build
+const isProduction = process.env.NODE_ENV === 'production';
+const isBuilding = process.env.BUILDING === 'true';
 
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
+if (isProduction && !isBuilding) {
+  Sentry.init({
+    dsn: "https://d1e235fa48e5d919100103a13c0d2754@o4510045051748352.ingest.us.sentry.io/4510045132029952",
 
-  // Enable logs to be sent to Sentry
-  enableLogs: true,
+    // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
+    tracesSampleRate: 1,
 
-  // Setting this option to true will print useful information to the console while you're setting up Sentry.
-  debug: false,
-});
+    // Enable logs to be sent to Sentry
+    enableLogs: true,
+
+    // Setting this option to true will print useful information to the console while you're setting up Sentry.
+    debug: false,
+  });
+}

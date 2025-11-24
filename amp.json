@@ -1,0 +1,14 @@
+{
+  "selectedAuthType": "none",
+  "mcpServers": {
+    "serena": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server"]
+    }
+  },
+  "settings": {
+    "serverPort": 3000,
+    "mcpDebug": false,
+    "logLevel": "info"
+  }
+}

@@ -3,7 +3,7 @@
 import { useAuth } from "@/components/auth-provider";
 import { AdvisorDashboard } from "@/components/advisor-dashboard";
 import { AdminDashboard } from "@/components/admin-dashboard";
-import { StudentDashboard } from "@/components/student-dashboard";
+import { StudentDashboardEnterprise } from "@/components/student-dashboard-enterprise";
 import { BrandedLoader } from "@/components/branded-loader";
 import { CriticDashboard } from "@/components/critic-dashboard";
 
@@ -93,7 +93,7 @@ export default function DashboardPage() {
               __html: JSON.stringify(getStructuredData())
             }}
           />
-          <StudentDashboard />
+          <StudentDashboardEnterprise />
         </>
       );
     default:

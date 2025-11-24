@@ -5,8 +5,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "./ui/button";
 import { Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { toPng } from "html-to-image";
-import jsPDF from "jspdf";
 
 interface CertificateDialogProps {
   open: boolean;
@@ -25,6 +23,13 @@ export function CertificateDialog({ open, onOpenChange, studentName, documentTit
     if (!certificateRef.current) return;
     setIsExporting(true);
     try {
+      // Lazy-load heavy dependencies only when needed
+      const [{ toPng }, jsPDFModule] = await Promise.all([
+        import('html-to-image'),
+        import('jspdf')
+      ]);
+      const jsPDF = jsPDFModule.default;
+      
       const dataUrl = await toPng(certificateRef.current, { cacheBust: true, backgroundColor: 'white', pixelRatio: 2 });
       const pdf = new jsPDF('l', 'mm', 'a4'); // landscape
       const pdfWidth = pdf.internal.pageSize.getWidth();

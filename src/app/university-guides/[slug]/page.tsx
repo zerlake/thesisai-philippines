@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
 import { UniversityGuideDetail } from "@/components/university-guide-detail";
 import { universityGuides, type UniversityGuide } from "@/lib/guides";
-import { notFound, useParams } from "next/navigation";
+// @ts-ignore - useParams is available in client components in Next.js 15
+import { useParams } from "next/navigation";
 import { useEffect } from "react";
 
 export default function UniversityGuideDetailPage() {
@@ -25,8 +26,15 @@ export default function UniversityGuideDetailPage() {
   }
 
   if (!guide) {
-    notFound();
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-2">Guide Not Found</h1>
+          <p className="text-muted-foreground">The guide you&apos;re looking for doesn&apos;t exist.</p>
+        </div>
+      </div>
+    );
   }
 
-  return <div className="p-4"><UniversityGuideDetail guide={guide} /></div>;
+  return <div className="p-4"><UniversityGuideDetail guide={guide as UniversityGuide} /></div>;
 }

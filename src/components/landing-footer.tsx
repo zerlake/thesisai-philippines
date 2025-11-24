@@ -1,38 +1,116 @@
-import { BotMessageSquare } from "lucide-react";
+import { BotMessageSquare, Mail, Github, Linkedin, Twitter } from "lucide-react";
 import Link from "next/link";
 
-const footerNav = [
-  { name: "Features", href: "/features" },
-  { name: "Pricing", href: "/pricing" },
-  { name: "For Advisors", href: "/for-advisors" },
-  { name: "For Critics", href: "/for-critics" },
-  { name: "FAQ", href: "/faq" },
+const footerSections = [
+  {
+    title: "Product",
+    links: [
+      { name: "Features", href: "/features" },
+      { name: "Pricing", href: "/pricing" },
+      { name: "For Advisors", href: "/for-advisors" },
+      { name: "For Critics", href: "/for-critics" },
+    ]
+  },
+  {
+    title: "Resources",
+    links: [
+      { name: "Help & FAQ", href: "/faq" },
+      { name: "University Guides", href: "/university-guides" },
+      { name: "Blog", href: "#" },
+      { name: "Documentation", href: "#" },
+    ]
+  },
+  {
+    title: "Company",
+    links: [
+      { name: "About Us", href: "#" },
+      { name: "Contact", href: "#" },
+      { name: "Privacy Policy", href: "#" },
+      { name: "Terms of Service", href: "#" },
+    ]
+  }
+];
+
+const socialLinks = [
+  { icon: Mail, href: "mailto:support@thesisai.ph", label: "Email" },
+  { icon: Github, href: "#", label: "GitHub" },
+  { icon: Linkedin, href: "#", label: "LinkedIn" },
+  { icon: Twitter, href: "#", label: "Twitter" },
 ];
 
 export function LandingFooter() {
   return (
-    <footer className="border-t border-slate-700 bg-slate-900">
-      <div className="container py-8">
-        <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-          <div className="flex items-center gap-2">
-            <BotMessageSquare className="h-6 w-6 text-white" />
-            <p className="font-semibold text-white">ThesisAI Philippines</p>
+    <footer className="border-t border-slate-700/50 bg-slate-900">
+      <div className="container py-12 md:py-16 lg:py-20">
+        {/* Main footer content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+          {/* Brand section */}
+          <div className="lg:col-span-1">
+            <Link href="/" className="flex items-center gap-2 mb-4 group">
+              <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 group-hover:shadow-lg group-hover:shadow-purple-500/50 transition-all">
+                <BotMessageSquare className="h-5 w-5 text-white" />
+              </div>
+              <span className="font-bold text-white">ThesisAI</span>
+            </Link>
+            <p className="text-sm text-slate-400 mb-4">
+              Empowering Filipino researchers with intelligent academic tools.
+            </p>
+            <div className="flex gap-4">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  className="text-slate-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-slate-800/50"
+                  aria-label={social.label}
+                >
+                  <social.icon className="h-5 w-5" />
+                </a>
+              ))}
+            </div>
           </div>
-          <nav className="flex flex-wrap justify-center gap-4 md:gap-6">
-            {footerNav.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-sm text-slate-400 hover:text-white transition-colors"
-              >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
+
+          {/* Footer sections */}
+          {footerSections.map((section) => (
+            <div key={section.title}>
+              <h4 className="font-semibold text-white mb-4 text-sm uppercase tracking-wider">
+                {section.title}
+              </h4>
+              <ul className="space-y-3">
+                {section.links.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-slate-400 hover:text-white transition-colors"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-        <div className="mt-6 border-t border-slate-700 pt-6 text-center text-sm text-slate-400">
-          <p>&copy; 2025 ThesisAI Philippines. All rights reserved.</p>
-          <p className="mt-1">Built to empower the next generation of Filipino researchers.</p>
+
+        {/* Divider */}
+        <div className="border-t border-slate-700/50 pt-8">
+          {/* Copyright and legal */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-400">
+            <p>&copy; 2025 ThesisAI Philippines. All rights reserved.</p>
+            <p>Built to empower the next generation of Filipino researchers.</p>
+          </div>
+
+          {/* Trust badges */}
+          <div className="mt-6 pt-6 border-t border-slate-700/50">
+            <p className="text-xs text-slate-500 text-center mb-3">
+              Enterprise-grade security and privacy protection
+            </p>
+            <div className="flex flex-wrap justify-center gap-4 text-xs text-slate-400">
+              <span>🔐 SSL Encrypted</span>
+              <span>✓ GDPR Compliant</span>
+              <span>✓ Data Privacy</span>
+              <span>✓ Academic Integrity</span>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

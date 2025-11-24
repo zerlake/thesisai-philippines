@@ -1,0 +1,4 @@
+
+> next-template@0.1.0 build
+> next build ; echo Build finished; type build-output.txt
+

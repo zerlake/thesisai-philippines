@@ -37,7 +37,7 @@ export function SerpApiStatusCard() {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${session.access_token}`,
-              apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
+              apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
             },
           }
         );

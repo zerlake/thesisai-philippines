@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import React, { useState } from 'react';
 import { useAuth } from "./auth-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -10,7 +10,7 @@ import { BrainCircuit, ShieldCheck, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { FieldOfStudySelector } from "./field-of-study-selector";
 import { Badge } from "./ui/badge";
-import { Alert, AlertDescription } from "./ui/alert";
+import { secureRandomInt } from "@/lib/crypto-utils";
 
 interface TopicSuggestion {
   title: string;
@@ -43,7 +43,7 @@ export function TopicIdeationTool() {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
-            apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
+            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
           },
           body: JSON.stringify({ 
             field,
@@ -59,8 +59,8 @@ export function TopicIdeationTool() {
       if (data.topicIdeas) {
         const generatedSuggestions = data.topicIdeas.map((idea: any) => ({
           ...idea,
-          relevance: 80 + Math.floor(Math.random() * 20), // Simulated relevance score
-          originalityScore: 60 + Math.floor(Math.random() * 40) // Simulated originality score
+          relevance: 80 + secureRandomInt(0, 19), // Simulated relevance score
+          originalityScore: 60 + secureRandomInt(0, 39) // Simulated originality score
         }));
         
         setSuggestions(generatedSuggestions);
@@ -74,7 +74,7 @@ export function TopicIdeationTool() {
     }
   };
 
-  const validateTopicOriginality = async (index: number, suggestion: TopicSuggestion) => {
+  const validateTopicOriginality = async (index: number, suggestion: TopicSuggestion): Promise<void> => {
     if (!session) return;
 
     try {
@@ -137,7 +137,7 @@ export function TopicIdeationTool() {
           <div className="mt-6 space-y-4">
             <h3 className="text-lg font-semibold">Generated Topics</h3>
             
-            {suggestions.map((suggestion, index) => (
+            {suggestions.map((suggestion: TopicSuggestion, index: number) => (
               <Card key={index} className="bg-tertiary border hover:border-primary transition-colors">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">

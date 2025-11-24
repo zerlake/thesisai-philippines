@@ -9,6 +9,7 @@ import { Label } from "./ui/label";
 import { useAuth } from "./auth-provider";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useAuthReady } from "@/hooks/use-auth-ready";
 import {
   Carousel,
   CarouselContent,
@@ -27,6 +28,7 @@ type Slide = {
 
 export function PresentationGenerator() {
   const { session, supabase } = useAuth();
+  const { isReady } = useAuthReady();
   const user = session?.user;
   const router = useRouter();
   const [chapterContent, setChapterContent] = useState("");
@@ -34,9 +36,33 @@ export function PresentationGenerator() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  const addSampleData = () => {
+    const sampleContent = `Chapter 3: Methodology
+
+Research Design
+This study employed a mixed-methods approach combining quantitative surveys and qualitative interviews to investigate the impact of social media usage on academic performance among senior high school students in Region III. The convergent parallel design was selected to gain comprehensive insights into the research problem.
+
+Population and Sampling
+The study's target population comprised 1,250 Grade 11 and Grade 12 students from three public schools in Bukidnon. A sample of 320 students was selected through stratified random sampling, with 160 students from each grade level. Participants were selected to ensure equal representation across gender and academic tracks.
+
+Instrumentation and Data Collection
+The primary research instrument was a structured questionnaire adapted from the Digital Behavior Assessment Tool (DBAT) with modifications for the local context. The instrument included four sections: (1) demographic profile, (2) social media usage patterns, (3) academic performance indicators, and (4) perceived impact of social media on studies. The questionnaire underwent face and content validation by three experts with CVR scores ranging from 0.87 to 0.94.
+
+Ethical Considerations
+The study protocol was reviewed and approved by the University Research Ethics Committee (UREC). All participants provided informed consent, and parents of minors provided assent. Participation was voluntary with assurance of confidentiality and anonymity. Data was stored securely with access limited to the principal investigators.`;
+    
+    setChapterContent(sampleContent);
+    toast.success("Sample chapter content added! Click 'Generate Presentation' to see the tool in action.");
+  };
+
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chapterContent) return;
+    
+    if (!isReady) {
+      toast.error("Please wait while your session is loading...");
+      return;
+    }
 
     setIsLoading(true);
     setSlides([]);
@@ -53,7 +79,7 @@ export function PresentationGenerator() {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
-            apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
+            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
           },
           body: JSON.stringify({ chapterContent }),
         }
@@ -124,7 +150,17 @@ export function PresentationGenerator() {
         <CardContent>
           <form onSubmit={handleGenerate} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="chapterContent">Chapter / Section Content</Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="chapterContent">Chapter / Section Content</Label>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={addSampleData}
+                >
+                  Add Sample Data
+                </Button>
+              </div>
               <Textarea
                 id="chapterContent"
                 placeholder="Paste your text here..."

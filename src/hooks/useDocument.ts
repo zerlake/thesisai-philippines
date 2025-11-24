@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/components/auth-provider';
 import { toast } from 'sonner';
 import { useDebounce } from './use-debounce';
@@ -32,6 +32,10 @@ export type Review = {
   } | null;
 };
 
+type CriticRelationship = {
+  critic_id: string;
+};
+
 export function useDocument(documentId: string, editor: Editor | null) {
   const { session, supabase, profile } = useAuth();
   const user = session?.user;
@@ -49,6 +53,7 @@ export function useDocument(documentId: string, editor: Editor | null) {
   const [reviewHistory, setReviewHistory] = useState<Review[]>([]);
   const [studentProfile, setStudentProfile] = useState<any>(null);
   const [certificationDate, setCertificationDate] = useState<string | null>(null);
+  const isSettingInitialContent = useRef(false);
 
   const debouncedTitle = useDebounce(title, 1000);
   const debouncedContent = useDebounce(content, 1000);
@@ -56,51 +61,230 @@ export function useDocument(documentId: string, editor: Editor | null) {
   const fetchDocumentData = useCallback(async () => {
     if (!user || !editor) return;
     
-    const { data, error } = await supabase
+    // First get the document data without the profile join to avoid relationship conflicts
+    const documentResult = await supabase
       .from('documents')
-      .select('*, profiles(*, critic:critic_student_relationships(critic_id)), comments(*, profiles(*)), document_reviews(*, profiles(*))')
+      .select('*')
       .eq('id', documentId)
       .single();
 
-    if (error) {
-      toast.error('Failed to load document.');
+    if (documentResult.error && (documentResult.error.message || documentResult.error.code)) {
+      console.error('Error loading document:', documentResult.error);
+      toast.error(`Failed to load document: ${documentResult.error.message || 'Unknown error'}`);
       return;
     }
 
-    setTitle(data.title || '');
-    setContent(data.content || '');
-    setReviewStatus(data.review_status);
-    setIsPublic(data.is_public);
+    if (!documentResult.data) {
+      toast.error('Document not found.');
+      return;
+    }
+
+    let documentData = documentResult.data;
+
+    // Get the profile separately to avoid relationship conflicts
+    let profileData = null;
+    if (documentData.user_id) {
+      const profileResult = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', documentData.user_id)
+        .single();
+
+      if (profileResult.error && (profileResult.error.message || profileResult.error.code)) {
+        console.error('Error loading profile:', profileResult.error);
+        // Continue with document even if profile fails to load
+      } else {
+        profileData = profileResult.data;
+      }
+    }
+
+    // Combine document and profile data
+    documentData = {
+      ...documentData,
+      profiles: profileData
+    };
+
+    // Get comments separately to avoid relationship conflicts
+    let commentsData = [];
+    try {
+      const result = await supabase
+        .from('comments')
+        .select('*')
+        .eq('document_id', documentId)
+        .order('created_at', { ascending: false });
+
+      if (result.error && (result.error.message || result.error.code)) {
+        console.error('Error loading comments:', result.error);
+      } else {
+        commentsData = result.data || [];
+        
+        // If comments exist, get their profiles separately
+        if (commentsData.length > 0) {
+          const commentUserIds = [...new Set(commentsData.map(comment => comment.user_id))];
+          if (commentUserIds.length > 0) {
+            const { data: profilesData, error: profilesError } = await supabase
+              .from('profiles')
+              .select('*')
+              .in('id', commentUserIds);
+
+            if (profilesError) {
+              console.error('Error loading comment profiles:', profilesError);
+            } else {
+              // Attach profile data to comments
+              commentsData = commentsData.map(comment => {
+                const profile = profilesData.find(p => p.id === comment.user_id);
+                return { ...comment, profiles: profile || null };
+              });
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Exception loading comments:', error);
+      commentsData = [];
+    }
+
+    // Get document reviews separately
+    let reviewsData = [];
+    try {
+      const result = await supabase
+        .from('document_reviews')
+        .select('*')
+        .eq('document_id', documentId)
+        .order('created_at', { ascending: false });
+
+      if (result.error && (result.error.message || result.error.code)) {
+        console.error('Error loading document reviews:', result.error);
+      } else {
+        reviewsData = result.data || [];
+        
+        // If reviews exist, get their profiles separately
+        if (reviewsData.length > 0) {
+          const reviewUserIds = [...new Set(reviewsData.map(review => review.user_id))];
+          if (reviewUserIds.length > 0) {
+            const { data: profilesData, error: profilesError } = await supabase
+              .from('profiles')
+              .select('*')
+              .in('id', reviewUserIds);
+
+            if (profilesError) {
+              console.error('Error loading review profiles:', profilesError);
+            } else {
+              // Attach profile data to reviews
+              reviewsData = reviewsData.map(review => {
+                const profile = profilesData.find(p => p.id === review.user_id);
+                return { ...review, profiles: profile || null };
+              });
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Exception loading document reviews:', error);
+      reviewsData = [];
+    }
+
+    // Get critic relationships separately if needed
+    let criticRelationships: CriticRelationship[] = [];
+    if (documentData.user_id) {
+      try {
+        const criticResult = await supabase
+          .from('critic_student_relationships')
+          .select('critic_id')
+          .eq('student_id', documentData.user_id);
+
+        if (criticResult.error && (criticResult.error.message || criticResult.error.code)) {
+          // No critic relationship found is normal, so we just ignore it
+          if (criticResult.error.code !== 'PGRST116') { // PGRST116 = Row not found
+            console.error('Error loading critic relationship:', criticResult.error);
+          }
+        } else {
+          criticRelationships = criticResult.data || [];
+        }
+      } catch (error) {
+        console.error('Exception loading critic relationship:', error);
+      }
+    }
+    
+    // Combine the data with related information
+    const data = {
+      ...documentData,
+      comments: commentsData || [],
+      document_reviews: reviewsData || [],
+      profiles: {
+        ...documentData.profiles,
+        critic: criticRelationships
+      }
+    };
+
+    if (title !== data.title) {
+      setTitle(data.title || '');
+    }
+    if (content !== data.content) {
+      setContent(data.content || '');
+    }
+    if (reviewStatus !== data.review_status) {
+      setReviewStatus(data.review_status);
+    }
+    if (isPublic !== data.is_public) {
+      setIsPublic(data.is_public);
+    }
     
     const ownerId = data.user_id;
-    setIsOwner(ownerId === user.id);
+    const shouldSetAsOwner = (ownerId === user.id);
+    if (isOwner !== shouldSetAsOwner) {
+      setIsOwner(shouldSetAsOwner);
+    }
 
     // @ts-ignore
     const criticRel = data.profiles?.critic[0];
-    if (criticRel && profile?.id === criticRel.critic_id) {
-      setIsCriticViewing(true);
+    const shouldBeCriticViewing = !!(criticRel && profile?.id === criticRel.critic_id);
+    if (isCriticViewing !== shouldBeCriticViewing) {
+      setIsCriticViewing(shouldBeCriticViewing);
     }
 
-    // @ts-ignore
-    setComments(data.comments.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
-    // @ts-ignore
-    setReviewHistory(data.document_reviews.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
-    // @ts-ignore
-    setStudentProfile(data.profiles);
-    setCertificationDate(data.certified_at);
-
-    if (editor.getHTML() !== data.content) {
-      editor.commands.setContent(data.content || '', { emitUpdate: false });
+    const sortedComments = data.comments.sort((a: Comment, b: Comment) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    if (JSON.stringify(comments) !== JSON.stringify(sortedComments)) {
+      // @ts-ignore
+      setComments(sortedComments);
     }
-    
+
+    const sortedReviews = data.document_reviews.sort((a: Review, b: Review) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    if (JSON.stringify(reviewHistory) !== JSON.stringify(sortedReviews)) {
+      // @ts-ignore
+      setReviewHistory(sortedReviews);
+    }
+
+    if (JSON.stringify(studentProfile) !== JSON.stringify(data.profiles)) {
+      // @ts-ignore
+      setStudentProfile(data.profiles);
+    }
+
+    if (certificationDate !== data.certified_at) {
+      setCertificationDate(data.certified_at);
+    }
+
+    // Only update editor content if it's different from current editor content to prevent flickering
+    if (editor && data.content && editor.getHTML() !== data.content) {
+      isSettingInitialContent.current = true;
+      editor.commands.setContent(data.content);
+      setTimeout(() => {
+        isSettingInitialContent.current = false;
+      }, 100);
+    }
+
     setIsLoading(false);
-  }, [documentId, user, editor, supabase, profile]);
+    justLoadedRef.current = false;  // Mark that we're no longer in the initial load state
+  }, [documentId, user, editor, supabase, profile, certificationDate, comments, content, isCriticViewing, isOwner, isPublic, reviewHistory, reviewStatus, studentProfile, title]);
 
   useEffect(() => {
     fetchDocumentData();
   }, [fetchDocumentData]);
 
   const saveDocument = useCallback(async (force = false) => {
+    // Don't save if we're currently setting initial content to prevent loops
+    if (isSettingInitialContent.current && !force) return;
+    
     if (!isOwner || saveState === 'saving') return;
     if (navigator.onLine === false) {
       setIsOffline(true);
@@ -136,8 +320,11 @@ export function useDocument(documentId: string, editor: Editor | null) {
     }
   }, [isOwner, saveState, documentId, title, content, supabase, isOffline]);
 
+  const justLoadedRef = useRef(true); // Set to true initially, will be reset after first load
+
   useEffect(() => {
-    if (!isLoading) {
+    // Skip saving if we just loaded the document
+    if (!isLoading && !justLoadedRef.current) {
       saveDocument();
     }
   }, [debouncedTitle, debouncedContent, isLoading, saveDocument]);

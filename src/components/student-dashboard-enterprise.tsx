@@ -1,0 +1,318 @@
+"use client";
+
+import {
+  BookCheck,
+  BrainCircuit,
+  ClipboardCheck,
+  ClipboardPen,
+  FileText,
+  FlaskConical,
+  Lightbulb,
+  List,
+  Presentation,
+  ShieldCheck,
+  BookOpenCheck,
+  BookOpen,
+  MessageSquare,
+  Target,
+  CheckSquare,
+  Square,
+  Users,
+  Folder,
+  type LucideIcon,
+} from "lucide-react";
+import Link from "next/link";
+import { useAuth } from "./auth-provider";
+import { useEffect, useState, useCallback } from "react";
+import { differenceInDays } from "date-fns";
+import { Skeleton } from "./ui/skeleton";
+import { toast } from "sonner";
+import { RecentActivityChart } from "./recent-activity-chart";
+import { SmartSessionGoalCard } from "./SmartSessionGoalCard";
+import { ThesisChecklist } from "./thesis-checklist";
+import { MyMilestonesCard } from "./my-milestones-card";
+import { WelcomeModal } from "./welcome-modal";
+import { BugReportAlert } from "./bug-report-alert";
+import { UserGuideCard } from "./user-guide-card";
+import { TestimonialSubmissionCard } from "./testimonial-submission-card";
+import { WhatsNextCard } from "./whats-next-card";
+import { AdvisorFeedbackCard } from "./advisor-feedback-card";
+import { thesisChecklist } from "../lib/checklist-items";
+import { thesisMilestones } from "../lib/milestones";
+import { ContextualActions } from "./contextual-actions";
+import { WritingStreakCard } from "./writing-streak-card";
+import { UpgradePromptCard } from "./upgrade-prompt-card";
+import { WellbeingWidget } from "./student-dashboard-enhancements";
+import { ProgressMilestones } from "./student-dashboard-enhancements";
+import { DashboardHeader } from "./dashboard-header";
+import { DashboardMetrics } from "./dashboard-metrics";
+import { DashboardNavigation } from "./dashboard-navigation";
+import { EnterpriseCard, EnterpriseCardContent } from "./enterprise-card";
+
+const topToolsForQuickAccess = [
+  {
+    icon: BrainCircuit,
+    title: "Topic Idea Generator",
+    description: "Brainstorm your thesis topic.",
+    href: "/topic-ideas",
+  },
+  {
+    icon: List,
+    title: "Outline Generator",
+    description: "Structure your thesis effectively.",
+    href: "/outline",
+  },
+  {
+    icon: FlaskConical,
+    title: "Research Helper",
+    description: "Find and manage academic papers.",
+    href: "/research",
+  },
+  {
+    icon: ClipboardPen,
+    title: "Methodology Helper",
+    description: "Design your research methodology.",
+    href: "/methodology",
+  },
+  {
+    icon: ClipboardCheck,
+    title: "Results Helper",
+    description: "Present your findings clearly.",
+    href: "/results",
+  },
+  {
+    icon: BookCheck,
+    title: "Conclusion Helper",
+    description: "Summarize and conclude effectively.",
+    href: "/conclusion",
+  },
+];
+
+type Document = {
+  id: string;
+  title: string | null;
+  updated_at: string;
+};
+
+type Stats = {
+  docCount: number;
+  wordCount: number;
+  avgWordCount: number;
+  recentWordCount: number;
+};
+
+type Action = {
+  type: 'feedback' | 'milestone' | 'task';
+  title: string;
+  detail: string;
+  urgency: 'critical' | 'high' | 'normal';
+  href: string;
+  icon: LucideIcon;
+};
+
+const defaultWidgets = {
+  stats: true,
+  next_action: true,
+  recent_activity: true,
+  checklist: true,
+  session_goal: true,
+  writing_streak: true,
+  milestones: true,
+  quick_access: true,
+  wellbeing: true,
+  progress_milestones: true,
+};
+
+export function StudentDashboardEnterprise() {
+  const { session, supabase, profile } = useAuth();
+  const user = session?.user;
+  const [displayName, setDisplayName] = useState("researcher");
+  const [latestDocument, setLatestDocument] = useState<Document | null>(null);
+  const [stats, setStats] = useState<Stats>({ docCount: 0, wordCount: 0, avgWordCount: 0, recentWordCount: 0 });
+  const [nextAction, setNextAction] = useState<Action | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [isLoadingNextAction, setIsLoadingNextAction] = useState(true);
+  const [_isLoadingDoc, setIsLoadingDoc] = useState(true);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
+  const widgets = { ...defaultWidgets, ...profile?.user_preferences?.dashboard_widgets };
+
+  const getNextAction = useCallback(async () => {
+    if (!user) return;
+    setIsLoadingNextAction(true);
+
+    const { data: nextActionData, error } = await supabase.rpc('get_student_next_action', { p_student_id: user.id });
+
+    if (error) {
+      console.error("Error fetching next action:", error);
+    } else if (nextActionData) {
+      if (nextActionData.type === 'feedback') {
+        setNextAction({ type: 'feedback', title: `Revise "${nextActionData.title || 'Untitled Document'}"`, detail: "Your advisor has requested revisions.", urgency: 'high', href: `/drafts/${nextActionData.id}`, icon: MessageSquare });
+      } else if (nextActionData.type === 'milestone_overdue') {
+        const milestoneInfo = thesisMilestones.find(m => m.key === nextActionData.key);
+        const daysOverdue = differenceInDays(new Date(), new Date(nextActionData.deadline!));
+        setNextAction({ type: 'milestone', title: `Overdue: ${milestoneInfo?.title || "Task"}`, detail: `This was due ${daysOverdue} day${daysOverdue > 1 ? 's' : ''} ago.`, urgency: 'critical', href: '/dashboard', icon: Target });
+      } else if (nextActionData.type === 'milestone_upcoming') {
+        const milestoneInfo = thesisMilestones.find(m => m.key === nextActionData.key);
+        const daysUntil = differenceInDays(new Date(nextActionData.deadline!), new Date());
+        setNextAction({ type: 'milestone', title: `Upcoming: ${milestoneInfo?.title || "Task"}`, detail: `Due in ${daysUntil} day${daysUntil > 1 ? 's' : ''}.`, urgency: 'high', href: '/dashboard', icon: Target });
+      }
+    } else {
+      const { data: completedItems } = await supabase.from("checklist_progress").select("item_id").eq("user_id", user.id);
+      const completedIds = new Set((completedItems || []).map(i => i.item_id));
+      const allChecklistItems = thesisChecklist.flatMap(phase => phase.items);
+      const nextTask = allChecklistItems.find(item => !completedIds.has(item.id));
+      if (nextTask) {
+        setNextAction({ type: 'task', title: nextTask.title, detail: nextTask.description, urgency: 'normal', href: nextTask.href || '/dashboard', icon: CheckSquare });
+      } else {
+        setNextAction({ type: 'task', title: "Prepare for Submission", detail: "You've completed all checklist items! Run a final originality check and prepare your presentation.", urgency: 'normal', href: '/originality-check', icon: BookCheck });
+      }
+    }
+    setIsLoadingNextAction(false);
+  }, [user, supabase]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const welcomeModalShown = localStorage.getItem("welcomeModalShown");
+    if (!welcomeModalShown) {
+      setShowWelcomeModal(true);
+    }
+
+    let name = "researcher";
+    if (profile && profile.first_name) name = profile.first_name;
+    else if (user.email) name = user.email.split('@')[0];
+    setDisplayName(name);
+
+    const fetchLatestDocument = async () => {
+      setIsLoadingDoc(true);
+      const { data } = await supabase.from("documents").select("id, title, updated_at").order("updated_at", { ascending: false, nullsFirst: false }).limit(1);
+      if (data && data.length > 0) setLatestDocument(data[0]);
+      setIsLoadingDoc(false);
+    };
+
+    const fetchStats = async () => {
+      setIsLoadingStats(true);
+      const { data: documents, error } = await supabase.from("documents").select("content, updated_at");
+      if (error) {
+        toast.error("Failed to load project stats.");
+        setIsLoadingStats(false);
+        return;
+      }
+      if (documents) {
+        const docCount = documents.length;
+        const totalWordCount = documents.reduce((acc, doc) => acc + (doc.content || "").replace(/<[^>]*>?/gm, '').split(/\s+/).filter(Boolean).length, 0);
+        const avgWordCount = docCount > 0 ? Math.round(totalWordCount / docCount) : 0;
+        
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const recentWordCount = documents
+          .filter(doc => new Date(doc.updated_at) > sevenDaysAgo)
+          .reduce((acc, doc) => acc + (doc.content || "").replace(/<[^>]*>?/gm, '').split(/\s+/).filter(Boolean).length, 0);
+
+        setStats({ docCount, wordCount: totalWordCount, avgWordCount, recentWordCount });
+      }
+      setIsLoadingStats(false);
+    };
+
+    fetchLatestDocument();
+    fetchStats();
+    getNextAction();
+  }, [user, getNextAction, profile, supabase]);
+
+  const handleModalClose = (open: boolean) => {
+    if (!open) {
+      localStorage.setItem("welcomeModalShown", "true");
+      setShowWelcomeModal(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen space-y-8 bg-background">
+      <WelcomeModal open={showWelcomeModal} onOpenChange={handleModalClose} name={displayName} />
+      
+      {/* Enterprise Dashboard Header */}
+      <DashboardHeader
+        displayName={displayName}
+        streak={5}
+        projectProgress={65}
+      />
+
+      <div className="space-y-8 px-1">
+        {/* Upgrade Banner */}
+        {profile?.plan === 'free' && widgets.next_action && (
+          <UpgradePromptCard />
+        )}
+
+        {/* Next Actions Section */}
+        {widgets.next_action && (
+          <div className="space-y-4">
+            <WhatsNextCard nextAction={nextAction} isLoading={isLoadingNextAction} />
+            <AdvisorFeedbackCard />
+            <ContextualActions nextAction={nextAction} latestDocument={latestDocument} />
+          </div>
+        )}
+
+        {/* Metrics Section */}
+        {widgets.stats && (
+          <DashboardMetrics
+            docCount={stats.docCount}
+            wordCount={stats.wordCount}
+            avgWordCount={stats.avgWordCount}
+            recentWordCount={stats.recentWordCount}
+            isLoading={isLoadingStats}
+          />
+        )}
+
+        {/* Checklist Section */}
+        {widgets.checklist && (
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Thesis Completion Checklist</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Track your progress through each phase of your thesis
+              </p>
+            </div>
+            <ThesisChecklist />
+          </div>
+        )}
+
+        {/* Quick Tools Navigation */}
+        {widgets.quick_access && (
+          <DashboardNavigation
+            items={topToolsForQuickAccess}
+            title="Essential Research Tools"
+          />
+        )}
+
+        {/* Activity & Progress Cards */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          {widgets.recent_activity && <RecentActivityChart />}
+        </div>
+
+        {/* Goal & Streak Cards */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          {widgets.session_goal && <SmartSessionGoalCard />}
+          {widgets.writing_streak && <WritingStreakCard />}
+          {widgets.milestones && <MyMilestonesCard />}
+        </div>
+
+        {/* Progress & Wellbeing */}
+        {(widgets.progress_milestones || widgets.wellbeing) && (
+          <div className="grid gap-6 lg:grid-cols-2">
+            {widgets.progress_milestones && <ProgressMilestones />}
+            {widgets.wellbeing && <WellbeingWidget />}
+          </div>
+        )}
+
+        {/* Learning Resources */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <UserGuideCard />
+          <TestimonialSubmissionCard />
+        </div>
+
+        {/* Support Section */}
+        <BugReportAlert />
+      </div>
+    </div>
+  );
+}

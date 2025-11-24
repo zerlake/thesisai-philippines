@@ -1,0 +1,27 @@
+// This is a modified version that removes the import line and replaces the function call
+
+// ORIGINAL IMPORT LINE:
+// import { callOpenRouterWithFallback } from '../_shared/openrouter.ts';
+
+// NEW IMPORT LINE:
+import { callPuterAIWithFallback } from '../_shared/puter-ai.ts';
+
+// Then further down, I need to find the exact function call to replace:
+
+// ORIGINAL CODE:
+//    console.log("Calling OpenRouter...");
+//    const responseText = await callOpenRouterWithFallback(openrouterApiKey, userPrompt, systemPrompt);
+
+// NEW CODE:
+//    console.log("Calling Puter AI...");
+//    const responseText = await callPuterAIWithFallback(userPrompt, systemPrompt);
+
+// Also need to remove the API key checking code:
+// ORIGINAL:
+//    const openrouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
+//    if (!openrouterApiKey) {
+//      throw new Error("OPENROUTER_API_KEY is not set");
+//    }
+
+// REPLACEMENT:
+//    console.log("Using Puter AI for research question generation");

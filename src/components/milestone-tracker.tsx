@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "./auth-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { thesisMilestones, type Milestone } from "../lib/milestones";
+import { thesisMilestones } from "../lib/milestones";
 import { toast } from "sonner";
 import { Skeleton } from "./ui/skeleton";
-import { Check, CheckCircle, Clock, AlertCircle, Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { Check, Clock, AlertCircle, Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "../lib/utils";
 import { Button } from "./ui/button";

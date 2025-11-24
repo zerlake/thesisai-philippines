@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useMemo } from "react";
+import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/components/auth-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -50,7 +50,7 @@ export function StudentCriticBillingHistory() {
     fetchBillingData();
   }, [session, supabase]);
 
-  const getStatusBadge = (status: 'paid' | 'unpaid') => {
+  const getStatusBadge = (status: 'paid' | 'unpaid'): React.ReactNode => {
     switch (status) {
       case 'paid':
         return <Badge className="bg-green-100 text-green-800">Paid</Badge>;

@@ -9,6 +9,11 @@ const config = {
     './src/**/*.{ts,tsx}',
 	],
   prefix: "",
+  // Optimize for production
+  safelist: [
+    // Add critical utility classes that should never be purged
+    'dark',
+  ],
   theme: {
     container: {
       center: true,

@@ -1,14 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Progress } from "./ui/progress";
-import { Heart, Trophy, TrendingUp, BookOpen } from "lucide-react";
-import { useAuth } from "./auth-provider";
+import { Heart, Trophy, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 
 export function WellbeingWidget() {
-  const { profile } = useAuth();
   const [mood, setMood] = useState<string | null>(null);
 
   const moods = [
@@ -56,7 +53,6 @@ export function WellbeingWidget() {
 }
 
 export function ProgressMilestones() {
-  const { profile } = useAuth();
   const [milestoneProgress, setMilestoneProgress] = useState([
     { name: "Proposal Defense", completed: true },
     { name: "Chapter I Draft", completed: true },

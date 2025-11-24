@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ArrowRight,
   BookCheck,
   BrainCircuit,
   ClipboardCheck,
@@ -13,29 +12,31 @@ import {
   Presentation,
   ShieldCheck,
   BookOpenCheck,
+  BookOpen,
   Baseline,
   MessageSquare,
   Target,
   CheckSquare,
+  Square,
+  Users,
+  Folder,
   type LucideIcon,
 } from "lucide-react";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "./ui/card";
 import Link from "next/link";
 import { useAuth } from "./auth-provider";
-import { Button } from "./ui/button";
 import { useEffect, useState, useCallback } from "react";
-import { formatDistanceToNow, differenceInDays } from "date-fns";
+import { differenceInDays } from "date-fns";
 import { Skeleton } from "./ui/skeleton";
 import { StatCard } from "./stat-card";
 import { toast } from "sonner";
 import { RecentActivityChart } from "./recent-activity-chart";
-import { SessionGoalCard } from "./session-goal-card";
+import { SmartSessionGoalCard } from "./SmartSessionGoalCard";
 import { ThesisChecklist } from "./thesis-checklist";
 import { MyMilestonesCard } from "./my-milestones-card";
 import { WelcomeModal } from "./welcome-modal";
@@ -51,6 +52,7 @@ import { WritingStreakCard } from "./writing-streak-card";
 import { UpgradePromptCard } from "./upgrade-prompt-card";
 import { WellbeingWidget } from "./student-dashboard-enhancements";
 import { ProgressMilestones } from "./student-dashboard-enhancements";
+import { QuickAccessToolsDropdown } from "./quick-access-dropdown";
 
 const quickAccessItems = [
   {
@@ -119,6 +121,42 @@ const quickAccessItems = [
     description: "Analyze your documents.",
     href: "/document-analyzer",
   },
+  {
+    icon: BookOpen,
+    title: "Research Article Analyzer",
+    description: "Analyze research articles with structured extraction.",
+    href: "/research-article-analyzer",
+  },
+  {
+    icon: Folder,
+    title: "Research Groups",
+    description: "Organize and manage research projects.",
+    href: "/research-groups",
+  },
+  {
+    icon: Users,
+    title: "Literature Review Collaboration",
+    description: "Collaborate with your team.",
+    href: "/literature-review",
+  },
+  {
+    icon: Target,
+    title: "Variable Mapping Tool",
+    description: "Map research variables.",
+    href: "/variable-mapping-tool",
+  },
+  {
+    icon: Square,
+    title: "University Format Checker",
+    description: "Check format compliance.",
+    href: "/university-format-checker",
+  },
+  {
+    icon: Lightbulb,
+    title: "Research Problem Identifier",
+    description: "Find research problems.",
+    href: "/research-problem-identifier",
+  }
 ];
 
 type Document = {
@@ -163,17 +201,12 @@ export function StudentDashboard() {
   const [latestDocument, setLatestDocument] = useState<Document | null>(null);
   const [stats, setStats] = useState<Stats>({ docCount: 0, wordCount: 0, avgWordCount: 0, recentWordCount: 0 });
   const [nextAction, setNextAction] = useState<Action | null>(null);
-  const [isLoadingDoc, setIsLoadingDoc] = useState(true);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [isLoadingNextAction, setIsLoadingNextAction] = useState(true);
+  const [_isLoadingDoc, setIsLoadingDoc] = useState(true);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
 
   const widgets = { ...defaultWidgets, ...profile?.user_preferences?.dashboard_widgets };
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const getNextAction = useCallback(async () => {
     if (!user) return;
@@ -225,14 +258,14 @@ export function StudentDashboard() {
 
     const fetchLatestDocument = async () => {
       setIsLoadingDoc(true);
-      const { data } = await supabase.from("documents").select("id, title, updated_at").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(1).single();
-      if (data) setLatestDocument(data);
+      const { data } = await supabase.from("documents").select("id, title, updated_at").order("updated_at", { ascending: false, nullsFirst: false }).limit(1);
+      if (data && data.length > 0) setLatestDocument(data[0]);
       setIsLoadingDoc(false);
     };
 
     const fetchStats = async () => {
       setIsLoadingStats(true);
-      const { data: documents, error } = await supabase.from("documents").select("content, updated_at").eq("user_id", user.id);
+      const { data: documents, error } = await supabase.from("documents").select("content, updated_at");
       if (error) {
         toast.error("Failed to load project stats.");
         setIsLoadingStats(false);
@@ -314,31 +347,12 @@ export function StudentDashboard() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {widgets.session_goal && <SessionGoalCard />}
+        {widgets.session_goal && <SmartSessionGoalCard />}
         {widgets.writing_streak && <WritingStreakCard />}
         {widgets.milestones && <MyMilestonesCard />}
       </div>
 
-      {widgets.quick_access && (
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Quick Access Tools</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {quickAccessItems.map((item) => (
-              <Link href={item.href} key={item.title}>
-                <Card className="hover:bg-accent hover:text-accent-foreground transition-colors">
-                  <CardHeader className="flex flex-row items-center gap-4">
-                    <item.icon className="w-8 h-8" />
-                    <div>
-                      <CardTitle className="text-base">{item.title}</CardTitle>
-                      <CardDescription>{item.description}</CardDescription>
-                    </div>
-                  </CardHeader>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
+      {widgets.quick_access && <QuickAccessToolsDropdown items={quickAccessItems} />}
 
       {widgets.progress_milestones && <ProgressMilestones />}
       {widgets.wellbeing && <WellbeingWidget />}

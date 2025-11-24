@@ -123,7 +123,7 @@ export function Editor({ documentId }: { documentId: string }) {
       <EditorToolbar editor={editor} />
       {editor && session && (
         <div className="flex gap-1 bg-background p-1 rounded-lg shadow-lg border">
-          <PuterAITools editor={editor} session={session} supabaseClient={supabase} />
+          <PuterAITools editor={editor} session={session} />
         </div>
       )}
       <EditorContent editor={editor} />

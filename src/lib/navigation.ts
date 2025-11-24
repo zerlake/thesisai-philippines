@@ -1,7 +1,6 @@
 import {
   BookCheck,
   BookCopy,
-  BookMarked,
   BookOpen,
   BookUser,
   BrainCircuit,
@@ -14,7 +13,6 @@ import {
   List,
   Presentation,
   ShieldCheck,
-  UserCog,
   BookText as TitleIdeaIcon,
   Languages,
   Baseline,
@@ -23,16 +21,14 @@ import {
   Gift,
   CreditCard,
   UserCheck,
-  Component,
   BarChart,
-  Table,
-  Calendar,
-  Palette,
   LayoutTemplate,
+  Target,
   Users,
   Banknote,
   FolderLock,
   MessageCircleQuestion,
+  Network,
   type LucideIcon,
 } from "lucide-react";
 
@@ -56,57 +52,83 @@ export const studentNavGroups: NavGroup[] = [
     ],
   },
   {
-    title: "Writing Tools",
+    title: "Collaboration & Settings",
     items: [
-      { icon: BrainCircuit, label: "Topic Ideas", href: "/topic-ideas" },
-      { icon: TitleIdeaIcon, label: "Title Generator", href: "/title-generator" },
-      { icon: List, label: "Outline", href: "/outline" },
-      { icon: FlaskConical, label: "Research", href: "/research" },
-      { icon: ClipboardPen, label: "Methodology", href: "/methodology" },
-      { icon: ClipboardCheck, label: "Results", href: "/results" },
-      { icon: BarChart, label: "Statistical Analysis", href: "/statistical-analysis" },
-      { icon: BookCheck, label: "Conclusion", href: "/conclusion" },
-      { icon: FileText, label: "PDF & Document Analysis", href: "/document-analyzer" },
-    ],
-  },
-  {
-    title: "Review & Submission",
-    items: [
-      { icon: Languages, label: "Paraphraser", href: "/paraphraser" },
-      { icon: Presentation, label: "Presentation", href: "/presentation" },
-      { icon: Lightbulb, label: "Flashcards", href: "/flashcards" },
-      { icon: MessageCircleQuestion, label: "Q&A Simulator", href: "/qa-simulator" },
-      { icon: Baseline, label: "Grammar Check", href: "/grammar-check" },
-      { icon: ShieldCheck, label: "Originality Check", href: "/originality-check" },
-      { icon: FileText, label: "Title Page", href: "/title-page" },
-    ],
-  },
-  {
-    title: "Data & Analytics",
-    items: [
-      { icon: FolderLock, label: "Data Management", href: "/data-management" },
-    ],
-  },
-  {
-    title: "Collaboration",
-    items: [
-      { icon: UserCheck, label: "Manage Advisor", href: "/settings?tab=advisor" },
-      { icon: ClipboardCheck, label: "Manage Critic", href: "/settings?tab=critic" },
-      { icon: CreditCard, label: "Billing", href: "/settings/billing" },
+      { icon: Users, label: "Study Groups", href: "/groups" },
+      { icon: UserCheck, label: "Advisor Management", href: "/settings?tab=advisor" },
+      { icon: ClipboardCheck, label: "Critic Management", href: "/settings?tab=critic" },
+      { icon: CreditCard, label: "Billing & Plan", href: "/settings/billing" },
       { icon: Gift, label: "Referrals", href: "/settings/referrals" },
     ],
   },
   {
-    title: "Resources",
+    title: "Phase 1: Research & Planning",
+    items: [
+      { icon: BrainCircuit, label: "Topic Ideas", href: "/topic-ideas" },
+      { icon: Target, label: "Research Gap Identifier", href: "/research-gap" },
+      { icon: Lightbulb, label: "Research Problem Identifier", href: "/research-problem-identifier" },
+      { icon: LayoutTemplate, label: "University Format Checker", href: "/university-format-checker" },
+      { icon: FlaskConical, label: "Research Assistant", href: "/research" },
+    ],
+  },
+  {
+    title: "Phase 2: Writing & Methodology",
+    items: [
+      { icon: TitleIdeaIcon, label: "Title Generator", href: "/title-generator" },
+      { icon: List, label: "Outline Builder", href: "/outline" },
+      { icon: ClipboardPen, label: "Methodology Builder", href: "/methodology" },
+      { icon: Network, label: "Literature Review", href: "/literature-review" },
+      { icon: BookCopy, label: "Reference Manager", href: "/references" },
+    ],
+  },
+  {
+    title: "Phase 3: Analysis & Results",
+    items: [
+      { icon: BarChart, label: "Statistical Analysis", href: "/statistical-analysis" },
+      { icon: ClipboardCheck, label: "Results Analyzer", href: "/results" },
+      { icon: BookOpen, label: "Research Article Analyzer", href: "/research-article-analyzer" },
+      { icon: Target, label: "Variable Mapping", href: "/variable-mapping-tool" },
+    ],
+  },
+  {
+    title: "Phase 4: Review & Submission",
+    items: [
+      { icon: Baseline, label: "Grammar Check", href: "/grammar-check" },
+      { icon: Languages, label: "Paraphraser", href: "/paraphraser" },
+      { icon: ShieldCheck, label: "Originality Check", href: "/originality-check" },
+      { icon: FileText, label: "PDF Document Analysis", href: "/document-analyzer" },
+      { icon: BookCheck, label: "Conclusion Writer", href: "/conclusion" },
+      { icon: FileText, label: "Title Page", href: "/title-page" },
+    ],
+  },
+  {
+    title: "Submission Prep",
+    items: [
+      { icon: Presentation, label: "Presentation Builder", href: "/presentation" },
+      { icon: MessageCircleQuestion, label: "Q&A Simulator", href: "/qa-simulator" },
+      { icon: Lightbulb, label: "Flashcards", href: "/flashcards" },
+      { icon: BarChart, label: "Writing Analytics", href: "/analytics" },
+    ],
+  },
+  {
+    title: "Resources & Support",
     items: [
       { icon: BookOpen, label: "Resources", href: "/resources" },
       { icon: University, label: "University Guides", href: "/university-guides" },
       { icon: BookUser, label: "User Guide", href: "/user-guide" },
+      { icon: FolderLock, label: "Data Management", href: "/data-management" },
     ],
   },
 ];
 
-export const adminNavItems: NavItem[] = [{ icon: UserCog, label: "Admin", href: "/admin" }];
+export const adminNavItems: NavItem[] = [
+  { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
+  { icon: Users, label: "Users", href: "/admin/users" },
+  { icon: University, label: "Institutions", href: "/admin/institutions" },
+  { icon: MessageCircleQuestion, label: "Testimonials", href: "/admin/testimonials" },
+  { icon: Banknote, label: "Payouts", href: "/admin/payouts" },
+  { icon: Network, label: "MCP Servers", href: "/admin/mcp-servers" },
+];
 
 export const advisorNavGroups: NavGroup[] = [
   {

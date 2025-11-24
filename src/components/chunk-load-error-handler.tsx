@@ -1,3 +1,5 @@
+import { createSanitizedHtml } from "@/lib/html-sanitizer";
+
 export function ChunkLoadErrorHandler() {
   const scriptContent = `
     (function() {
@@ -16,10 +18,8 @@ export function ChunkLoadErrorHandler() {
             // Only reload if it's been more than 10 seconds since the last reload
             if (!lastReloadTime || now - parseInt(lastReloadTime) > 10000) {
               sessionStorage.setItem(CHUNK_ERROR_RELOAD_KEY, now.toString());
-              console.warn('DYAD: Detected chunk load error. Forcing a hard refresh.');
               window.location.reload(true); // Force reload from server
             } else {
-              console.warn('DYAD: Chunk load error detected, but a recent reload was already attempted. Aborting to prevent a loop.');
             }
           }
         }
@@ -30,5 +30,5 @@ export function ChunkLoadErrorHandler() {
     })();
   `;
 
-  return <script dangerouslySetInnerHTML={{ __html: scriptContent }} />;
+  return <script dangerouslySetInnerHTML={createSanitizedHtml(scriptContent)} />;
 }

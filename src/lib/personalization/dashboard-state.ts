@@ -1,0 +1,481 @@
+/**
+ * Dashboard State Management
+ * Manages dashboard customizer state with undo/redo, layout persistence
+ */
+
+import { create } from 'zustand';
+import { WidgetLayout, WidgetId, WidgetSettings } from './widget-registry';
+
+export interface DashboardLayout {
+  id: string;
+  name: string;
+  description?: string;
+  widgets: WidgetLayout[];
+  createdAt: Date;
+  updatedAt: Date;
+  isDefault?: boolean;
+  isTemplate?: boolean;
+  breakpoint?: 'mobile' | 'tablet' | 'desktop';
+}
+
+export interface HistoryState {
+  past: DashboardLayout[];
+  present: DashboardLayout;
+  future: DashboardLayout[];
+}
+
+interface DashboardState {
+  // Current state
+  currentLayout: DashboardLayout;
+  allLayouts: DashboardLayout[];
+  history: HistoryState;
+  isDirty: boolean;
+  isSaving: boolean;
+  currentBreakpoint: 'mobile' | 'tablet' | 'desktop';
+  
+  // Layout management
+  createLayout: (name: string, description?: string) => void;
+  loadLayout: (id: string) => void;
+  saveLayout: () => Promise<void>;
+  deleteLayout: (id: string) => void;
+  renameLayout: (id: string, name: string) => void;
+  
+  // Widget management
+  addWidget: (widgetId: WidgetId, x?: number, y?: number) => void;
+  removeWidget: (widgetLayoutId: string) => void;
+  updateWidgetPosition: (widgetLayoutId: string, x: number, y: number) => void;
+  updateWidgetSize: (widgetLayoutId: string, w: number, h: number) => void;
+  updateWidgetSettings: (widgetLayoutId: string, settings: WidgetSettings) => void;
+  lockWidget: (widgetLayoutId: string) => void;
+  unlockWidget: (widgetLayoutId: string) => void;
+  
+  // History management
+  undo: () => void;
+  redo: () => void;
+  clearHistory: () => void;
+  
+  // Breakpoint management
+  setBreakpoint: (breakpoint: 'mobile' | 'tablet' | 'desktop') => void;
+  getLayoutForBreakpoint: (breakpoint: 'mobile' | 'tablet' | 'desktop') => DashboardLayout | null;
+  
+  // Reset
+  resetToDefault: () => void;
+  loadTemplate: (templateId: string) => void;
+}
+
+// Helper function to generate widget layout ID
+function generateWidgetLayoutId(): string {
+  return `widget-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+// Helper function to find next available position
+function findNextWidgetPosition(widgets: WidgetLayout[]): { x: number; y: number } {
+  let maxY = 0;
+  let x = 0;
+  
+  for (const widget of widgets) {
+    const widgetBottom = widget.y + widget.h;
+    if (widgetBottom > maxY) {
+      maxY = widgetBottom;
+    }
+  }
+  
+  // Default grid: 6 columns
+  const x_pos = (widgets.length % 3) * 2;
+  const y_pos = maxY;
+  
+  return { x: x_pos, y: y_pos };
+}
+
+// Helper function to save to history
+function pushHistory(state: DashboardState): HistoryState {
+  return {
+    past: [...state.history.past, state.history.present],
+    present: state.currentLayout,
+    future: []
+  };
+}
+
+// Create default layout
+function createDefaultLayout(): DashboardLayout {
+  return {
+    id: 'default',
+    name: 'Default Dashboard',
+    description: 'Default dashboard layout',
+    widgets: [
+      {
+        id: generateWidgetLayoutId(),
+        widgetId: 'research-progress',
+        x: 0,
+        y: 0,
+        w: 2,
+        h: 2,
+        settings: {
+          period: 'month',
+          metrics: ['papers_read', 'notes_taken'],
+          chartType: 'line'
+        }
+      },
+      {
+        id: generateWidgetLayoutId(),
+        widgetId: 'quick-stats',
+        x: 2,
+        y: 0,
+        w: 2,
+        h: 1,
+        settings: {
+          stats: ['total_papers', 'total_notes']
+        }
+      },
+      {
+        id: generateWidgetLayoutId(),
+        widgetId: 'recent-papers',
+        x: 0,
+        y: 2,
+        w: 2,
+        h: 2,
+        settings: {
+          count: 5,
+          sortBy: 'date'
+        }
+      }
+    ],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    isDefault: true
+  };
+}
+
+export const useDashboardStore = create<DashboardState>((set, get) => ({
+  // Initial state
+  currentLayout: createDefaultLayout(),
+  allLayouts: [createDefaultLayout()],
+  history: {
+    past: [],
+    present: createDefaultLayout(),
+    future: []
+  },
+  isDirty: false,
+  isSaving: false,
+  currentBreakpoint: 'desktop',
+  
+  // Create new layout
+  createLayout: (name: string, description?: string) => {
+    const newLayout: DashboardLayout = {
+      id: `layout-${Date.now()}`,
+      name,
+      description,
+      widgets: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isDefault: false
+    };
+    
+    set((state) => ({
+      currentLayout: newLayout,
+      allLayouts: [...state.allLayouts, newLayout],
+      history: pushHistory(state),
+      isDirty: false
+    }));
+  },
+  
+  // Load existing layout
+  loadLayout: (id: string) => {
+    const layout = get().allLayouts.find(l => l.id === id);
+    if (layout) {
+      set((state) => ({
+        currentLayout: layout,
+        history: {
+          past: [...state.history.past, state.history.present],
+          present: layout,
+          future: []
+        },
+        isDirty: false
+      }));
+    }
+  },
+  
+  // Save current layout
+  saveLayout: async () => {
+    set({ isSaving: true });
+    try {
+      const state = get();
+      const updated = {
+        ...state.currentLayout,
+        updatedAt: new Date()
+      };
+      
+      set((s) => ({
+        currentLayout: updated,
+        allLayouts: s.allLayouts.map(l => l.id === updated.id ? updated : l),
+        isDirty: false,
+        isSaving: false
+      }));
+      
+      // TODO: Persist to API
+      // await apiClient.saveDashboardLayout(updated);
+    } catch (error) {
+      console.error('Failed to save layout:', error);
+      set({ isSaving: false });
+      throw error;
+    }
+  },
+  
+  // Delete layout
+  deleteLayout: (id: string) => {
+    set((state) => {
+      const remaining = state.allLayouts.filter(l => l.id !== id);
+      const newCurrent = remaining.length > 0 ? remaining[0] : createDefaultLayout();
+      
+      return {
+        allLayouts: remaining,
+        currentLayout: newCurrent,
+        isDirty: true
+      };
+    });
+  },
+  
+  // Rename layout
+  renameLayout: (id: string, name: string) => {
+    set((state) => ({
+      currentLayout: state.currentLayout.id === id 
+        ? { ...state.currentLayout, name }
+        : state.currentLayout,
+      allLayouts: state.allLayouts.map(l => 
+        l.id === id ? { ...l, name } : l
+      ),
+      isDirty: true
+    }));
+  },
+  
+  // Add widget to layout
+  addWidget: (widgetId: WidgetId, x = 0, y = 0) => {
+    set((state) => {
+      const pos = x === 0 && y === 0 
+        ? findNextWidgetPosition(state.currentLayout.widgets)
+        : { x, y };
+      
+      const newWidget: WidgetLayout = {
+        id: generateWidgetLayoutId(),
+        widgetId,
+        x: pos.x,
+        y: pos.y,
+        w: 2,
+        h: 2,
+        settings: {}
+      };
+      
+      const updated = {
+        ...state.currentLayout,
+        widgets: [...state.currentLayout.widgets, newWidget],
+        updatedAt: new Date()
+      };
+      
+      return {
+        currentLayout: updated,
+        history: pushHistory(state),
+        isDirty: true
+      };
+    });
+  },
+  
+  // Remove widget
+  removeWidget: (widgetLayoutId: string) => {
+    set((state) => {
+      const updated = {
+        ...state.currentLayout,
+        widgets: state.currentLayout.widgets.filter(w => w.id !== widgetLayoutId),
+        updatedAt: new Date()
+      };
+      
+      return {
+        currentLayout: updated,
+        history: pushHistory(state),
+        isDirty: true
+      };
+    });
+  },
+  
+  // Update widget position
+  updateWidgetPosition: (widgetLayoutId: string, x: number, y: number) => {
+    set((state) => {
+      const updated = {
+        ...state.currentLayout,
+        widgets: state.currentLayout.widgets.map(w =>
+          w.id === widgetLayoutId ? { ...w, x, y } : w
+        ),
+        updatedAt: new Date()
+      };
+      
+      return {
+        currentLayout: updated,
+        isDirty: true
+      };
+    });
+  },
+  
+  // Update widget size
+  updateWidgetSize: (widgetLayoutId: string, w: number, h: number) => {
+    set((state) => {
+      const updated = {
+        ...state.currentLayout,
+        widgets: state.currentLayout.widgets.map(wl =>
+          wl.id === widgetLayoutId ? { ...wl, w, h } : wl
+        ),
+        updatedAt: new Date()
+      };
+      
+      return {
+        currentLayout: updated,
+        isDirty: true
+      };
+    });
+  },
+  
+  // Update widget settings
+  updateWidgetSettings: (widgetLayoutId: string, settings: WidgetSettings) => {
+    set((state) => {
+      const updated = {
+        ...state.currentLayout,
+        widgets: state.currentLayout.widgets.map(wl =>
+          wl.id === widgetLayoutId ? { ...wl, settings } : wl
+        ),
+        updatedAt: new Date()
+      };
+      
+      return {
+        currentLayout: updated,
+        history: pushHistory(state),
+        isDirty: true
+      };
+    });
+  },
+  
+  // Lock widget
+  lockWidget: (widgetLayoutId: string) => {
+    set((state) => ({
+      currentLayout: {
+        ...state.currentLayout,
+        widgets: state.currentLayout.widgets.map(wl =>
+          wl.id === widgetLayoutId ? { ...wl, locked: true } : wl
+        )
+      }
+    }));
+  },
+  
+  // Unlock widget
+  unlockWidget: (widgetLayoutId: string) => {
+    set((state) => ({
+      currentLayout: {
+        ...state.currentLayout,
+        widgets: state.currentLayout.widgets.map(wl =>
+          wl.id === widgetLayoutId ? { ...wl, locked: false } : wl
+        )
+      }
+    }));
+  },
+  
+  // Undo
+  undo: () => {
+    set((state) => {
+      if (state.history.past.length === 0) return state;
+      
+      const newPast = state.history.past.slice(0, -1);
+      const newPresent = state.history.past[state.history.past.length - 1];
+      
+      return {
+        currentLayout: newPresent,
+        history: {
+          past: newPast,
+          present: newPresent,
+          future: [state.history.present, ...state.history.future]
+        }
+      };
+    });
+  },
+  
+  // Redo
+  redo: () => {
+    set((state) => {
+      if (state.history.future.length === 0) return state;
+      
+      const newFuture = state.history.future.slice(1);
+      const newPresent = state.history.future[0];
+      
+      return {
+        currentLayout: newPresent,
+        history: {
+          past: [...state.history.past, state.history.present],
+          present: newPresent,
+          future: newFuture
+        }
+      };
+    });
+  },
+  
+  // Clear history
+  clearHistory: () => {
+    set((state) => ({
+      history: {
+        past: [],
+        present: state.currentLayout,
+        future: []
+      }
+    }));
+  },
+  
+  // Set breakpoint
+  setBreakpoint: (breakpoint) => {
+    set({ currentBreakpoint: breakpoint });
+  },
+  
+  // Get layout for breakpoint
+  getLayoutForBreakpoint: (breakpoint) => {
+    return get().allLayouts.find(l => l.breakpoint === breakpoint) || null;
+  },
+  
+  // Reset to default
+  resetToDefault: () => {
+    set((state) => {
+      const defaultLayout = createDefaultLayout();
+      return {
+        currentLayout: defaultLayout,
+        history: {
+          past: [...state.history.past, state.history.present],
+          present: defaultLayout,
+          future: []
+        },
+        isDirty: false
+      };
+    });
+  },
+  
+  // Load template
+  loadTemplate: (templateId: string) => {
+    // TODO: Implement template loading
+    const state = get();
+    state.loadLayout(templateId);
+  }
+}));
+
+// Export hook for easier usage
+export function useDashboardLayout() {
+  return useDashboardStore();
+}
+
+export function useDashboardHistory() {
+  return useDashboardStore((state) => ({
+    canUndo: state.history.past.length > 0,
+    canRedo: state.history.future.length > 0,
+    undo: state.undo,
+    redo: state.redo
+  }));
+}
+
+export function useDashboardSave() {
+  return useDashboardStore((state) => ({
+    isDirty: state.isDirty,
+    isSaving: state.isSaving,
+    saveLayout: state.saveLayout
+  }));
+}

@@ -9,6 +9,7 @@ import { useAuth } from "./auth-provider";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { FilePlus2 } from "lucide-react";
+import { createSanitizedHtml } from "@/lib/html-sanitizer";
 
 export function TitlePageGenerator() {
   const { session, supabase } = useAuth();
@@ -121,7 +122,7 @@ export function TitlePageGenerator() {
           <div className="space-y-4">
             <Label>Preview</Label>
             <div className="p-4 border rounded-md bg-tertiary min-h-[400px] flex items-center justify-center">
-              <div className="prose prose-sm" dangerouslySetInnerHTML={{ __html: generatedHtml }} />
+              <div className="prose prose-sm" dangerouslySetInnerHTML={createSanitizedHtml(generatedHtml)} />
             </div>
             <Button onClick={handleSaveAsDraft} disabled={isSaving || !formData.title}>
               <FilePlus2 className="w-4 h-4 mr-2" />

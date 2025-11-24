@@ -1,29 +1,44 @@
-// @ts-ignore
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
-// @ts-ignore
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
+// supabase/functions/paraphrase-text/index.ts
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { corsHeaders } from "../_shared/cors.ts";
 
-const getCorsHeaders = (req: Request) => {
-  const ALLOWED_ORIGINS = [
-    'https://thesisai-philippines.vercel.app',
-    'http://localhost:3000',
-    'http://localhost:32100',
-  ];
-  const origin = req.headers.get('Origin');
-  const allowOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+serve(async (req) => {
+  // Handle CORS
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
 
-  return {
-    'Access-Control-Allow-Origin': allowOrigin,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cc-webhook-signature',
-  };
-}
+  try {
+    const { text, mode } = await req.json();
 
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
+    if (!text) {
+      return new Response(
+        JSON.stringify({ error: "Missing text parameter" }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
 
-function getPrompt(text: string, mode: string): string {
-  switch (mode) {
-    case 'formal':
-      return `You are an expert academic editor. Your task is to rewrite the following text to make it more formal and suitable for a thesis.
+    // Get Puter auth token from header
+    const puterAuthToken = req.headers.get("X-Puter-Auth");
+    
+    if (!puterAuthToken) {
+      return new Response(
+        JSON.stringify({ error: "Missing X-Puter-Auth header" }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
+    // Construct prompt based on mode
+    let prompt = '';
+    switch (mode) {
+      case 'formal':
+        prompt = `You are an expert academic editor. Your task is to rewrite the following text to make it more formal and suitable for a thesis.
 - Elevate the vocabulary and sentence structure.
 - Ensure the core meaning is preserved.
 - Return only the rewritten text, with no additional comments or explanations.
@@ -31,8 +46,10 @@ function getPrompt(text: string, mode: string): string {
 Original text: "${text}"
 
 Formal text:`;
-    case 'simple':
-      return `You are an expert academic editor. Your task is to simplify the following text.
+        break;
+
+      case 'simple':
+        prompt = `You are an expert academic editor. Your task is to simplify the following text.
 - Make it easier to understand for a general audience.
 - Use clearer, more direct language.
 - Retain the key information and core meaning.
@@ -41,8 +58,10 @@ Formal text:`;
 Original text: "${text}"
 
 Simplified text:`;
-    case 'expand':
-      return `You are an expert academic editor. Your task is to expand on the following text.
+        break;
+
+      case 'expand':
+        prompt = `You are an expert academic editor. Your task is to expand on the following text.
 - Add more detail, context, or examples to elaborate on the core idea.
 - The length should be slightly longer but not excessively so.
 - Maintain a consistent academic tone.
@@ -51,9 +70,11 @@ Simplified text:`;
 Original text: "${text}"
 
 Expanded text:`;
-    case 'standard':
-    default:
-      return `You are an expert academic editor. Your task is to paraphrase the following text.
+        break;
+
+      case 'standard':
+      default:
+        prompt = `You are an expert academic editor. Your task is to paraphrase the following text.
 - The new version should have a different sentence structure and use different vocabulary.
 - It must retain the original meaning and academic tone.
 - Return only the paraphrased text, with no additional comments or explanations.
@@ -61,101 +82,97 @@ Expanded text:`;
 Original text: "${text}"
 
 Paraphrased text:`;
-  }
-}
-
-async function paraphraseTextWithGemini(text: string, mode: string, apiKey: string) {
-  const prompt = getPrompt(text, mode);
-
-  const response = await fetch(`${GEMINI_API_URL}${apiKey}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      contents: [{
-        parts: [{
-          text: prompt,
-        }],
-      }],
-    }),
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.json() as { error?: { message: string } };
-    console.error("Gemini API Error:", errorBody);
-    throw new Error(`Gemini API request failed: ${errorBody.error?.message || 'Unknown error'}`);
-  }
-
-  const data = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>, paraphrasedText?: string };
-  const paraphrasedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!paraphrasedText) {
-    console.error("Invalid response structure from Gemini:", data);
-    throw new Error("Failed to parse the paraphrased text from the Gemini API response.");
-  }
-
-  return paraphrasedText.trim();
-}
-
-interface RequestBody {
-  text: string;
-  mode?: string;
-}
-
-serve(async (req: Request) => {
-  const corsHeaders = getCorsHeaders(req);
-
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
-  }
-
-  try {
-    const supabaseAdmin = createClient(
-      // @ts-ignore
-      Deno.env.get('SUPABASE_URL') ?? '',
-      // @ts-ignore
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
-
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      throw new Error('Missing authorization header')
-    }
-    const jwt = authHeader.replace('Bearer ', '')
-
-    const { data: { user } } = await supabaseAdmin.auth.getUser(jwt)
-    if (!user) {
-      throw new Error('Invalid JWT')
     }
 
-    // @ts-ignore
-    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!geminiApiKey) {
-      throw new Error("GEMINI_API_KEY is not set in Supabase project secrets.");
-    }
-
-    const { text, mode = 'standard' } = await req.json() as RequestBody;
-    if (!text) {
-      return new Response(JSON.stringify({ error: 'Text to paraphrase is required' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const paraphrasedText = await paraphraseTextWithGemini(text, mode, geminiApiKey);
-
-    return new Response(JSON.stringify({ paraphrasedText }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
+    // Call Puter AI via HTTP (since we can't use the SDK in Edge Functions)
+    const puterResponse = await fetch("https://api.puter.com/ai/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${puterAuthToken}`,
+      },
+      body: JSON.stringify({
+        prompt,
+        temperature: 0.7,
+        max_tokens: 2000,
+      }),
     });
 
-  } catch (error) {
-    console.error("Error in paraphrase-text function:", error);
-    const message = error instanceof Error ? error.message : "An unknown error occurred.";
-    return new Response(JSON.stringify({ error: message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    });
+    // Read response body once
+    const responseText = await puterResponse.text();
+
+    if (!puterResponse.ok) {
+      let errorMessage = "Puter AI service failed";
+      try {
+        const errorData = JSON.parse(responseText);
+        errorMessage = errorData.error || errorMessage;
+      } catch {
+        // Not JSON, use raw text
+        errorMessage = responseText || `HTTP ${puterResponse.status}`;
+      }
+      return new Response(
+        JSON.stringify({ 
+          error: errorMessage,
+          status: puterResponse.status 
+        }),
+        { 
+          status: puterResponse.status, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid response from Puter AI" }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+    
+    // Extract text from Puter response
+    let paraphrasedText = '';
+    if (typeof result === 'string') {
+      paraphrasedText = result.trim();
+    } else if (result && typeof result === 'object') {
+      paraphrasedText = 
+        result.choices?.[0]?.message?.content?.trim() ||
+        result.choices?.[0]?.text?.trim() ||
+        result.response?.trim() ||
+        result.text?.trim() ||
+        result.content?.trim() ||
+        '';
+    }
+
+    if (!paraphrasedText) {
+      return new Response(
+        JSON.stringify({ error: "AI returned empty response" }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ paraphrasedText }),
+      { 
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
+    );
+  } catch (error: any) {
+    console.error("Error in paraphrase function:", error);
+    return new Response(
+      JSON.stringify({ error: error.message || "Internal server error" }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
+    );
   }
-})
+});

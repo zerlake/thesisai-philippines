@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
+import { callPuterAI } from '../_shared/puter-ai.ts';
 
 const getCorsHeaders = (req: Request) => {
   const ALLOWED_ORIGINS = [
@@ -18,99 +19,84 @@ const getCorsHeaders = (req: Request) => {
   };
 }
 
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
+async function generateQuestionsWithPuter(textContent: string) {
+  const prompt = `You are an expert thesis defense panelist at a top Philippine university. Your task is to analyze the following text from a student's thesis (e.g., an abstract or chapter summary) and generate a list of 10 challenging and insightful questions that a panel would likely ask during an oral defense.
 
-async function generateQuestionsWithGemini(textContent: string, apiKey: string) {
-  const prompt = `
-    You are an expert thesis defense panelist at a top Philippine university. Your task is to analyze the following text from a student's thesis (e.g., an abstract or chapter summary) and generate a list of 10 challenging and insightful questions that a panel would likely ask during an oral defense.
+Use the following list of real-world questions as a model for the style, depth, and range of questions you should generate. Your questions should be tailored to the provided thesis text but reflect the critical thinking demonstrated in these examples.
 
-    Use the following list of real-world questions as a model for the style, depth, and range of questions you should generate. Your questions should be tailored to the provided thesis text but reflect the critical thinking demonstrated in these examples.
+MODEL QUESTIONS:
 
-    ---
-    MODEL QUESTIONS:
+**Introduction & Rationale**
+- What motivated you to choose this research topic?
+- Why is this research important or relevant today in the Philippine context?
+- How does your research align with current gaps in the literature?
 
-    **Introduction & Rationale**
-    - What motivated you to choose this research topic?
-    - Why is this research important or relevant today in the Philippine context?
-    - How does your research align with current gaps in the literature?
+**Literature Review & Theoretical Framework**
+- What are the most influential studies or theories that guided your work?
+- How does your research contribute to, contradict, or build upon previous studies?
+- Can you explain your conceptual or theoretical framework and why you chose it?
 
-    **Literature Review & Theoretical Framework**
-    - What are the most influential studies or theories that guided your work?
-    - How does your research contribute to, contradict, or build upon previous studies?
-    - Can you explain your conceptual or theoretical framework and why you chose it?
+**Methodology**
+- Why did you choose your particular research design?
+- What are the strengths and limitations of your chosen methods?
+- How did you ensure validity and reliability (or trustworthiness in qualitative work)?
+- Were there ethical considerations, and how did you address them?
 
-    **Methodology**
-    - Why did you choose your particular research design?
-    - What are the strengths and limitations of your chosen methods?
-    - How did you ensure validity and reliability (or trustworthiness in qualitative work)?
-    - Were there ethical considerations, and how did you address them?
+**Results & Discussion**
+- What are your main findings, and how do they answer your research questions?
+- Can you summarize any surprising or counterintuitive results?
+- How do your findings compare with previous research or theory?
+- Are there limitations in your analysis that might affect interpretation?
 
-    **Results & Discussion**
-    - What are your main findings, and how do they answer your research questions?
-    - Can you summarize any surprising or counterintuitive results?
-    - How do your findings compare with previous research or theory?
-    - Are there limitations in your analysis that might affect interpretation?
+**Conclusions & Implications**
+- What are the key practical or policy implications of your findings?
+- Who will benefit from your research, and how can your findings be applied?
+- What would you do differently if repeating this study?
 
-    **Conclusions & Implications**
-    - What are the key practical or policy implications of your findings?
-    - Who will benefit from your research, and how can your findings be applied?
-    - What would you do differently if repeating this study?
+**Defense of Originality and Contribution**
+- In what ways is your work novel or innovative?
+- How does your research advance the field or open new directions for study?
+- Can you restate your research in layman's terms?
 
-    **Defense of Originality and Contribution**
-    - In what ways is your work novel or innovative?
-    - How does your research advance the field or open new directions for study?
-    - Can you restate your research in layman's terms?
-    ---
+Now, analyze the following thesis text and generate your questions.
 
-    Now, analyze the following thesis text and generate your questions.
+Your entire response MUST be a single, valid JSON object. Do not include any markdown formatting or any text outside of the JSON object.
 
-    Your entire output MUST be a single, valid JSON object. Do not include any markdown formatting like 
-    \`\`\`json
-    or any text outside of the JSON object.
+The JSON object must have the following structure:
+{
+  "questions": [
+    "Question 1...",
+    "Question 2...",
+    "..."
+  ]
+}
 
-    The JSON object must have the following structure:
-    {
-      "questions": [
-        "Question 1...",
-        "Question 2...",
-        "..."
-      ]
+Thesis Text: "${textContent.substring(0, 4000)}"
+
+Generate the complete JSON object now.`;
+
+  const systemPrompt = 'You are an expert thesis defense panelist specializing in Philippine university standards.';
+
+  try {
+    const generatedText = await callPuterAI(prompt, {
+      systemPrompt,
+      temperature: 0.7,
+      max_tokens: 1500,
+    });
+
+    if (!generatedText) {
+      throw new Error("Failed to generate defense questions from Puter AI");
     }
 
-    Thesis Text: "${textContent.substring(0, 4000)}"
-
-    Generate the JSON object now.
-  `;
-
-  const response = await fetch(`${GEMINI_API_URL}${apiKey}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      contents: [{
-        parts: [{
-          text: prompt,
-        }],
-      }],
-    }),
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.json() as { error?: { message: string } };
-    console.error("Gemini API Error:", errorBody);
-    throw new Error(`Gemini API request failed: ${errorBody.error?.message || 'Unknown error'}`);
+    // Extract JSON from the response
+    const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+    const jsonString = jsonMatch ? jsonMatch[0] : generatedText;
+    
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error("Puter AI Error:", error);
+    throw new Error(`Failed to generate defense questions: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-
-  const data = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
-  const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!generatedText) {
-    console.error("Invalid response structure from Gemini:", data);
-    throw new Error("Failed to parse the questions from the Gemini API response.");
-  }
-
-  return JSON.parse(generatedText);
 }
 
 interface RequestBody {
@@ -143,12 +129,6 @@ serve(async (req: Request) => {
       throw new Error('Invalid JWT')
     }
 
-    // @ts-ignore
-    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!geminiApiKey) {
-      throw new Error("GEMINI_API_KEY is not set in Supabase project secrets.");
-    }
-
     const { textContent } = await req.json() as RequestBody;
     if (!textContent) {
       return new Response(JSON.stringify({ error: 'Text content is required' }), {
@@ -157,7 +137,7 @@ serve(async (req: Request) => {
       });
     }
 
-    const questionData = await generateQuestionsWithGemini(textContent, geminiApiKey);
+    const questionData = await generateQuestionsWithPuter(textContent);
 
     return new Response(JSON.stringify(questionData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

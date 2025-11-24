@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address."),
@@ -27,6 +29,7 @@ export function SignInForm() {
     resolver: zodResolver(formSchema),
     defaultValues: { email: "", password: "" },
   });
+  const router = useRouter();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const { error } = await supabase.auth.signInWithPassword({
@@ -36,7 +39,11 @@ export function SignInForm() {
 
     if (error) {
       toast.error(error.message);
+      return;
     }
+
+    toast.success("Login successful!");
+    router.push("/dashboard");
   }
 
   return (
@@ -60,7 +67,12 @@ export function SignInForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <div className="flex items-center justify-between">
+                <FormLabel>Password</FormLabel>
+                <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
               <FormControl>
                 <Input type="password" placeholder="••••••••" {...field} />
               </FormControl>

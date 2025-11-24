@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
+import { callPuterAI } from '../_shared/puter-ai.ts';
 
 const getCorsHeaders = (req: Request) => {
   const ALLOWED_ORIGINS = [
@@ -18,61 +19,52 @@ const getCorsHeaders = (req: Request) => {
   };
 }
 
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
+async function generateFlashcardsWithPuter(topic: string) {
+  const prompt = `You are an expert academic assistant. Your task is to generate a comprehensive set of flashcards for key terms related to a given thesis topic.
 
-async function generateFlashcardsWithGemini(topic: string, apiKey: string) {
-  const prompt = `
-    You are an expert academic assistant. Your task is to generate a set of flashcards for key terms related to a given thesis topic.
+Identify 12 of the most important keywords and concepts from the topic. Include a mix of foundational terms, methods, theories, findings, and applications. For each term, provide a clear and concise definition suitable for a flashcard.
 
-    Identify 4-5 of the most important keywords or concepts from the topic. For each term, provide a clear and concise definition suitable for a flashcard.
+Your entire output MUST be a single, valid JSON object. Do not include any markdown formatting or any text outside of the JSON object.
 
-    Your entire output MUST be a single, valid JSON object. Do not include any markdown formatting like 
-    or any text outside of the JSON object.
-
-    The JSON object must have the following structure:
+The JSON object must have the following structure:
+{
+  "flashcards": [
     {
-      "flashcards": [
-        {
-          "term": "...",
-          "definition": "..."
-        }
-      ]
+      "term": "...",
+      "definition": "..."
+    }
+  ]
+}
+
+Thesis Topic: "${topic}"
+
+Generate the complete JSON object with 12 flashcards now.`;
+
+  const systemPrompt = 'You are an expert academic assistant specializing in thesis study materials.';
+
+  try {
+    const generatedText = await callPuterAI(prompt, {
+      systemPrompt,
+      temperature: 0.7,
+      max_tokens: 1500,
+    });
+
+    if (!generatedText) {
+      throw new Error("Failed to generate flashcards from Puter AI");
     }
 
-    Thesis Topic: "${topic}"
-
-    Generate the JSON object now.
-  `;
-
-  const response = await fetch(`${GEMINI_API_URL}${apiKey}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      contents: [{
-        parts: [{
-          text: prompt,
-        }],
-      }],
-    }),
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.json() as { error?: { message: string } };
-    console.error("Gemini API Error:", errorBody);
-    throw new Error(`Gemini API request failed: ${errorBody.error?.message || 'Unknown error'}`);
+    // Extract JSON from the response
+    const jsonStart = generatedText.indexOf('{');
+    const jsonEnd = generatedText.lastIndexOf('}') + 1;
+    const jsonString = jsonStart !== -1 && jsonEnd !== 0 
+      ? generatedText.substring(jsonStart, jsonEnd)
+      : generatedText;
+    
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error("Puter AI Error:", error);
+    throw new Error(`Failed to generate flashcards: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-
-  const data = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>, flashcards?: any[] };
-  const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!generatedText) {
-    console.error("Invalid response structure from Gemini:", data);
-    throw new Error("Failed to parse the flashcards from the Gemini API response.");
-  }
-
-  return JSON.parse(generatedText);
 }
 
 interface RequestBody {
@@ -105,12 +97,6 @@ serve(async (req: Request) => {
       throw new Error('Invalid JWT')
     }
 
-    // @ts-ignore
-    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
-    if (!geminiApiKey) {
-      throw new Error("GEMINI_API_KEY is not set in Supabase project secrets.");
-    }
-
     const { topic } = await req.json() as RequestBody;
     if (!topic) {
       return new Response(JSON.stringify({ error: 'Topic is required' }), {
@@ -119,7 +105,7 @@ serve(async (req: Request) => {
       });
     }
 
-    const flashcardData = await generateFlashcardsWithGemini(topic, geminiApiKey);
+    const flashcardData = await generateFlashcardsWithPuter(topic);
 
     return new Response(JSON.stringify(flashcardData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { Button } from "./ui/button";
-import { Wand2, MessageCircle } from "lucide-react";
+import { Wand2, MessageCircle, Sparkles } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { AIAssistantPanel } from "./ai-assistant-panel";
+import { SmartAIAssistant } from "./SmartAIAssistant";
 import { ReviewerAiToolkit } from "./reviewer-ai-toolkit";
 import { AdvisorReviewPanel } from "./advisor-review-panel";
 import { CommentSidebar } from "./comment-sidebar";
@@ -43,12 +44,21 @@ export function EditorAICompanion({
           </Button>
           {isOwner && (
             isMobile ? (
-              <Sheet>
-                <SheetTrigger asChild><Button className="rounded-full h-12 w-12 shadow-lg"><Wand2 className="w-6 h-6" /></Button></SheetTrigger>
-                <SheetContent><SheetHeader><SheetTitle>AI Assistant</SheetTitle><SheetDescription>Supercharge your writing process.</SheetDescription></SheetHeader><div className="py-4"><AIAssistantPanel editor={editor} documentContent={documentContent} documentId={documentId} /></div></SheetContent>
-              </Sheet>
+              <>
+                <Sheet>
+                  <SheetTrigger asChild><Button className="rounded-full h-12 w-12 shadow-lg"><Wand2 className="w-6 h-6" /></Button></SheetTrigger>
+                  <SheetContent><SheetHeader><SheetTitle>AI Assistant</SheetTitle><SheetDescription>Supercharge your writing process.</SheetDescription></SheetHeader><div className="py-4"><AIAssistantPanel editor={editor} documentContent={documentContent} documentId={documentId} /></div></SheetContent>
+                </Sheet>
+                <Sheet>
+                  <SheetTrigger asChild><Button className="rounded-full h-12 w-12 shadow-lg"><Sparkles className="w-6 h-6" /></Button></SheetTrigger>
+                  <SheetContent><SheetHeader><SheetTitle>Smart AI Assistant</SheetTitle><SheetDescription>Advanced writing assistance for your thesis</SheetDescription></SheetHeader><div className="py-4"><SmartAIAssistant editor={editor} documentContent={documentContent} documentId={documentId} /></div></SheetContent>
+                </Sheet>
+              </>
             ) : (
-              <AIAssistantPanel editor={editor} documentContent={documentContent} documentId={documentId} />
+              <div className="flex gap-2">
+                <AIAssistantPanel editor={editor} documentContent={documentContent} documentId={documentId} />
+                <SmartAIAssistant editor={editor} documentContent={documentContent} documentId={documentId} />
+              </div>
             )
           )}
           {isAdvisorViewing && (

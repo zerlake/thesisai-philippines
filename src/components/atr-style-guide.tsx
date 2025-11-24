@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "./ui/card";
 import { BookMarked, ExternalLink, FileText } from "lucide-react";
+import { createSanitizedHtml } from "@/lib/html-sanitizer";
 
 const atrCitationExamples = [
   {
@@ -149,7 +150,7 @@ export function AtrStyleGuide() {
                     <p className="text-sm text-muted-foreground"><strong>Rule:</strong> {item.rule}</p>
                     <div className="p-3 bg-tertiary rounded-md font-mono text-sm">
                       <p><strong>Example:</strong></p>
-                      <p dangerouslySetInnerHTML={{ __html: item.example }} />
+                      <p dangerouslySetInnerHTML={createSanitizedHtml(item.example)} />
                     </div>
                   </div>
                 </AccordionContent>

@@ -11,9 +11,11 @@ import { useAuth } from "./auth-provider";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { FieldOfStudySelector } from "./field-of-study-selector";
+import { useAuthReady } from "@/hooks/use-auth-ready";
 
 export function OutlineGenerator() {
   const { session, supabase } = useAuth();
+  const { isReady } = useAuthReady();
   const user = session?.user;
   const router = useRouter();
   const [field, setField] = useState("");
@@ -25,6 +27,11 @@ export function OutlineGenerator() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!topic || !field) return;
+    
+    if (!isReady) {
+      toast.error("Please wait while your session is loading...");
+      return;
+    }
 
     setIsLoading(true);
     setOutline("");
@@ -36,29 +43,18 @@ export function OutlineGenerator() {
         );
       }
 
-      const response = await fetch(
-        "https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/generate-outline",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-            apikey:
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
-          },
-          body: JSON.stringify({ topic, field }),
-        }
-      );
-      
-      const data = await response.json();
+      // Use Supabase client to call the edge function instead of direct fetch
+      const { data, error } = await supabase.functions.invoke('generate-outline', {
+        body: { topic, field }
+      });
 
-      if (!response.ok) {
+      if (error) {
         throw new Error(
-          data.error || `Request failed with status ${response.status}`
+          error.message || 'Failed to generate outline'
         );
       }
 
-      if (data.outline) {
+      if (data?.outline) {
         setOutline(data.outline);
       } else {
         throw new Error(
