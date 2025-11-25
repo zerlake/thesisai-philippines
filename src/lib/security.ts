@@ -11,7 +11,7 @@ import { z } from 'zod';
  */
 export function validateURL(
   url: string,
-  allowedDomains: string[] = ['serpapi.com']
+  allowedDomains: string[] = [process.env.NEXT_PUBLIC_SERPAPI_ENDPOINT || 'serpapi.com']
 ): boolean {
   try {
     const parsedUrl = new URL(url);

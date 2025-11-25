@@ -1,22 +1,17 @@
 import { NextRequest } from 'next/server';
 import { createServerSupabaseClient } from '@/integrations/supabase/server-client';
+import { getAuthenticatedUser, AuthenticationError } from '@/lib/server-auth'; // Add this import
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { section: string } }
+  { params }: { params: Promise<{ section: string }> }
 ) {
   try {
-    const supabase = createServerSupabaseClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const user = await getAuthenticatedUser(); // Add this line
+    const supabase = createServerSupabaseClient(); // Add this line to create supabase client for data operations
 
-    if (!session) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const userId = session.user.id;
-    const { section } = params;
+    const userId = user.id; // Replace session.user.id with user.id
+    const { section } = await params;
 
     // Fetch user preferences
     const { data: preferences, error } = await supabase
@@ -49,6 +44,12 @@ export async function GET(
     return Response.json({ [section]: sectionData });
   } catch (error) {
     console.error('Error fetching preference section:', error);
+    if (error instanceof AuthenticationError) { // Add this block
+        return Response.json(
+            { error: error.message },
+            { status: 401 }
+        );
+    }
     return Response.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -58,20 +59,14 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { section: string } }
+  { params }: { params: Promise<{ section: string }> }
 ) {
   try {
-    const supabase = createServerSupabaseClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const user = await getAuthenticatedUser(); // Add this line
+    const supabase = createServerSupabaseClient(); // Add this line
 
-    if (!session) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const userId = session.user.id;
-    const { section } = params;
+    const userId = user.id; // Replace session.user.id with user.id
+    const { section } = await params;
     const body = await request.json();
 
     // Fetch current preferences
@@ -113,6 +108,12 @@ export async function PUT(
     return Response.json({ [section]: updated[section.toLowerCase()] });
   } catch (error) {
     console.error('Error updating preference section:', error);
+    if (error instanceof AuthenticationError) { // Add this block
+        return Response.json(
+            { error: error.message },
+            { status: 401 }
+        );
+    }
     return Response.json(
       { error: 'Internal server error' },
       { status: 500 }

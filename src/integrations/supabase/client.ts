@@ -17,5 +17,9 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   },
 });
 
+export function getSupabaseFunctionUrl(functionName: string): string {
+  return `${SUPABASE_URL}/functions/v1/${functionName}`;
+}
+
 // Export createClient function as well
 export { createClient };

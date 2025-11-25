@@ -5,7 +5,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
 const getCorsHeaders = (req: Request) => {
   const ALLOWED_ORIGINS = [
-    'https://thesisai-philippines.vercel.app',
+    Deno.env.get('NEXT_PUBLIC_APP_BASE_URL') || Deno.env.get('NEXT_PUBLIC_VERCEL_URL') || 'http://localhost:3000',
     'http://localhost:3000',
     'http://localhost:32100',
   ];
@@ -66,7 +66,7 @@ Generate the JSON object now with all 10 topic ideas. Do not generate fewer than
     }
 
     const response = await Promise.race([
-      fetch('https://api.puter.com/v1/ai/chat', {
+      fetch(Deno.env.get("PUTER_API_ENDPOINT") || 'https://api.puter.com/v1/ai/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

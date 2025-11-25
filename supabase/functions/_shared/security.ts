@@ -8,7 +8,7 @@
  */
 export function validateURL(
   url: string,
-  allowedDomains: string[] = ['serpapi.com']
+  allowedDomains: string[] = [Deno.env.get("SERPAPI_ENDPOINT") || 'serpapi.com']
 ): boolean {
   try {
     const parsedUrl = new URL(url);

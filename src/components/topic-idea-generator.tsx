@@ -10,6 +10,8 @@ import { useAuth } from "./auth-provider";
 import { toast } from "sonner";
 import { FieldOfStudySelector } from "./field-of-study-selector";
 import { useRouter } from "next/navigation";
+import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
+import { useApiCall } from "@/hooks/use-api-call";
 
 type TopicIdea = {
   title: string;
@@ -22,23 +24,39 @@ export function TopicIdeaGenerator() {
   const router = useRouter();
   const [field, setField] = useState("");
   const [ideas, setIdeas] = useState<TopicIdea[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false); // Replaced by useApiCall's loading state
   const [isSaving, setIsSaving] = useState(false);
+
+  const { execute: generateTopics, loading: isGenerating } = useApiCall<any>({
+    onSuccess: (data) => {
+      if (!data.topicIdeas) {
+        throw new Error("API returned no topic ideas data.");
+      }
+      setIdeas(data.topicIdeas);
+    },
+    onError: (error) => {
+      toast.error(error.message || "An unexpected error occurred.");
+      console.error(error);
+    },
+    autoErrorToast: false,
+  });
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!field) return;
+    if (!field) {
+        toast.error("Please select a field of study.");
+        return;
+    }
+    if (!session) {
+      toast.error("You must be logged in to use this feature.");
+      return;
+    }
 
-    setIsLoading(true);
-    setIdeas([]);
+    setIdeas([]); // Clear previous ideas
 
     try {
-      if (!session) {
-        throw new Error("Authentication session not found. Please log in again.");
-      }
-
-      const response = await fetch(
-        "https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/generate-topic-ideas",
+      await generateTopics(
+        getSupabaseFunctionUrl("generate-topic-ideas"),
         {
           method: "POST",
           headers: {
@@ -49,23 +67,9 @@ export function TopicIdeaGenerator() {
           body: JSON.stringify({ field }),
         }
       );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || `Request failed with status ${response.status}`);
-      }
-
-      if (data.topicIdeas) {
-        setIdeas(data.topicIdeas);
-      } else {
-        throw new Error("The AI did not return the expected topic data. Please try again.");
-      }
     } catch (error: any) {
-      console.error(error);
-      toast.error(error.message || "An unexpected error occurred.");
-    } finally {
-      setIsLoading(false);
+        // Errors are already handled by useApiCall's onError
+        console.error("Local error before API call in handleGenerate:", error);
     }
   };
 
@@ -115,27 +119,27 @@ export function TopicIdeaGenerator() {
               <FieldOfStudySelector
                 value={field}
                 onValueChange={setField}
-                disabled={isLoading}
+                disabled={isGenerating}
               />
             </div>
-            <Button type="submit" disabled={isLoading || !field || !session}>
+            <Button type="submit" disabled={isGenerating || !field || !session}>
               <Wand2 className="w-4 h-4 mr-2" />
-              {isLoading ? "Generating Ideas..." : "Generate Ideas"}
+              {isGenerating ? "Generating Ideas..." : "Generate Ideas"}
             </Button>
           </form>
 
-          {(isLoading || ideas.length > 0) && (
+          {(isGenerating || ideas.length > 0) && (
             <div className="mt-8">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">Generated Ideas</h3>
-                {ideas.length > 0 && !isLoading && (
+                {ideas.length > 0 && !isGenerating && (
                   <Button variant="outline" size="sm" onClick={handleSaveAsDraft} disabled={isSaving}>
                     <FilePlus2 className="w-4 h-4 mr-2" />
                     {isSaving ? "Saving..." : "Save as Draft"}
                   </Button>
                 )}
               </div>
-              {isLoading ? (
+              {isGenerating ? (
                 <div className="space-y-4">
                   <Skeleton className="h-24 w-full" />
                   <Skeleton className="h-24 w-full" />

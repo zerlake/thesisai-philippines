@@ -2,6 +2,7 @@
 
 import { Calendar, Clock, TrendingUp } from "lucide-react";
 import { Button } from "./ui/button";
+import { DashboardSyncIndicator } from "./dashboard/DashboardSyncIndicator";
 
 interface DashboardHeaderProps {
   displayName: string;
@@ -21,6 +22,11 @@ export function DashboardHeader({ displayName, streak = 0, projectProgress = 0 }
           <p className="mt-2 text-lg text-muted-foreground">
             Here's your research thesis progress and upcoming actions.
           </p>
+        </div>
+        
+        {/* Sync Status Indicator */}
+        <div className="flex items-center">
+          <DashboardSyncIndicator className="px-4 py-2 rounded-lg bg-card/50 border" />
         </div>
       </div>
 

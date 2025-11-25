@@ -28,7 +28,7 @@ export async function callPuterAI(
 
   try {
     const response = await Promise.race([
-      fetch('https://api.puter.com/v1/ai/chat', {
+      fetch(Deno.env.get("PUTER_API_ENDPOINT") || 'https://api.puter.com/v1/ai/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

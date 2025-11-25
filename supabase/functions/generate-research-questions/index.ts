@@ -6,11 +6,11 @@ import { callPuterAIWithFallback } from '../_shared/puter-ai.ts';
 
 const getCorsHeaders = (req: Request) => {
   const ALLOWED_ORIGINS = [
-    'https://thesis-ai-iota.vercel.app/',
-    'https://thesisai-philippines.vercel.app',
+    Deno.env.get('NEXT_PUBLIC_APP_BASE_URL') || 'https://thesisai-philippines.vercel.app',
+    Deno.env.get('NEXT_PUBLIC_VERCEL_ENV') === 'preview' ? 'https://thesis-ai-iota.vercel.app/' : '',
     'http://localhost:3000',
     'http://localhost:32100',
-  ];
+  ].filter(Boolean);
   const origin = req.headers.get('Origin');
   const allowOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
 

@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { FieldOfStudySelector } from "./field-of-study-selector";
 import { Badge } from "./ui/badge";
 import { secureRandomInt } from "@/lib/crypto-utils";
+import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
+import { useApiCall } from "@/hooks/use-api-call";
 
 interface TopicSuggestion {
   title: string;
@@ -24,20 +26,42 @@ export function TopicIdeationTool() {
   const [field, setField] = useState("");
   const [keywords, setKeywords] = useState("");
   const [suggestions, setSuggestions] = useState<TopicSuggestion[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false); // Replaced by useApiCall's loading state
   const [validationResults, setValidationResults] = useState<{ [key: string]: boolean }>({});
 
+  const { execute: generateTopicsCall, loading: isGenerating } = useApiCall<any>({
+    onSuccess: (data) => {
+      if (!data.topicIdeas) {
+        throw new Error("API returned no topic ideas data.");
+      }
+      const generatedSuggestions = data.topicIdeas.map((idea: any) => ({
+        ...idea,
+        relevance: 80 + secureRandomInt(0, 19), // Simulated relevance score
+        originalityScore: 60 + secureRandomInt(0, 39) // Simulated originality score
+      }));
+      
+      setSuggestions(generatedSuggestions);
+      toast.success("Generated 3 research topics!");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to generate topic suggestions.");
+    },
+    autoErrorToast: false,
+  });
+
   const handleGenerateTopics = async () => {
-    if (!field || !session) return;
+    if (!field || !session) {
+        toast.error("Please provide a field of study and ensure you are logged in.");
+        return;
+    }
     
-    setIsLoading(true);
+    // setIsLoading(true); // Replaced
     setSuggestions([]);
     setValidationResults({});
 
     try {
-      // First, generate topics using AI
-      const response = await fetch(
-        "https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/generate-topic-ideas",
+      await generateTopicsCall(
+        getSupabaseFunctionUrl("generate-topic-ideas"),
         {
           method: "POST",
           headers: {
@@ -51,26 +75,9 @@ export function TopicIdeationTool() {
           }),
         }
       );
-
-      const data = await response.json();
-      
-      if (!response.ok) throw new Error(data.error || "Failed to generate topics");
-      
-      if (data.topicIdeas) {
-        const generatedSuggestions = data.topicIdeas.map((idea: any) => ({
-          ...idea,
-          relevance: 80 + secureRandomInt(0, 19), // Simulated relevance score
-          originalityScore: 60 + secureRandomInt(0, 39) // Simulated originality score
-        }));
-        
-        setSuggestions(generatedSuggestions);
-        toast.success("Generated 3 research topics!");
-      }
-
     } catch (error: any) {
-      toast.error(error.message || "Failed to generate topic suggestions.");
-    } finally {
-      setIsLoading(false);
+        // Errors are already handled by useApiCall's onError
+        console.error("Local error before API call in handleGenerateTopics:", error);
     }
   };
 
@@ -126,11 +133,11 @@ export function TopicIdeationTool() {
         
         <Button 
           onClick={handleGenerateTopics}
-          disabled={isLoading || !field || !session}
+          disabled={isGenerating || !field || !session}
           className="w-full"
         >
-          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
-          {isLoading ? "Generating Topics..." : "Generate Research Topics"}
+          {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
+          {isGenerating ? "Generating Topics..." : "Generate Research Topics"}
         </Button>
 
         {suggestions.length > 0 && (

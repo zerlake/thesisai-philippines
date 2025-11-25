@@ -21,6 +21,8 @@ import {
 import { Copy, Trash2, Wand2 } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 import { toast } from "sonner";
+import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
+import { useApiCall } from "@/hooks/use-api-call";
 import {
   Table,
   TableBody,
@@ -45,7 +47,53 @@ export function CitationManager() {
   const [style, setStyle] = useState("APA 7th Edition");
   const [citations, setCitations] = useState<Citation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isGenerating, setIsGenerating] = useState(false);
+  // const [isGenerating, setIsGenerating] = useState(false); // Replaced by useApiCall's loading state
+
+  const { execute: generateCitation, loading: isGeneratingCitation } = useApiCall<any>({
+    onSuccess: (data) => {
+      // Data from the API call is handled here
+      if (!data || !data.citation) {
+        throw new Error("API returned no citation data.");
+      }
+
+      // Supabase insert happens after successful API call
+      const insertCitation = async () => {
+        if (!user) {
+          toast.error("User not authenticated for saving citation.");
+          return;
+        }
+        const { error: insertError, data: newCitation } = await supabase
+          .from("citations")
+          .insert({
+            user_id: user.id,
+            content: data.citation,
+            style: style,
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          throw insertError; // Propagate error for useApiCall to catch
+        }
+
+        setCitations([newCitation, ...citations]);
+        setDescription("");
+        toast.success("Citation generated and saved!");
+      };
+      
+      insertCitation().catch((err) => {
+        toast.error(err.message || "Failed to save citation to database.");
+        console.error("Supabase insert error:", err);
+      });
+    },
+    onError: (error) => {
+      // Error from API call or from the insertCitation function above
+      toast.error(error.message || "Failed to generate citation.");
+      console.error(error);
+    },
+    autoErrorToast: false, // We handle toast explicitly
+  });
+
 
   useEffect(() => {
     if (!user) return;
@@ -70,12 +118,15 @@ export function CitationManager() {
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description || !style || !session) return;
+    if (!description || !style || !session) {
+      toast.error("Please provide a description and select a style.");
+      return;
+    }
 
-    setIsGenerating(true);
+    // setIsGenerating(true); // Loading state managed by useApiCall
     try {
-      const response = await fetch(
-        "https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/generate-citation",
+      await generateCitation(
+        getSupabaseFunctionUrl("generate-citation"),
         {
           method: "POST",
           headers: {
@@ -86,29 +137,11 @@ export function CitationManager() {
           body: JSON.stringify({ description, style }),
         }
       );
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-
-      const { error: insertError, data: newCitation } = await supabase
-        .from("citations")
-        .insert({
-          user_id: user!.id,
-          content: data.citation,
-          style: style,
-        })
-        .select()
-        .single();
-
-      if (insertError) throw insertError;
-
-      setCitations([newCitation, ...citations]);
-      setDescription("");
-      toast.success("Citation generated and saved!");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to generate citation.");
-      console.error(error);
-    } finally {
-      setIsGenerating(false);
+      // Success and error handled by useApiCall callbacks
+    } catch (error) {
+        // This catch block would only be reached if generateCitation explicitly rethrows after onError
+        // Or if there's a sync error in execute, which useApiCall should handle
+        console.error("Unexpected error in handleGenerate:", error);
     }
   };
 
@@ -147,14 +180,14 @@ export function CitationManager() {
                 placeholder="e.g., A 2022 book by Santos on Philippine history"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                disabled={isGenerating}
+                disabled={isGeneratingCitation}
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Describe the source, and the AI will generate a realistic citation.
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Select value={style} onValueChange={setStyle} disabled={isGenerating}>
+              <Select value={style} onValueChange={setStyle} disabled={isGeneratingCitation}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Select style" />
                 </SelectTrigger>
@@ -164,9 +197,9 @@ export function CitationManager() {
                   <SelectItem value="Chicago 17th Edition">Chicago 17th Edition</SelectItem>
                 </SelectContent>
               </Select>
-              <Button type="submit" disabled={isGenerating || !description || !session}>
+              <Button type="submit" disabled={isGeneratingCitation || !description || !session}>
                 <Wand2 className="w-4 h-4 mr-2" />
-                {isGenerating ? "Generating..." : "Generate & Save"}
+                {isGeneratingCitation ? "Generating..." : "Generate & Save"}
               </Button>
             </div>
           </form>

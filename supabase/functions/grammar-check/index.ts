@@ -6,7 +6,7 @@ import { callPuterAI } from '../_shared/puter-ai.ts';
 
 const getCorsHeaders = (req: Request) => {
   const ALLOWED_ORIGINS = [
-    'https://thesisai-philippines.vercel.app',
+    Deno.env.get('NEXT_PUBLIC_APP_BASE_URL') || 'https://thesisai-philippines.vercel.app',
     'http://localhost:3000',
     'http://localhost:32100',
   ];

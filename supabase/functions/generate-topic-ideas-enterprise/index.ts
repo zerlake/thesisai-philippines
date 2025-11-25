@@ -5,7 +5,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
 const getCorsHeaders = (req: Request) => {
   const ALLOWED_ORIGINS = [
-    'https://thesisai-philippines.vercel.app',
+    Deno.env.get('NEXT_PUBLIC_APP_BASE_URL') || 'https://thesisai-philippines.vercel.app',
     'http://localhost:3000',
     'http://localhost:32100',
   ];
@@ -79,7 +79,7 @@ Generate exactly 10 advanced topics with all required fields. Focus on Philippin
     }
 
     const response = await Promise.race([
-      fetch('https://api.puter.com/v1/ai/chat', {
+      fetch(Deno.env.get("PUTER_API_ENDPOINT") || 'https://api.puter.com/v1/ai/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

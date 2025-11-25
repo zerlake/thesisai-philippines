@@ -1,21 +1,16 @@
 import { NextRequest } from 'next/server';
 import { createServerSupabaseClient } from '@/integrations/supabase/server-client';
+import { getAuthenticatedUser, AuthenticationError } from '@/lib/server-auth'; // Add this import
 import { dashboardLayoutSchema } from '@/lib/personalization/validation';
 import { ZodError } from 'zod';
 
 // Get all dashboard layouts for the user
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServerSupabaseClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const user = await getAuthenticatedUser(); // Add this line
+    const supabase = createServerSupabaseClient(); // Add this line to create supabase client for data operations
 
-    if (!session) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const userId = session.user.id;
+    const userId = user.id; // Replace session.user.id with user.id
     const { searchParams } = new URL(request.url);
     const defaultOnly = searchParams.get('default') === 'true';
 
@@ -30,7 +25,7 @@ export async function GET(request: NextRequest) {
       throw error;
     }
 
-    if (!preferences || !preferences.dashboard_layout) {
+    if (!preferences) {
       return Response.json({
         layouts: [],
         default: null,
@@ -54,6 +49,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching dashboard layouts:', error);
+    if (error instanceof AuthenticationError) { // Add this block
+        return Response.json(
+            { error: error.message },
+            { status: 401 }
+        );
+    }
     return Response.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -64,16 +65,10 @@ export async function GET(request: NextRequest) {
 // Create or update dashboard layout
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = createServerSupabaseClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const user = await getAuthenticatedUser(); // Add this line
+    const supabase = createServerSupabaseClient(); // Add this line
 
-    if (!session) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const userId = session.user.id;
+    const userId = user.id; // Replace session.user.id with user.id
     const body = await request.json();
 
     // Validate request body
@@ -143,6 +138,12 @@ export async function PUT(request: NextRequest) {
     return Response.json(body);
   } catch (error) {
     console.error('Error updating dashboard layout:', error);
+    if (error instanceof AuthenticationError) { // Add this block
+        return Response.json(
+            { error: error.message },
+            { status: 401 }
+        );
+    }
     return Response.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -152,16 +153,10 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = createServerSupabaseClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const user = await getAuthenticatedUser(); // Add this line
+    const supabase = createServerSupabaseClient(); // Add this line
 
-    if (!session) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const userId = session.user.id;
+    const userId = user.id; // Replace session.user.id with user.id
     const { searchParams } = new URL(request.url);
     const layoutId = searchParams.get('id');
 
@@ -207,6 +202,12 @@ export async function DELETE(request: NextRequest) {
     return Response.json({ success: true, deletedId: layoutId });
   } catch (error) {
     console.error('Error deleting dashboard layout:', error);
+    if (error instanceof AuthenticationError) { // Add this block
+        return Response.json(
+            { error: error.message },
+            { status: 401 }
+        );
+    }
     return Response.json(
       { error: 'Internal server error' },
       { status: 500 }

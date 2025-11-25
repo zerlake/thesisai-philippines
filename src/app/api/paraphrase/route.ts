@@ -1,6 +1,6 @@
 // src/app/api/paraphrase/route.ts
 import { NextRequest } from 'next/server';
-import { createServerSupabaseClient } from '@/integrations/supabase/server-client';
+import { getAuthenticatedUser, AuthenticationError } from '@/lib/server-auth'; // Add this import
 
 interface ParaphraseRequest {
   text: string;
@@ -18,18 +18,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get auth session from Supabase
-    const supabase = createServerSupabaseClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      return Response.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    const user = await getAuthenticatedUser(); // Add this line
+    // userId is not used directly, but authentication is performed.
 
     const { text, mode } = body;
 
@@ -75,6 +65,12 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error('Error in paraphrase API:', error);
+    if (error instanceof AuthenticationError) { // Add this block
+        return Response.json(
+            { error: error.message },
+            { status: 401 }
+        );
+    }
     return Response.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -27,6 +27,8 @@ import { useAuth } from "./auth-provider";
 import { toast } from "sonner";
 import { FieldOfStudySelector } from "./field-of-study-selector";
 import { useRouter } from "next/navigation";
+import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
+import { useApiCall } from "@/hooks/use-api-call";
 
 type TopicIdea = {
   title: string;
@@ -52,8 +54,23 @@ export function EnterpriseTopicGenerator() {
 
   const [field, setField] = useState("");
   const [ideas, setIdeas] = useState<TopicIdea[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false); // Replaced by useApiCall's loading state
   const [isSaving, setIsSaving] = useState(false);
+
+  const { execute: generateTopics, loading: isGenerating } = useApiCall<any>({
+    onSuccess: (data) => {
+      if (!data.topicIdeas) {
+        throw new Error("API returned no topic ideas data.");
+      }
+      setIdeas(data.topicIdeas);
+      toast.success(`Generated ${data.topicIdeas.length} topic ideas`);
+    },
+    onError: (error) => {
+      toast.error(error.message || "An unexpected error occurred.");
+      console.error(error);
+    },
+    autoErrorToast: false,
+  });
   const [savedTopics, setSavedTopics] = useState<TopicIdea[]>([]);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -101,18 +118,20 @@ export function EnterpriseTopicGenerator() {
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!field) return;
+    if (!field) {
+        toast.error("Please select a field of study.");
+        return;
+    }
+    if (!session) {
+      toast.error("You must be logged in to use this feature.");
+      return;
+    }
 
-    setIsLoading(true);
-    setIdeas([]);
+    setIdeas([]); // Clear previous ideas
 
     try {
-      if (!session) {
-        throw new Error("Authentication session not found. Please log in again.");
-      }
-
-      const response = await fetch(
-        "https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/generate-topic-ideas-enterprise",
+      await generateTopics(
+        getSupabaseFunctionUrl("generate-topic-ideas-enterprise"),
         {
           method: "POST",
           headers: {
@@ -123,24 +142,9 @@ export function EnterpriseTopicGenerator() {
           body: JSON.stringify({ field }),
         }
       );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || `Request failed with status ${response.status}`);
-      }
-
-      if (data.topicIdeas) {
-        setIdeas(data.topicIdeas);
-        toast.success(`Generated ${data.topicIdeas.length} topic ideas`);
-      } else {
-        throw new Error("The AI did not return the expected topic data. Please try again.");
-      }
     } catch (error: any) {
-      console.error(error);
-      toast.error(error.message || "An unexpected error occurred.");
-    } finally {
-      setIsLoading(false);
+        // Errors are already handled by useApiCall's onError
+        console.error("Local error before API call in handleGenerate:", error);
     }
   };
 
@@ -242,12 +246,12 @@ export function EnterpriseTopicGenerator() {
               <FieldOfStudySelector
                 value={field}
                 onValueChange={setField}
-                disabled={isLoading}
+                disabled={isGenerating}
               />
             </div>
             <Button type="submit" disabled={isLoading || !field || !session} size="lg" className="w-full">
               <Wand2 className="w-4 h-4 mr-2" />
-              {isLoading ? "Analyzing Topics..." : "Generate & Analyze Ideas"}
+              {isGenerating ? "Analyzing Topics..." : "Generate & Analyze Ideas"}
             </Button>
           </form>
         </CardContent>
@@ -359,13 +363,13 @@ export function EnterpriseTopicGenerator() {
       )}
 
       {/* Generated Ideas */}
-      {(isLoading || filteredIdeas.length > 0) && (
+      {(isGenerating || filteredIdeas.length > 0) && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">
               Research Topics {filteredIdeas.length > 0 && `(${filteredIdeas.length})`}
             </h3>
-            {filteredIdeas.length > 0 && !isLoading && (
+            {filteredIdeas.length > 0 && !isGenerating && (
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={handleExportPDF}>
                   <Download className="w-4 h-4 mr-2" />
@@ -383,7 +387,7 @@ export function EnterpriseTopicGenerator() {
             )}
           </div>
 
-          {isLoading ? (
+          {isGenerating ? (
             <div className="space-y-4">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Skeleton key={i} className="h-32 w-full" />

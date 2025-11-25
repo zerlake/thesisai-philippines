@@ -31,12 +31,12 @@ async function callOpenRouterWithFallback(
     try {
       console.log(`Attempting OpenRouter call with model: ${model}`);
       
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      const response = await fetch(Deno.env.get("OPENROUTER_API_ENDPOINT") || "https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${apiKey}`,
-          "HTTP-Referer": "https://thesisai-philippines.vercel.app",
+          "HTTP-Referer": Deno.env.get('NEXT_PUBLIC_APP_BASE_URL') || Deno.env.get('NEXT_PUBLIC_VERCEL_URL') || "http://localhost:3000",
           "X-Title": "THESISAI PHILIPPINES"
         },
         body: JSON.stringify({
@@ -76,11 +76,11 @@ async function callOpenRouterWithFallback(
 
 const getCorsHeaders = (req: Request) => {
   const ALLOWED_ORIGINS = [
-    'https://thesis-ai-iota.vercel.app/',
-    'https://thesisai-philippines.vercel.app',
+    Deno.env.get('NEXT_PUBLIC_APP_BASE_URL') || Deno.env.get('NEXT_PUBLIC_VERCEL_URL') || 'http://localhost:3000',
+    Deno.env.get('NEXT_PUBLIC_VERCEL_ENV') === 'preview' ? 'https://thesis-ai-iota.vercel.app/' : '',
     'http://localhost:3000',
     'http://localhost:32100',
-  ];
+  ].filter(Boolean);
   const origin = req.headers.get('Origin');
   const allowOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
 

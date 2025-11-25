@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useMemo, useEffect } from "react";
 import {
   Select,
@@ -15,6 +13,8 @@ import { Copy, Wand2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useAuth } from "../auth-provider";
+import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
+import { useApiCall } from "@/hooks/use-api-call";
 
 type InputField = {
   name: string;
@@ -155,7 +155,22 @@ export function ResultsInterpreter() {
   const [testType, setTestType] = useState("pearson-correlation");
   const [values, setValues] = useState<Record<string, string>>({});
   const [interpretation, setInterpretation] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false); // Replaced by useApiCall's loading state
+
+  const { execute: generateInterpretationCall, loading: isGeneratingInterpretation } = useApiCall<any>({
+    onSuccess: (data) => {
+      if (!data.interpretation) {
+        throw new Error("API returned no interpretation data.");
+      }
+      setInterpretation(data.interpretation);
+      toast.success("Interpretation generated!");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to generate interpretation.");
+      console.error(error);
+    },
+    autoErrorToast: false,
+  });
 
   useEffect(() => {
     setValues({});
@@ -173,14 +188,13 @@ export function ResultsInterpreter() {
       toast.error("You must be logged in to use this feature.");
       return;
     }
-    setIsLoading(true);
     setInterpretation("");
     try {
       const pValue = parseFloat(values.p || "1");
       const isSignificant = pValue < 0.05;
 
-      const response = await fetch(
-        "https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/interpret-results",
+      await generateInterpretationCall(
+        getSupabaseFunctionUrl("interpret-results"),
         {
           method: "POST",
           headers: {
@@ -195,17 +209,11 @@ export function ResultsInterpreter() {
           }),
         }
       );
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-      
-      setInterpretation(data.interpretation);
-      toast.success("Interpretation generated!");
     } catch (error: any) {
-      toast.error(error.message || "Failed to generate interpretation.");
-    } finally {
-      setIsLoading(false);
+        console.error("Local error before API call in generateInterpretation:", error);
     }
   };
+
 
   const handleCopyToClipboard = () => {
     if (!interpretation) return;
@@ -238,8 +246,8 @@ export function ResultsInterpreter() {
         ))}
       </div>
 
-      <Button onClick={generateInterpretation} disabled={isLoading}>
-        <Wand2 className="w-4 h-4 mr-2" /> {isLoading ? "Generating..." : "Generate Interpretation"}
+      <Button onClick={generateInterpretation} disabled={isGeneratingInterpretation}>
+        <Wand2 className="w-4 h-4 mr-2" /> {isGeneratingInterpretation ? "Generating..." : "Generate Interpretation"}
       </Button>
 
       {interpretation && (

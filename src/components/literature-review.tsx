@@ -11,7 +11,9 @@ import { Skeleton } from './ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
 import { Input } from './ui/input';
 import { Checkbox } from './ui/checkbox';
+import { getSupabaseFunctionUrl } from '@/integrations/supabase/client';
 import { useRouter } from 'next/navigation';
+import { useApiCall } from '@/hooks/use-api-call';
 
 type Paper = {
   id: string;
@@ -29,69 +31,86 @@ export function LiteratureReview() {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [selectedPapers, setSelectedPapers] = useState<Paper[]>([]);
   const [synthesizedText, setSynthesizedText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSynthesizing, setIsSynthesizing] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false); // Replaced by useApiCall's loading state
+  // const [isSynthesizing, setIsSynthesizing] = useState(false); // Replaced by useApiCall's loading state
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState("arxiv"); // Changed default to arxiv
+  const [activeTab, setActiveTab] = useState("arxiv");
+
+  const { execute: searchArxiv, loading: isSearchingArxiv } = useApiCall<any>({
+    onSuccess: (data) => {
+      if (data.papers) {
+        setPapers(data.papers.map((p: any) => ({
+          id: p.id,
+          title: p.title,
+          link: p.url,
+          publication_info: p.published,
+          snippet: p.abstract,
+        })));
+        toast.success(`Found ${data.papers.length} papers from ArXiv`);
+      } else {
+        toast.info("No papers found for your search. Try different keywords.");
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message || "An unexpected error occurred during search.");
+      console.error(error);
+    },
+    autoErrorToast: false,
+  });
+
+  const { execute: synthesizeLiterature, loading: isSynthesizingLiterature } = useApiCall<any>({
+    onSuccess: (data) => {
+      if (!data.synthesizedText) {
+        throw new Error("API returned no synthesized text.");
+      }
+      setSynthesizedText(data.synthesizedText);
+      toast.success("Synthesis complete!");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to synthesize sources.");
+      console.error(error);
+    },
+    autoErrorToast: false,
+  });
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!topic) return;
+    if (!topic) {
+      toast.error("Please enter a topic to search.");
+      return;
+    }
+    if (!session) {
+      toast.error("You must be logged in to search for literature.");
+      return;
+    }
 
-    setIsLoading(true);
+    // setIsLoading(true); // Loading state managed by useApiCall
     setPapers([]);
     setSelectedPapers([]);
     setSynthesizedText("");
 
     try {
-      if (!session) {
-        throw new Error("Authentication session not found. Please log in again.");
-      }
-
-      // Determine which tool to call on the arxiv-mcp-server
-      // For now, we'll assume 'search_papers' is the primary search tool
       const toolName = "search_papers";
       const toolArguments = {
         query: topic,
-        max_results: 10, // Default max results
-        // Add other arguments like categories, date_from, date_to if needed
+        max_results: 10,
       };
 
-      const response = await fetch(
-        `https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/call-arxiv-mcp-server`,
+      await searchArxiv(
+        getSupabaseFunctionUrl('call-arxiv-mcp-server'),
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
-            apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
+            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
           },
           body: JSON.stringify({ toolName, toolArguments }),
         }
       );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || `Request failed with status ${response.status}`);
-      }
-
-      if (data.papers) {
-        setPapers(data.papers.map((p: any) => ({
-          id: p.id,
-          title: p.title,
-          link: p.url, // Assuming 'url' from arxiv-mcp-server maps to 'link'
-          publication_info: p.published, // Using 'published' as publication info
-          snippet: p.abstract, // Using 'abstract' as snippet
-        })));
-      } else {
-        throw new Error("The search did not return the expected data. Please try again.");
-      }
     } catch (error: any) {
-      console.error(error);
-      toast.error(error.message || "An unexpected error occurred.");
-    } finally {
-      setIsLoading(false);
+        // Errors are already handled by useApiCall's onError
+        console.error("Local error before API call in handleSearch:", error);
     }
   };
 
@@ -112,29 +131,24 @@ export function LiteratureReview() {
       toast.error("You must be logged in to synthesize sources.");
       return;
     }
-    setIsSynthesizing(true);
+    // setIsSynthesizing(true); // Loading state managed by useApiCall
     setSynthesizedText("");
     try {
-      const response = await fetch(
-        "https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/synthesize-literature",
+      await synthesizeLiterature(
+        getSupabaseFunctionUrl('synthesize-literature'),
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
-            apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRueWpnenpmeXpyc3VjdWNleGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NDAxMjcsImV4cCI6MjA3MzAxNjEyN30.elZ6r3JJjdwGUadSzQ1Br5EdGeqZIEr67Z5QB_Q3eMw",
+            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
           },
           body: JSON.stringify({ papers: selectedPapers.map(p => ({ title: p.title, snippet: p.snippet })) }),
         }
       );
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-      setSynthesizedText(data.synthesizedText);
-      toast.success("Synthesis complete!");
     } catch (error: any) {
-      toast.error(error.message || "Failed to synthesize sources.");
-    } finally {
-      setIsSynthesizing(false);
+        // Errors are already handled by useApiCall's onError
+        console.error("Local error before API call in handleSynthesize:", error);
     }
   };
 
@@ -187,20 +201,20 @@ export function LiteratureReview() {
             </TabsList>
           </Tabs>
           <form onSubmit={handleSearch} className="flex items-center gap-2 mt-4">
-            <Input id="topic" placeholder="e.g., Transformer architecture in NLP" value={topic} onChange={(e) => setTopic(e.target.value)} disabled={isLoading} />
-            <Button type="submit" disabled={isLoading || !topic || !session}><Search className="w-4 h-4 mr-2" />{isLoading ? "Searching..." : "Search"}</Button>
+            <Input id="topic" placeholder="e.g., Transformer architecture in NLP" value={topic} onChange={(e) => setTopic(e.target.value)} disabled={isSearchingArxiv} />
+            <Button type="submit" disabled={isSearchingArxiv || !topic || !session}><Search className="w-4 h-4 mr-2" />{isSearchingArxiv ? "Searching..." : "Search"}</Button>
           </form>
         </CardContent>
       </Card>
 
-      {isLoading && <div className="space-y-4"><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /></div>}
+      {isSearchingArxiv && <div className="space-y-4"><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /></div>}
 
-      {!isLoading && papers.length > 0 && (
+      {!isSearchingArxiv && papers.length > 0 && (
         <>
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Search Results</h3>
             <div className="flex items-center gap-2">
-              {selectedPapers.length > 1 && <Button onClick={handleSynthesize} disabled={isSynthesizing || !session}><Sparkles className="w-4 h-4 mr-2" />{isSynthesizing ? "Synthesizing..." : `Synthesize (${selectedPapers.length})`}</Button>}
+              {selectedPapers.length > 1 && <Button onClick={handleSynthesize} disabled={isSynthesizingLiterature || !session}><Sparkles className="w-4 h-4 mr-2" />{isSynthesizingLiterature ? "Synthesizing..." : `Synthesize (${selectedPapers.length})`}</Button>}
               <Button variant="outline" onClick={handleSaveAsDraft} disabled={isSaving}><FilePlus2 className="w-4 h-4 mr-2" />{isSaving ? "Saving..." : "Save as Draft"}</Button>
             </div>
           </div>

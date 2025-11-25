@@ -18,6 +18,8 @@ import { useAuth } from "./auth-provider";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAuthReady } from "@/hooks/use-auth-ready";
+import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
+import { useApiCall } from "@/hooks/use-api-call";
 
 function Flashcard({ term, definition }: { term: string; definition: string }) {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -49,8 +51,23 @@ export function FlashcardsGenerator() {
   const router = useRouter();
   const [topic, setTopic] = useState("");
   const [flashcards, setFlashcards] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false); // Replaced by useApiCall's loading state
   const [isSaving, setIsSaving] = useState(false);
+
+  const { execute: generateFlashcards, loading: isGenerating } = useApiCall<any>({
+    onSuccess: (data) => {
+      if (!data.flashcards) {
+        throw new Error("API returned no flashcards data.");
+      }
+      setFlashcards(data.flashcards);
+      toast.success("Flashcards generated!");
+    },
+    onError: (error) => {
+      toast.error(error.message || "An unexpected error occurred.");
+      console.error(error);
+    },
+    autoErrorToast: false,
+  });
 
   const addSampleData = () => {
     // Sample flashcards for a thesis on "The Impact of Social Media on Academic Performance"
@@ -114,23 +131,27 @@ export function FlashcardsGenerator() {
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!topic) return;
+    if (!topic) {
+        toast.error("Please enter a topic.");
+        return;
+    }
     
     if (!isReady) {
       toast.error("Please wait while your session is loading...");
       return;
     }
+    
+    if (!session) {
+      toast.error("You must be logged in to use this feature.");
+      return;
+    }
 
-    setIsLoading(true);
+    // setIsLoading(true); // Loading state managed by useApiCall
     setFlashcards([]);
 
     try {
-      if (!session) {
-        throw new Error("Authentication session not found. Please log in again.");
-      }
-
-      const response = await fetch(
-        "https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/generate-flashcards",
+      await generateFlashcards(
+        getSupabaseFunctionUrl("generate-flashcards"),
         {
           method: "POST",
           headers: {
@@ -141,23 +162,9 @@ export function FlashcardsGenerator() {
           body: JSON.stringify({ topic }),
         }
       );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || `Request failed with status ${response.status}`);
-      }
-
-      if (data.flashcards) {
-        setFlashcards(data.flashcards);
-      } else {
-        throw new Error("The AI did not return the expected flashcard data. Please try again.");
-      }
     } catch (error: any) {
-      console.error(error);
-      toast.error(error.message || "An unexpected error occurred.");
-    } finally {
-      setIsLoading(false);
+        // Errors are already handled by useApiCall's onError
+        console.error("Local error before API call in handleGenerate:", error);
     }
   };
 
@@ -218,17 +225,17 @@ export function FlashcardsGenerator() {
                 placeholder="e.g., The Impact of AI on Higher Education"
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                disabled={isLoading}
+                disabled={isGenerating}
               />
             </div>
-            <Button type="submit" disabled={isLoading || !topic || !session}>
+            <Button type="submit" disabled={isGenerating || !topic || !session}>
               <Wand2 className="w-4 h-4 mr-2" />
-              {isLoading ? "Generating Flashcards..." : "Generate Flashcards"}
+              {isGenerating ? "Generating Flashcards..." : "Generate Flashcards"}
             </Button>
           </form>
 
           <div className="mt-8">
-            {isLoading && (
+            {isGenerating && (
               <div className="flex justify-center">
                  <Skeleton className="h-64 w-full max-w-md" />
               </div>

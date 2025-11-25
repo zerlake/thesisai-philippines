@@ -10,13 +10,29 @@ import { Copy, Wand2 } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 import { Label } from "./ui/label";
 import { useAuthReady } from "@/hooks/use-auth-ready";
+import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
+import { useApiCall } from "@/hooks/use-api-call";
 
 export function TitleGenerator() {
   const { session } = useAuth();
   const { isReady } = useAuthReady();
   const [summary, setSummary] = useState("");
   const [titles, setTitles] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false); // Replaced by useApiCall's loading state
+
+  const { execute: generateTitlesCall, loading: isGenerating } = useApiCall<any>({
+    onSuccess: (data) => {
+      if (!data.titles) {
+        throw new Error("API returned no titles data.");
+      }
+      setTitles(data.titles || []);
+      toast.success("Titles generated successfully!");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+    autoErrorToast: false, // We handle toast explicitly
+  });
 
   const handleGenerate = async () => {
     if (!summary.trim()) {
@@ -34,12 +50,12 @@ export function TitleGenerator() {
       return;
     }
 
-    setIsLoading(true);
+    // setIsLoading(true); // Replaced
     setTitles([]);
 
     try {
-      const response = await fetch(
-        "https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/generate-titles",
+      await generateTitlesCall(
+        getSupabaseFunctionUrl("generate-titles"),
         {
           method: "POST",
           headers: {
@@ -50,16 +66,9 @@ export function TitleGenerator() {
           body: JSON.stringify({ summary }),
         }
       );
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Failed to generate titles.");
-
-      setTitles(data.titles || []);
-      toast.success("Titles generated successfully!");
     } catch (error: any) {
-      toast.error(error.message);
-    } finally {
-      setIsLoading(false);
+        // Errors are already handled by useApiCall's onError
+        console.error("Local error before API call in handleGenerate:", error);
     }
   };
 
@@ -88,20 +97,20 @@ export function TitleGenerator() {
               onChange={(e) => setSummary(e.target.value)}
             />
           </div>
-          <Button onClick={handleGenerate} disabled={isLoading}>
+          <Button onClick={handleGenerate} disabled={isGenerating}>
             <Wand2 className="w-4 h-4 mr-2" />
-            {isLoading ? "Generating..." : "Generate Titles"}
+            {isGenerating ? "Generating..." : "Generate Titles"}
           </Button>
         </CardContent>
       </Card>
 
-      {(isLoading || titles.length > 0) && (
+      {(isGenerating || titles.length > 0) && (
         <Card>
           <CardHeader>
             <CardTitle>Generated Titles</CardTitle>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
+            {isGenerating ? (
               <div className="space-y-3">
                 <Skeleton className="h-8 w-full" />
                 <Skeleton className="h-8 w-11/12" />

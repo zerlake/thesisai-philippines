@@ -85,7 +85,7 @@ Paraphrased text:`;
     }
 
     // Call Puter AI via HTTP (since we can't use the SDK in Edge Functions)
-    const puterResponse = await fetch("https://api.puter.com/ai/chat", {
+    const puterResponse = await fetch(Deno.env.get("PUTER_API_ENDPOINT") || "https://api.puter.com/ai/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

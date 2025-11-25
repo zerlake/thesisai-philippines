@@ -19,6 +19,8 @@ import {
 } from "./ui/carousel";
 import { Textarea } from "./ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
+import { useApiCall } from "@/hooks/use-api-call";
 
 type Slide = {
   title: string;
@@ -33,8 +35,23 @@ export function PresentationGenerator() {
   const router = useRouter();
   const [chapterContent, setChapterContent] = useState("");
   const [slides, setSlides] = useState<Slide[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false); // Replaced by useApiCall's loading state
   const [isSaving, setIsSaving] = useState(false);
+
+  const { execute: generatePresentation, loading: isGenerating } = useApiCall<any>({
+    onSuccess: (data) => {
+      if (!data.slides) {
+        throw new Error("API returned no slides data.");
+      }
+      setSlides(data.slides);
+      toast.success("Presentation slides generated!");
+    },
+    onError: (error) => {
+      toast.error(error.message || "An unexpected error occurred.");
+      console.error(error);
+    },
+    autoErrorToast: false,
+  });
 
   const addSampleData = () => {
     const sampleContent = `Chapter 3: Methodology
@@ -57,23 +74,27 @@ The study protocol was reviewed and approved by the University Research Ethics C
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chapterContent) return;
+    if (!chapterContent) {
+        toast.error("Please provide chapter content.");
+        return;
+    }
     
     if (!isReady) {
       toast.error("Please wait while your session is loading...");
       return;
     }
 
-    setIsLoading(true);
+    if (!session) {
+      toast.error("You must be logged in to use this feature.");
+      return;
+    }
+
+    // setIsLoading(true); // Replaced
     setSlides([]);
 
     try {
-      if (!session) {
-        throw new Error("Authentication session not found. Please log in again.");
-      }
-
-      const response = await fetch(
-        "https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/generate-presentation-slides",
+      await generatePresentation(
+        getSupabaseFunctionUrl("generate-presentation-slides"),
         {
           method: "POST",
           headers: {
@@ -84,23 +105,9 @@ The study protocol was reviewed and approved by the University Research Ethics C
           body: JSON.stringify({ chapterContent }),
         }
       );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || `Request failed with status ${response.status}`);
-      }
-
-      if (data.slides) {
-        setSlides(data.slides);
-      } else {
-        throw new Error("The AI did not return the expected slide data. Please try again.");
-      }
     } catch (error: any) {
-      console.error(error);
-      toast.error(error.message || "An unexpected error occurred.");
-    } finally {
-      setIsLoading(false);
+        // Errors are already handled by useApiCall's onError
+        console.error("Local error before API call in handleGenerate:", error);
     }
   };
 
@@ -167,23 +174,23 @@ The study protocol was reviewed and approved by the University Research Ethics C
                 className="min-h-[200px]"
                 value={chapterContent}
                 onChange={(e) => setChapterContent(e.target.value)}
-                disabled={isLoading}
+                disabled={isGenerating}
               />
             </div>
-            <Button type="submit" disabled={isLoading || !chapterContent || !session}>
+            <Button type="submit" disabled={isGenerating || !chapterContent || !session}>
               <Wand2 className="w-4 h-4 mr-2" />
-              {isLoading ? "Generating Slides..." : "Generate Presentation"}
+              {isGenerating ? "Generating Slides..." : "Generate Presentation"}
             </Button>
           </form>
         </CardContent>
       </Card>
 
-      {(isLoading || slides.length > 0) && (
+      {(isGenerating || slides.length > 0) && (
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle>Generated Presentation</CardTitle>
-              {slides.length > 0 && !isLoading && (
+              {slides.length > 0 && !isGenerating && (
                 <Button variant="outline" size="sm" onClick={handleSaveAsDraft} disabled={isSaving}>
                   <FilePlus2 className="w-4 h-4 mr-2" />
                   {isSaving ? "Saving..." : "Save Outline as Draft"}
@@ -192,7 +199,7 @@ The study protocol was reviewed and approved by the University Research Ethics C
             </div>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
+            {isGenerating ? (
               <Skeleton className="h-96 w-full" />
             ) : (
               <Carousel className="w-full max-w-2xl mx-auto">

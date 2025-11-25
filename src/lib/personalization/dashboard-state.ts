@@ -24,6 +24,20 @@ export interface HistoryState {
   future: DashboardLayout[];
 }
 
+export interface WidgetData {
+  [key: string]: any;
+}
+
+export interface WidgetDataState {
+  [widgetId: string]: {
+    data: WidgetData | null;
+    loading: boolean;
+    error: Error | null;
+    lastUpdated: Date | null;
+    isCached: boolean;
+  };
+}
+
 interface DashboardState {
   // Current state
   currentLayout: DashboardLayout;
@@ -32,6 +46,10 @@ interface DashboardState {
   isDirty: boolean;
   isSaving: boolean;
   currentBreakpoint: 'mobile' | 'tablet' | 'desktop';
+  
+  // Widget data state (NEW)
+  widgetData: WidgetDataState;
+  isLoadingAllWidgets: boolean;
   
   // Layout management
   createLayout: (name: string, description?: string) => void;
@@ -61,6 +79,17 @@ interface DashboardState {
   // Reset
   resetToDefault: () => void;
   loadTemplate: (templateId: string) => void;
+  
+  // Widget data loading (NEW)
+  loadWidgetData: (widgetId: string) => Promise<WidgetData | null>;
+  loadAllWidgetData: (widgetIds: string[]) => Promise<Record<string, WidgetData | null>>;
+  setWidgetData: (widgetId: string, data: WidgetData, isCached?: boolean) => void;
+  setWidgetError: (widgetId: string, error: Error | null) => void;
+  clearWidgetCache: (widgetId?: string) => void;
+  refetchWidget: (widgetId: string) => Promise<WidgetData | null>;
+  getWidgetData: (widgetId: string) => WidgetData | null;
+  isWidgetLoading: (widgetId: string) => boolean;
+  getWidgetError: (widgetId: string) => Error | null;
 }
 
 // Helper function to generate widget layout ID
@@ -158,6 +187,10 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   isDirty: false,
   isSaving: false,
   currentBreakpoint: 'desktop',
+  
+  // Widget data state (NEW)
+  widgetData: {},
+  isLoadingAllWidgets: false,
   
   // Create new layout
   createLayout: (name: string, description?: string) => {
@@ -455,6 +488,263 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
     // TODO: Implement template loading
     const state = get();
     state.loadLayout(templateId);
+  },
+  
+  // Widget data loading methods (NEW)
+  loadWidgetData: async (widgetId: string) => {
+    try {
+      set((state) => ({
+        widgetData: {
+          ...state.widgetData,
+          [widgetId]: {
+            data: state.widgetData[widgetId]?.data || null,
+            loading: true,
+            error: null,
+            lastUpdated: state.widgetData[widgetId]?.lastUpdated || null,
+            isCached: state.widgetData[widgetId]?.isCached || false
+          }
+        }
+      }));
+
+      // Fetch data from API
+      const response = await fetch(`/api/dashboard/widgets/${widgetId}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch widget data: ${response.statusText}`);
+      }
+
+      const { data, cached } = await response.json();
+
+      set((state) => ({
+        widgetData: {
+          ...state.widgetData,
+          [widgetId]: {
+            data,
+            loading: false,
+            error: null,
+            lastUpdated: new Date(),
+            isCached: cached || false
+          }
+        }
+      }));
+
+      return data;
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      set((state) => ({
+        widgetData: {
+          ...state.widgetData,
+          [widgetId]: {
+            data: state.widgetData[widgetId]?.data || null,
+            loading: false,
+            error: err,
+            lastUpdated: state.widgetData[widgetId]?.lastUpdated || null,
+            isCached: state.widgetData[widgetId]?.isCached || false
+          }
+        }
+      }));
+      return null;
+    }
+  },
+
+  loadAllWidgetData: async (widgetIds: string[]) => {
+    set({ isLoadingAllWidgets: true });
+    
+    try {
+      // Initialize all widgets as loading
+      set((state) => ({
+        widgetData: {
+          ...state.widgetData,
+          ...Object.fromEntries(
+            widgetIds.map((id) => [
+              id,
+              {
+                data: state.widgetData[id]?.data || null,
+                loading: true,
+                error: null,
+                lastUpdated: state.widgetData[id]?.lastUpdated || null,
+                isCached: state.widgetData[id]?.isCached || false
+              }
+            ])
+          )
+        }
+      }));
+
+      // Batch fetch data
+      const response = await fetch('/api/dashboard/widgets/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ widgetIds, forceRefresh: false })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch widget data: ${response.statusText}`);
+      }
+
+      const { results, errors } = await response.json();
+
+      // Update widget data with results
+      set((state) => ({
+        widgetData: {
+          ...state.widgetData,
+          ...Object.fromEntries(
+            widgetIds.map((id) => [
+              id,
+              {
+                data: results[id] || null,
+                loading: false,
+                error: errors[id] ? new Error(errors[id]) : null,
+                lastUpdated: results[id] ? new Date() : null,
+                isCached: false
+              }
+            ])
+          )
+        },
+        isLoadingAllWidgets: false
+      }));
+
+      return results;
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      set((state) => ({
+        widgetData: Object.fromEntries(
+          widgetIds.map((id) => [
+            id,
+            {
+              data: state.widgetData[id]?.data || null,
+              loading: false,
+              error: err,
+              lastUpdated: state.widgetData[id]?.lastUpdated || null,
+              isCached: state.widgetData[id]?.isCached || false
+            }
+          ])
+        ),
+        isLoadingAllWidgets: false
+      }));
+      return {};
+    }
+  },
+
+  setWidgetData: (widgetId: string, data: WidgetData, isCached = false) => {
+    set((state) => ({
+      widgetData: {
+        ...state.widgetData,
+        [widgetId]: {
+          data,
+          loading: false,
+          error: null,
+          lastUpdated: new Date(),
+          isCached
+        }
+      }
+    }));
+  },
+
+  setWidgetError: (widgetId: string, error: Error | null) => {
+    set((state) => ({
+      widgetData: {
+        ...state.widgetData,
+        [widgetId]: {
+          ...state.widgetData[widgetId],
+          error,
+          loading: false
+        }
+      }
+    }));
+  },
+
+  clearWidgetCache: (widgetId?: string) => {
+    set((state) => {
+      if (widgetId) {
+        return {
+          widgetData: {
+            ...state.widgetData,
+            [widgetId]: {
+              ...state.widgetData[widgetId],
+              data: null,
+              isCached: false
+            }
+          }
+        };
+      }
+      
+      // Clear all widget cache
+      return {
+        widgetData: Object.fromEntries(
+          Object.entries(state.widgetData).map(([id, state]) => [
+            id,
+            {
+              ...state,
+              data: null,
+              isCached: false
+            }
+          ])
+        )
+      };
+    });
+  },
+
+  refetchWidget: async (widgetId: string) => {
+    try {
+      set((state) => ({
+        widgetData: {
+          ...state.widgetData,
+          [widgetId]: {
+            ...state.widgetData[widgetId],
+            loading: true
+          }
+        }
+      }));
+
+      const response = await fetch(`/api/dashboard/widgets/${widgetId}?forceRefresh=true`);
+      if (!response.ok) {
+        throw new Error(`Failed to refetch widget: ${response.statusText}`);
+      }
+
+      const { data } = await response.json();
+
+      set((state) => ({
+        widgetData: {
+          ...state.widgetData,
+          [widgetId]: {
+            data,
+            loading: false,
+            error: null,
+            lastUpdated: new Date(),
+            isCached: false
+          }
+        }
+      }));
+
+      return data;
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      set((state) => ({
+        widgetData: {
+          ...state.widgetData,
+          [widgetId]: {
+            ...state.widgetData[widgetId],
+            loading: false,
+            error: err
+          }
+        }
+      }));
+      return null;
+    }
+  },
+
+  getWidgetData: (widgetId: string) => {
+    const state = get();
+    return state.widgetData[widgetId]?.data || null;
+  },
+
+  isWidgetLoading: (widgetId: string) => {
+    const state = get();
+    return state.widgetData[widgetId]?.loading || false;
+  },
+
+  getWidgetError: (widgetId: string) => {
+    const state = get();
+    return state.widgetData[widgetId]?.error || null;
   }
 }));
 
@@ -478,4 +768,39 @@ export function useDashboardSave() {
     isSaving: state.isSaving,
     saveLayout: state.saveLayout
   }));
+}
+
+// Widget data hooks (NEW)
+export function useWidgetData(widgetId: string) {
+  return useDashboardStore((state) => ({
+    data: state.getWidgetData(widgetId),
+    loading: state.isWidgetLoading(widgetId),
+    error: state.getWidgetError(widgetId),
+    lastUpdated: state.widgetData[widgetId]?.lastUpdated || null,
+    isCached: state.widgetData[widgetId]?.isCached || false,
+    refetch: () => state.refetchWidget(widgetId)
+  }));
+}
+
+export function useWidgetsData(widgetIds: string[]) {
+  return useDashboardStore((state) => ({
+    data: Object.fromEntries(
+      widgetIds.map((id) => [id, state.getWidgetData(id)])
+    ),
+    loading: state.isLoadingAllWidgets || widgetIds.some(id => state.isWidgetLoading(id)),
+    errors: Object.fromEntries(
+      widgetIds.map((id) => [id, state.getWidgetError(id)])
+    ),
+    loadAll: () => state.loadAllWidgetData(widgetIds)
+  }));
+}
+
+export function useWidgetDataState(widgetId: string) {
+  return useDashboardStore((state) => state.widgetData[widgetId] || {
+    data: null,
+    loading: false,
+    error: null,
+    lastUpdated: null,
+    isCached: false
+  });
 }

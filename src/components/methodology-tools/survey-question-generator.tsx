@@ -5,25 +5,45 @@ import { useAuth } from "@/components/auth-provider";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Copy, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
+import { useApiCall } from "@/hooks/use-api-call";
 
 export function SurveyQuestionGenerator() {
   const { session } = useAuth();
   const [surveyTopic, setSurveyTopic] = useState("");
   const [questionType, setQuestionType] = useState("Likert Scale (1-5)");
   const [generatedQuestions, setGeneratedQuestions] = useState<string[]>([]);
-  const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
+  // const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false); // Replaced by useApiCall's loading state
+
+  const { execute: generateQuestions, loading: isGenerating } = useApiCall<any>({
+    onSuccess: (data) => {
+      if (!data.questions) {
+        throw new Error("API returned no questions data.");
+      }
+      setGeneratedQuestions(data.questions);
+      toast.success("Survey questions generated!");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to generate questions.");
+      console.error(error);
+    },
+    autoErrorToast: false,
+  });
 
   const handleGenerateQuestions = async () => {
-    if (!surveyTopic || !questionType || !session) return;
-    setIsGeneratingQuestions(true);
+    if (!surveyTopic || !questionType || !session) {
+        toast.error("Please provide a topic and question type.");
+        return;
+    }
+    // setIsGeneratingQuestions(true); // Loading state managed by useApiCall
     setGeneratedQuestions([]);
     try {
-      const response = await fetch(
-        "https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/generate-survey-questions",
+      await generateQuestions(
+        getSupabaseFunctionUrl("generate-survey-questions"),
         {
           method: "POST",
           headers: {
@@ -34,15 +54,9 @@ export function SurveyQuestionGenerator() {
           body: JSON.stringify({ topic: surveyTopic, questionType }),
         }
       );
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-      setGeneratedQuestions(data.questions);
-      toast.success("Survey questions generated!");
     } catch (error: any) {
-      toast.error(error.message || "Failed to generate questions.");
-      console.error(error);
-    } finally {
-      setIsGeneratingQuestions(false);
+        // Errors are already handled by useApiCall's onError
+        console.error("Local error before API call in handleGenerateQuestions:", error);
     }
   };
 
@@ -75,8 +89,8 @@ export function SurveyQuestionGenerator() {
           </div>
         </RadioGroup>
       </div>
-      <Button onClick={handleGenerateQuestions} disabled={isGeneratingQuestions || !surveyTopic || !session}>
-        <Wand2 className="w-4 h-4 mr-2" /> {isGeneratingQuestions ? "Generating..." : "Generate Questions"}
+      <Button onClick={handleGenerateQuestions} disabled={isGenerating || !surveyTopic || !session}>
+        <Wand2 className="w-4 h-4 mr-2" /> {isGenerating ? "Generating..." : "Generate Questions"}
       </Button>
       {generatedQuestions.length > 0 && (
         <div className="relative">

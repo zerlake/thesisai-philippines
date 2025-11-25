@@ -11,6 +11,8 @@ import { Skeleton } from "./ui/skeleton";
 import { Label } from "./ui/label";
 import { useRouter } from "next/navigation";
 import { useAuthReady } from "@/hooks/use-auth-ready";
+import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
+import { useApiCall } from "@/hooks/use-api-call";
 
 export function QASimulator() {
   const { session, supabase } = useAuth();
@@ -19,8 +21,22 @@ export function QASimulator() {
   const router = useRouter();
   const [textContent, setTextContent] = useState("");
   const [questions, setQuestions] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false); // Replaced by useApiCall's loading state
   const [isSaving, setIsSaving] = useState(false);
+
+  const { execute: generateQuestionsCall, loading: isGeneratingQuestions } = useApiCall<any>({
+    onSuccess: (data) => {
+      if (!data.questions) {
+        throw new Error("API returned no questions data.");
+      }
+      setQuestions(data.questions || []);
+      toast.success("Potential defense questions generated!");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+    autoErrorToast: false, // We handle toast explicitly
+  });
 
   const addSampleData = () => {
     // Sample text content for a thesis
@@ -68,12 +84,12 @@ Data collection occurred over a six-week period in August-September 2024. Quanti
       return;
     }
 
-    setIsLoading(true);
+    // setIsLoading(true); // Replaced
     setQuestions([]);
 
     try {
-      const response = await fetch(
-        "https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/generate-defense-questions",
+      await generateQuestionsCall(
+        getSupabaseFunctionUrl("generate-defense-questions"),
         {
           method: "POST",
           headers: {
@@ -84,16 +100,9 @@ Data collection occurred over a six-week period in August-September 2024. Quanti
           body: JSON.stringify({ textContent }),
         }
       );
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Failed to generate questions.");
-
-      setQuestions(data.questions || []);
-      toast.success("Potential defense questions generated!");
     } catch (error: any) {
-      toast.error(error.message);
-    } finally {
-      setIsLoading(false);
+        // Errors are already handled by useApiCall's onError
+        console.error("Local error before API call in handleGenerate:", error);
     }
   };
 
@@ -161,19 +170,19 @@ Data collection occurred over a six-week period in August-September 2024. Quanti
               onChange={(e) => setTextContent(e.target.value)}
             />
           </div>
-          <Button onClick={handleGenerate} disabled={isLoading}>
+          <Button onClick={handleGenerate} disabled={isGeneratingQuestions}>
             <Wand2 className="w-4 h-4 mr-2" />
-            {isLoading ? "Generating..." : "Generate Questions"}
+            {isGeneratingQuestions ? "Generating..." : "Generate Questions"}
           </Button>
         </CardContent>
       </Card>
 
-      {(isLoading || questions.length > 0) && (
+      {(isGeneratingQuestions || questions.length > 0) && (
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle>Generated Questions</CardTitle>
-              {questions.length > 0 && !isLoading && (
+              {questions.length > 0 && !isGeneratingQuestions && (
                 <Button variant="outline" size="sm" onClick={handleSaveAsDraft} disabled={isSaving}>
                   <FilePlus2 className="w-4 h-4 mr-2" />
                   {isSaving ? "Saving..." : "Save as Draft"}
@@ -182,7 +191,7 @@ Data collection occurred over a six-week period in August-September 2024. Quanti
             </div>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
+            {isGeneratingQuestions ? (
               <div className="space-y-3">
                 <Skeleton className="h-8 w-full" />
                 <Skeleton className="h-8 w-11/12" />

@@ -4,7 +4,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
 // Security utilities
-function validateURL(url: string, allowedDomains: string[] = ['serpapi.com']): boolean {
+function validateURL(url: string, allowedDomains: string[] = [Deno.env.get("SERPAPI_ENDPOINT") || 'serpapi.com']): boolean {
   try {
     const parsedUrl = new URL(url);
     const hostname = parsedUrl.hostname;
@@ -40,7 +40,7 @@ function validateJWT(token: string): boolean {
 
 const getCorsHeaders = (req: Request) => {
   const ALLOWED_ORIGINS = [
-    'https://thesisai-philippines.vercel.app',
+    Deno.env.get('NEXT_PUBLIC_APP_BASE_URL') || Deno.env.get('NEXT_PUBLIC_VERCEL_URL') || 'http://localhost:3000',
     'http://localhost:3000',
     'http://localhost:32100',
   ];
@@ -115,7 +115,8 @@ serve(async (req: Request) => {
     // Sanitize and validate query to prevent injection
     const sanitizedQuery = sanitizeInput(query, 500);
 
-    const searchUrl = `https://serpapi.com/search.json?engine=google_scholar&q=${encodeURIComponent(sanitizedQuery)}&api_key=${serpApiKey}`;
+    const serpApiEndpoint = Deno.env.get("SERPAPI_ENDPOINT") || "https://serpapi.com";
+    const searchUrl = `${serpApiEndpoint}/search.json?engine=google_scholar&q=${encodeURIComponent(sanitizedQuery)}&api_key=${serpApiKey}`;
     
     // Validate URL to prevent SSRF attacks
     if (!validateURL(searchUrl)) {

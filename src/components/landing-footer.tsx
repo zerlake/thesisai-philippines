@@ -16,17 +16,17 @@ const footerSections = [
     links: [
       { name: "Help & FAQ", href: "/faq" },
       { name: "University Guides", href: "/university-guides" },
-      { name: "Blog", href: "#" },
-      { name: "Documentation", href: "#" },
+      { name: "Blog", href: "/blog" },
+      { name: "Documentation", href: "/documentation" },
     ]
   },
   {
     title: "Company",
     links: [
-      { name: "About Us", href: "#" },
-      { name: "Contact", href: "#" },
-      { name: "Privacy Policy", href: "#" },
-      { name: "Terms of Service", href: "#" },
+      { name: "About Us", href: "/about" },
+      { name: "Contact", href: "/contact" },
+      { name: "Privacy Policy", href: "/privacy-policy" },
+      { name: "Terms of Service", href: "/terms-of-service" },
     ]
   }
 ];

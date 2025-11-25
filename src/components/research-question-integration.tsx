@@ -18,6 +18,8 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { FieldOfStudySelector } from "../components/field-of-study-selector";
 import { Skeleton } from "../components/ui/skeleton";
+import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
+import { useApiCall } from "@/hooks/use-api-call";
 
 type ResearchQuestion = {
   question: string;
@@ -78,8 +80,39 @@ export function ResearchQuestionIntegration() {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [selectedPapers, setSelectedPapers] = useState<Paper[]>([]);
   const [synthesizedText, setSynthesizedText] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-  const [isSynthesizing, setIsSynthesizing] = useState(false);
+  // const [isSearching, setIsSearching] = useState(false); // Replaced by useApiCall's loading state
+  // const [isSynthesizing, setIsSynthesizing] = useState(false); // Replaced by useApiCall's loading state
+
+  const { execute: searchArxiv, loading: isSearchingArxiv } = useApiCall<any>({
+    onSuccess: (data) => {
+        if (data.papers && data.papers.length > 0) {
+            setPapers(data.papers);
+            toast.success(`Found ${data.papers.length} papers from ArXiv`);
+        } else {
+            toast.info("No papers found for your search. Try different keywords.");
+        }
+    },
+    onError: (error) => {
+        console.error("ArXiv search error:", error);
+        toast.error(error.message || "Failed to search ArXiv. Please try again.");
+    },
+    autoErrorToast: false,
+  });
+
+  const { execute: synthesizeLiterature, loading: isSynthesizingLiterature } = useApiCall<any>({
+    onSuccess: (data) => {
+        if (!data.synthesizedText) {
+            throw new Error("API returned no synthesized text.");
+        }
+        setSynthesizedText(data.synthesizedText);
+        toast.success("Synthesis complete!");
+    },
+    onError: (error) => {
+        toast.error(error.message || "Failed to synthesize sources.");
+        console.error(error);
+    },
+    autoErrorToast: false,
+  });
   const [literatureActiveTab, setLiteratureActiveTab] = useState("search");
 
   const handleGenerateQuestions = async () => {
@@ -223,38 +256,23 @@ export function ResearchQuestionIntegration() {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!topic) return;
+    if (!topic) {
+        toast.error("Please enter a topic to search.");
+        return;
+    }
+    if (!session) {
+      toast.error("You must be logged in to search for literature.");
+      return;
+    }
 
-    setIsSearching(true);
     setPapers([]);
     setSelectedPapers([]);
     setSynthesizedText("");
 
     try {
-      // Call our API route which proxies to ArXiv
-      const response = await fetch(`/api/arxiv-search?query=${encodeURIComponent(topic)}`);
-
-      if (!response.ok) {
-        throw new Error(`Search failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      if (data.papers && data.papers.length > 0) {
-        setPapers(data.papers);
-        toast.success(`Found ${data.papers.length} papers from ArXiv`);
-      } else {
-        toast.info("No papers found for your search. Try different keywords.");
-      }
+      await searchArxiv(`/api/arxiv-search?query=${encodeURIComponent(topic)}`);
     } catch (error: any) {
-      console.error("ArXiv search error:", error);
-      toast.error(error.message || "Failed to search ArXiv. Please try again.");
-    } finally {
-      setIsSearching(false);
+        console.error("Local error before API call in handleSearch:", error);
     }
   };
 
@@ -275,11 +293,10 @@ export function ResearchQuestionIntegration() {
       toast.error("You must be logged in to synthesize sources.");
       return;
     }
-    setIsSynthesizing(true);
     setSynthesizedText("");
     try {
-      const response = await fetch(
-        "https://dnyjgzzfyzrsucucexhy.supabase.co/functions/v1/synthesize-literature",
+      await synthesizeLiterature(
+        getSupabaseFunctionUrl("synthesize-literature"),
         {
           method: "POST",
           headers: {
@@ -290,14 +307,8 @@ export function ResearchQuestionIntegration() {
           body: JSON.stringify({ papers: selectedPapers.map(p => ({ title: p.title, snippet: p.snippet })) }),
         }
       );
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-      setSynthesizedText(data.synthesizedText);
-      toast.success("Synthesis complete!");
     } catch (error: any) {
-      toast.error(error.message || "Failed to synthesize sources.");
-    } finally {
-      setIsSynthesizing(false);
+        console.error("Local error before API call in handleSynthesize:", error);
     }
   };
 
@@ -404,12 +415,12 @@ export function ResearchQuestionIntegration() {
               <FieldOfStudySelector
                 value={field}
                 onValueChange={setField}
-                disabled={isGenerating || isSearching}
+                disabled={isGenerating || isSearchingArxiv}
               />
             </div>
             <div className="space-y-2">
               <Label>Research Type</Label>
-              <Select value={researchType} onValueChange={setResearchType} disabled={isGenerating || isSearching}>
+              <Select value={researchType} onValueChange={setResearchType} disabled={isGenerating || isSearchingArxiv}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -429,7 +440,7 @@ export function ResearchQuestionIntegration() {
               placeholder="e.g., The Impact of Online Learning on Student Performance"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              disabled={isGenerating || isSearching}
+              disabled={isGenerating || isSearchingArxiv}
             />
           </div>
 
@@ -440,7 +451,7 @@ export function ResearchQuestionIntegration() {
               placeholder="Briefly summarize key findings from your literature review..."
               value={literatureContext}
               onChange={(e) => setLiteratureContext(e.target.value)}
-              disabled={isGenerating || isSearching}
+              disabled={isGenerating || isSearchingArxiv}
               rows={4}
             />
           </div>
@@ -735,23 +746,23 @@ export function ResearchQuestionIntegration() {
                 />
                 <Button 
                   type="submit" 
-                  disabled={isSearching || isGenerating || !topic || !session || !field}
+                  disabled={isSearchingArxiv || isGenerating || !topic || !session || !field}
                 >
                   <Wand2 className="w-4 h-4 mr-2" />
-                  {isSearching ? "Searching..." : "Search"}
+                  {isSearchingArxiv ? "Searching..." : "Search"}
                 </Button>
               </form>
             </CardContent>
           </Card>
 
-          {isSearching && <div className="space-y-4"><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /></div>}
+          {isSearchingArxiv && <div className="space-y-4"><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /></div>}
 
-          {!isSearching && papers.length > 0 && (
+          {!isSearchingArxiv && papers.length > 0 && (
             <>
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Search Results</h3>
                 <div className="flex items-center gap-2">
-                  {selectedPapers.length > 1 && <Button onClick={handleSynthesize} disabled={isSynthesizing || !session}><Wand2 className="w-4 h-4 mr-2" />{isSynthesizing ? "Synthesizing..." : `Synthesize (${selectedPapers.length})`}</Button>}
+                  {selectedPapers.length > 1 && <Button onClick={handleSynthesize} disabled={isSynthesizingLiterature || !session}><Wand2 className="w-4 h-4 mr-2" />{isSynthesizingLiterature ? "Synthesizing..." : `Synthesize (${selectedPapers.length})`}</Button>}
                 </div>
               </div>
 

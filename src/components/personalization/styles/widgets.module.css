@@ -1,0 +1,820 @@
+/* Widget Components Shared Styles */
+
+.widget {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Base widget styling */
+.widgetBody {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+}
+
+/* Stats widget */
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.statCard {
+  text-align: center;
+  padding: 16px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #f9fbfc 100%);
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.icon {
+  font-size: 28px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.label {
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.value {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* Progress bar */
+.stat {
+  margin-bottom: 16px;
+}
+
+.progressBar {
+  margin-bottom: 16px;
+}
+
+.barContainer {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #45b7d1);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.percentage {
+  font-size: 12px;
+  color: #666;
+  text-align: right;
+}
+
+/* Chart placeholder */
+.chart {
+  width: 100%;
+  height: 120px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 12px;
+  margin-top: 12px;
+}
+
+/* List widgets */
+.list {
+  padding: 0;
+}
+
+.listItem {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.listItem:hover {
+  background: #f9f9f9;
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+.itemTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.itemMeta {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.itemDate {
+  font-size: 11px;
+  color: #ccc;
+}
+
+/* Goal widget */
+.goalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.goalHeader h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.interval {
+  font-size: 12px;
+  color: #999;
+  background: #f5f5f5;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.goalProgress {
+  margin-bottom: 16px;
+}
+
+.progressNumber {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.current {
+  color: #4caf50;
+}
+
+.total {
+  color: #999;
+}
+
+.goalType {
+  margin-top: 12px;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.goalType p {
+  margin: 0;
+  font-size: 11px;
+  color: #666;
+  letter-spacing: 0.5px;
+}
+
+/* Collaboration widget */
+.collaboration {
+  padding: 0;
+}
+
+.collaborationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.collaborationHeader h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.badge {
+  font-size: 12px;
+  background: #007bff;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.membersList {
+  padding: 8px 0;
+}
+
+.member {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.member:last-child {
+  border-bottom: none;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.memberInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.memberName {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.memberRole {
+  font-size: 11px;
+  color: #999;
+}
+
+.actionBtn {
+  width: calc(100% - 24px);
+  margin: 12px 12px 0;
+  padding: 8px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.actionBtn:hover {
+  background: #0056b3;
+}
+
+/* Calendar widget */
+.calendar {
+  padding: 0;
+}
+
+.calendarHeader {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.calendarHeader h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.eventsList {
+  padding: 0;
+}
+
+.event {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.event:last-child {
+  border-bottom: none;
+}
+
+.eventDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.eventContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.eventTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin-bottom: 2px;
+}
+
+.eventDate {
+  font-size: 11px;
+  color: #999;
+}
+
+.eventType {
+  font-size: 11px;
+  color: #666;
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+/* Trends widget */
+.trendsContainer {
+  padding: 0;
+}
+
+.trendsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.trendsHeader h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.timeRange {
+  font-size: 12px;
+  color: #999;
+}
+
+.trendsList {
+  padding: 0;
+}
+
+.trendItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.trendItem:last-child {
+  border-bottom: none;
+}
+
+.trendRank {
+  font-size: 14px;
+  font-weight: 600;
+  color: #667eea;
+  min-width: 30px;
+  text-align: center;
+}
+
+.trendContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.trendTopic {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin-bottom: 2px;
+}
+
+.trendMeta {
+  font-size: 11px;
+  color: #999;
+}
+
+.trendValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: #d32f2f;
+  white-space: nowrap;
+}
+
+.trendValue.positive {
+  color: #4caf50;
+}
+
+/* Notes widget */
+.notesContainer {
+  padding: 0;
+}
+
+.notesHeader {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.notesHeader h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.notesList {
+  padding: 0;
+}
+
+.noteItem {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.noteItem:hover {
+  background: #f9f9f9;
+}
+
+.noteItem:last-child {
+  border-bottom: none;
+}
+
+.noteTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.noteContent {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 6px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.noteTime {
+  font-size: 11px;
+  color: #999;
+}
+
+/* Citation widget */
+.citationContainer {
+  padding: 0;
+}
+
+.citationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.citationHeader h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.count {
+  font-size: 18px;
+  font-weight: 600;
+  color: #007bff;
+}
+
+.citationStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.formatList {
+  padding: 8px 0;
+}
+
+.formatItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.formatItem:hover {
+  background: #f9f9f9;
+}
+
+.formatItem.active {
+  background: #e3f2fd;
+  color: #007bff;
+  font-weight: 600;
+}
+
+/* Suggestions widget */
+.suggestionsContainer {
+  padding: 0;
+}
+
+.suggestionsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.suggestionsHeader h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.frequency {
+  font-size: 12px;
+  color: #999;
+  background: #f5f5f5;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.suggestionsList {
+  padding: 0;
+}
+
+.suggestionItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.suggestionItem:hover {
+  background: #f9f9f9;
+}
+
+.suggestionItem:last-child {
+  border-bottom: none;
+}
+
+.suggestionContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.suggestionTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.suggestionType {
+  font-size: 11px;
+  color: #999;
+}
+
+.relevanceScore {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4caf50;
+  white-space: nowrap;
+}
+
+/* Time tracker widget */
+.timeTrackerContainer {
+  padding: 0;
+}
+
+.trackerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.trackerHeader h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.period {
+  font-size: 12px;
+  color: #999;
+}
+
+.timeBreakdown {
+  padding: 12px;
+}
+
+.timeItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.timeItem:last-child {
+  margin-bottom: 0;
+}
+
+.timeItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.timeItemRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.hours {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.totalTime {
+  padding: 12px;
+  border-top: 1px solid #f0f0f0;
+  text-align: center;
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Custom widget */
+.customContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyCustom {
+  color: #999;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .citationStats {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .statCard {
+    background: linear-gradient(135deg, #2d2d2d 0%, #3d3d3d 100%);
+    border-color: #4d4d4d;
+  }
+
+  .label {
+    color: #999;
+  }
+
+  .value {
+    color: #e0e0e0;
+  }
+
+  .listItem:hover {
+    background: #3d3d3d;
+  }
+
+  .itemTitle {
+    color: #e0e0e0;
+  }
+
+  .itemMeta,
+  .itemDate {
+    color: #666;
+  }
+
+  .barContainer {
+    background: #4d4d4d;
+  }
+
+  .goalType {
+    background: #3d3d3d;
+  }
+
+  .goalType p {
+    color: #999;
+  }
+
+  .memberName {
+    color: #e0e0e0;
+  }
+
+  .memberRole {
+    color: #666;
+  }
+
+  .eventTitle {
+    color: #e0e0e0;
+  }
+
+  .eventDate {
+    color: #666;
+  }
+
+  .eventType {
+    background: #3d3d3d;
+    color: #999;
+  }
+
+  .trendTopic {
+    color: #e0e0e0;
+  }
+
+  .trendMeta {
+    color: #666;
+  }
+
+  .noteTitle {
+    color: #e0e0e0;
+  }
+
+  .noteContent {
+    color: #999;
+  }
+
+  .noteTime {
+    color: #666;
+  }
+
+  .formatItem:hover {
+    background: #3d3d3d;
+  }
+
+  .suggestionItem:hover {
+    background: #3d3d3d;
+  }
+
+  .suggestionTitle {
+    color: #e0e0e0;
+  }
+
+  .suggestionType {
+    color: #666;
+  }
+
+  .hours {
+    color: #e0e0e0;
+  }
+
+  .totalTime {
+    border-top-color: #4d4d4d;
+    color: #999;
+  }
+}

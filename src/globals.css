@@ -1,3 +1,6 @@
+/* Premium Visual Effects */
+@import './styles/premium-effects.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

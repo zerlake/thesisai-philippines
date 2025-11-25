@@ -7,23 +7,72 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
 import { AlignLeft, AlignRight, LayoutGrid, Eye } from 'lucide-react';
+import { LayoutPreferences } from '@/lib/personalization/types';
+
+// Default values for layout preferences
+const getDefaultLayoutPreferences = (): LayoutPreferences => ({
+  sidebarPosition: 'left',
+  sidebarWidth: 240, // pixels
+  compactMode: false,
+  gridLayout: 'flexible',
+  cardView: 'list',
+  itemsPerPage: 20,
+});
 
 export default function LayoutSettings() {
   const { preferences, updatePreferences, isLoading } = usePersonalization();
-  const [settings, setSettings] = useState(preferences?.layout || {});
+  // Extend the LayoutPreferences type with UI-specific properties for local state
+  type ExtendedLayoutSettings = LayoutPreferences & {
+    showBreadcrumbs?: boolean;
+    showFilters?: boolean;
+    defaultViewType?: string;
+  };
+
+  const [settings, setSettings] = useState<ExtendedLayoutSettings>(preferences?.layout ?
+    { ...preferences.layout, showBreadcrumbs: true, showFilters: true, defaultViewType: preferences.layout.cardView } :
+    { ...getDefaultLayoutPreferences(), showBreadcrumbs: true, showFilters: true, defaultViewType: 'list' }
+  );
 
   useEffect(() => {
     if (preferences?.layout) {
-      setSettings(preferences.layout);
+      setSettings({
+        ...preferences.layout,
+        showBreadcrumbs: settings.showBreadcrumbs ?? true,
+        showFilters: settings.showFilters ?? true,
+        defaultViewType: preferences.layout.cardView
+      });
+    } else {
+      setSettings({
+        ...getDefaultLayoutPreferences(),
+        showBreadcrumbs: true,
+        showFilters: true,
+        defaultViewType: 'list'
+      });
     }
   }, [preferences]);
 
   const handleChange = async (key: string, value: any) => {
-    const updated = { ...settings, [key]: value };
-    setSettings(updated);
-    await updatePreferences({
-      layout: updated
-    });
+    const currentLayout = preferences?.layout || getDefaultLayoutPreferences();
+
+    // Update local state with both layout and UI properties
+    const newSettings = { ...settings, [key]: value };
+    setSettings(newSettings);
+
+    // Only update layout preferences for actual layout properties
+    if (key === 'defaultViewType') {
+      // Map defaultViewType to cardView (list, grid, kanban)
+      const layoutUpdate = { ...currentLayout, cardView: value as 'list' | 'grid' | 'kanban' };
+      await updatePreferences({
+        layout: layoutUpdate
+      });
+    } else if (key !== 'showBreadcrumbs' && key !== 'showFilters') {
+      // Update actual layout properties
+      const layoutUpdate = { ...currentLayout, [key]: value } as LayoutPreferences;
+      await updatePreferences({
+        layout: layoutUpdate
+      });
+    }
+    // For showBreadcrumbs and showFilters, we're only updating local state
   };
 
   if (isLoading) {

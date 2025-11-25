@@ -6,19 +6,62 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
 import { Eye, Zap, Type, Keyboard, AudioWaveform, Focus } from 'lucide-react';
+import { AccessibilityPreferences } from '@/lib/personalization/types';
+
+// Default values for accessibility preferences
+const getDefaultAccessibilityPreferences = (): AccessibilityPreferences => ({
+  screenReaderEnabled: false,
+  keyboardNavigationOnly: false,
+  reducedAnimations: false,
+  highContrast: false,
+  fontSize: 100, // percentage
+  lineHeight: 1.5, // multiplier
+  letterSpacing: 0, // pixels
+  dyslexiaFriendlyFont: false,
+  focusIndicatorSize: 'normal',
+  captions: false,
+  textToSpeech: false,
+});
 
 export default function AccessibilitySettings() {
   const { preferences, updatePreferences, isLoading } = usePersonalization();
-  const [settings, setSettings] = useState(preferences?.accessibility || {});
+  const [settings, setSettings] = useState<AccessibilityPreferences>(preferences?.accessibility || getDefaultAccessibilityPreferences());
 
   useEffect(() => {
     if (preferences?.accessibility) {
       setSettings(preferences.accessibility);
+    } else {
+      setSettings(getDefaultAccessibilityPreferences());
     }
   }, [preferences]);
 
-  const handleChange = async (key: string, value: boolean) => {
-    const updated = { ...settings, [key]: value };
+  const handleChange = async (key: string, value: any) => {
+    // Get current accessibility preferences or use defaults
+    const currentAccessibility = preferences?.accessibility || getDefaultAccessibilityPreferences();
+
+    let updated: AccessibilityPreferences;
+    if (key === 'largerText') {
+      // Map largerText to fontSize: default is 100, larger is 120
+      updated = { ...currentAccessibility, fontSize: value ? 120 : 100 };
+    } else if (key === 'reduceMotion') {
+      // Map reduceMotion to reducedAnimations
+      updated = { ...currentAccessibility, reducedAnimations: value };
+    } else if (key === 'keyboardNavigation') {
+      // Map keyboardNavigation to keyboardNavigationOnly
+      updated = { ...currentAccessibility, keyboardNavigationOnly: value };
+    } else if (key === 'focusIndicators') {
+      // Map focusIndicators to focusIndicatorSize ('normal' if false, 'large' if true)
+      updated = {
+        ...currentAccessibility,
+        focusIndicatorSize: value ? 'large' : 'normal' as const
+      };
+    } else if (key === 'screenReaderOptimized') {
+      // Map screenReaderOptimized to screenReaderEnabled
+      updated = { ...currentAccessibility, screenReaderEnabled: value };
+    } else {
+      updated = { ...currentAccessibility, [key]: value };
+    }
+
     setSettings(updated);
     await updatePreferences({
       accessibility: updated
@@ -64,7 +107,7 @@ export default function AccessibilitySettings() {
               </p>
             </div>
             <Switch
-              checked={settings.largerText ?? false}
+              checked={settings.fontSize > 100}
               onCheckedChange={(value) => handleChange('largerText', value)}
             />
           </div>
@@ -88,7 +131,7 @@ export default function AccessibilitySettings() {
             </p>
           </div>
           <Switch
-            checked={settings.reduceMotion ?? false}
+            checked={settings.reducedAnimations ?? false}
             onCheckedChange={(value) => handleChange('reduceMotion', value)}
           />
         </div>
@@ -112,7 +155,7 @@ export default function AccessibilitySettings() {
               </p>
             </div>
             <Switch
-              checked={settings.keyboardNavigation ?? false}
+              checked={settings.keyboardNavigationOnly ?? false}
               onCheckedChange={(value) => handleChange('keyboardNavigation', value)}
             />
           </div>
@@ -127,7 +170,7 @@ export default function AccessibilitySettings() {
               </p>
             </div>
             <Switch
-              checked={settings.focusIndicators ?? true}
+              checked={settings.focusIndicatorSize === 'large'}
               onCheckedChange={(value) => handleChange('focusIndicators', value)}
             />
           </div>
@@ -151,7 +194,7 @@ export default function AccessibilitySettings() {
             </p>
           </div>
           <Switch
-            checked={settings.screenReaderOptimized ?? false}
+            checked={settings.screenReaderEnabled ?? false}
             onCheckedChange={(value) => handleChange('screenReaderOptimized', value)}
           />
         </div>

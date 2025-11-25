@@ -5,7 +5,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
 const getCorsHeaders = (req: Request) => {
   const ALLOWED_ORIGINS = [
-    'https://thesisai-philippines.vercel.app',
+    Deno.env.get('NEXT_PUBLIC_APP_BASE_URL') || Deno.env.get('NEXT_PUBLIC_VERCEL_URL') || 'http://localhost:3000',
     'http://localhost:3000',
     'http://localhost:32100',
   ];
@@ -135,7 +135,8 @@ serve(async (req: Request) => {
         while (!data && retries < 2) {
           try {
             const query = `"${sentence}"`;
-            const searchUrl = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(query)}&api_key=${serpApiKey}&num=10`;
+            const serpApiEndpoint = Deno.env.get("SERPAPI_ENDPOINT") || "https://serpapi.com";
+            const searchUrl = `${serpApiEndpoint}/search.json?engine=google&q=${encodeURIComponent(query)}&api_key=${serpApiKey}&num=10`;
 
             const response = await fetch(searchUrl);
             if (!response.ok) {

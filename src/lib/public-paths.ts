@@ -11,6 +11,12 @@ export const publicPaths = [
   "/university-guides",
   "/user-guide",
   "/atr-style-guide",
+  "/blog",
+  "/documentation",
+  "/about",
+  "/contact",
+  "/privacy-policy",
+  "/terms-of-service",
 ];
 
 export const isPublicPage = (pathname: string): boolean => {

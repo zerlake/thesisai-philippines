@@ -48,6 +48,7 @@ import { DashboardHeader } from "./dashboard-header";
 import { DashboardMetrics } from "./dashboard-metrics";
 import { DashboardNavigation } from "./dashboard-navigation";
 import { EnterpriseCard, EnterpriseCardContent } from "./enterprise-card";
+import { DashboardRealtimeProvider } from "./dashboard/DashboardRealtimeProvider";
 
 const topToolsForQuickAccess = [
   {
@@ -227,15 +228,20 @@ export function StudentDashboardEnterprise() {
   };
 
   return (
-    <div className="min-h-screen space-y-8 bg-background">
-      <WelcomeModal open={showWelcomeModal} onOpenChange={handleModalClose} name={displayName} />
-      
-      {/* Enterprise Dashboard Header */}
-      <DashboardHeader
-        displayName={displayName}
-        streak={5}
-        projectProgress={65}
-      />
+    <DashboardRealtimeProvider
+      autoConnect={true}
+      onInitialized={() => console.log('Real-time system initialized')}
+      onError={(error) => console.error('Real-time error:', error)}
+    >
+      <div className="min-h-screen space-y-8 bg-background">
+        <WelcomeModal open={showWelcomeModal} onOpenChange={handleModalClose} name={displayName} />
+        
+        {/* Enterprise Dashboard Header */}
+        <DashboardHeader
+          displayName={displayName}
+          streak={5}
+          projectProgress={65}
+        />
 
       <div className="space-y-8 px-1">
         {/* Upgrade Banner */}
@@ -314,5 +320,6 @@ export function StudentDashboardEnterprise() {
         <BugReportAlert />
       </div>
     </div>
+    </DashboardRealtimeProvider>
   );
 }

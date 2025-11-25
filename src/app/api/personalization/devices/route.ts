@@ -1,20 +1,15 @@
 import { NextRequest } from 'next/server';
 import { createServerSupabaseClient } from '@/integrations/supabase/server-client';
+import { getAuthenticatedUser, AuthenticationError } from '@/lib/server-auth'; // Add this import
 import { userDeviceSchema } from '@/lib/personalization/validation';
 import { ZodError } from 'zod';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServerSupabaseClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const user = await getAuthenticatedUser(); // Add this line
+    const supabase = createServerSupabaseClient(); // Add this line to create supabase client for data operations
 
-    if (!session) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const userId = session.user.id;
+    const userId = user.id; // Replace session.user.id with user.id
 
     // Fetch user devices
     const { data: devices, error } = await supabase
@@ -30,6 +25,12 @@ export async function GET(request: NextRequest) {
     return Response.json({ devices });
   } catch (error) {
     console.error('Error fetching devices:', error);
+    if (error instanceof AuthenticationError) { // Add this block
+        return Response.json(
+            { error: error.message },
+            { status: 401 }
+        );
+    }
     return Response.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -39,16 +40,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerSupabaseClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const user = await getAuthenticatedUser(); // Add this line
+    const supabase = createServerSupabaseClient(); // Add this line
 
-    if (!session) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const userId = session.user.id;
+    const userId = user.id; // Replace session.user.id with user.id
     const body = await request.json();
 
     // Validate request body
@@ -100,6 +95,12 @@ export async function POST(request: NextRequest) {
     return Response.json(device, { status: 201 });
   } catch (error) {
     console.error('Error registering device:', error);
+    if (error instanceof AuthenticationError) { // Add this block
+        return Response.json(
+            { error: error.message },
+            { status: 401 }
+        );
+    }
     return Response.json(
       { error: 'Internal server error' },
       { status: 500 }

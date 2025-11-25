@@ -5,7 +5,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
 const getCorsHeaders = (req: Request) => {
   const ALLOWED_ORIGINS = [
-    'https://thesisai-philippines.vercel.app',
+    Deno.env.get('NEXT_PUBLIC_APP_BASE_URL') || 'https://thesisai-philippines.vercel.app',
     'http://localhost:3000',
     'http://localhost:32100',
   ];
@@ -18,7 +18,7 @@ const getCorsHeaders = (req: Request) => {
   };
 }
 
-const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+const OPENROUTER_API_URL = Deno.env.get("OPENROUTER_API_ENDPOINT") || "https://openrouter.ai/api/v1/chat/completions";
 
 async function generateSlidesWithOpenRouter(chapterContent: string, apiKey: string) {
   const prompt = `
