@@ -140,7 +140,7 @@ export function useBatchedState<T extends object>(
 ): [T, (updates: Partial<T>) => void] {
   const [state, setState] = React.useState<T>(initialState);
   const batchRef = React.useRef<Partial<T>>({});
-  const timeoutRef = React.useRef<NodeJS.Timeout>();
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const updateBatch = React.useCallback((updates: Partial<T>) => {
     Object.assign(batchRef.current, updates);
@@ -309,7 +309,7 @@ export function useBatchAsync<T>(
     error: null
   });
 
-  const timeoutRef = React.useRef<NodeJS.Timeout>();
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   React.useEffect(() => {
     const execute = async () => {

@@ -11,6 +11,7 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import { useRealtimeManagers } from '@/components/dashboard/DashboardRealtimeProvider';
+import { MessageType } from '@/lib/dashboard/websocket-manager';
 
 export interface WidgetUpdatePayload {
   widgetId: string;
@@ -48,7 +49,15 @@ export function useWidgetRealtime({
 }: UseWidgetRealtimeOptions) {
   const { wsManager, stateManager } = useRealtimeManagers();
   const subscriptionsRef = useRef<Set<string>>(new Set());
-  const handlerRef = useRef<((message: any) => void) | null>(null);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+
+  // Unsubscribe from widget updates
+  const unsubscribe = useCallback(() => {
+    if (!unsubscribeRef.current) return;
+    unsubscribeRef.current();
+    unsubscribeRef.current = null;
+    subscriptionsRef.current.delete(widgetId);
+  }, [widgetId]);
 
   // Subscribe to widget updates
   const subscribe = useCallback(() => {
@@ -68,21 +77,11 @@ export function useWidgetRealtime({
       }
     };
 
-    handlerRef.current = handler;
-    wsManager.on('message', handler);
+    unsubscribeRef.current = wsManager.on('message', handler);
     subscriptionsRef.current.add(widgetId);
 
-    return () => unsubscribe();
-  }, [wsManager, widgetId, onUpdate]);
-
-  // Unsubscribe from widget updates
-  const unsubscribe = useCallback(() => {
-    if (!wsManager || !handlerRef.current) return;
-
-    wsManager.off('message', handlerRef.current);
-    subscriptionsRef.current.delete(widgetId);
-    handlerRef.current = null;
-  }, [wsManager, widgetId]);
+    return unsubscribe;
+  }, [wsManager, widgetId, onUpdate, unsubscribe]);
 
   // Request widget refresh
   const refresh = useCallback(async () => {
@@ -92,8 +91,7 @@ export function useWidgetRealtime({
     }
 
     try {
-      wsManager.send({
-        type: 'widget_refresh_request',
+      wsManager.send(MessageType.WIDGET_LOAD, {
         widgetId,
         timestamp: Date.now()
       });

@@ -117,7 +117,7 @@ export function DashboardRealtimeProvider({
 
         // Wire up event listeners
         // Subscribe to all message types that should trigger updates
-        wsManager.subscribe(MessageType.WIDGET_UPDATE, (message) => {
+        const unsubscribeWidgetUpdate = wsManager.subscribe(MessageType.WIDGET_UPDATE, (message) => {
           if (message.data) {
             stateManager.applyRemoteUpdate(message.type, message.data);
           }
@@ -128,7 +128,7 @@ export function DashboardRealtimeProvider({
             timestamp: message.timestamp
           });
         });
-        wsManager.subscribe(MessageType.DASHBOARD_UPDATE, (message) => {
+        const unsubscribeDashboardUpdate = wsManager.subscribe(MessageType.DASHBOARD_UPDATE, (message) => {
           if (message.data) {
             stateManager.applyRemoteUpdate(message.type, message.data);
           }
@@ -139,7 +139,7 @@ export function DashboardRealtimeProvider({
             timestamp: message.timestamp
           });
         });
-        wsManager.subscribe(MessageType.SYNC_RESPONSE, (message) => {
+        const unsubscribeSyncResponse = wsManager.subscribe(MessageType.SYNC_RESPONSE, (message) => {
           if (message.data) {
             stateManager.applyRemoteUpdate(message.type, message.data);
           }
@@ -151,15 +151,15 @@ export function DashboardRealtimeProvider({
           });
         });
 
-        wsManager.on('connected', () => {
+        const unsubscribeConnected = wsManager.on('connected', () => {
           syncManager.start();
         });
 
-        wsManager.on('disconnected', () => {
+        const unsubscribeDisconnected = wsManager.on('disconnected', () => {
           syncManager.stop();
         });
 
-        stateManager.subscribe('conflict', (conflict) => {
+        const unsubscribeConflict = stateManager.subscribe('conflict', (conflict) => {
           console.warn('State conflict detected:', conflict);
         });
 
@@ -198,6 +198,14 @@ export function DashboardRealtimeProvider({
 
     // Cleanup on unmount
     return () => {
+      // Unsubscribe from all event listeners
+      unsubscribeWidgetUpdate?.();
+      unsubscribeDashboardUpdate?.();
+      unsubscribeSyncResponse?.();
+      unsubscribeConnected?.();
+      unsubscribeDisconnected?.();
+      unsubscribeConflict?.();
+      
       if (managersRef.current.ws) {
         managersRef.current.ws?.disconnect?.();
       }

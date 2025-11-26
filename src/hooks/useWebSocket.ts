@@ -111,13 +111,14 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     const manager = managerRef.current;
 
     // State change listener
-    const unsubscribeStateChange = manager.subscribe('stateChange' as any, (newState) => {
-      setState(newState);
-      onStateChange?.(newState);
+    const unsubscribeStateChange = manager.subscribe('stateChange' as any, (newState: any) => {
+      const state = newState as ConnectionState;
+      setState(state);
+      onStateChange?.(state);
 
-      if (newState === ConnectionState.CONNECTED) {
+      if (state === ConnectionState.CONNECTED) {
         onConnected?.();
-      } else if (newState === ConnectionState.DISCONNECTED) {
+      } else if (state === ConnectionState.DISCONNECTED) {
         onDisconnected?.();
       }
     });
