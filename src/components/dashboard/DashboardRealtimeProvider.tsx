@@ -89,6 +89,14 @@ export function DashboardRealtimeProvider({
 
   // Initialize managers on mount
   useEffect(() => {
+    // Declare unsubscribe refs in outer scope for cleanup
+    let unsubscribeWidgetUpdate: (() => void) | undefined;
+    let unsubscribeDashboardUpdate: (() => void) | undefined;
+    let unsubscribeSyncResponse: (() => void) | undefined;
+    let unsubscribeConnected: (() => void) | undefined;
+    let unsubscribeDisconnected: (() => void) | undefined;
+    let unsubscribeConflict: (() => void) | undefined;
+
     const initializeManagers = async () => {
       try {
         // Create WebSocket Manager
@@ -117,7 +125,7 @@ export function DashboardRealtimeProvider({
 
         // Wire up event listeners
         // Subscribe to all message types that should trigger updates
-        const unsubscribeWidgetUpdate = wsManager.subscribe(MessageType.WIDGET_UPDATE, (message) => {
+        unsubscribeWidgetUpdate = wsManager.subscribe(MessageType.WIDGET_UPDATE, (message) => {
           if (message.data) {
             stateManager.applyRemoteUpdate(message.type, message.data);
           }
@@ -128,7 +136,7 @@ export function DashboardRealtimeProvider({
             timestamp: message.timestamp
           });
         });
-        const unsubscribeDashboardUpdate = wsManager.subscribe(MessageType.DASHBOARD_UPDATE, (message) => {
+        unsubscribeDashboardUpdate = wsManager.subscribe(MessageType.DASHBOARD_UPDATE, (message) => {
           if (message.data) {
             stateManager.applyRemoteUpdate(message.type, message.data);
           }
@@ -139,7 +147,7 @@ export function DashboardRealtimeProvider({
             timestamp: message.timestamp
           });
         });
-        const unsubscribeSyncResponse = wsManager.subscribe(MessageType.SYNC_RESPONSE, (message) => {
+        unsubscribeSyncResponse = wsManager.subscribe(MessageType.SYNC_RESPONSE, (message) => {
           if (message.data) {
             stateManager.applyRemoteUpdate(message.type, message.data);
           }
@@ -151,15 +159,15 @@ export function DashboardRealtimeProvider({
           });
         });
 
-        const unsubscribeConnected = wsManager.on('connected', () => {
+        unsubscribeConnected = wsManager.on('connected', () => {
           syncManager.start();
         });
 
-        const unsubscribeDisconnected = wsManager.on('disconnected', () => {
+        unsubscribeDisconnected = wsManager.on('disconnected', () => {
           syncManager.stop();
         });
 
-        const unsubscribeConflict = stateManager.subscribe('conflict', (conflict) => {
+        unsubscribeConflict = stateManager.subscribe('conflict', (conflict) => {
           console.warn('State conflict detected:', conflict);
         });
 
