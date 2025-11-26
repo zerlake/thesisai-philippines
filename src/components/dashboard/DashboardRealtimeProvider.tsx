@@ -214,12 +214,9 @@ export function DashboardRealtimeProvider({
       unsubscribeDisconnected?.();
       unsubscribeConflict?.();
       
-      if (managersRef.current.ws) {
-        managersRef.current.ws?.disconnect?.();
-      }
-      if (managersRef.current.sync) {
-        managersRef.current.sync?.stop?.();
-      }
+      // Disconnect managers
+      managersRef.current.ws?.disconnect();
+      managersRef.current.sync?.stop();
     };
   }, [wsUrl, autoConnect, onError, onInitialized]);
 

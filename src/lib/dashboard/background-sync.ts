@@ -70,6 +70,10 @@ export class BackgroundSyncManager {
   private syncId: number = 0;
   private failureCount: number = 0;
   private lastSyncTime: number = 0;
+  
+  // Bound handlers for event listeners (needed for proper cleanup)
+  private boundHandleOnline = this.handleOnline.bind(this);
+  private boundHandleOffline = this.handleOffline.bind(this);
 
   constructor(config: Partial<SyncConfig> = {}) {
     this.config = {
@@ -91,9 +95,9 @@ export class BackgroundSyncManager {
   start(): void {
     if (!this.config.enableBackgroundSync) return;
 
-    // Setup offline detection
-    window.addEventListener('online', () => this.handleOnline());
-    window.addEventListener('offline', () => this.handleOffline());
+    // Setup offline detection with bound handlers
+    window.addEventListener('online', this.boundHandleOnline);
+    window.addEventListener('offline', this.boundHandleOffline);
 
     // Start sync interval
     this.syncInterval = setInterval(() => {
@@ -125,8 +129,9 @@ export class BackgroundSyncManager {
       this.widgetRefreshInterval = null;
     }
 
-    window.removeEventListener('online', () => this.handleOnline());
-    window.removeEventListener('offline', () => this.handleOffline());
+    // Remove event listeners using bound handlers
+    window.removeEventListener('online', this.boundHandleOnline);
+    window.removeEventListener('offline', this.boundHandleOffline);
   }
 
   /**
