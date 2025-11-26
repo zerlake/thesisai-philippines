@@ -7,10 +7,27 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Bell, Mail, Smartphone, Clock } from 'lucide-react';
+import type { NotificationPreferences } from '@/lib/personalization/types';
+
+const defaultNotifications: NotificationPreferences = {
+  enabled: true,
+  emailNotifications: true,
+  pushNotifications: true,
+  soundEnabled: true,
+  priorityBasedTiming: false,
+  quietHours: {
+    enabled: false,
+    start: '22:00',
+    end: '08:00',
+  },
+  channels: [],
+};
 
 export default function NotificationSettings() {
   const { preferences, updatePreferences, isLoading } = usePersonalization();
-  const [settings, setSettings] = useState(preferences?.notifications || {});
+  const [settings, setSettings] = useState<NotificationPreferences>(
+    preferences?.notifications || defaultNotifications
+  );
 
   useEffect(() => {
     if (preferences?.notifications) {
@@ -61,15 +78,15 @@ export default function NotificationSettings() {
         <div className="space-y-4">
           <div className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
             <div className="flex items-center gap-3">
-              <Bell className="w-4 h-4 text-blue-600" />
-              <Label className="font-medium text-slate-900 dark:text-white cursor-pointer">
-                In-App Notifications
-              </Label>
-            </div>
-            <Switch
-              checked={settings.inAppNotifications ?? true}
-              onCheckedChange={(value) => handleChange('inAppNotifications', value)}
-            />
+                <Bell className="w-4 h-4 text-blue-600" />
+                <Label className="font-medium text-slate-900 dark:text-white cursor-pointer">
+                  Sound Notifications
+                </Label>
+              </div>
+              <Switch
+                checked={settings.soundEnabled ?? true}
+                onCheckedChange={(value) => handleChange('soundEnabled', value)}
+              />
           </div>
 
           <div className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
@@ -114,70 +131,64 @@ export default function NotificationSettings() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="quiet-start" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Start Time
-            </Label>
-            <Input
-              id="quiet-start"
-              type="time"
-              value={settings.quietHoursStart || '22:00'}
-              onChange={(e) => handleChange('quietHoursStart', e.target.value)}
-              className="w-full"
-            />
-          </div>
-          <div>
-            <Label htmlFor="quiet-end" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              End Time
-            </Label>
-            <Input
-              id="quiet-end"
-              type="time"
-              value={settings.quietHoursEnd || '08:00'}
-              onChange={(e) => handleChange('quietHoursEnd', e.target.value)}
-              className="w-full"
-            />
-          </div>
-        </div>
+        <div className="space-y-4">
+           <div className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+             <Label className="font-medium text-slate-900 dark:text-white cursor-pointer">
+               Enable Quiet Hours
+             </Label>
+             <Switch
+               checked={settings.quietHours?.enabled ?? false}
+               onCheckedChange={(value) => handleChange('quietHours', { ...settings.quietHours, enabled: value })}
+             />
+           </div>
+
+           {settings.quietHours?.enabled && (
+             <div className="grid grid-cols-2 gap-4">
+               <div>
+                 <Label htmlFor="quiet-start" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                   Start Time
+                 </Label>
+                 <Input
+                   id="quiet-start"
+                   type="time"
+                   value={settings.quietHours?.start || '22:00'}
+                   onChange={(e) => handleChange('quietHours', { ...settings.quietHours, start: e.target.value })}
+                   className="w-full"
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="quiet-end" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                   End Time
+                 </Label>
+                 <Input
+                   id="quiet-end"
+                   type="time"
+                   value={settings.quietHours?.end || '08:00'}
+                   onChange={(e) => handleChange('quietHours', { ...settings.quietHours, end: e.target.value })}
+                   className="w-full"
+                 />
+               </div>
+             </div>
+           )}
+         </div>
       </Card>
 
-      {/* Notification Batching */}
+      {/* Priority-based Timing */}
       <Card className="p-6 border-slate-200 dark:border-slate-700">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between">
           <div>
             <Label className="text-base font-semibold text-slate-900 dark:text-white">
-              Batch Notifications
+              Priority-Based Timing
             </Label>
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              Group similar notifications together
+              Send high-priority notifications immediately, others periodically
             </p>
           </div>
           <Switch
-            checked={settings.notificationBatching ?? false}
-            onCheckedChange={(value) => handleChange('notificationBatching', value)}
+            checked={settings.priorityBasedTiming ?? false}
+            onCheckedChange={(value) => handleChange('priorityBasedTiming', value)}
           />
         </div>
-
-        {settings.notificationBatching && (
-          <div>
-            <Label htmlFor="batch-interval" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Batch Interval (minutes)
-            </Label>
-            <Input
-              id="batch-interval"
-              type="number"
-              min="5"
-              max="1440"
-              value={settings.batchInterval || 60}
-              onChange={(e) => handleChange('batchInterval', parseInt(e.target.value))}
-              className="w-full sm:w-32"
-            />
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Minimum 5 minutes, maximum 24 hours
-            </p>
-          </div>
-        )}
       </Card>
 
       {/* Info */}

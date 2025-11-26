@@ -154,10 +154,35 @@ export function usePersonalization(): UsePersonalizationReturn {
       // Call API to reset (assuming endpoint exists)
       const reset = await apiClient.updatePreferences({
         theme: { mode: 'auto', fontSize: 'medium', lineHeight: 'normal' },
-        notifications: { enabled: true },
-        accessibility: { highContrast: false, reduceMotion: false },
-        layout: { sidebarPosition: 'left', compactMode: false },
-        privacy: { behaviorTracking: true, analyticsOptIn: true }
+        notifications: { 
+          enabled: true,
+          emailNotifications: true,
+          pushNotifications: true,
+          inAppNotifications: true,
+          notificationBatching: false,
+          batchInterval: 3600,
+        },
+        accessibility: { 
+          highContrast: false, 
+          reduceMotion: false,
+          largerText: false,
+          keyboardNavigation: true,
+          screenReaderOptimized: false,
+          focusIndicators: true,
+        },
+        layout: { 
+          sidebarPosition: 'left', 
+          compactMode: false,
+          showBreadcrumbs: true,
+          showFilters: true,
+          defaultViewType: 'list',
+        },
+        privacy: { 
+          behaviorTracking: true, 
+          analyticsOptIn: true,
+          personalizationOptIn: true,
+          dataRetentionDays: 90,
+        }
       });
 
       // Update cache

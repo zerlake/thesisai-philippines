@@ -1,11 +1,7 @@
 
-> next-template@0.1.0 build
+> next-template@0.1.0 build C:\Users\Projects\thesis-ai
 > next build
 
-   ▲ Next.js 15.3.4
-   - Environments: .env.local, .env
-   - Experiments (use with caution):
-     · clientTraceMetadata
-
-   Creating an optimized production build ...
-   Linting and checking validity of types ...
+ ⨯ Unable to acquire lock at C:\Users\Projects\thesis-ai\.next\lock, is another instance of next build running?
+   Suggestion: If you intended to restart next build, terminate the other process, and then try again.
+ ELIFECYCLE  Command failed with exit code 1.

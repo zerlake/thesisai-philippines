@@ -184,7 +184,7 @@ export function useAnalyticsLogging(config?: {
       const lcpObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         const lastEntry = entries[entries.length - 1];
-        metricsRef.current.largestContentfulPaint = Math.round(lastEntry.renderTime);
+        metricsRef.current.largestContentfulPaint = Math.round((lastEntry as any).startTime || lastEntry.startTime);
       });
       lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });
     } catch (e) {

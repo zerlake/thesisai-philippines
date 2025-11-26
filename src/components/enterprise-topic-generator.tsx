@@ -249,7 +249,7 @@ export function EnterpriseTopicGenerator() {
                 disabled={isGenerating}
               />
             </div>
-            <Button type="submit" disabled={isLoading || !field || !session} size="lg" className="w-full">
+            <Button type="submit" disabled={isGenerating || !field || !session} size="lg" className="w-full">
               <Wand2 className="w-4 h-4 mr-2" />
               {isGenerating ? "Analyzing Topics..." : "Generate & Analyze Ideas"}
             </Button>

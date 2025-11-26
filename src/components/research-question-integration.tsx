@@ -459,7 +459,7 @@ export function ResearchQuestionIntegration() {
           <div className="flex flex-wrap gap-2">
             <Button 
               onClick={handleGenerateQuestions} 
-              disabled={isGenerating || isSearching || !topic || !field || !session}
+              disabled={isGenerating || isSearchingArxiv || !topic || !field || !session}
             >
               {isGenerating && activeTab === "questions" ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -472,7 +472,7 @@ export function ResearchQuestionIntegration() {
             {researchType === "quantitative" && (
               <Button 
                 onClick={handleGenerateHypotheses} 
-                disabled={isGenerating || isSearching || !topic || !field || !session}
+                disabled={isGenerating || isSearchingArxiv || !topic || !field || !session}
                 variant="outline"
               >
                 {isGenerating && activeTab === "hypotheses" ? (
@@ -487,7 +487,7 @@ export function ResearchQuestionIntegration() {
             {researchQuestions.length > 0 && literatureContext && (
               <Button 
                 onClick={handleAlignWithLiterature} 
-                disabled={isGenerating || isSearching || !session}
+                disabled={isGenerating || isSearchingArxiv || !session}
                 variant="outline"
               >
                 {isGenerating && activeTab === "alignment" ? (
@@ -742,7 +742,7 @@ export function ResearchQuestionIntegration() {
                   placeholder="e.g., Transformer architecture in NLP" 
                   value={topic} 
                   onChange={(e) => setTopic(e.target.value)} 
-                  disabled={isSearching || isGenerating} 
+                  disabled={isSearchingArxiv || isGenerating} 
                 />
                 <Button 
                   type="submit" 

@@ -3,6 +3,9 @@ import { createServerSupabaseClient } from '@/integrations/supabase/server-clien
 import { AuthenticationError } from '@/lib/errors';
 import { User } from '@supabase/supabase-js';
 
+// Re-export AuthenticationError for convenience
+export { AuthenticationError };
+
 // Define a more specific user type for our application
 export interface AuthenticatedUser extends User {
   // Add any custom profile properties here if you join with a profiles table

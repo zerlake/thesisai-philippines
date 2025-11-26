@@ -34,7 +34,7 @@ export function useOfflineSync(
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncError, setSyncError] = useState<Error | null>(null);
   const queueRef = useRef<Map<string, QueuedAction>>(new Map());
-  const syncTimerRef = useRef<NodeJS.Timeout>();
+  const syncTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const defaultConfig = {
     maxRetries: 3,

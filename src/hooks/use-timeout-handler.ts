@@ -28,8 +28,8 @@ export function useTimeoutHandler(
   const [showWarning, setShowWarning] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
 
-  const timerRef = useRef<NodeJS.Timeout>();
-  const warningTimerRef = useRef<NodeJS.Timeout>();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const warningTimerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
 
   const defaultOptions = {

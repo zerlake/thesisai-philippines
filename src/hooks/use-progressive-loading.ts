@@ -40,7 +40,7 @@ export function useProgressiveLoad<T>(
 
       // Show skeleton after delay
       const skeletonTimer = setTimeout(() => {
-        setSkeletonData(generateSkeleton());
+        setSkeletonData(generateSkeleton() as Partial<T>);
         setPhase("partial");
       }, defaultConfig.skeletonDelay);
 

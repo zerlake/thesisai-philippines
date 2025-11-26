@@ -32,7 +32,7 @@ export function useErrorRecovery() {
   const handleError = useCallback(
     async (err: Error, errorContext?: ErrorContext) => {
       setError(err);
-      setContext(errorContext);
+      setContext(errorContext || null);
       setIsRecovering(false);
 
       const recoveryPaths = generateRecoverySuggestions(

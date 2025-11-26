@@ -24,7 +24,7 @@ export const WidgetSettingsModal: React.FC<WidgetSettingsModalProps> = ({
 }) => {
   const { currentLayout, updateWidgetSettings } = useDashboardStore();
 
-  const widgetLayout = currentLayout.widgets.find((w) => w.id === widgetLayoutId);
+  const widgetLayout = currentLayout.widgets.find((w: any) => w.id === widgetLayoutId);
   if (!widgetLayout) return null;
 
   const widget = getWidget(widgetLayout.widgetId);

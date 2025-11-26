@@ -10,8 +10,8 @@
      · optimizePackageImports
 
    Creating an optimized production build ...
- ✓ Compiled successfully in 57s
+ ✓ Compiled successfully in 65s
    Running next.config.js provided runAfterProductionCompile ...
- ✓ Completed runAfterProductionCompile in 1782ms
+ ✓ Completed runAfterProductionCompile in 3235ms
    Running TypeScript ...
  ELIFECYCLE  Command failed with exit code 1.

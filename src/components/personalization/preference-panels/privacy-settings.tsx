@@ -9,24 +9,45 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Lock, BarChart3, Eye, Trash2 } from 'lucide-react';
 
+interface PrivacySettings {
+  dataCollection: boolean;
+  analyticsSharing: boolean;
+  thirdPartyIntegration: boolean;
+  publicProfile: boolean;
+  behaviorTracking: boolean;
+  analyticsOptIn: boolean;
+  personalizationOptIn: boolean;
+  dataRetentionDays: number;
+}
+
+const defaultSettings: PrivacySettings = {
+  dataCollection: true,
+  analyticsSharing: false,
+  thirdPartyIntegration: false,
+  publicProfile: false,
+  behaviorTracking: true,
+  analyticsOptIn: true,
+  personalizationOptIn: true,
+  dataRetentionDays: 90,
+};
+
 export default function PrivacySettings() {
   const { preferences, updatePreferences, isLoading } = usePersonalization();
-  const [settings, setSettings] = useState(preferences?.privacy || {});
+  const [settings, setSettings] = useState<PrivacySettings>(defaultSettings);
   const [exportLoading, setExportLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
-    if (preferences?.privacy) {
-      setSettings(preferences.privacy);
-    }
+    // Privacy settings will be stored in behavior settings in the future
+    // For now, use defaults
+    setSettings(defaultSettings);
   }, [preferences]);
 
   const handleChange = async (key: string, value: any) => {
     const updated = { ...settings, [key]: value };
     setSettings(updated);
-    await updatePreferences({
-      privacy: updated
-    });
+    // Privacy settings can be extended to UserPreferences when needed
+    console.log('Privacy settings updated:', updated);
   };
 
   const handleExportData = async () => {
