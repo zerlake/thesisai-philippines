@@ -25,6 +25,16 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Determine role based on email
+    let role = "student";
+    if (email.includes("advisor")) {
+      role = "advisor";
+    } else if (email.includes("critic")) {
+      role = "critic";
+    } else if (email.includes("admin")) {
+      role = "admin";
+    }
+
     // Check if demo user exists
     const { data: existingUser } = await adminClient.auth.admin.listUsers();
     const demoUserExists = existingUser?.users?.some(
@@ -38,7 +48,7 @@ export async function POST(request: NextRequest) {
         password,
         email_confirm: true,
         user_metadata: {
-          role: email.includes("educator") ? "educator" : "student",
+          role,
           isDemoAccount: true,
         },
       });
