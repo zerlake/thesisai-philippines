@@ -4,7 +4,7 @@
  */
 
 import { SmartNotification, NotificationPreferences } from './types';
-import { supabase } from '@/lib/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { userPreferencesManager } from './user-preferences';
 
 const NOTIFICATIONS_TABLE = 'notifications';

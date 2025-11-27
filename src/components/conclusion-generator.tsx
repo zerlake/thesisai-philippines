@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { useAuth } from "./auth-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useRouter } from "next/navigation";
-import { useAuthReady } from "@/hooks/use-auth-ready";
+import { generateConclusion } from "@/lib/puter-sdk";
 
 type ConclusionResult = {
   summary: string;
@@ -19,7 +19,6 @@ type ConclusionResult = {
 
 export function ConclusionGenerator() {
   const { session, supabase } = useAuth();
-  const { isReady } = useAuthReady();
   const user = session?.user;
   const router = useRouter();
   const [findings, setFindings] = useState("");
@@ -28,27 +27,45 @@ export function ConclusionGenerator() {
   const [results, setResults] = useState<ConclusionResult | null>(null);
 
   const handleGenerate = async () => {
-    if (!isReady) {
-      toast.error("Please wait while your session is loading...");
+    if (!findings.trim()) {
+      toast.error("Please enter your research findings.");
       return;
     }
-    
-    if (!session) {
-      toast.error("You must be logged in to use this feature.");
-      return;
-    }
+
     setIsLoading(true);
     setResults(null);
+    
     try {
-      const { data, error } = await supabase.functions.invoke('generate-conclusion', {
-        body: { findings },
-      });
-      if (error) throw new Error(error.message);
-      if (data.error) throw new Error(data.error);
-      setResults(data);
+      const conclusionText = await generateConclusion(findings);
+      
+      // Parse conclusion response - could be string or structured data
+      let summary = '';
+      let conclusion = '';
+      let recommendations = '';
+      
+      if (typeof conclusionText === 'string') {
+        // If it's a plain string, use it as the conclusion
+        conclusion = conclusionText;
+        summary = findings.substring(0, 200);
+        recommendations = 'Based on the findings above, further research is needed.';
+      } else if (conclusionText && typeof conclusionText === 'object') {
+        const data = conclusionText as Record<string, string>;
+        summary = data.summary || findings.substring(0, 200);
+        conclusion = data.conclusion || String(conclusionText);
+        recommendations = data.recommendations || 'Based on the findings above, further research is needed.';
+      }
+      
+      setResults({ summary, conclusion, recommendations });
       toast.success("Conclusion sections generated!");
     } catch (err: any) {
-      toast.error(err.message || "Failed to generate conclusion.");
+      const msg = err.message || "Failed to generate conclusion.";
+      
+      if (msg.includes("auth")) {
+        toast.error("Please sign in to your Puter account");
+      } else {
+        toast.error(msg);
+      }
+      console.error(err);
     } finally {
       setIsLoading(false);
     }

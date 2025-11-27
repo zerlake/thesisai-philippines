@@ -72,7 +72,7 @@ export function DashboardRealtimeProvider({
   onError,
   onInitialized
 }: DashboardRealtimeProviderProps) {
-  const [context, setContext] = React.useState<RealtimeContextType>({
+  const contextRef = useRef<RealtimeContextType>({
     wsManager: null,
     stateManager: null,
     syncManager: null,
@@ -87,8 +87,13 @@ export function DashboardRealtimeProvider({
     update?: UpdateProcessor;
   }>({});
 
+  const [, forceUpdate] = React.useReducer(x => x + 1, 0);
+
   // Initialize managers on mount
   useEffect(() => {
+    // Don't proceed if managers are already initialized
+    if (managersRef.current.ws) return;
+
     // Declare unsubscribe refs in outer scope for cleanup
     let unsubscribeWidgetUpdate: (() => void) | undefined;
     let unsubscribeDashboardUpdate: (() => void) | undefined;
@@ -171,7 +176,7 @@ export function DashboardRealtimeProvider({
           console.warn('State conflict detected:', conflict);
         });
 
-        // Store references
+        // Store references to prevent recreation
         managersRef.current = {
           ws: wsManager,
           state: stateManager,
@@ -179,14 +184,17 @@ export function DashboardRealtimeProvider({
           update: updateProcessor
         };
 
-        // Update context
-        setContext({
+        // Update context ref
+        contextRef.current = {
           wsManager,
           stateManager,
           syncManager,
           updateProcessor,
           isInitialized: true
-        });
+        };
+
+        // Force a re-render to update the context
+        forceUpdate();
 
         // Auto-connect if enabled
         if (autoConnect) {
@@ -196,8 +204,14 @@ export function DashboardRealtimeProvider({
         onInitialized?.();
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error));
-        setContext(prev => ({ ...prev, error: err }));
+        // Update error in context
+        contextRef.current = {
+          ...contextRef.current,
+          error: err,
+          isInitialized: contextRef.current.isInitialized
+        };
         onError?.(err);
+        forceUpdate(); // Trigger re-render to show error
         console.error('Failed to initialize realtime managers:', err);
       }
     };
@@ -213,15 +227,16 @@ export function DashboardRealtimeProvider({
       unsubscribeConnected?.();
       unsubscribeDisconnected?.();
       unsubscribeConflict?.();
-      
+
       // Disconnect managers
       managersRef.current.ws?.disconnect();
       managersRef.current.sync?.stop();
     };
-  }, [wsUrl, autoConnect, onError, onInitialized]);
+  }, [wsUrl, autoConnect, onError, onInitialized]); // Only re-run if these props change
 
+  // Return context value from ref
   return (
-    <RealtimeContext.Provider value={context}>
+    <RealtimeContext.Provider value={contextRef.current}>
       {children}
     </RealtimeContext.Provider>
   );

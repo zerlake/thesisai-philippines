@@ -363,6 +363,43 @@ All files are production-ready and can be immediately integrated with:
 5. Test with example component
 6. Build domain-specific workflows
 
+## Supabase Functions (23 active)
+
+**Status**: Cleanup complete (Session 8) - 25 unused functions removed
+
+**Active Functions (23)**:
+- advisor-invite-student
+- align-questions-with-literature
+- analyze-research-gaps
+- check-plagiarism
+- coinbase-webhook
+- create-coinbase-charge
+- generate-hypotheses
+- generate-research-questions
+- generate-topic-ideas
+- generate-topic-ideas-enterprise
+- manage-advisor-assignment
+- manage-advisor-request
+- manage-critic-request
+- manage-institution-request
+- manage-payout-request
+- puter-ai-wrapper
+- request-payout
+- run-statistical-analysis
+- send-reminder-notification
+- transfer-credit
+- update-user-role
+- update-writing-streak
+- _shared (utilities)
+
+**Removed Functions (25 - Session 8)**:
+- Batch 1: generate-abstract, generate-citation, generate-citation-from-source, generate-conclusion, generate-defense-questions, generate-feedback, generate-flashcards, generate-outline (8)
+- Batch 2: generate-presentation, generate-presentation-slides, generate-survey-questions, generate-titles (4)
+- Batch 3: check-originality, check-internal-plagiarism, interpret-results, search-google-scholar, search-web, synthesize-literature (6)
+- Batch 4: ensure-demo-user, get-serpapi-status, call-arxiv-mcp-server (3)
+- Batch 5: grammar-check, paraphrase-text (2 - superseded by Puter AI)
+- Batch 6: pdf-analyzer (1)
+
 ## File Manifest for Version Control
 
 ```

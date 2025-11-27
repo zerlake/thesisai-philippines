@@ -3,7 +3,7 @@
  * Defines widget metadata, settings, and factory functions
  */
 
-import React from 'react';
+import * as React from 'react';
 
 export type WidgetCategory = 'analytics' | 'productivity' | 'shortcuts' | 'news' | 'custom';
 export type WidgetId = 
@@ -78,25 +78,38 @@ export interface WidgetLayout {
 /**
  * Placeholder components for development
  */
-const PlaceholderWidget: React.FC<{ name: string; settings?: WidgetSettings }> = ({ name, settings }) => (
-  <div style={{ padding: '16px', border: '1px solid #ccc', borderRadius: '8px' }}>
-    <h4>{name}</h4>
-    <p style={{ fontSize: '12px', color: '#666' }}>Widget coming soon</p>
-    {settings && <pre style={{ fontSize: '10px' }}>{JSON.stringify(settings, null, 2)}</pre>}
-  </div>
-);
+const PlaceholderWidget: React.FC<{ name: string; settings?: WidgetSettings }> = React.memo(({ name, settings }) => {
+  return React.createElement('div',
+    { style: { padding: '16px', border: '1px solid #ccc', borderRadius: '8px' } },
+    React.createElement('h4', null, name),
+    React.createElement('p',
+      { style: { fontSize: '12px', color: '#666' } },
+      'Widget coming soon'
+    ),
+    settings && React.createElement('pre',
+      { style: { fontSize: '10px' } },
+      JSON.stringify(settings, null, 2)
+    )
+  );
+});
 
-const PlaceholderSettings: React.FC<{ settings: any; onSave: (s: any) => void; onCancel: () => void }> = ({
+const PlaceholderSettings: React.FC<{ settings: any; onSave: (s: any) => void; onCancel: () => void }> = React.memo(({
   settings,
   onSave,
   onCancel
-}) => (
-  <div>
-    <p>Settings UI coming soon</p>
-    <button onClick={() => onSave(settings)}>Save</button>
-    <button onClick={onCancel}>Cancel</button>
-  </div>
-);
+}) => {
+  return React.createElement('div', null,
+    React.createElement('p', null, 'Settings UI coming soon'),
+    React.createElement('button',
+      { onClick: () => onSave(settings) },
+      'Save'
+    ),
+    React.createElement('button',
+      { onClick: onCancel },
+      'Cancel'
+    )
+  );
+});
 
 /**
  * Widget Registry
@@ -118,7 +131,9 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
     configurable: true,
     removable: true,
     draggable: true,
-    previewComponent: (props) => <PlaceholderWidget name="Research Progress" {...props} />,
+    previewComponent: function ResearchProgressPreview(props) {
+      return React.createElement(PlaceholderWidget, { name: "Research Progress", ...props });
+    },
     settingsComponent: PlaceholderSettings,
     defaultSettings: {
       period: 'month',
@@ -126,7 +141,7 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
       chartType: 'line'
     }
   },
-  
+
   'stats': {
     id: 'stats',
     name: 'Quick Stats',
@@ -142,13 +157,15 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
     configurable: true,
     removable: true,
     draggable: true,
-    previewComponent: (props) => <PlaceholderWidget name="Quick Stats" {...props} />,
+    previewComponent: function QuickStatsPreview(props) {
+      return React.createElement(PlaceholderWidget, { name: "Quick Stats", ...props });
+    },
     settingsComponent: PlaceholderSettings,
     defaultSettings: {
       stats: ['total_papers', 'total_notes', 'completion_rate']
     }
   },
-  
+
   'recent-papers': {
     id: 'recent-papers',
     name: 'Recent Papers',
@@ -164,7 +181,9 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
     configurable: true,
     removable: true,
     draggable: true,
-    previewComponent: (props) => <PlaceholderWidget name="Recent Papers" {...props} />,
+    previewComponent: function RecentPapersPreview(props) {
+      return React.createElement(PlaceholderWidget, { name: "Recent Papers", ...props });
+    },
     settingsComponent: PlaceholderSettings,
     defaultSettings: {
       count: 5,
@@ -172,7 +191,7 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
       showPreview: true
     }
   },
-  
+
   'writing-goals': {
     id: 'writing-goals',
     name: 'Writing Goals',
@@ -188,7 +207,9 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
     configurable: true,
     removable: true,
     draggable: true,
-    previewComponent: (props) => <PlaceholderWidget name="Writing Goals" {...props} />,
+    previewComponent: function WritingGoalsPreview(props) {
+      return React.createElement(PlaceholderWidget, { name: "Writing Goals", ...props });
+    },
     settingsComponent: PlaceholderSettings,
     defaultSettings: {
       goalType: 'words_per_day',
@@ -196,7 +217,7 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
       interval: 'daily'
     }
   },
-  
+
   'collaboration': {
     id: 'collaboration',
     name: 'Collaboration',
@@ -212,14 +233,16 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
     configurable: true,
     removable: true,
     draggable: true,
-    previewComponent: (props) => <PlaceholderWidget name="Collaboration" {...props} />,
+    previewComponent: function CollaborationPreview(props) {
+      return React.createElement(PlaceholderWidget, { name: "Collaboration", ...props });
+    },
     settingsComponent: PlaceholderSettings,
     defaultSettings: {
       showMembers: true,
       maxMembers: 5
     }
   },
-  
+
   'calendar': {
     id: 'calendar',
     name: 'Research Calendar',
@@ -235,14 +258,16 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
     configurable: true,
     removable: true,
     draggable: true,
-    previewComponent: (props) => <PlaceholderWidget name="Research Calendar" {...props} />,
+    previewComponent: function ResearchCalendarPreview(props) {
+      return React.createElement(PlaceholderWidget, { name: "Research Calendar", ...props });
+    },
     settingsComponent: PlaceholderSettings,
     defaultSettings: {
       eventTypes: ['deadline', 'milestone', 'meeting'],
       showWeekends: true
     }
   },
-  
+
   'trends': {
     id: 'trends',
     name: 'Topic Trends',
@@ -258,7 +283,9 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
     configurable: true,
     removable: true,
     draggable: true,
-    previewComponent: (props) => <PlaceholderWidget name="Topic Trends" {...props} />,
+    previewComponent: function TopicTrendsPreview(props) {
+      return React.createElement(PlaceholderWidget, { name: "Topic Trends", ...props });
+    },
     settingsComponent: PlaceholderSettings,
     defaultSettings: {
       timeRange: '30d',
@@ -266,7 +293,7 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
       limit: 10
     }
   },
-  
+
   'notes': {
     id: 'notes',
     name: 'Notes Snapshot',
@@ -282,7 +309,9 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
     configurable: true,
     removable: true,
     draggable: true,
-    previewComponent: (props) => <PlaceholderWidget name="Notes Snapshot" {...props} />,
+    previewComponent: function NotesSnapshotPreview(props) {
+      return React.createElement(PlaceholderWidget, { name: "Notes Snapshot", ...props });
+    },
     settingsComponent: PlaceholderSettings,
     defaultSettings: {
       count: 5,
@@ -290,7 +319,7 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
       groupBy: 'topic'
     }
   },
-  
+
   'citation': {
     id: 'citation',
     name: 'Citation Manager',
@@ -306,14 +335,16 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
     configurable: true,
     removable: true,
     draggable: true,
-    previewComponent: (props) => <PlaceholderWidget name="Citation Manager" {...props} />,
+    previewComponent: function CitationManagerPreview(props) {
+      return React.createElement(PlaceholderWidget, { name: "Citation Manager", ...props });
+    },
     settingsComponent: PlaceholderSettings,
     defaultSettings: {
       format: 'APA',
       showCount: true
     }
   },
-  
+
   'suggestions': {
     id: 'suggestions',
     name: 'AI Suggestions',
@@ -329,7 +360,9 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
     configurable: true,
     removable: true,
     draggable: true,
-    previewComponent: (props) => <PlaceholderWidget name="AI Suggestions" {...props} />,
+    previewComponent: function AISuggestionsPreview(props) {
+      return React.createElement(PlaceholderWidget, { name: "AI Suggestions", ...props });
+    },
     settingsComponent: PlaceholderSettings,
     defaultSettings: {
       frequency: 'daily',
@@ -337,7 +370,7 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
       limit: 5
     }
   },
-  
+
   'time-tracker': {
     id: 'time-tracker',
     name: 'Time Tracker',
@@ -353,14 +386,16 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
     configurable: true,
     removable: true,
     draggable: true,
-    previewComponent: (props) => <PlaceholderWidget name="Time Tracker" {...props} />,
+    previewComponent: function TimeTrackerPreview(props) {
+      return React.createElement(PlaceholderWidget, { name: "Time Tracker", ...props });
+    },
     settingsComponent: PlaceholderSettings,
     defaultSettings: {
       categories: ['reading', 'writing', 'research'],
       period: 'week'
     }
   },
-  
+
   'custom-html': {
     id: 'custom-html',
     name: 'Custom Widget',
@@ -376,7 +411,9 @@ export const widgetRegistry: Record<WidgetId, Widget> = {
     configurable: true,
     removable: true,
     draggable: true,
-    previewComponent: (props) => <PlaceholderWidget name="Custom Widget" {...props} />,
+    previewComponent: function CustomWidgetPreview(props) {
+      return React.createElement(PlaceholderWidget, { name: "Custom Widget", ...props });
+    },
     settingsComponent: PlaceholderSettings,
     defaultSettings: {
       html: '',

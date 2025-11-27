@@ -10,7 +10,7 @@ import { Copy, FilePlus2, Languages, Loader2, Info, RotateCcw, Eye } from "lucid
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "./ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { paraphraseText } from "@/lib/puter-sdk";
 
 export function ParaphrasingTool() {
   const { session, supabase } = useAuth();
@@ -34,126 +34,26 @@ export function ParaphrasingTool() {
     setOutputText("");
 
     try {
-      // Wait for Puter SDK to load
-      let puter = (window as any).puter;
-      let attempts = 0;
-      while (!puter?.ai?.chat && attempts < 20) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        puter = (window as any).puter;
-        attempts++;
-      }
+      const result = await paraphraseText(
+        inputText,
+        (mode as 'formal' | 'simple' | 'expand' | 'standard') || 'standard'
+      );
       
-      if (!puter?.ai?.chat) {
-        throw new Error("Puter AI service not available. Please reload the page.");
-      }
-
-      // Check authentication
-      let puterUser;
-      try {
-        puterUser = await puter.auth.getUser();
-      } catch (authError) {
-        console.error("Puter auth.getUser() error:", authError);
-        throw new Error("Unable to verify Puter authentication. Please sign in again.");
-      }
-      
-      if (!puterUser) {
-        throw new Error("Not authenticated with Puter. Please sign in.");
-      }
-
-      // Construct prompt based on mode
-      let prompt = '';
-      switch (mode) {
-        case 'formal':
-          prompt = `You are an expert academic editor. Your task is to rewrite the following text to make it more formal and suitable for a thesis.
-- Elevate the vocabulary and sentence structure.
-- Ensure the core meaning is preserved.
-- Return only the rewritten text, with no additional comments or explanations.
-
-Original text: "${inputText}"
-
-Formal text:`;
-          break;
-
-        case 'simple':
-          prompt = `You are an expert academic editor. Your task is to simplify the following text.
-- Make it easier to understand for a general audience.
-- Use clearer, more direct language.
-- Retain the key information and core meaning.
-- Return only the simplified text, with no additional comments or explanations.
-
-Original text: "${inputText}"
-
-Simplified text:`;
-          break;
-
-        case 'expand':
-          prompt = `You are an expert academic editor. Your task is to expand on the following text.
-- Add more detail, context, or examples to elaborate on the core idea.
-- The length should be slightly longer but not excessively so.
-- Maintain a consistent academic tone.
-- Return only the expanded text, with no additional comments or explanations.
-
-Original text: "${inputText}"
-
-Expanded text:`;
-          break;
-
-        case 'standard':
-        default:
-          prompt = `You are an expert academic editor. Your task is to paraphrase the following text.
-- The new version should have a different sentence structure and use different vocabulary.
-- It must retain the original meaning and academic tone.
-- Return only the paraphrased text, with no additional comments or explanations.
-
-Original text: "${inputText}"
-
-Paraphrased text:`;
-      }
-
-      // Call Puter AI directly
-      let result;
-      try {
-        result = await puter.ai.chat(prompt);
-      } catch (chatError) {
-        console.error("Puter AI chat error:", chatError);
-        throw chatError;
-      }
-
-      // Extract text from response
-      let paraphrasedText = '';
-      if (typeof result === 'string') {
-        paraphrasedText = result.trim();
-      } else if (result && typeof result === 'object') {
-        // Puter returns format: {message: {content: "..."}, ...}
-        paraphrasedText =
-          (result as any).message?.content?.trim() ||
-          (result as any).choices?.[0]?.message?.content?.trim() ||
-          (result as any).choices?.[0]?.text?.trim() ||
-          (result as any).response?.trim() ||
-          (result as any).text?.trim() ||
-          (result as any).content?.trim() ||
-          '';
-      }
-
-      if (!paraphrasedText) {
-        throw new Error("AI returned empty response. Please try again.");
-      }
-
-      setOutputText(paraphrasedText);
-      setHistory([...history, { mode, output: paraphrasedText }]);
+      setOutputText(result);
+      setHistory([...history, { mode, output: result }]);
       setShowPreview(true);
       toast.success("Text paraphrased successfully!");
     } catch (error: any) {
-      let errorMessage = "Failed to paraphrase text.";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error && typeof error === 'object' && error.message) {
-        errorMessage = error.message;
-      }
+      const errorMessage = error.message || "Failed to paraphrase text.";
       
-      toast.error(errorMessage);
+      if (errorMessage.includes("auth")) {
+        toast.error("Please sign in to your Puter account");
+      } else if (errorMessage.includes("empty")) {
+        toast.error("AI returned empty response. Please try again.");
+      } else {
+        toast.error(errorMessage);
+      }
+      console.error(error);
     } finally {
       setIsLoading(false);
     }

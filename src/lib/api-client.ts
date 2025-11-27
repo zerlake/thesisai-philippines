@@ -1,4 +1,4 @@
-import { APIError, AuthenticationError } from '@/lib/errors';
+import { APIError, AuthenticationError, ensureError } from '@/lib/errors';
 
 // Define a type for the response to standardize it
 export type ApiResponse<T> = {
@@ -129,10 +129,11 @@ export async function apiCall<T = unknown>(
       }
 
       // Fallback for any other errors
-      throw new APIError(
-        error instanceof Error ? error.message : 'Unknown error occurred',
-        { originalError: error }
-      );
+      const errorInstance = ensureError(error);
+       throw new APIError(
+         errorInstance.message || 'Unknown error occurred',
+         { originalError: errorInstance }
+       );
     }
   };
 

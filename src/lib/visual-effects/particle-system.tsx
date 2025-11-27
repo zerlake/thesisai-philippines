@@ -23,9 +23,9 @@ interface ParticleSystemConfig {
   density?: 'sparse' | 'medium' | 'dense'
 }
 
-export const useParticleSystem = (canvasRef: React.RefObject<HTMLCanvasElement>, config: ParticleSystemConfig) => {
+export const useParticleSystem = (canvasRef: React.RefObject<HTMLCanvasElement | null>, config: ParticleSystemConfig) => {
   const particlesRef = useRef<Particle[]>([])
-  const animationRef = useRef<number>()
+  const animationRef = useRef<number | undefined>(undefined)
 
   useEffect(() => {
     const canvas = canvasRef.current

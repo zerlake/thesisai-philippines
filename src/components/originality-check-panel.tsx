@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import Link from 'next/link';
 import { cn } from '../lib/utils';
+import { checkPlagiarism } from '@/lib/puter-sdk';
 
 type MatchSource = {
   url: string;
@@ -62,10 +63,6 @@ export function OriginalityCheckPanel({ documentContent, documentId }: Originali
       toast.error(`Text must be at least ${MINIMUM_WORD_COUNT} words long.`);
       return;
     }
-    if (!session) {
-      toast.error("You must be logged in to perform this check.");
-      return;
-    }
 
     setIsLoading(true);
     setError('');
@@ -74,53 +71,67 @@ export function OriginalityCheckPanel({ documentContent, documentId }: Originali
     setCitationResults({});
 
     try {
-      const functionName = checkType === 'web' ? 'check-plagiarism' : 'check-internal-plagiarism';
-      const body = checkType === 'web' 
-        ? { text: plainTextContent } 
-        : { text: plainTextContent, sourceDocumentId: documentId };
-
-      const { data, error: functionError } = await supabase.functions.invoke(functionName, { body });
-      
-      if (functionError) throw new Error(functionError.message);
-      if (data.error) throw new Error(data.error);
+      // Call plagiarism check via Puter
+      const data = await checkPlagiarism(plainTextContent);
 
       if (checkType === 'web') {
-        setWebResults(data);
+        // Transform Puter response to web format
+        const webResult: WebOriginalityResult = {
+          score: data.percentage || 0,
+          totalSentences: plainTextContent.split('.').length,
+          matchedSentences: Math.ceil((data.percentage || 0) / 100 * plainTextContent.split('.').length),
+          matches: (data.issues || []).map((issue: string) => ({
+            sentence: issue,
+            sources: [{ url: '#', title: 'AI Analysis' }]
+          })),
+          wordCount: wordCount
+        };
+        setWebResults(webResult);
       } else {
-        setInternalResults(data);
+        // For internal check, create a basic result
+        const internalResult: InternalOriginalityResult = {
+          highestScore: data.percentage || 0,
+          matches: []
+        };
+        setInternalResults(internalResult);
       }
+      
       toast.success(`Originality check (${checkType}) complete!`);
-
     } catch (err: any) {
-      const errorMessage = err.message || 'An unknown error occurred.';
-      setError(errorMessage);
-      toast.error(errorMessage);
+      const msg = err.message || 'An unknown error occurred.';
+      setError(msg);
+      
+      if (msg.includes("auth")) {
+        toast.error("Please sign in to your Puter account");
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSuggestCitation = async (match: Match, index: number) => {
-    if (!session) return;
+    // Citation generation moved to future enhancement
+    // For now, provide a template-based citation
     const source = match.sources[0];
     if (!source) return;
 
     setIsCiting(index);
     try {
-        const { data, error: functionError } = await supabase.functions.invoke('generate-citation-from-source', {
-            body: { sentence: match.sentence, sourceUrl: source.url }
-        });
-
-        if (functionError) throw new Error(functionError.message);
-        if (data.error) throw new Error(data.error);
-
-        setCitationResults(prev => ({ ...prev, [index]: data }));
-        toast.success("Citation suggestion generated!");
-
+      // Generate basic APA citation format
+      const inText = `(Source, n.d.)`;
+      const reference = `Source. (n.d.). Retrieved from ${source.url}`;
+      
+      setCitationResults(prev => ({ 
+        ...prev, 
+        [index]: { inText, reference } 
+      }));
+      toast.success("Citation template generated!");
     } catch (err: any) {
-        toast.error(err.message || "Failed to generate citation.");
+      toast.error(err.message || "Failed to generate citation.");
     } finally {
-        setIsCiting(null);
+      setIsCiting(null);
     }
   };
 

@@ -1,0 +1,22 @@
+src/lib/realtime-init.ts(10,32): error TS2307: Cannot find module './realtime-server' or its corresponding type declarations.
+src/lib/realtime-init.ts(48,34): error TS7006: Parameter 'session' implicitly has an 'any' type.
+src/lib/realtime-init.ts(52,37): error TS7006: Parameter 'session' implicitly has an 'any' type.
+src/lib/realtime-init.ts(56,32): error TS7031: Binding element 'clientId' implicitly has an 'any' type.
+src/lib/realtime-init.ts(56,42): error TS7031: Binding element 'error' implicitly has an 'any' type.
+src/lib/realtime-init.ts(61,36): error TS7031: Binding element 'clientId' implicitly has an 'any' type.
+src/lib/realtime-init.ts(61,46): error TS7031: Binding element 'message' implicitly has an 'any' type.
+src/lib/realtime-init.ts(68,34): error TS7031: Binding element 'clientId' implicitly has an 'any' type.
+src/lib/realtime-init.ts(72,32): error TS7031: Binding element 'clientId' implicitly has an 'any' type.
+src/lib/realtime-init.ts(72,42): error TS7031: Binding element 'message' implicitly has an 'any' type.
+src/lib/realtime-init.ts(77,34): error TS7031: Binding element 'clientId' implicitly has an 'any' type.
+src/lib/realtime-init.ts(77,44): error TS7031: Binding element 'message' implicitly has an 'any' type.
+src/lib/realtime-init.ts(81,34): error TS7031: Binding element 'clientId' implicitly has an 'any' type.
+src/lib/realtime-init.ts(81,44): error TS7031: Binding element 'message' implicitly has an 'any' type.
+src/lib/realtime-init.ts(85,32): error TS7031: Binding element 'clientId' implicitly has an 'any' type.
+src/lib/realtime-init.ts(85,42): error TS7031: Binding element 'message' implicitly has an 'any' type.
+src/lib/realtime-init.ts(90,34): error TS7031: Binding element 'clientId' implicitly has an 'any' type.
+src/lib/realtime-init.ts(90,44): error TS7031: Binding element 'message' implicitly has an 'any' type.
+src/lib/realtime-init.ts(95,37): error TS7031: Binding element 'clientId' implicitly has an 'any' type.
+src/lib/realtime-init.ts(95,47): error TS7031: Binding element 'message' implicitly has an 'any' type.
+src/lib/visual-effects/particle-system.tsx(28,24): error TS2554: Expected 1 arguments, but got 0.
+src/lib/visual-effects/particle-system.tsx(117,21): error TS2345: Argument of type 'RefObject<HTMLCanvasElement | null>' is not assignable to parameter of type 'RefObject<HTMLCanvasElement>'.

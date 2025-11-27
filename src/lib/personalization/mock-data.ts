@@ -154,7 +154,6 @@ export const mockNotifications: Notification[] = [
     priority: 3,
     channels: ['in_app'],
     data: { featureUrl: '/features/personalization' },
-    readAt: null,
     deliveredAt: new Date(),
     createdAt: new Date(Date.now() - 3600000),
     updatedAt: new Date(Date.now() - 3600000)
@@ -181,7 +180,6 @@ export const mockNotifications: Notification[] = [
     priority: 2,
     channels: ['in_app', 'email'],
     data: { recommendedSetting: 'theme.mode', recommendedValue: 'dark' },
-    readAt: null,
     deliveredAt: new Date(),
     createdAt: new Date(),
     updatedAt: new Date()
@@ -195,7 +193,6 @@ export const mockNotifications: Notification[] = [
     priority: 5,
     channels: ['in_app', 'email', 'push'],
     data: { deviceName: 'Unknown Device', location: 'Unknown' },
-    readAt: null,
     deliveredAt: new Date(),
     expiresAt: new Date(Date.now() + 86400000),
     createdAt: new Date(),

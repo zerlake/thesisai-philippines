@@ -204,7 +204,7 @@ export function StudentDashboardEnterprise() {
         const docCount = documents.length;
         const totalWordCount = documents.reduce((acc, doc) => acc + (doc.content || "").replace(/<[^>]*>?/gm, '').split(/\s+/).filter(Boolean).length, 0);
         const avgWordCount = docCount > 0 ? Math.round(totalWordCount / docCount) : 0;
-        
+
         const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
         const recentWordCount = documents
           .filter(doc => new Date(doc.updated_at) > sevenDaysAgo)
@@ -217,8 +217,17 @@ export function StudentDashboardEnterprise() {
 
     fetchLatestDocument();
     fetchStats();
-    getNextAction();
-  }, [user, getNextAction, profile, supabase]);
+
+    // Don't call getNextAction() directly here as it can create infinite loops
+    // Instead, call it separately after the data is loaded
+  }, [user, profile, supabase]);
+
+  // Separate effect to call getNextAction after initial data is loaded
+  useEffect(() => {
+    if (user && !_isLoadingDoc && !isLoadingStats) {
+      getNextAction();
+    }
+  }, [user, _isLoadingDoc, isLoadingStats, getNextAction]);
 
   const handleModalClose = (open: boolean) => {
     if (!open) {

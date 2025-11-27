@@ -104,13 +104,13 @@ export function useWidgetRealtime({
   // Get widget state from state manager
   const getWidgetState = useCallback(() => {
     if (!stateManager) return null;
-    return stateManager.getState(`widget:${widgetId}`);
+    return stateManager.getStateValue(`widget.${widgetId}`);
   }, [stateManager, widgetId]);
 
   // Update widget state locally
   const updateWidgetState = useCallback((data: Record<string, any>) => {
     if (!stateManager) return;
-    stateManager.updateLocalState(`widget:${widgetId}`, data);
+    stateManager.applyOptimisticUpdate(`widget-update:${widgetId}`, data);
   }, [stateManager, widgetId]);
 
   // Auto-subscribe on mount

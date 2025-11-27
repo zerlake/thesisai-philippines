@@ -147,7 +147,7 @@ function createDefaultLayout(): DashboardLayout {
       },
       {
         id: generateWidgetLayoutId(),
-        widgetId: 'quick-stats',
+        widgetId: 'stats',
         x: 2,
         y: 0,
         w: 2,

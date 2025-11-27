@@ -10,33 +10,16 @@ import { Copy, FilePlus2, HelpCircle, Wand2 } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 import { Label } from "./ui/label";
 import { useRouter } from "next/navigation";
-import { useAuthReady } from "@/hooks/use-auth-ready";
-import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
-import { useApiCall } from "@/hooks/use-api-call";
+import { generateDefenseQuestions } from "@/lib/puter-sdk";
 
 export function QASimulator() {
   const { session, supabase } = useAuth();
-  const { isReady } = useAuthReady();
   const user = session?.user;
   const router = useRouter();
   const [textContent, setTextContent] = useState("");
   const [questions, setQuestions] = useState<string[]>([]);
-  // const [isLoading, setIsLoading] = useState(false); // Replaced by useApiCall's loading state
+  const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  const { execute: generateQuestionsCall, loading: isGeneratingQuestions } = useApiCall<any>({
-    onSuccess: (data) => {
-      if (!data.questions) {
-        throw new Error("API returned no questions data.");
-      }
-      setQuestions(data.questions || []);
-      toast.success("Potential defense questions generated!");
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-    autoErrorToast: false, // We handle toast explicitly
-  });
 
   const addSampleData = () => {
     // Sample text content for a thesis
@@ -73,36 +56,27 @@ Data collection occurred over a six-week period in August-September 2024. Quanti
       toast.error("Please paste your abstract or a chapter summary first.");
       return;
     }
-    
-    if (!isReady) {
-      toast.error("Please wait while your session is loading...");
-      return;
-    }
-    
-    if (!session) {
-      toast.error("You must be logged in to use this feature.");
-      return;
-    }
 
-    // setIsLoading(true); // Replaced
+    setIsGeneratingQuestions(true);
     setQuestions([]);
 
     try {
-      await generateQuestionsCall(
-        getSupabaseFunctionUrl("generate-defense-questions"),
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-          },
-          body: JSON.stringify({ textContent }),
-        }
-      );
-    } catch (error: any) {
-        // Errors are already handled by useApiCall's onError
-        console.error("Local error before API call in handleGenerate:", error);
+      const generatedQuestions = await generateDefenseQuestions(textContent);
+      setQuestions(Array.isArray(generatedQuestions) ? generatedQuestions : [generatedQuestions]);
+      toast.success("Potential defense questions generated!");
+    } catch (err: any) {
+      const msg = err.message || "Failed to generate questions";
+      
+      if (msg.includes("auth")) {
+        toast.error("Please sign in to your Puter account");
+      } else if (msg.includes("JSON")) {
+        toast.error("Invalid response format. Please try again.");
+      } else {
+        toast.error(msg);
+      }
+      console.error(err);
+    } finally {
+      setIsGeneratingQuestions(false);
     }
   };
 

@@ -275,8 +275,8 @@ export function useAnimationFrame(
  */
 export function useResizeObserver<T extends Element>(
   callback: (rect: DOMRectReadOnly) => void
-): React.RefObject<T> {
-  const ref = React.useRef<T>(null);
+): React.RefObject<T | null> {
+  const ref = React.useRef<T | null>(null);
   const cleanup = useCleanup();
 
   React.useEffect(() => {
@@ -305,8 +305,8 @@ export function useResizeObserver<T extends Element>(
 export function useMutationObserver<T extends Element>(
   callback: (mutations: MutationRecord[]) => void,
   options: MutationObserverInit = { attributes: true, childList: true, subtree: true }
-): React.RefObject<T> {
-  const ref = React.useRef<T>(null);
+): React.RefObject<T | null> {
+  const ref = React.useRef<T | null>(null);
   const cleanup = useCleanup();
 
   React.useEffect(() => {

@@ -4,7 +4,7 @@
  */
 
 import { DeviceInfo, SyncConflict, SyncState, SyncChange, UserPreferences } from './types';
-import { supabase } from '@/lib/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 const DEVICE_TABLE = 'user_devices';
 const SYNC_CHANGES_TABLE = 'sync_changes';
@@ -93,7 +93,8 @@ class CrossDeviceSyncManager {
     }
 
     const syncPromise = this._performSync(userId, deviceId);
-    this.syncInProgress.set(userId, syncPromise);
+    // Store the sync in progress as a void promise to match the map type
+    this.syncInProgress.set(userId, syncPromise.then(() => undefined));
 
     try {
       const result = await syncPromise;

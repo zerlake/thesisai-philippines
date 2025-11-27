@@ -18,8 +18,7 @@ import { useAuth } from "./auth-provider";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAuthReady } from "@/hooks/use-auth-ready";
-import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
-import { useApiCall } from "@/hooks/use-api-call";
+import { generateFlashcards } from "@/lib/puter-sdk";
 
 function Flashcard({ term, definition }: { term: string; definition: string }) {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -51,23 +50,8 @@ export function FlashcardsGenerator() {
   const router = useRouter();
   const [topic, setTopic] = useState("");
   const [flashcards, setFlashcards] = useState<any[]>([]);
-  // const [isLoading, setIsLoading] = useState(false); // Replaced by useApiCall's loading state
+  const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  const { execute: generateFlashcards, loading: isGenerating } = useApiCall<any>({
-    onSuccess: (data) => {
-      if (!data.flashcards) {
-        throw new Error("API returned no flashcards data.");
-      }
-      setFlashcards(data.flashcards);
-      toast.success("Flashcards generated!");
-    },
-    onError: (error) => {
-      toast.error(error.message || "An unexpected error occurred.");
-      console.error(error);
-    },
-    autoErrorToast: false,
-  });
 
   const addSampleData = () => {
     // Sample flashcards for a thesis on "The Impact of Social Media on Academic Performance"
@@ -132,39 +116,30 @@ export function FlashcardsGenerator() {
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!topic) {
-        toast.error("Please enter a topic.");
-        return;
-    }
-    
-    if (!isReady) {
-      toast.error("Please wait while your session is loading...");
-      return;
-    }
-    
-    if (!session) {
-      toast.error("You must be logged in to use this feature.");
+      toast.error("Please enter a topic.");
       return;
     }
 
-    // setIsLoading(true); // Loading state managed by useApiCall
+    setIsGenerating(true);
     setFlashcards([]);
 
     try {
-      await generateFlashcards(
-        getSupabaseFunctionUrl("generate-flashcards"),
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-          },
-          body: JSON.stringify({ topic }),
-        }
-      );
-    } catch (error: any) {
-        // Errors are already handled by useApiCall's onError
-        console.error("Local error before API call in handleGenerate:", error);
+      const cards = await generateFlashcards(topic);
+      setFlashcards(Array.isArray(cards) ? cards : [cards]);
+      toast.success("Flashcards generated!");
+    } catch (err: any) {
+      const msg = err.message || "Failed to generate flashcards";
+      
+      if (msg.includes("auth")) {
+        toast.error("Please sign in to your Puter account");
+      } else if (msg.includes("JSON")) {
+        toast.error("Invalid response format. Please try again.");
+      } else {
+        toast.error(msg);
+      }
+      console.error(err);
+    } finally {
+      setIsGenerating(false);
     }
   };
 

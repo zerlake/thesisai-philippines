@@ -35,10 +35,8 @@ export function SignInPage() {
             <div className="space-y-2">
               <GoogleSignInButton label="Sign in with Google" />
               
-              {/* Demo Accounts Section - Enabled with SUPABASE_SERVICE_ROLE_KEY */}
-              {process.env.SUPABASE_SERVICE_ROLE_KEY && (
-                <DemoAccountsSection />
-              )}
+              {/* Demo Accounts Section - Always visible, API handles environment validation */}
+              <DemoAccountsSection />
             </div>
           </CardContent>
         </Card>

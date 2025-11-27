@@ -1,11 +1,24 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
+import { loadPuterSDK, isPuterSDKLoaded } from '@/utils/puter-sdk-loader';
+
+// Module-level variable to track if the initial auth check has been performed globally
+let hasPerformedInitialAuthCheck = false;
+
+// Track last auth check time to debounce calls
+let lastAuthCheckTime = 0;
+const AUTH_CHECK_DEBOUNCE_MS = 2000; // 2 seconds debounce
+
+// Track the last time a 401 error occurred to implement backoff
+let last401ErrorTime = 0;
+const ERROR_BACKOFF_MS = 10000; // 10 seconds backoff after 401 error
 
 interface PuterContextType {
   puterReady: boolean;
   puterUser: Record<string, any> | null;
   isAuthenticated: boolean;
+  initializePuter: () => Promise<boolean>;
   signIn: () => Promise<Record<string, any> | null | undefined>;
   signOut: () => Promise<void>;
   loading: boolean;
@@ -19,50 +32,34 @@ export function PuterProvider({ children }: { children: ReactNode }) {
   const [puterUser, setPuterUser] = useState<null | Record<string, any>>(null);
   const [loading, setLoading] = useState(false);
 
-  // Wait for SDK to load
-  useEffect(() => {
-    // Check if Puter SDK is already available (e.g., loaded in layout.tsx)
-    if (typeof window !== 'undefined' && window.puter && window.puter.auth) {
-      setPuterReady(true);
-      // Get current user status
-      window.puter.auth.getUser()
-        .then((user: Record<string, any>) => {
-          // Check if user is an empty object
-          if (user && typeof user === 'object' && Object.keys(user).length === 0) {
-            setPuterUser(null);
-          } else {
-            setPuterUser(user);
-          }
-        })
-        .catch(() => setPuterUser(null));
-    } else {
-      // Wait for SDK to load
-      const interval = setInterval(() => {
-        if (typeof window !== 'undefined' && window.puter && window.puter.auth) {
-          setPuterReady(true);
-          // Get current user status
-          window.puter.auth.getUser()
-            .then((user: Record<string, any>) => {
-              // Check if user is an empty object
-              if (user && typeof user === 'object' && Object.keys(user).length === 0) {
-                setPuterUser(null);
-              } else {
-                setPuterUser(user);
-              }
-            })
-            .catch(() => setPuterUser(null));
-          clearInterval(interval);
-        }
-      }, 200);
+    // Don't automatically load the SDK on component mount
+  // Instead, make SDK loading lazy and only when needed
 
-      // Clean up interval
-      return () => clearInterval(interval);
+  // Function to initialize the SDK when actually needed
+  const initializePuterSDK = useCallback(async (): Promise<boolean> => {
+    if (puterReady) return true; // Already initialized
+
+    try {
+      // Load the Puter SDK dynamically
+      await loadPuterSDK();
+
+      // Check if Puter SDK is available after loading
+      if (typeof window !== 'undefined' && window.puter && window.puter.auth) {
+        setPuterReady(true);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.warn("Failed to initialize Puter SDK:", error);
+      return false;
     }
-  }, []);
+  }, [puterReady]);
 
   const signIn = useCallback(async (): Promise<Record<string, any> | null | undefined> => {
-    if (!puterReady) {
-      console.error("Puter SDK not ready");
+    // Initialize SDK if not ready
+    const sdkReady = await initializePuterSDK();
+    if (!sdkReady) {
+      console.error("Puter SDK not ready after initialization attempt");
       return;
     }
 
@@ -87,12 +84,16 @@ export function PuterProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [puterReady]);
+  }, [puterReady, initializePuterSDK]);
 
   const signOut = useCallback(async () => {
     if (!puterReady) {
-      console.error("Puter SDK not ready");
-      return;
+      // Initialize SDK if not ready, but we can't sign out if there's no SDK
+      const sdkReady = await initializePuterSDK();
+      if (!sdkReady) {
+        console.error("Puter SDK not available for sign out");
+        return;
+      }
     }
 
     setLoading(true);
@@ -111,15 +112,38 @@ export function PuterProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [puterReady]);
+  }, [puterReady, initializePuterSDK]);
 
-  const checkAuth = useCallback(async () => {
+  const checkAuth = useCallback(async (bypassDebounce = false) => {
+    const now = Date.now();
+
+    // Check if we're in an error backoff period after a 401
+    if (now - last401ErrorTime < ERROR_BACKOFF_MS && !bypassDebounce) {
+      // Return current state during backoff period
+      return puterUser;
+    }
+
+    // Debounce check to prevent rapid API calls, unless explicitly bypassed
+    if (!bypassDebounce && now - lastAuthCheckTime < AUTH_CHECK_DEBOUNCE_MS) {
+      // Return current state if called too recently
+      return puterUser;
+    }
+    lastAuthCheckTime = now;
+
     if (!puterReady) {
-      return null;
+      const sdkReady = await initializePuterSDK();
+      if (!sdkReady) {
+        console.warn("Puter SDK not available for auth check");
+        setPuterUser(null);
+        return null;
+      }
     }
 
     try {
       const user = await window.puter.auth.getUser();
+      // Reset the error backoff timer on successful response
+      last401ErrorTime = 0;
+
       // Check if user is an empty object
       if (user && typeof user === 'object' && Object.keys(user).length === 0) {
         setPuterUser(null);
@@ -128,25 +152,51 @@ export function PuterProvider({ children }: { children: ReactNode }) {
       setPuterUser(user);
       return user;
     } catch (error: any) {
-      // Check if error is an empty object
+      // Check if error is an empty object or is an auth error
       if (error && typeof error === 'object' && Object.keys(error).length === 0) {
         setPuterUser(null);
         return null;
       }
+
+      // Don't log authentication errors as warnings since they're expected
+      // when user is not authenticated with Puter (401 Unauthorized is normal)
+      if (error?.status === 401 || error?.message?.includes?.('401') || error?.message?.includes?.('Unauthorized')) {
+        setPuterUser(null);
+        // Track when this 401 error occurred for backoff
+        last401ErrorTime = now;
+        return null;
+      }
+
+      // Log other errors that are not auth-related
+      console.warn("Error in Puter auth check:", error);
       setPuterUser(null);
       return null;
     }
-  }, [puterReady]);
+  }, [puterReady, puterUser, initializePuterSDK]);
+
+  useEffect(() => {
+    // Check auth status on initial load only once globally, with a small delay to avoid conflicts
+    if (!hasPerformedInitialAuthCheck && puterReady) {
+      hasPerformedInitialAuthCheck = true;
+      // Add a small delay to let other auth flows settle, and bypass debounce for initial check
+      const timer = setTimeout(() => {
+        checkAuth(true); // Bypass debounce for initial check
+      }, 300); // 300ms delay to avoid race conditions with other auth systems
+
+      return () => clearTimeout(timer);
+    }
+  }, [puterReady, checkAuth]); // Add puterReady dependency to ensure SDK is loaded before checking
 
   return (
     <PuterContext.Provider value={{
       puterReady,
       puterUser,
       isAuthenticated: !!puterUser,
+      initializePuter: initializePuterSDK,
       signIn,
       signOut,
       loading,
-      checkAuth
+      checkAuth  // Use the original checkAuth function for consumers
     }}>
       {children}
     </PuterContext.Provider>

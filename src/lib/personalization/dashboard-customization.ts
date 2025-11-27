@@ -4,7 +4,7 @@
  */
 
 import { DashboardPreferences, DashboardWidget } from './types';
-import { supabase } from '@/lib/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { userPreferencesManager } from './user-preferences';
 
 const DASHBOARD_TABLE = 'dashboard_widgets';

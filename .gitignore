@@ -48,3 +48,5 @@ next-env.d.ts
 
 # Supabase temp files
 /supabase/.temp/
+.gemini/
+gha-creds-*.json

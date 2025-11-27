@@ -18,6 +18,11 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { FieldOfStudySelector } from "./field-of-study-selector";
 import { Skeleton } from "./ui/skeleton";
+import {
+  generateResearchQuestions,
+  generateHypotheses,
+  alignQuestionsWithLiterature,
+} from "@/lib/puter-sdk";
 
 type ResearchQuestion = {
   question: string;
@@ -69,23 +74,8 @@ export function ResearchQuestionGenerator() {
     setResearchQuestions([]);
 
     try {
-      if (!session) {
-        throw new Error("Authentication session not found. Please log in again.");
-      }
-
-      const { data, error } = await supabase.functions.invoke('generate-research-questions', {
-        body: { 
-          topic, 
-          field, 
-          researchType,
-          literatureContext: literatureContext || undefined
-        }
-      });
-
-      if (error) {
-        throw new Error(error.message || 'Failed to generate research questions');
-      }
-
+      const data = await generateResearchQuestions(topic);
+      
       if (data?.questions) {
         setResearchQuestions(data.questions);
         toast.success("Research questions generated successfully!");
@@ -93,7 +83,13 @@ export function ResearchQuestionGenerator() {
         throw new Error("No research questions returned.");
       }
     } catch (error: any) {
-      toast.error(error.message || "An unexpected error occurred.");
+      const msg = error.message || "Failed to generate research questions";
+      
+      if (msg.includes("auth")) {
+        toast.error("Please sign in to your Puter account");
+      } else {
+        toast.error(msg);
+      }
       console.error(error);
     } finally {
       setIsGenerating(false);
@@ -114,30 +110,40 @@ export function ResearchQuestionGenerator() {
     setHypotheses([]);
 
     try {
-      if (!session) {
-        throw new Error("Authentication session not found. Please log in again.");
-      }
-
-      const { data, error } = await supabase.functions.invoke('generate-hypotheses', {
-        body: { 
-          topic, 
-          field,
-          researchQuestions: researchQuestions.map(rq => rq.question)
-        }
-      });
-
-      if (error) {
-        throw new Error(error.message || 'Failed to generate hypotheses');
-      }
-
-      if (data?.hypotheses) {
-        setHypotheses(data.hypotheses);
-        toast.success("Hypotheses generated successfully!");
+      const data = await generateHypotheses(topic);
+      
+      // generateHypotheses returns string[], convert to Hypothesis objects
+      let hypothesesList: Hypothesis[] = [];
+      if (Array.isArray(data)) {
+        // Convert string hypotheses to Hypothesis objects
+        hypothesesList = data.map((h: any) => {
+          if (typeof h === 'string') {
+            return {
+              null_hypothesis: h,
+              alternative_hypothesis: `Not: ${h}`,
+              variables: { independent: [], dependent: [] },
+              testable: true
+            };
+          }
+          return h;
+        });
+      } else if (data && typeof data === 'object' && 'hypotheses' in data) {
+        const dataObj = data as Record<string, any>;
+        hypothesesList = dataObj.hypotheses;
       } else {
         throw new Error("No hypotheses returned.");
       }
+      
+      setHypotheses(hypothesesList);
+      toast.success("Hypotheses generated successfully!");
     } catch (error: any) {
-      toast.error(error.message || "An unexpected error occurred.");
+      const msg = error.message || "Failed to generate hypotheses";
+      
+      if (msg.includes("auth")) {
+        toast.error("Please sign in to your Puter account");
+      } else {
+        toast.error(msg);
+      }
       console.error(error);
     } finally {
       setIsGenerating(false);
@@ -159,30 +165,27 @@ export function ResearchQuestionGenerator() {
     setAlignmentSuggestions([]);
 
     try {
-      if (!session) {
-        throw new Error("Authentication session not found. Please log in again.");
-      }
+      const data = await alignQuestionsWithLiterature(
+        researchQuestions.map(rq => rq.question),
+        topic
+      );
 
-      const { data, error } = await supabase.functions.invoke('align-questions-with-literature', {
-        body: { 
-          researchQuestions: researchQuestions.map(rq => rq.question),
-          literatureContext,
-          field
-        }
-      });
-
-      if (error) {
-        throw new Error(error.message || 'Failed to align questions with literature');
-      }
-
-      if (data?.alignments) {
+      if (Array.isArray(data)) {
+        setAlignmentSuggestions(data);
+      } else if (data?.alignments) {
         setAlignmentSuggestions(data.alignments);
-        toast.success("Alignment analysis complete!");
       } else {
         throw new Error("No alignment suggestions returned.");
       }
+      toast.success("Alignment analysis complete!");
     } catch (error: any) {
-      toast.error(error.message || "An unexpected error occurred.");
+      const msg = error.message || "Failed to align questions with literature";
+      
+      if (msg.includes("auth")) {
+        toast.error("Please sign in to your Puter account");
+      } else {
+        toast.error(msg);
+      }
       console.error(error);
     } finally {
       setIsGenerating(false);

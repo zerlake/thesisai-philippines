@@ -15,7 +15,7 @@ export class ApiError extends Error {
   }
 }
 
-export interface ErrorContext {
+export interface ErrorContext extends Record<string, unknown> {
   widgetId?: string;
   endpoint?: string;
   method?: string;
@@ -250,7 +250,7 @@ export class DashboardApiErrorHandler {
       actions.push({
         label: 'Check Connection',
         description: 'Verify your internet connection and try again',
-        action: () => location.reload()
+        action: () => { location.reload(); }
       });
     }
 
@@ -259,7 +259,7 @@ export class DashboardApiErrorHandler {
       actions.push({
         label: 'Log In Again',
         description: 'Your session has expired',
-        action: () => (window.location.href = '/auth/login')
+        action: () => { window.location.href = '/auth/login'; }
       });
     }
 
@@ -268,13 +268,13 @@ export class DashboardApiErrorHandler {
       actions.push({
         label: 'Try Again',
         description: 'The server may be temporarily unavailable',
-        action: () => location.reload()
+        action: () => { location.reload(); }
       });
 
       actions.push({
         label: 'Check Status',
         description: 'View service status page',
-        action: () => window.open('/status', '_blank')
+        action: () => { window.open('/status', '_blank'); }
       });
     }
 

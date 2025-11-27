@@ -444,5 +444,3 @@ class DataSourceManager {
 
 // Export singleton instance
 export const dataSourceManager = new DataSourceManager();
-
-export type { WidgetData };

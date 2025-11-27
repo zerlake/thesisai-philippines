@@ -4,7 +4,7 @@
  */
 
 import { UserPreferences, LayoutPreferences, ThemePreferences, NotificationPreferences, AccessibilityPreferences, DashboardPreferences, BehaviorSettings } from './types';
-import { supabase } from '@/lib/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 const PREFERENCES_TABLE = 'user_preferences';
 const PREFERENCES_CACHE_KEY = 'user_preferences_cache';

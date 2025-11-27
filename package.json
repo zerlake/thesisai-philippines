@@ -16,6 +16,7 @@
     "amp-metrics": "node -e \"const {getPerformanceReport, getCdnHealthStatus} = require('./src/lib/cdn-metrics'); console.log(JSON.stringify({report: getPerformanceReport(), health: getCdnHealthStatus()}, null, 2))\""
   },
   "dependencies": {
+    "@heyputer/puter.js": "2.1.6",
     "@hookform/resolvers": "latest",
     "@radix-ui/react-accordion": "latest",
     "@radix-ui/react-alert-dialog": "latest",
@@ -69,7 +70,6 @@
     "@tiptap/pm": "3.10.2",
     "@tiptap/react": "^3.10.2",
     "@tiptap/starter-kit": "^3.10.2",
-    "@heyputer/puter.js": "2.1.6",
     "bibtex-parser": "^0.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -100,7 +100,8 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2",
     "xlsx": "^0.18.5",
-    "zod": "^3.25.28"
+    "zod": "^3.25.28",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

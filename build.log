@@ -1,5 +1,71 @@
 
-> next-template@0.1.0 build C:\Users\Projects\thesis-ai
+> next-template@0.1.0 build
 > next build
 
- ELIFECYCLE  Command failed with exit code 1.
+   ▲ Next.js 16.0.3 (Turbopack)
+   - Environments: .env.local, .env
+   - Experiments (use with caution):
+     · clientTraceMetadata
+     ✓ optimizeCss
+     · optimizePackageImports
+
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+   Creating an optimized production build ...
+Turbopack build encountered 5 warnings:
+./node_modules/.pnpm/@opentelemetry+instrumentat_04f370d515cee0be955272f826166073/node_modules/@opentelemetry/instrumentation/build/esm/platform/node
+Package import-in-the-middle can't be external
+The request import-in-the-middle matches serverExternalPackages (or the default list).
+The request could not be resolved by Node.js from the project directory.
+Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.
+Try to install it into the project directory by running npm install import-in-the-middle from the project directory.
+
+
+./node_modules/.pnpm/@opentelemetry+instrumentat_f652686f626c89883300e722e0beadcf/node_modules/@opentelemetry/instrumentation/build/esm/platform/node
+Package import-in-the-middle can't be external
+The request import-in-the-middle matches serverExternalPackages (or the default list).
+The request could not be resolved by Node.js from the project directory.
+Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.
+Try to install it into the project directory by running npm install import-in-the-middle from the project directory.
+
+
+./node_modules/.pnpm/@sentry+node-core@10.23.0_@_a85e3818cbaa54b6eac8eaf48d3af41b/node_modules/@sentry/node-core/build/cjs/sdk
+Package import-in-the-middle can't be external
+The request import-in-the-middle matches serverExternalPackages (or the default list).
+The request could not be resolved by Node.js from the project directory.
+Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.
+Try to install it into the project directory by running npm install import-in-the-middle from the project directory.
+
+
+./node_modules/.pnpm/@opentelemetry+instrumentat_04f370d515cee0be955272f826166073/node_modules/@opentelemetry/instrumentation/build/esm/platform/node
+Package require-in-the-middle can't be external
+The request require-in-the-middle matches serverExternalPackages (or the default list).
+The request could not be resolved by Node.js from the project directory.
+Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.
+Try to install it into the project directory by running npm install require-in-the-middle from the project directory.
+
+
+./node_modules/.pnpm/@opentelemetry+instrumentat_f652686f626c89883300e722e0beadcf/node_modules/@opentelemetry/instrumentation/build/esm/platform/node
+Package require-in-the-middle can't be external
+The request require-in-the-middle matches serverExternalPackages (or the default list).
+The request could not be resolved by Node.js from the project directory.
+Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.
+Try to install it into the project directory by running npm install require-in-the-middle from the project directory.
+
+
+ ✓ Compiled successfully in 78s
+   Running next.config.js provided runAfterProductionCompile ...
+ ✓ Completed runAfterProductionCompile in 3502ms
+   Running TypeScript ...
+Failed to compile.
+
+./src/lib/dashboard/api-error-handler.ts:262:23
+Type error: Type 'string' is not assignable to type 'void | Promise<void>'.
+
+[0m [90m 260 |[39m         label[33m:[39m [32m'Log In Again'[39m[33m,[39m
+ [90m 261 |[39m         description[33m:[39m [32m'Your session has expired'[39m[33m,[39m
+[31m[1m>[22m[39m[90m 262 |[39m         action[33m:[39m () [33m=>[39m (window[33m.[39mlocation[33m.[39mhref [33m=[39m [32m'/auth/login'[39m)
+ [90m     |[39m                       [31m[1m^[22m[39m
+ [90m 263 |[39m       })[33m;[39m
+ [90m 264 |[39m     }
+ [90m 265 |[39m[0m
+Next.js build worker exited with code: 1 and signal: null

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "../integrations/supabase/client";
 import { Session, SupabaseClient, User } from "@supabase/supabase-js";
 import { usePathname, useRouter } from "next/navigation";
@@ -63,16 +63,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .insert({
               id: user.id,
               role: "user",
-              user_preferences: {
-                dashboard_widgets: {},
-                notification_preferences: {}
-              }
+              email: user.email || undefined,
+              plan: "free"
             });
           
           if (createError) {
             console.error("Failed to create profile:", createError);
             toast.error("Could not create user profile.");
-            await supabase.auth.signOut();
             return;
           }
           
@@ -99,7 +96,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         toast.error("Could not fetch user profile.");
         console.error("Error fetching profile:", normalized.message);
       setProfile(null);
-      await supabase.auth.signOut();
     }
   }, []);
 
@@ -108,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const handleAuthChange = async (session: Session | null) => {
       if (!mounted) return;
-      
+
       setIsLoading(true);
       setSession(session);
       if (session?.user) {
@@ -116,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setProfile(null);
       }
-      
+
       if (mounted) {
         setIsLoading(false);
       }
@@ -128,9 +124,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (_event === 'SIGNED_OUT') {
           // Clear session and profile if signed out or token refresh failed
           await handleAuthChange(null);
-          
+
           // Redirect to login page
-          if (!isPublicPage(pathname)) {
+          if (!isPublicPage(pathname) && pathname !== "/login") {
             router.push("/login");
           }
         } else if (_event === 'TOKEN_REFRESHED' && session) {
@@ -152,7 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
-        
+
         if (!mounted) return;
 
         if (error) {
@@ -184,7 +180,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [fetchProfile, router, pathname]);
+  }, [fetchProfile]);  // Remove router from dependencies to prevent potential loops
+
+  // Effect to handle redirects after auth state is loaded
+  // Track both auth state and pathname changes separately to prevent infinite loops
+  const prevAuthState = useRef({
+    session: null as any,
+    profile: null as any,
+    pathname: ""
+  });
 
   useEffect(() => {
     if (isLoading) return;
@@ -192,9 +196,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const authStatus = session && profile ? 'authenticated' : 'unauthenticated';
     const isPublic = isPublicPage(pathname);
 
-    if (authStatus === 'unauthenticated' && !isPublic) {
-      router.push("/login");
-    } else if (authStatus === 'authenticated' && profile) {
+    // Handle unauthenticated users on non-public pages
+    if (authStatus === 'unauthenticated' && !isPublic && pathname !== "/login") {
+      router.replace("/login");
+      return;
+    }
+
+    // If authenticated and has profile
+    if (authStatus === 'authenticated' && profile) {
       const roleHomePages: { [key: string]: string } = {
         admin: '/admin',
         advisor: '/advisor',
@@ -203,24 +212,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
       const userHomePage = roleHomePages[profile.role] || '/dashboard';
 
-      // 1. Redirect from public-only pages if logged in
+      // Redirect from auth pages when authenticated
       if (pathname === "/login" || pathname === "/register" || pathname === "/") {
-        router.push(userHomePage);
+        router.replace(userHomePage);
+        return;
       }
-      // 2. Role-based page protection
-      else if (pathname.startsWith("/admin") && profile.role !== "admin") {
-        router.push(userHomePage);
-      } else if (pathname.startsWith("/advisor") && profile.role !== "advisor") {
-        router.push(userHomePage);
-      } else if (pathname.startsWith("/critic") && profile.role !== "critic") {
-        router.push(userHomePage);
+
+      // Role-based access control
+      if ((pathname.startsWith("/admin") && profile.role !== "admin") ||
+          (pathname.startsWith("/advisor") && profile.role !== "advisor") ||
+          (pathname.startsWith("/critic") && profile.role !== "critic")) {
+        if (pathname !== userHomePage) {
+          router.replace(userHomePage);
+          return;
+        }
       }
-      // 3. Prevent non-students from accessing the student dashboard
-      else if (pathname.startsWith("/dashboard") && profile.role !== "user") {
-        router.push(userHomePage);
+
+      // Role-based dashboard access
+      if (pathname.startsWith("/dashboard") && profile.role !== "user" && pathname !== userHomePage) {
+        router.replace(userHomePage);
+        return;
       }
     }
-  }, [isLoading, session, profile, pathname, router]);
+  }, [isLoading, session, profile, pathname]);
 
   const refreshProfile = useCallback(async () => {
     if (session?.user) {

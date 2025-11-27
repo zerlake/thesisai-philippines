@@ -85,10 +85,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
-        {/* Puter SDK - loaded globally for AI features */}
-        <script src="https://js.puter.com/v2/" async />
+        {/* Puter SDK now loaded dynamically when needed */}
       </head>
       <body
         className={cn(

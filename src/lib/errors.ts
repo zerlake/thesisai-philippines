@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+export { ensureError, getErrorMessage as getErrorMessageFromNormalizer, getErrorStatus, isError, hasErrorStatus, safeErrorHandler } from '@/lib/error-normalizer';
 
 /**
  * Base class for all custom application errors.
@@ -188,6 +189,7 @@ export function toAppError(error: unknown): AppError {
     const message = getErrorMessage(error);
     return new AppError('UnknownError', message, { originalError: new Error(message) });
 }
+
 
 /**
  * Utility function to standardize creating `NextResponse` for API routes from an `AppError`.

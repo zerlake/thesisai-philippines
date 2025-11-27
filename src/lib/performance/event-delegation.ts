@@ -5,9 +5,9 @@
 
 export type EventHandler<T = Event> = (event: T, target: Element) => void;
 
-interface DelegatedListener {
+interface DelegatedListener<T = Event> {
   selector: string;
-  handler: EventHandler;
+  handler: EventHandler<T>;
   boundHandler: (e: Event) => void;
 }
 
@@ -21,11 +21,11 @@ interface DebounceOptions {
  * EventDelegator - Attach listeners to parent, filter by selector
  */
 export class EventDelegator {
-  private root: Element;
-  private listeners: Map<string, DelegatedListener[]> = new Map();
+  private root: Element | Document;
+  private listeners: Map<string, DelegatedListener<any>[]> = new Map();
   private rafId: number | null = null;
 
-  constructor(root: Element = document) {
+  constructor(root: Element | Document = document) {
     this.root = root;
   }
 
@@ -49,7 +49,7 @@ export class EventDelegator {
       }
     };
 
-    const listener: DelegatedListener = {
+    const listener: DelegatedListener<T> = {
       selector,
       handler,
       boundHandler
@@ -131,7 +131,7 @@ export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number,
   options: DebounceOptions = {}
-): (...args: Parameters<T>) => void {
+): ((...args: Parameters<T>) => void) & { cancel: () => void } {
   let timeout: NodeJS.Timeout | null = null;
   let maxTimeout: NodeJS.Timeout | null = null;
   let lastCallTime = 0;

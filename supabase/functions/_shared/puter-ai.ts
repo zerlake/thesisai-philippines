@@ -25,10 +25,13 @@ export async function callPuterAI(
   } = options;
 
   const puterApiKey = Deno.env.get('PUTER_API_KEY');
+  const endpoint = Deno.env.get("PUTER_API_ENDPOINT") || 'https://api.puter.com/v1/ai/chat';
+
+  console.log(`[puter-ai] Calling Puter AI - Endpoint: ${endpoint}, Has API Key: ${!!puterApiKey}`);
 
   try {
     const response = await Promise.race([
-      fetch(Deno.env.get("PUTER_API_ENDPOINT") || 'https://api.puter.com/v1/ai/chat', {
+      fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,11 +53,12 @@ export async function callPuterAI(
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => '');
-      console.error(`Puter API error: ${response.status}`, errorText);
-      throw new Error(`Puter API error: ${response.status}`);
+      console.error(`[puter-ai] API error: ${response.status} - ${response.statusText}`, errorText);
+      throw new Error(`Puter API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json() as any;
+    console.log(`[puter-ai] Got response with keys:`, Object.keys(data));
     
     // Handle OpenAI-compatible response format
     if (data.choices && data.choices[0]?.message?.content) {
@@ -74,9 +78,10 @@ export async function callPuterAI(
       return data.text;
     }
 
-    console.error('Unexpected response format from Puter API:', data);
+    console.error('[puter-ai] Unexpected response format:', data);
     throw new Error('Unexpected response format from Puter API');
   } catch (error) {
+    console.error('[puter-ai] Exception during API call:', error);
     if (error instanceof Error) {
       throw error;
     }

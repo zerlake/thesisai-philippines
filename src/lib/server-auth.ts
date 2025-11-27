@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { createServerSupabaseClient } from '@/integrations/supabase/server-client';
-import { AuthenticationError } from '@/lib/errors';
+import { AuthenticationError, ensureError } from '@/lib/errors';
 import { User } from '@supabase/supabase-js';
 
 // Re-export AuthenticationError for convenience
@@ -122,9 +122,10 @@ export async function requireAllAuthorizationChecks(
     if (error instanceof AuthenticationError) {
       throw error;
     }
+    const errorInstance = ensureError(error);
     throw new AuthenticationError(
-      error instanceof Error ? error.message : 'Authorization check failed',
-      { originalError: error }
+      errorInstance.message || 'Authorization check failed',
+      { originalError: errorInstance }
     );
   }
 }

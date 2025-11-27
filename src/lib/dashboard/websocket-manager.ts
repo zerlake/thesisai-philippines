@@ -168,9 +168,10 @@ export class WebSocketManager {
           this.attemptReconnect();
         };
       } catch (error) {
-        this.setState(ConnectionState.ERROR);
-        reject(error);
-      }
+         this.setState(ConnectionState.ERROR);
+         const err = error instanceof Error ? error : new Error(String(error));
+         reject(err);
+       }
     });
   }
 

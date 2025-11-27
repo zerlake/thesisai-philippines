@@ -19,6 +19,15 @@ pnpm test:coverage # Coverage report
 pnpm exec vitest src/__tests__/path/to/test.test.ts
 ```
 
+**Cleanup & Verification:**
+```bash
+# Verify function usage (before cleanup)
+grep -r "functions.invoke" src/ | grep -o "'[^']*'" | sort -u
+
+# List Supabase functions
+dir supabase\functions /B
+```
+
 **MCP server subproject** (Python, `web-app/arxiv-mcp-server/`):
 ```bash
 uv venv && source .venv/bin/activate

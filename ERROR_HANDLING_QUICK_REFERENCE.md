@@ -1,244 +1,257 @@
 # Error Handling Quick Reference
 
-## One-Liner Usage
+## When to Use Each Utility
+
+### `ensureError(error: unknown): Error`
+**Use when:** You need to guarantee an Error type from a catch block
 
 ```typescript
-// In a try-catch block
-const { message } = handleError(error, 'ComponentName');
-toast.error(message);
+import { ensureError } from '@/lib/errors';
+
+try {
+  await someAsyncOperation();
+} catch (error) {
+  const err = ensureError(error);
+  console.error(err.message); // Safe - guaranteed Error
+  throw new APIError('Failed', { originalError: err });
+}
 ```
 
-## Import Statements
+### `getErrorMessage(error: unknown, fallback?: string): string`
+**Use when:** You need to safely extract a message string
 
 ```typescript
-import { 
-  handleError,              // Use this most of the time
-  normalizeError,          // If you need the full error object
-  isRetryableError,        // For retry logic
-  isAuthError,             // For auth checks
-  getUserFriendlyMessage,  // For custom messaging
-} from '@/utils/error-utilities';
+import { getErrorMessage } from '@/lib/error-normalizer';
+
+try {
+  // operation
+} catch (error) {
+  const message = getErrorMessage(error, 'Operation failed');
+  toast.error(message); // Safe - returns string
+}
+```
+
+### `getErrorStatus(error: unknown): number | undefined`
+**Use when:** You need to check HTTP status codes
+
+```typescript
+import { getErrorStatus } from '@/lib/error-normalizer';
+
+try {
+  await fetch('/api/endpoint');
+} catch (error) {
+  const status = getErrorStatus(error);
+  if (status === 401) {
+    // Handle unauthorized
+  }
+}
+```
+
+### `isError(value: unknown): value is Error`
+**Use when:** You need a type-safe way to check if something is an Error
+
+```typescript
+import { isError } from '@/lib/error-normalizer';
+
+if (isError(value)) {
+  // TypeScript knows value is Error here
+  console.error(value.message);
+}
+```
+
+### `hasErrorStatus(error: unknown, status: number): boolean`
+**Use when:** You want a one-liner status check
+
+```typescript
+import { hasErrorStatus } from '@/lib/error-normalizer';
+
+catch (error) {
+  if (hasErrorStatus(error, 401)) {
+    redirectToLogin();
+  }
+}
 ```
 
 ## Common Patterns
 
-### Pattern 1: Simple Toast Error
+### Pattern 1: API Error with Unknown Error Type
 ```typescript
-try {
-  await operation();
-} catch (error) {
-  const { message } = handleError(error, 'OperationName');
-  toast.error(message);
-}
-```
+import { ensureError } from '@/lib/errors';
+import { APIError } from '@/lib/errors';
 
-### Pattern 2: With Debugging Context
-```typescript
-try {
-  await operation();
-} catch (error) {
-  const { message, normalized } = handleError(error, 'MyComponent', {
-    userId: user?.id,
-    action: 'fetching data',
+catch (error) {
+  const err = ensureError(error);
+  throw new APIError(err.message || 'API call failed', {
+    originalError: err,
+    status: getErrorStatus(error)
   });
-  // normalized contains full debugging info
-  toast.error(message);
 }
 ```
 
-### Pattern 3: Conditional Retry
+### Pattern 2: Logging Errors Safely
 ```typescript
-try {
-  await operation();
-} catch (error) {
-  if (isRetryableError(error)) {
-    // Safe to retry
-    await operation(); // With exponential backoff ideally
-  } else {
-    const { message } = handleError(error, 'Operation');
-    toast.error(message);
-  }
+import { getErrorMessage, getErrorStatus } from '@/lib/error-normalizer';
+
+catch (error) {
+  console.error({
+    message: getErrorMessage(error),
+    status: getErrorStatus(error),
+    timestamp: new Date()
+  });
 }
 ```
 
-### Pattern 4: Auth Error Handling
+### Pattern 3: User-Friendly Error Messages
 ```typescript
-try {
-  await operation();
-} catch (error) {
-  if (isAuthError(error)) {
-    // Redirect to login
-    router.push('/login');
-  } else {
-    const { message } = handleError(error, 'Operation');
-    toast.error(message);
-  }
-}
-```
+import { getErrorMessage } from '@/lib/error-normalizer';
+import { normalizeError, getUserFriendlyMessage } from '@/utils/error-utilities';
 
-### Pattern 5: Full Control
-```typescript
-try {
-  await operation();
-} catch (error) {
-  const normalized = normalizeError(error, 'MyContext');
-  
-  // Handle by type
-  switch (normalized.type) {
-    case ErrorType.EMPTY_OBJECT:
-    case ErrorType.SERVICE:
-      // Retry after delay
-      break;
-    case ErrorType.AUTH:
-      // Redirect to login
-      break;
-    default:
-      // Show message to user
-  }
-  
+catch (error) {
+  const normalized = normalizeError(error);
   const userMessage = getUserFriendlyMessage(normalized);
   toast.error(userMessage);
 }
 ```
 
-## Error Types at a Glance
-
-| Type | Retryable? | Common Cause |
-|------|-----------|--------------|
-| `EMPTY_OBJECT` | ✓ | SDK returned empty error |
-| `NETWORK` | ✓ | Connection lost |
-| `TIMEOUT` | ✓ | Request took too long |
-| `SERVICE` | ✓ | Server error (5xx) |
-| `AUTH` | ✗ | Not logged in / no permission |
-| `VALIDATION` | ✗ | Bad input |
-| `NOT_FOUND` | ✗ | Resource doesn't exist |
-| `CONFLICT` | ✗ | Resource already exists |
-| `UNDEFINED` | ✗ | Null/undefined error |
-| `UNKNOWN` | ✗ | Can't determine |
-
-## Retryable Errors
-
+### Pattern 4: Custom Error Classes
 ```typescript
-// These return true from isRetryableError()
-- ErrorType.TIMEOUT
-- ErrorType.NETWORK
-- ErrorType.SERVICE
-- ErrorType.EMPTY_OBJECT
-```
+import { ensureError } from '@/lib/errors';
+import { AppError } from '@/lib/errors';
 
-## Common Issues & Solutions
-
-### Issue: Empty Error Object `{}`
-**Cause**: Puter SDK or external API returns empty error object
-**Solution**: System automatically handles with sensible default message
-```typescript
-const normalized = normalizeError({});
-// normalized.type = ErrorType.EMPTY_OBJECT
-// normalized.message = "An error occurred. Please try again..."
-```
-
-### Issue: Lost Error Details
-**Cause**: Error properties not extracted properly
-**Solution**: `normalizeError()` extracts from all common properties
-```typescript
-// All these work:
-normalizeError({ message: 'error' });          // .message
-normalizeError({ error: 'error' });            // .error
-normalizeError({ detail: 'error' });           // .detail
-normalizeError({ description: 'error' });      // .description
-normalizeError(new Error('error'));            // Error instance
-normalizeError('error string');                // String
-```
-
-### Issue: Inconsistent Error Handling
-**Cause**: Different parts of code handle errors differently
-**Solution**: Always use `handleError()` or `normalizeError()`
-```typescript
-// ❌ Don't do this
 catch (error) {
-  console.error(error?.message || 'Unknown');
+  const err = ensureError(error);
+  throw new AppError(
+    'CustomError',
+    err.message,
+    { originalError: err }
+  );
 }
+```
 
-// ✓ Do this
+### Pattern 5: Multiple Error Handling
+```typescript
+import { ensureError, getErrorMessage } from '@/lib/errors';
+import { getErrorStatus } from '@/lib/error-normalizer';
+
+try {
+  // operation
+} catch (error) {
+  const err = ensureError(error);
+  const message = getErrorMessage(error);
+  const status = getErrorStatus(error);
+  
+  // Use all three safely
+  if (status === 401) {
+    // Handle auth
+  } else {
+    console.error(`Error: ${message}`);
+  }
+}
+```
+
+## DO's and DON'Ts
+
+### ✅ DO
+```typescript
+// Good: Use ensureError for catch blocks
 catch (error) {
-  const { message } = handleError(error, 'ComponentName');
+  const err = ensureError(error);
+  throw new Error(err.message);
+}
+
+// Good: Use getErrorMessage
+catch (error) {
+  console.error(getErrorMessage(error));
+}
+
+// Good: Type-safe error checking
+catch (error) {
+  if (isError(error)) {
+    // TypeScript narrows to Error type
+  }
 }
 ```
 
-### Issue: User Seeing Technical Errors
-**Cause**: Exposing raw error messages to users
-**Solution**: Use `getUserFriendlyMessage()` which provides appropriate messaging
+### ❌ DON'T
 ```typescript
-// ❌ Wrong
-toast.error(error?.message);
+// Bad: Direct access without type guard
+catch (error) {
+  throw new Error(error.message); // error might not have .message
+}
 
-// ✓ Right
-const { message } = handleError(error, 'FeatureName');
-toast.error(message);
-```
+// Bad: Passing unknown to Error constructor
+catch (error) {
+  throw new APIError('msg', { originalError: error }); // ❌ Type error
+}
 
-## Debugging Tips
-
-### In Development
-Errors are logged with full details:
-```
-[ComponentName] ERROR_TYPE
-Message: User-friendly message
-Code: Optional error code
-Status: Optional HTTP status
-Context: Additional debugging info
-Original Error: Full original error
-```
-
-### Check Error Type
-```typescript
-const normalized = normalizeError(error);
-console.log('Error type:', normalized.type);
-console.log('Message:', normalized.message);
-console.log('Context:', normalized.context);
-```
-
-### Should We Retry?
-```typescript
-if (isRetryableError(error)) {
-  // Safe to retry
-} else {
-  // Don't retry, show error to user
+// Bad: Assuming error is Error
+catch (error) {
+  console.error(error.stack); // error might not have .stack
 }
 ```
 
-## Performance Notes
+## Summary Table
 
-- `normalizeError()` is fast (object property checks)
-- `handleError()` includes logging (minor perf impact in dev)
-- No external dependencies
-- Works in browser and server contexts
+| Need | Utility | Returns | Safe |
+|------|---------|---------|------|
+| Convert to Error | `ensureError()` | `Error` | ✅ |
+| Get message | `getErrorMessage()` | `string` | ✅ |
+| Get status code | `getErrorStatus()` | `number \| undefined` | ✅ |
+| Check if Error | `isError()` | `boolean` | ✅ (type guard) |
+| Check status | `hasErrorStatus()` | `boolean` | ✅ |
+| Full normalization | `normalizeError()` | `NormalizedError` | ✅ |
+| User message | `getUserFriendlyMessage()` | `string` | ✅ |
 
-## Files Using This System
+## Import Examples
 
-- `/src/components/paraphrasing-tool.tsx`
-- `/src/utils/supabase-error-handler.ts`
-- `/src/utils/puter-ai-retry.ts`
-- `/src/lib/puter-ai-integration.ts`
-- `/src/hooks/use-puter-auth.ts`
-- `/src/hooks/usePuterTool.ts`
-- `/src/components/auth-provider.tsx`
+```typescript
+// From main errors file
+import { ensureError, APIError, AuthenticationError } from '@/lib/errors';
 
-## More Info
+// From normalizer (more specific)
+import { 
+  ensureError, 
+  getErrorMessage, 
+  getErrorStatus, 
+  isError, 
+  hasErrorStatus,
+  safeErrorHandler 
+} from '@/lib/error-normalizer';
 
-- Full guide: `/ERROR_HANDLING_GUIDE.md`
-- Implementation summary: `/ERROR_HANDLING_IMPLEMENTATION_SUMMARY.md`
-- Source: `/src/utils/error-utilities.ts`
+// From utilities (comprehensive)
+import { 
+  normalizeError, 
+  getUserFriendlyMessage,
+  isRetryableError,
+  isAuthError,
+  getErrorDetails 
+} from '@/utils/error-utilities';
+```
 
-## Migration Checklist
+## Testing
 
-When adding error handling to new code:
+When testing error scenarios:
 
-- [ ] Import `{ handleError }` from error-utilities
-- [ ] Wrap catch blocks with `handleError()`
-- [ ] Pass descriptive context name ('ComponentName')
-- [ ] Include debugging context object if relevant
-- [ ] Use returned `message` for user-facing errors
-- [ ] Test with empty error objects: `{}`
-- [ ] Verify retryable errors: `isRetryableError(error)`
-- [ ] Check auth errors: `isAuthError(error)`
+```typescript
+import { ensureError, getErrorMessage } from '@/lib/errors';
+
+describe('Error handling', () => {
+  it('handles string errors', () => {
+    const err = ensureError('test error');
+    expect(err).toBeInstanceOf(Error);
+    expect(err.message).toBe('test error');
+  });
+  
+  it('handles Error objects', () => {
+    const original = new Error('original');
+    const err = ensureError(original);
+    expect(err).toBe(original);
+  });
+  
+  it('handles unknown values', () => {
+    const err = ensureError({ some: 'object' });
+    expect(err).toBeInstanceOf(Error);
+    expect(typeof err.message).toBe('string');
+  });
+});
+```

@@ -16,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Label } from "./ui/label";
 import { formatDistanceToNow } from "date-fns";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { loadPuterSDK } from "@/lib/puter-sdk";
 
 type ScoreResults = {
   focus: number;
@@ -85,6 +86,163 @@ const criterionDescriptions: { [key: string]: string } = {
   readability: "What is the overall readability level? (Flesch-Kincaid equivalent)",
 };
 
+/**
+ * Analyze text using Puter AI directly
+ * No API keys required - Puter.js handles authentication
+ */
+async function analyzeWithPuterAI(text: string): Promise<AnalysisResult> {
+  const prompt = `You are an expert academic writing coach. Analyze the following text based on these criteria:
+
+CORE CRITERIA (required):
+- Focus: Is the writing centered on a clear, consistent main idea?
+- Development: Are the ideas well-supported with evidence, examples, and details?
+- Audience: Is the tone and language appropriate for an academic audience?
+- Cohesion: Do the ideas flow logically? Are transitions used effectively?
+- Language and Style: Is the grammar correct? Is the sentence structure varied and the word choice precise?
+
+EXTENDED CRITERIA:
+- Clarity & Precision: How clearly are ideas expressed? Is vocabulary precise and appropriate?
+- Originality & Creativity: Does the writing present unique insights, arguments, or presentation styles?
+- Structure & Organization: Is the text logically organized with clear introduction, body, and conclusion?
+- Grammar & Mechanics: Are grammar, punctuation, spelling, and formatting consistent and correct?
+- Argument Strength & Evidence: How effective are arguments? Is evidence adequate and convincing?
+- Engagement & Tone: Does the writing engage the target audience? Is the tone appropriate for the purpose?
+- Conciseness & Redundancy: Is the writing economical with words? Are there unnecessary repetitions or verbosity?
+- Readability Metrics: What is the overall readability level? Consider sentence length and complexity.
+
+For each criterion, provide a score from 1 to 5 (can be decimal like 3.5).
+Provide an overall score which is the average of ALL scores.
+Provide a concise "overallFeedback" (2-3 sentences) summarizing main strengths and areas for improvement.
+For each criterion, provide a specific actionable "tip" (1-2 sentences).
+
+Output ONLY a valid JSON object with this structure:
+{
+  "scores": {
+    "focus": number,
+    "development": number,
+    "audience": number,
+    "cohesion": number,
+    "languageAndStyle": number,
+    "clarity": number,
+    "originality": number,
+    "structure": number,
+    "grammar": number,
+    "argumentStrength": number,
+    "engagement": number,
+    "conciseness": number,
+    "readability": number,
+    "overall": number
+  },
+  "overallFeedback": "string",
+  "tips": {
+    "focus": "string",
+    "development": "string",
+    "audience": "string",
+    "cohesion": "string",
+    "languageAndStyle": "string",
+    "clarity": "string",
+    "originality": "string",
+    "structure": "string",
+    "grammar": "string",
+    "argumentStrength": "string",
+    "engagement": "string",
+    "conciseness": "string",
+    "readability": "string"
+  }
+}
+
+Text to analyze:
+"${text}"
+
+Generate the JSON now.`;
+
+  try {
+    // Access Puter from window (Puter.js SDK is loaded globally)
+    const puter = (window as any).puter;
+    if (!puter || !puter.ai) {
+      throw new Error("Puter AI not available. Please ensure Puter.js SDK is loaded.");
+    }
+
+    // Call Puter AI chat endpoint
+    console.log('[grammar-check] Calling Puter AI...');
+    const response = await puter.ai.chat(prompt);
+    console.log('[grammar-check] Got Puter response:', response);
+    
+    if (!response) {
+      throw new Error("No response from Puter AI");
+    }
+
+    // Puter.ai.chat() returns a ChatResponse object with .message property
+    // ChatResponse.message can be a string or an object with .content
+    let responseText: string;
+    
+    if (typeof response === 'string') {
+      console.log('[grammar-check] Response is direct string');
+      responseText = response;
+    } else if (typeof response.message === 'string') {
+      // ChatResponse with message as string
+      console.log('[grammar-check] Response.message is string');
+      responseText = response.message;
+    } else if (response.message && typeof response.message === 'object') {
+      // ChatResponse where message is an object (e.g., with .content property)
+      if (typeof response.message.content === 'string') {
+        console.log('[grammar-check] Response.message.content is string');
+        responseText = response.message.content;
+      } else if (Array.isArray(response.message.content)) {
+        // Could be array of content blocks
+        console.log('[grammar-check] Response.message.content is array');
+        responseText = response.message.content
+          .map((block: any) => typeof block === 'string' ? block : block.text || '')
+          .join('');
+      } else {
+        responseText = JSON.stringify(response.message);
+      }
+    } else {
+      console.warn('[grammar-check] Unexpected response format:', response);
+      responseText = JSON.stringify(response);
+    }
+
+    console.log('[grammar-check] Response text (first 200 chars):', responseText.substring(0, 200));
+
+    // Extract JSON from response
+    const jsonStart = responseText.indexOf('{');
+    const jsonEnd = responseText.lastIndexOf('}') + 1;
+    const jsonString = jsonStart !== -1 && jsonEnd !== 0 
+      ? responseText.substring(jsonStart, jsonEnd)
+      : responseText;
+    
+    const result = JSON.parse(jsonString) as AnalysisResult;
+
+    // Validate and fill in missing scores
+    const requiredScores = [
+      'focus', 'development', 'audience', 'cohesion', 'languageAndStyle',
+      'clarity', 'originality', 'structure', 'grammar', 'argumentStrength',
+      'engagement', 'conciseness', 'readability'
+    ];
+
+    for (const dimension of requiredScores) {
+      if (result.scores[dimension as keyof ScoreResults] === undefined) {
+        result.scores[dimension as keyof ScoreResults] = 3;
+        result.tips[dimension as keyof Tips] = result.tips[dimension as keyof Tips] || 'Review this aspect of your writing for improvement.';
+      }
+    }
+
+    // Recalculate overall score
+    const allScores = Object.entries(result.scores)
+      .filter(([key]) => key !== 'overall')
+      .map(([_, value]) => value as number);
+    
+    if (allScores.length > 0) {
+      result.scores.overall = Math.round((allScores.reduce((a, b) => a + b, 0) / allScores.length) * 10) / 10;
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Puter AI analysis error:", error);
+    throw new Error(`Analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
 export function GrammarChecker() {
   const { session, supabase } = useAuth();
   const user = session?.user;
@@ -151,16 +309,39 @@ Research Problem: With the proliferation of digital technology and social media 
     setResults(null);
 
     try {
-      const { data, error: functionError } = await supabase.functions.invoke('grammar-check', {
-        body: { text: inputText }
-      });
+      // Load Puter SDK and ensure user is authenticated
+      const puter = await loadPuterSDK();
       
-      if (functionError) throw new Error(functionError.message);
-      if (data.error) throw new Error(data.error);
+      // Check if user is authenticated with Puter
+      try {
+        await puter.auth.getUser();
+      } catch {
+        // User not authenticated with Puter, prompt sign in
+        toast.info("Signing you in with Puter...");
+        await puter.auth.signIn();
+      }
 
-      setResults(data);
+      // Call Puter AI directly
+      const analysisData = await analyzeWithPuterAI(inputText);
+      
+      setResults(analysisData);
       toast.success("Analysis complete!");
-      // Refresh history after a new check
+
+      // Save analysis results to database (fire and forget)
+      const { error: saveError } = await supabase
+        .from("grammar_check_history")
+        .insert({
+          user_id: user!.id,
+          text_preview: inputText.substring(0, 200),
+          scores: analysisData.scores,
+          overall_feedback: analysisData.overallFeedback,
+        });
+
+      if (saveError) {
+        console.error("Failed to save grammar check history:", saveError);
+      }
+
+      // Refresh history
       const { data: newHistory, error: historyError } = await supabase
         .from("grammar_check_history")
         .select("*")

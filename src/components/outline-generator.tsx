@@ -11,11 +11,10 @@ import { useAuth } from "./auth-provider";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { FieldOfStudySelector } from "./field-of-study-selector";
-import { useAuthReady } from "@/hooks/use-auth-ready";
+import { generateOutline } from "@/lib/puter-sdk";
 
 export function OutlineGenerator() {
   const { session, supabase } = useAuth();
-  const { isReady } = useAuthReady();
   const user = session?.user;
   const router = useRouter();
   const [field, setField] = useState("");
@@ -27,45 +26,33 @@ export function OutlineGenerator() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!topic || !field) return;
-    
-    if (!isReady) {
-      toast.error("Please wait while your session is loading...");
-      return;
-    }
 
     setIsLoading(true);
     setOutline("");
 
     try {
-      if (!session) {
-        throw new Error(
-          "Authentication session not found. Please log in again."
-        );
-      }
-
-      // Use Supabase client to call the edge function instead of direct fetch
-      const { data, error } = await supabase.functions.invoke('generate-outline', {
-        body: { topic, field }
-      });
-
-      if (error) {
-        throw new Error(
-          error.message || 'Failed to generate outline'
-        );
-      }
-
-      if (data?.outline) {
-        setOutline(data.outline);
+      const data = await generateOutline(topic);
+      
+      let outlineText = '';
+      if (typeof data === 'string') {
+        outlineText = data;
+      } else if (data?.outline) {
+        outlineText = data.outline;
       } else {
-        throw new Error(
-          "Failed to generate outline. The function did not return the expected data."
-        );
+        outlineText = JSON.stringify(data, null, 2);
       }
+      
+      setOutline(outlineText);
+      toast.success("Outline generated successfully!");
     } catch (error: any) {
-      toast.error(
-        error.message ||
-          "An unexpected error occurred while generating the outline."
-      );
+      const msg = error.message || "Failed to generate outline.";
+      
+      if (msg.includes("auth")) {
+        toast.error("Please sign in to your Puter account");
+      } else {
+        toast.error(msg);
+      }
+      console.error(error);
     } finally {
       setIsLoading(false);
     }

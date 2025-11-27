@@ -22,9 +22,8 @@ const StatCardSchema = z.object({
 
 const ChartDataSchema = z.array(z.object({
   date: z.string(),
-  value: z.number(),
-  [z.string()]: z.any() // Allow additional properties for chart data
-}));
+  value: z.number()
+}).passthrough()); // Allow additional properties for chart data
 
 // Individual widget schemas
 export const ResearchProgressSchema = z.object({

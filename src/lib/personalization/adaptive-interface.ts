@@ -4,7 +4,7 @@
  */
 
 import { AdaptiveInterface, SuggestedAction, UserBehaviorData, UserPattern } from './types';
-import { supabase } from '@/lib/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 const BEHAVIOR_TABLE = 'user_behavior_logs';
 const PATTERNS_TABLE = 'user_patterns';
