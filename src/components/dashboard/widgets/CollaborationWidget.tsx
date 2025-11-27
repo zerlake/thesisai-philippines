@@ -71,8 +71,8 @@ export function CollaborationWidget({ data }: CollaborationWidgetProps) {
                 Recent Activity
               </p>
               <div className="space-y-2 max-h-40 overflow-y-auto">
-                {data.recentActivity.slice(0, 3).map((activity) => (
-                  <div key={activity.id} className="flex items-start gap-2 text-xs">
+                {data.recentActivity.slice(0, 3).map((activity, idx) => (
+                  <div key={`${activity.userId}-${idx}`} className="flex items-start gap-2 text-xs">
                     <MessageCircle className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-gray-900 font-medium">

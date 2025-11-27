@@ -100,13 +100,13 @@ export function CalendarWidget({ data }: CalendarWidgetProps) {
         })}
       </div>
 
-      {data.upcomingEvents && data.upcomingEvents.length > 0 && (
+      {data.events && data.events.length > 0 && (
         <div className="mt-4 pt-4 border-t border-gray-200">
           <p className="text-xs text-gray-600 font-medium mb-2">
             Upcoming Events
           </p>
           <div className="space-y-2 max-h-24 overflow-y-auto">
-            {data.upcomingEvents.slice(0, 3).map((event) => (
+            {data.events.slice(0, 3).map((event) => (
               <div
                 key={event.id}
                 className="text-xs p-2 bg-gray-50 rounded border border-gray-200"

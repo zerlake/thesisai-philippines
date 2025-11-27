@@ -55,11 +55,11 @@ export function DashboardPageContent() {
               />
             ) : widgetData['research-progress']?.loading ? (
               <div className="bg-white p-6 rounded-lg border border-gray-200 h-64 animate-pulse" />
-            ) : (
+            ) : widgetData['research-progress']?.data ? (
               <ResearchProgressWidget
-                data={widgetData['research-progress']?.data}
+                data={widgetData['research-progress'].data as any}
               />
-            )}
+            ) : null}
           </ErrorBoundary>
 
           {/* Stats Widget */}
@@ -72,9 +72,9 @@ export function DashboardPageContent() {
               />
             ) : widgetData['stats']?.loading ? (
               <div className="bg-white p-6 rounded-lg border border-gray-200 h-64 animate-pulse" />
-            ) : (
-              <StatsWidget data={widgetData['stats']?.data} />
-            )}
+            ) : widgetData['stats']?.data ? (
+              <StatsWidget data={widgetData['stats'].data as any} />
+            ) : null}
           </ErrorBoundary>
 
           {/* Recent Papers Widget */}
@@ -87,9 +87,9 @@ export function DashboardPageContent() {
               />
             ) : widgetData['recent-papers']?.loading ? (
               <div className="bg-white p-6 rounded-lg border border-gray-200 h-64 animate-pulse" />
-            ) : (
-              <RecentPapersWidget data={widgetData['recent-papers']?.data} />
-            )}
+            ) : widgetData['recent-papers']?.data ? (
+              <RecentPapersWidget data={widgetData['recent-papers'].data as any} />
+            ) : null}
           </ErrorBoundary>
 
           {/* Writing Goals Widget */}
@@ -102,9 +102,9 @@ export function DashboardPageContent() {
               />
             ) : widgetData['writing-goals']?.loading ? (
               <div className="bg-white p-6 rounded-lg border border-gray-200 h-64 animate-pulse" />
-            ) : (
-              <WritingGoalsWidget data={widgetData['writing-goals']?.data} />
-            )}
+            ) : widgetData['writing-goals']?.data ? (
+              <WritingGoalsWidget data={widgetData['writing-goals'].data as any} />
+            ) : null}
           </ErrorBoundary>
 
           {/* Collaboration Widget */}
@@ -117,9 +117,9 @@ export function DashboardPageContent() {
               />
             ) : widgetData['collaboration']?.loading ? (
               <div className="bg-white p-6 rounded-lg border border-gray-200 h-64 animate-pulse" />
-            ) : (
-              <CollaborationWidget data={widgetData['collaboration']?.data} />
-            )}
+            ) : widgetData['collaboration']?.data ? (
+              <CollaborationWidget data={widgetData['collaboration'].data as any} />
+            ) : null}
           </ErrorBoundary>
 
           {/* Calendar Widget */}
@@ -132,9 +132,9 @@ export function DashboardPageContent() {
               />
             ) : widgetData['calendar']?.loading ? (
               <div className="bg-white p-6 rounded-lg border border-gray-200 h-64 animate-pulse" />
-            ) : (
-              <CalendarWidget data={widgetData['calendar']?.data} />
-            )}
+            ) : widgetData['calendar']?.data ? (
+              <CalendarWidget data={widgetData['calendar'].data as any} />
+            ) : null}
           </ErrorBoundary>
         </div>
       </div>
