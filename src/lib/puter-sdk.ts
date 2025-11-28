@@ -218,16 +218,25 @@ Format as JSON:
  * AI Task: Generate Outline
  * Generates thesis outline with chapter structure
  */
-export async function generateOutline(topic: string, options?: any): Promise<any> {
+export async function generateOutline(topic: string, options?: any): Promise<string> {
   const puter = await loadPuterSDK();
   await ensurePuterAuth();
 
   const prompt = `Generate a detailed thesis outline for "${topic}".
 Include introduction, literature review, methodology, results, discussion, and conclusion chapters.
-Format as JSON with chapter headings and subheadings.`;
+Format the outline using Markdown headings (e.g., # Introduction, ## Background, ### Sub-point).`;
 
   const response = await puter.ai.chat(prompt, options);
-  return parsePuterJsonResponse(response);
+  
+  if (typeof response === 'string') return response;
+  if (typeof response.message === 'string') return response.message;
+  if (response.message?.content) {
+    return Array.isArray(response.message.content)
+      ? response.message.content.map((b: any) => typeof b === 'string' ? b : b.text || '').join('')
+      : response.message.content;
+  }
+  
+  throw new Error('Unable to extract outline from response');
 }
 
 /**

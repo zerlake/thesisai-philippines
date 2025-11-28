@@ -11,7 +11,8 @@ import { useAuth } from "./auth-provider";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { FieldOfStudySelector } from "./field-of-study-selector";
-import { generateOutline } from "@/lib/puter-sdk";
+import { generateOutline, signInWithPuter } from "@/lib/puter-sdk";
+import { MarkdownRenderer } from "./markdown-renderer"; // Import MarkdownRenderer
 
 export function OutlineGenerator() {
   const { session, supabase } = useAuth();
@@ -22,6 +23,7 @@ export function OutlineGenerator() {
   const [outline, setOutline] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPuterSignIn, setIsPuterSignIn] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,22 +35,31 @@ export function OutlineGenerator() {
     try {
       const data = await generateOutline(topic);
       
-      let outlineText = '';
-      if (typeof data === 'string') {
-        outlineText = data;
-      } else if (data?.outline) {
-        outlineText = data.outline;
-      } else {
-        outlineText = JSON.stringify(data, null, 2);
-      }
-      
+      const outlineText = data;
       setOutline(outlineText);
       toast.success("Outline generated successfully!");
     } catch (error: any) {
       const msg = error.message || "Failed to generate outline.";
       
       if (msg.includes("auth")) {
-        toast.error("Please sign in to your Puter account");
+        toast.error("Please sign in to your Puter account to continue.", {
+          action: {
+            label: "Sign in",
+            onClick: async () => {
+              setIsPuterSignIn(true);
+              try {
+                await signInWithPuter();
+                toast.success("Signed in successfully! Retrying...");
+                handleSubmit(e);
+              } catch (signInError) {
+                toast.error("Failed to sign in. Please try again.");
+                console.error(signInError);
+              } finally {
+                setIsPuterSignIn(false);
+              }
+            },
+          },
+        });
       } else {
         toast.error(msg);
       }
@@ -62,14 +73,14 @@ export function OutlineGenerator() {
     if (!user || !outline || !topic) return;
     setIsSaving(true);
 
-    const htmlOutline = outline.replace(/\n/g, '<br>');
+    const htmlOutline = outline; // Outline is now already Markdown, no need to replace newlines with <br>
 
     const { data: newDoc, error } = await supabase
       .from("documents")
       .insert({
         user_id: user.id,
         title: `Outline: ${topic}`,
-        content: `<h1>Outline for: ${topic}</h1><p>${htmlOutline}</p>`,
+        content: htmlOutline, // Content is now Markdown, not HTML
       })
       .select("id")
       .single();
@@ -114,9 +125,9 @@ export function OutlineGenerator() {
                 disabled={isLoading}
               />
             </div>
-            <Button type="submit" disabled={isLoading || !topic || !field || !session}>
+            <Button type="submit" disabled={isLoading || isPuterSignIn || !topic || !field || !session}>
               <Wand2 className="w-4 h-4 mr-2" />
-              {isLoading ? "Generating..." : "Generate Outline"}
+              {isPuterSignIn ? "Signing in..." : isLoading ? "Generating..." : "Generate Outline"}
             </Button>
           </form>
 
@@ -141,9 +152,7 @@ export function OutlineGenerator() {
                   <Skeleton className="h-4 w-11/12" />
                 </div>
               ) : (
-                <div className="p-4 border rounded-md bg-tertiary whitespace-pre-wrap font-mono text-sm">
-                  {outline}
-                </div>
+                <MarkdownRenderer content={outline} className="p-4 border rounded-md bg-tertiary" />
               )}
             </div>
           )}
