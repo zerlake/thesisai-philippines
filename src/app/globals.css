@@ -136,7 +136,48 @@
   }
   body {
     @apply bg-background text-foreground text-body;
+    /* Improve CLS by ensuring font is loaded properly */
+    font-display: swap;
   }
+
+  /* Prevent layout shift for images */
+  img {
+    height: auto;
+    font-size: 0; /* Hide alt text during loading */
+  }
+
+  /* Ensure videos don't cause layout shift */
+  video {
+    width: 100%;
+    height: auto;
+  }
+
+  /* Reserve space for common aspect ratios */
+  .aspect-video { aspect-ratio: 16/9; }
+  .aspect-square { aspect-ratio: 1/1; }
+  .aspect-portrait { aspect-ratio: 3/4; }
+  .aspect-landscape { aspect-ratio: 4/3; }
+
+  /* Prevent layout shift for ads, embeds, and other external content */
+  .ad-container,
+  .embed-container,
+  .iframe-container {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  }
+
+  .ad-container > *,
+  .embed-container > *,
+  .iframe-container > * {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif font-bold text-balance;
   }

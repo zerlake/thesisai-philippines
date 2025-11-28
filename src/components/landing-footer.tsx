@@ -52,7 +52,7 @@ export function LandingFooter() {
               </div>
               <span className="font-bold text-white">ThesisAI</span>
             </Link>
-            <p className="text-sm text-slate-400 mb-4">
+            <p className="text-sm text-slate-300 mb-4">
               Empowering Filipino researchers with intelligent academic tools.
             </p>
             <div className="flex gap-4">
@@ -60,7 +60,7 @@ export function LandingFooter() {
                 <a
                   key={social.label}
                   href={social.href}
-                  className="text-slate-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-slate-800/50"
+                  className="text-slate-300 hover:text-white transition-colors p-2 rounded-lg hover:bg-slate-800/50"
                   aria-label={social.label}
                 >
                   <social.icon className="h-5 w-5" />
@@ -80,7 +80,7 @@ export function LandingFooter() {
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-sm text-slate-400 hover:text-white transition-colors"
+                      className="text-sm text-slate-300 hover:text-white transition-colors"
                     >
                       {link.name}
                     </Link>
@@ -101,7 +101,7 @@ export function LandingFooter() {
 
           {/* Trust badges */}
           <div className="mt-6 pt-6 border-t border-slate-700/50">
-            <p className="text-xs text-slate-500 text-center mb-3">
+            <p className="text-xs text-slate-400 text-center mb-3">
               Enterprise-grade security and privacy protection
             </p>
             <div className="flex flex-wrap justify-center gap-4 text-xs text-slate-400">

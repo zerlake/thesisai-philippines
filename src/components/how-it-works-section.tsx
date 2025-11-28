@@ -62,7 +62,7 @@ export function HowItWorksSection() {
                       {step.icon}
                     </span>
                   </div>
-                  <span className="text-3xl font-bold text-slate-700 group-hover:text-slate-600 transition-colors">
+                  <span className="text-3xl font-bold text-slate-300 group-hover:text-slate-200 transition-colors">
                     {step.step}
                   </span>
                 </div>

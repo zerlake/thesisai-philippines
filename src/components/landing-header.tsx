@@ -13,7 +13,7 @@ export function LandingHeader() {
 
   return (
     <header className="px-4 lg:px-8 h-16 flex items-center border-b border-slate-700/50 sticky top-0 bg-slate-900/95 backdrop-blur-md z-50 shadow-lg">
-      <Link href="/" className="flex items-center justify-center mr-auto group">
+      <Link href="/" className="flex items-center justify-center mr-auto group" aria-label="ThesisAI Philippines homepage">
         <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 group-hover:shadow-lg group-hover:shadow-purple-500/50 transition-all">
           <BotMessageSquare className="h-5 w-5 text-white" />
         </div>
@@ -55,8 +55,10 @@ export function LandingHeader() {
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="lg:hidden p-2 rounded-md text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
         >
           {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          <span className="sr-only">{mobileMenuOpen ? "Close menu" : "Open menu"}</span>
         </button>
       </div>
 

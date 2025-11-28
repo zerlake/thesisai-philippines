@@ -106,7 +106,7 @@ export function Header() {
       <div className="flex items-center gap-3">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button variant="ghost" size="icon" className="md:hidden" aria-label="Toggle navigation menu">
               <Menu className="w-6 h-6" />
               <span className="sr-only">Toggle navigation menu</span>
             </Button>

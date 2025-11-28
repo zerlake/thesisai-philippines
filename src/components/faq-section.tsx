@@ -291,7 +291,7 @@ export function FaqSection() {
               <a href="mailto:support@thesisai.ph">Contact Support</a>
             </Button>
             <Button variant="outline" asChild className="border-slate-600 text-white hover:bg-slate-800">
-              <a href="#">View Documentation</a>
+              <a href="/documentation">View Documentation</a>
             </Button>
           </div>
         </div>
