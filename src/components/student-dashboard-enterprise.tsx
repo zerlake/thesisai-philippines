@@ -185,49 +185,74 @@ export function StudentDashboardEnterprise() {
     else if (user.email) name = user.email.split('@')[0];
     setDisplayName(name);
 
+    // Use a timeout to avoid hanging
+    const timeoutId = setTimeout(() => {
+      setIsLoadingDoc(false);
+      setIsLoadingStats(false);
+    }, 10000); // 10 second timeout
+
     const fetchLatestDocument = async () => {
       setIsLoadingDoc(true);
-      const { data } = await supabase.from("documents").select("id, title, updated_at").order("updated_at", { ascending: false, nullsFirst: false }).limit(1);
-      if (data && data.length > 0) setLatestDocument(data[0]);
-      setIsLoadingDoc(false);
+      try {
+        const { data, error } = await supabase.from("documents").select("id, title, updated_at").order("updated_at", { ascending: false, nullsFirst: false }).limit(1);
+        if (error) {
+          console.error("Error fetching latest document:", error);
+        } else if (data && data.length > 0) {
+          setLatestDocument(data[0]);
+        }
+      } catch (err) {
+        console.error("Error in fetchLatestDocument:", err);
+      } finally {
+        setIsLoadingDoc(false);
+      }
     };
 
     const fetchStats = async () => {
       setIsLoadingStats(true);
-      const { data: documents, error } = await supabase.from("documents").select("content, updated_at");
-      if (error) {
+      try {
+        const { data: documents, error } = await supabase.from("documents").select("content, updated_at");
+        if (error) {
+          console.error("Error fetching stats:", error);
+          toast.error("Failed to load project stats.");
+        } else if (documents) {
+          const docCount = documents.length;
+          const totalWordCount = documents.reduce((acc, doc) => acc + (doc.content || "").replace(/<[^>]*>?/gm, '').split(/\s+/).filter(Boolean).length, 0);
+          const avgWordCount = docCount > 0 ? Math.round(totalWordCount / docCount) : 0;
+
+          const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+          const recentDocuments = documents.filter(doc => doc.updated_at && new Date(doc.updated_at) > sevenDaysAgo);
+          const recentWordCount = recentDocuments.reduce((acc, doc) => acc + (doc.content || "").replace(/<[^>]*>?/gm, '').split(/\s+/).filter(Boolean).length, 0);
+
+          setStats({ docCount, wordCount: totalWordCount, avgWordCount, recentWordCount });
+        }
+      } catch (err) {
+        console.error("Error in fetchStats:", err);
         toast.error("Failed to load project stats.");
+      } finally {
         setIsLoadingStats(false);
-        return;
       }
-      if (documents) {
-        const docCount = documents.length;
-        const totalWordCount = documents.reduce((acc, doc) => acc + (doc.content || "").replace(/<[^>]*>?/gm, '').split(/\s+/).filter(Boolean).length, 0);
-        const avgWordCount = docCount > 0 ? Math.round(totalWordCount / docCount) : 0;
-
-        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        const recentWordCount = documents
-          .filter(doc => new Date(doc.updated_at) > sevenDaysAgo)
-          .reduce((acc, doc) => acc + (doc.content || "").replace(/<[^>]*>?/gm, '').split(/\s+/).filter(Boolean).length, 0);
-
-        setStats({ docCount, wordCount: totalWordCount, avgWordCount, recentWordCount });
-      }
-      setIsLoadingStats(false);
     };
 
     fetchLatestDocument();
     fetchStats();
 
-    // Don't call getNextAction() directly here as it can create infinite loops
-    // Instead, call it separately after the data is loaded
+    // Clear timeout when component unmounts or effect runs again
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [user, profile, supabase]);
 
   // Separate effect to call getNextAction after initial data is loaded
   useEffect(() => {
-    if (user && !_isLoadingDoc && !isLoadingStats) {
-      getNextAction();
+    if (user) {
+      // Call after a small delay to ensure other data loads first
+      const nextActionTimer = setTimeout(() => {
+        getNextAction();
+      }, 500);
+
+      return () => clearTimeout(nextActionTimer);
     }
-  }, [user, _isLoadingDoc, isLoadingStats, getNextAction]);
+  }, [user, getNextAction]);
 
   const handleModalClose = (open: boolean) => {
     if (!open) {

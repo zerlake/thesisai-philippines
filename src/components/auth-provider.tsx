@@ -108,13 +108,91 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
       setSession(session);
       if (session?.user) {
-        await fetchProfile(session.user);
+        try {
+          // Add a timeout to prevent indefinite loading
+          const timeoutPromise = new Promise((resolve) => {
+            setTimeout(() => {
+              console.log(`[Auth] Profile load timeout for user: ${session.user?.id}, proceeding with minimal profile`);
+              // Instead of rejecting, resolve with minimal profile data to unblock the user
+              resolve({
+                id: session.user?.id,
+                email: session.user?.email,
+                role: "user", // default role
+                created_at: null,
+                updated_at: null,
+                last_login_at: new Date().toISOString(),
+                // Add other minimal required fields to prevent crashes
+                first_name: '',
+                last_name: '',
+                institution: '',
+                department: '',
+                is_onboarded: false,
+                preferences: {},
+                avatar_url: null,
+                full_name: session.user?.email?.split('@')[0] || 'User'
+              });
+            }, 10000); // Reduced to 10 seconds to provide faster fallback
+          });
+
+          const fetchPromise = fetchProfile(session.user);
+
+          // Race the fetchProfile call with a timeout
+          // If timeout occurs, the timeoutPromise will resolve with minimal profile
+          const profileResult = await Promise.race([fetchPromise, timeoutPromise]);
+
+          // Only set profile if it's a valid profile (not an error)
+          if (profileResult && profileResult.id) {
+            setProfile(profileResult);
+            localStorage.setItem("lastProfileLoad", new Date().toISOString());
+          } else {
+            // If result is an error, set minimal profile to unblock user
+            setProfile({
+              id: session.user?.id,
+              email: session.user?.email,
+              role: "user",
+              created_at: null,
+              updated_at: null,
+              last_login_at: new Date().toISOString(),
+              first_name: '',
+              last_name: '',
+              institution: '',
+              department: '',
+              is_onboarded: false,
+              preferences: {},
+              avatar_url: null,
+              full_name: session.user?.email?.split('@')[0] || 'User'
+            });
+          }
+        } catch (error) {
+          console.error("[Auth] Error loading profile:", error);
+          // Set a minimal profile to avoid blocking the user
+          setProfile({
+            id: session.user?.id,
+            email: session.user?.email,
+            role: "user",
+            created_at: null,
+            updated_at: null,
+            last_login_at: new Date().toISOString(),
+            first_name: '',
+            last_name: '',
+            institution: '',
+            department: '',
+            is_onboarded: false,
+            preferences: {},
+            avatar_url: null,
+            full_name: session.user?.email?.split('@')[0] || 'User'
+          });
+        } finally {
+          // Always clear the loading state, even on error
+          if (mounted) {
+            setIsLoading(false);
+          }
+        }
       } else {
         setProfile(null);
-      }
-
-      if (mounted) {
-        setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -174,9 +252,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
+    // Initialize with a timeout to prevent hanging
+    const initTimeout = setTimeout(() => {
+      if (mounted && isLoading) {
+        console.log('[Auth] Initialization timeout, stopping loading state');
+        setIsLoading(false);
+      }
+    }, 15000); // 15 second timeout for initialization
+
     initializeAuth();
 
     return () => {
+      clearTimeout(initTimeout);
       mounted = false;
       subscription.unsubscribe();
     };
@@ -219,13 +306,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Role-based access control
-      if ((pathname.startsWith("/admin") && profile.role !== "admin") ||
+      if (((pathname.startsWith("/admin") && profile.role !== "admin") ||
           (pathname.startsWith("/advisor") && profile.role !== "advisor") ||
-          (pathname.startsWith("/critic") && profile.role !== "critic")) {
-        if (pathname !== userHomePage) {
-          router.replace(userHomePage);
-          return;
-        }
+          (pathname.startsWith("/critic") && profile.role !== "critic")) &&
+          pathname !== userHomePage) {
+        router.replace(userHomePage);
+        return;
       }
 
       // Role-based dashboard access
@@ -246,11 +332,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await supabase.auth.signOut();
       }
     }
-  }, [session, fetchProfile]);
+  }, [session, fetchProfile]);  // Remove router from dependencies to prevent potential loops
 
-  if (isLoading && !isPublicPage(pathname)) {
+  // Show loader only for public pages if needed; for private pages, let content render to avoid infinite loading
+  if (isLoading && isPublicPage(pathname)) {
     return <BrandedLoader />;
   }
+  // For private pages, we render the content regardless of loading state to prevent infinite loading
+  // The individual components will handle their own loading states
 
   return (
     <AuthContext.Provider value={{ supabase, session, profile, refreshProfile, isLoading }}>

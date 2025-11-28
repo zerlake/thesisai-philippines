@@ -1,9 +1,15 @@
+import { Suspense } from "react";
+import Head from "next/head";
 import { HeroSection } from "@/components/landing/hero-section";
-import { HowItWorksSection } from "@/components/how-it-works-section";
-import { FaqSection } from "@/components/faq-section";
 import { FeaturesSection } from "@/components/landing/features-section";
-import { ThesisStructureSection } from "@/components/thesis-structure-section";
-import { AiToolkitSection } from "@/components/ai-toolkit-section";
+import { DeferredSections } from "@/components/landing/deferred-sections";
+
+// Loading skeleton for critical sections with fixed height to prevent CLS
+function SectionSkeleton() {
+  return (
+    <div className="h-[600px] bg-slate-800/30 animate-pulse" />
+  );
+}
 
 export default function LandingPage() {
   return (
@@ -12,7 +18,7 @@ export default function LandingPage() {
       <meta itemProp="description" content="AI-powered academic writing assistant for Philippine students" />
       <meta itemProp="applicationCategory" content="Education" />
       <meta itemProp="operatingSystem" content="Web" />
-      
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -45,13 +51,16 @@ export default function LandingPage() {
         }}
       />
 
-      <main>
+      <main id="main-content">
         <HeroSection />
-        <FeaturesSection />
-        <HowItWorksSection />
-        <ThesisStructureSection />
-        <AiToolkitSection />
-        <FaqSection />
+
+        {/* Features shown immediately - critical for above-fold engagement */}
+        <Suspense fallback={<SectionSkeleton />}>
+          <FeaturesSection />
+        </Suspense>
+
+        {/* Below-fold sections lazy load from client component */}
+        <DeferredSections />
       </main>
     </div>
   );

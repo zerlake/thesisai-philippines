@@ -8,6 +8,7 @@ import { AuthProvider } from "@/components/auth-provider";
 import { SkipToContentLink } from "@/components/skip-to-content-link";
 import { RootLayoutClient } from "@/components/root-layout-client";
 import { ChunkLoadErrorHandler } from "@/components/chunk-load-error-handler";
+import { LayoutStabilityOptimizer } from "@/components/performance/layout-stability";
 
 const fontSans = Outfit({
   subsets: ["latin"],
@@ -87,6 +88,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
+        {/* Note: Actual font files are handled by next/font and loaded automatically */}
+
         {/* Puter SDK now loaded dynamically when needed */}
       </head>
       <body
@@ -97,6 +100,7 @@ export default function RootLayout({
         )}
         suppressHydrationWarning
       >
+        <LayoutStabilityOptimizer />
         <ChunkLoadErrorHandler />
         <SkipToContentLink />
         <ThemeProvider

@@ -506,13 +506,23 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         }
       }));
 
-      // Fetch data from API
-      const response = await fetch(`/api/dashboard/widgets/${widgetId}`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch widget data: ${response.statusText}`);
-      }
+      // Create timeout promise to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error(`Widget ${widgetId} load timeout`)), 15000); // 15 second timeout (increased for network reliability)
+      });
 
-      const { data, cached } = await response.json();
+      // Create fetch promise
+      const fetchPromise = (async () => {
+        const response = await fetch(`/api/dashboard/widgets/${widgetId}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch widget data: ${response.statusText}`);
+        }
+        const result = await response.json();
+        return result;
+      })();
+
+      // Race with timeout
+      const { data, cached } = await Promise.race([fetchPromise, timeoutPromise]);
 
       set((state) => ({
         widgetData: {
@@ -529,6 +539,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
 
       return data;
     } catch (error) {
+      console.error(`Error loading widget ${widgetId}:`, error);
       const err = error instanceof Error ? error : new Error(String(error));
       set((state) => ({
         widgetData: {
@@ -548,7 +559,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
 
   loadAllWidgetData: async (widgetIds: string[]) => {
     set({ isLoadingAllWidgets: true });
-    
+
     try {
       // Initialize all widgets as loading
       set((state) => ({
@@ -569,18 +580,29 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         }
       }));
 
-      // Batch fetch data
-      const response = await fetch('/api/dashboard/widgets/batch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ widgetIds, forceRefresh: false })
+      // Create a timeout promise to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Dashboard widgets load timeout')), 15000); // 15 second timeout
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch widget data: ${response.statusText}`);
-      }
+      // Create the fetch promise
+      const fetchPromise = (async () => {
+        const response = await fetch('/api/dashboard/widgets/batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ widgetIds, forceRefresh: false })
+        });
 
-      const { results, errors } = await response.json();
+        if (!response.ok) {
+          throw new Error(`Failed to fetch widget data: ${response.statusText}`);
+        }
+
+        const { results, errors } = await response.json();
+        return { results, errors };
+      })();
+
+      // Race the fetch with timeout
+      const { results, errors } = await Promise.race([fetchPromise, timeoutPromise]);
 
       // Update widget data with results
       set((state) => ({
@@ -604,7 +626,10 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
 
       return results;
     } catch (error) {
+      console.error('Error loading dashboard widgets:', error);
       const err = error instanceof Error ? error : new Error(String(error));
+
+      // Set all widgets to error state and stop loading
       set((state) => ({
         widgetData: Object.fromEntries(
           widgetIds.map((id) => [

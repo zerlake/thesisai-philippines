@@ -137,12 +137,11 @@ export function DemoAccountsSection() {
 
       console.log("Session set successfully, waiting for auth state change...");
       
-      // Wait a moment for the auth state change to propagate, then redirect
-      setTimeout(() => {
-        console.log("Redirecting to dashboard...");
-        window.location.href = "/dashboard";
-      }, 500);
+      console.log("Session set successfully, redirecting to dashboard...");
+      // Redirect directly after session is set instead of waiting for auth state change
+      window.location.href = "/dashboard";
     } catch (err) {
+      console.error("Demo login error:", err);
       setError(err instanceof Error ? err.message : "Login failed. Demo functionality may not be properly configured.");
       setLoading(null);
     }

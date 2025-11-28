@@ -8,10 +8,30 @@ import { BrandedLoader } from "@/components/branded-loader";
 import { CriticDashboard } from "@/components/critic-dashboard";
 
 export default function DashboardPage() {
-  const { profile } = useAuth();
+  const { profile, isLoading } = useAuth();
 
-  if (!profile) {
+  // Only show loader if there's no session at all
+  // If we have a session but profile is still loading, show skeleton/profile to avoid infinite loading
+  if (!profile && !isLoading) {
     return <BrandedLoader />;
+  }
+
+  // If profile exists, proceed to render dashboard
+  if (profile) {
+    // Continue with dashboard rendering below...
+  }
+  // If we have no profile but loading is still ongoing, we might want to render a partial dashboard
+  else if (isLoading) {
+    // Render a skeleton dashboard or fallback UI to avoid infinite loading
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+          <p className="text-lg text-muted-foreground">Loading your dashboard...</p>
+          <p className="text-sm text-muted-foreground/70 mt-1">This may take a few moments</p>
+        </div>
+      </div>
+    );
   }
 
   // Add structured data based on user role
