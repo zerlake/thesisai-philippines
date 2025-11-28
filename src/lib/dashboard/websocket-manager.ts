@@ -154,11 +154,13 @@ export class WebSocketManager {
           this.handleMessage(JSON.parse(event.data));
         };
 
-        this.ws.onerror = (error) => {
-          console.error('[WebSocket] Error:', error);
+        this.ws.onerror = (event) => {
+          console.error('[WebSocket] Connection error:', event);
           this.setState(ConnectionState.ERROR);
-          this.emit('error', error);
-          reject(error);
+          this.emit('error', event);
+
+          this.ws = null; // Clear the broken connection
+          reject(new Error('WebSocket connection failed')); // Reject the promise to indicate failure
         };
 
         this.ws.onclose = () => {

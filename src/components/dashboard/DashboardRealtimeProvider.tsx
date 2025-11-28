@@ -102,16 +102,25 @@ export function DashboardRealtimeProvider({
     let unsubscribeDisconnected: (() => void) | undefined;
     let unsubscribeConflict: (() => void) | undefined;
 
-    const initializeManagers = async () => {
-      try {
-        // Create WebSocket Manager
-        const wsManager = new WebSocketManager(
-          wsUrl || (typeof window !== 'undefined'
-            ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/api/realtime`
-            : 'ws://localhost:3000/api/realtime'),
-          WEBSOCKET_CONFIG as any
-        );
-
+            const initializeManagers = async () => {
+              try {
+                let actualWsUrl = wsUrl;
+    
+                // If wsUrl is not provided, fetch it from the API
+                if (!actualWsUrl) {
+                  const response = await fetch('/api/realtime');
+                  if (!response.ok) {
+                    throw new Error(`Failed to fetch WebSocket URL: ${response.statusText}`);
+                  }
+                  const data = await response.json();
+                  actualWsUrl = data.wsUrl;
+                }
+    
+                // Create WebSocket Manager
+                const wsManager = new WebSocketManager(
+                  actualWsUrl || 'ws://localhost:3000/realtime', // Fallback to /realtime if API fails or wsUrl is empty
+                  WEBSOCKET_CONFIG as any
+                );
         // Create State Manager
         const stateManager = new RealtimeStateManager();
 
@@ -184,22 +193,22 @@ export function DashboardRealtimeProvider({
           update: updateProcessor
         };
 
-        // Update context ref
+        // Auto-connect if enabled
+        if (autoConnect) {
+          await wsManager.connect();
+        }
+        
+        // Update context ref AFTER successful connection
         contextRef.current = {
           wsManager,
           stateManager,
           syncManager,
           updateProcessor,
-          isInitialized: true
+          isInitialized: true // Set to true only after successful connection
         };
 
         // Force a re-render to update the context
         forceUpdate();
-
-        // Auto-connect if enabled
-        if (autoConnect) {
-          await wsManager.connect();
-        }
 
         onInitialized?.();
       } catch (error) {
