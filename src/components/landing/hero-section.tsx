@@ -2,59 +2,15 @@
 
 import Link from "next/link";
 import { Button } from "../ui/button";
-import { motion } from "framer-motion";
 import { ArrowRightIcon, Sparkles, Users, TrendingUp } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import Image from "next/image";
 
 export function HeroSection() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isInView, setIsInView] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
-
-  // Spring animation configuration
-  const springConfig = prefersReducedMotion 
-    ? { type: "tween", duration: 0.3 }
-    : { type: "spring", stiffness: 100, damping: 30, mass: 1 };
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { 
-        staggerChildren: prefersReducedMotion ? 0.05 : 0.15, 
-        delayChildren: 0 
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { 
-        ...springConfig,
-        duration: prefersReducedMotion ? 0.3 : 0.8 
-      } 
-    }
-  };
-
-  // Track mouse for parallax effect
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (containerRef.current && !prefersReducedMotion) {
-        const rect = containerRef.current.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width - 0.5;
-        const y = (e.clientY - rect.top) / rect.height - 0.5;
-        setMousePosition({ x: x * 10, y: y * 10 });
-      }
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [prefersReducedMotion]);
+  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
 
   // Haptic feedback helper
   const triggerHaptic = () => {
@@ -67,87 +23,81 @@ export function HeroSection() {
     <section
       ref={containerRef}
       className="relative bg-cover bg-center bg-no-repeat overflow-hidden"
-      style={{ backgroundImage: "url('/hero-background.png')" }}
       aria-labelledby="hero-title"
     >
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/60 to-slate-900" />
-      
-      {/* Animated background elements with parallax */}
-      <motion.div 
-        className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"
-        animate={!prefersReducedMotion ? mousePosition : {}}
-        transition={{ type: "tween", duration: 0.6 }}
-      />
-      <motion.div 
-        className="absolute bottom-0 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"
-        animate={!prefersReducedMotion ? { x: -mousePosition.x, y: -mousePosition.y } : {}}
-        transition={{ type: "tween", duration: 0.6 }}
+      {/* Preloaded hero background image with explicit dimensions to prevent CLS */}
+      <Image
+        src="/hero-background.webp"
+        alt="Hero background"
+        fill
+        priority
+        quality={90}
+        sizes="100vw"
+        className="absolute inset-0 object-cover"
+        onLoad={() => setBackgroundLoaded(true)}
+        style={{
+          position: 'absolute',
+          height: '100%',
+          width: '100%',
+          objectFit: 'cover',
+          color: 'transparent' // Hide alt text during loading
+        }}
       />
 
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/60 to-slate-900" />
+
+      {/* Simplified background elements with CSS animations for performance */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse-slow" />
+      <div className="absolute bottom-0 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse-slower" />
+
       <div className="relative container flex flex-col items-center justify-center text-center py-4 md:py-6 lg:py-8">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="max-w-4xl mx-auto"
-        >
+        <div className="max-w-4xl mx-auto">
           {/* Badge */}
-          <motion.div variants={itemVariants} className="mb-6 inline-flex">
+          <div className="mb-6 inline-flex opacity-0 animate-[fade-in_0.5s_ease-out_0.2s_forwards]">
             <div className="px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-blue-400" />
               <span className="text-sm font-semibold text-blue-300">AI-Powered Academic Excellence</span>
             </div>
-          </motion.div>
+          </div>
 
           {/* Main heading */}
-          <motion.h1
-            variants={itemVariants}
-            id="hero-title"
-            className="text-5xl md:text-7xl font-black tracking-tight text-white mb-6"
-          >
+          <h1 className="text-5xl md:text-7xl font-black tracking-tight text-white mb-6 opacity-0 animate-[fade-in_0.5s_ease-out_0.3s_forwards]">
             Your Thesis,{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
               Perfected
             </span>
-          </motion.h1>
+          </h1>
 
           {/* Subheading */}
-          <motion.p
-            variants={itemVariants}
-            className="text-xl md:text-2xl text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed"
-          >
+          <p className="text-xl md:text-2xl text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed opacity-0 animate-[fade-in_0.5s_ease-out_0.4s_forwards]">
             From research conceptualization to final defense, ThesisAI provides enterprise-grade tools to streamline every stage of your academic journey.
-          </motion.p>
+          </p>
 
           {/* Stats */}
-          <motion.div
-            variants={itemVariants}
-            className="grid grid-cols-3 gap-4 md:gap-8 mb-10 max-w-2xl mx-auto"
-          >
+          <div className="grid grid-cols-3 gap-4 md:gap-8 mb-10 max-w-2xl mx-auto opacity-0 animate-[fade-in_0.5s_ease-out_0.5s_forwards]">
             {[
               { icon: Users, label: "AI-Powered", value: "Research Tools" },
               { icon: TrendingUp, label: "Smart", value: "Analysis Engine" },
               { icon: Sparkles, label: "Instant", value: "AI Feedback" }
             ].map((stat, idx) => (
-              <div key={idx} className="p-3 rounded-lg bg-slate-800/30 border border-slate-700/50">
+              <div
+                key={idx}
+                className="p-3 rounded-lg bg-slate-800/30 border border-slate-700/50 opacity-0 animate-[fade-in_0.5s_ease-out_0.6s_forwards]"
+                style={{ animationDelay: `${500 + idx * 100}ms` }}
+              >
                 <stat.icon className="w-5 h-5 text-blue-400 mx-auto mb-2" />
                 <p className="text-sm font-semibold text-white">{stat.label}</p>
                 <p className="text-xs text-slate-400">{stat.value}</p>
               </div>
             ))}
-          </motion.div>
+          </div>
 
           {/* CTA Buttons */}
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-col md:flex-row justify-center gap-4 mb-8"
-          >
-            <motion.div
-              whileHover={prefersReducedMotion ? {} : { scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.98 }}
+          <div className="flex flex-col md:flex-row justify-center gap-4 mb-8 opacity-0 animate-[fade-in_0.5s_ease-out_0.8s_forwards]">
+            <div
               onMouseEnter={triggerHaptic}
-              transition={springConfig}
+              className="motion-safe:transition-transform motion-safe:hover:scale-105 motion-safe:hover:-translate-y-0.5"
             >
               <Button
                 size="lg"
@@ -158,12 +108,10 @@ export function HeroSection() {
                   Get Started Free <ArrowRightIcon className="w-5 h-5" />
                 </Link>
               </Button>
-            </motion.div>
-            <motion.div
-              whileHover={prefersReducedMotion ? {} : { scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.98 }}
+            </div>
+            <div
               onMouseEnter={triggerHaptic}
-              transition={springConfig}
+              className="motion-safe:transition-transform motion-safe:hover:scale-105 motion-safe:hover:-translate-y-0.5"
             >
               <Button
                 size="lg"
@@ -173,29 +121,25 @@ export function HeroSection() {
               >
                 <Link href="#features">Explore Features</Link>
               </Button>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
 
           {/* Trust statement */}
-          <motion.p variants={itemVariants} className="text-sm text-slate-400">
+          <p className="text-sm text-slate-400 opacity-0 animate-[fade-in_0.5s_ease-out_1s_forwards]">
             <strong className="text-slate-300">🚀 Ready to elevate your thesis?</strong> Join thousands of Filipino students and researchers using ThesisAI.
-          </motion.p>
-        </motion.div>
+          </p>
+        </div>
       </div>
 
       {/* Scroll indicator */}
-      <motion.div
-        animate={{ y: [0, 10, 0] }}
-        transition={{ repeat: Infinity, duration: 2 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-      >
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-0 animate-[fade-in_0.5s_ease-out_1.2s_forwards]">
         <div className="flex flex-col items-center gap-2">
           <span className="text-sm text-slate-400">Scroll to explore</span>
           <div className="w-6 h-10 border-2 border-slate-500 rounded-full flex items-center justify-center">
-            <div className="w-1 h-3 bg-slate-400 rounded-full" />
+            <div className="w-1 h-3 bg-slate-400 rounded-full animate-bounce" />
           </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

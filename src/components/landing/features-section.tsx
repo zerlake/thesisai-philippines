@@ -17,7 +17,6 @@ import {
   ChevronDown
 } from "lucide-react";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 const featureCategories = [
@@ -142,10 +141,6 @@ export function FeaturesSection() {
   const [expandedCategory, setExpandedCategory] = useState("conceptualize");
   const prefersReducedMotion = useReducedMotion();
 
-  const springConfig = prefersReducedMotion 
-    ? { type: "tween", duration: 0.3 }
-    : { type: "spring", stiffness: 80, damping: 20 };
-
   // Haptic feedback helper
   const triggerHaptic = () => {
     if (typeof window !== "undefined" && "vibrate" in navigator) {
@@ -157,10 +152,10 @@ export function FeaturesSection() {
     <section id="features" className="bg-gradient-to-b from-slate-900 to-slate-800 py-16 md:py-24">
       <div className="container">
         <div className="mx-auto mb-16 max-w-3xl text-center">
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white opacity-0 animate-[fade-in_0.5s_ease-out_0.2s_forwards]">
             Features for Every Stage
           </h2>
-          <p className="mt-6 text-lg text-slate-300">
+          <p className="mt-6 text-lg text-slate-300 opacity-0 animate-[fade-in_0.5s_ease-out_0.3s_forwards]">
             Follow your research journey with tools designed for each phase—from planning through defense.
           </p>
         </div>
@@ -168,14 +163,12 @@ export function FeaturesSection() {
         {/* Phase-based Feature Accordion */}
         <div className="grid gap-4 max-w-4xl mx-auto">
           {featureCategories.map((category) => (
-            <motion.div
+            <div
               key={category.id}
-              className="group border border-slate-700/50 rounded-xl overflow-hidden"
-              whileHover={prefersReducedMotion ? {} : { borderColor: "rgb(71, 85, 105)" }}
-              transition={springConfig}
+              className="group border border-slate-700/50 rounded-xl overflow-hidden motion-safe:transition-colors"
             >
               {/* Category Header - Always Visible */}
-              <motion.button
+              <button
                 onClick={() => {
                   triggerHaptic();
                   setExpandedCategory(expandedCategory === category.id ? "" : category.id);
@@ -184,10 +177,7 @@ export function FeaturesSection() {
                   expandedCategory === category.id
                     ? `bg-gradient-to-r ${category.color} bg-opacity-10 border-b border-slate-700/50`
                     : "bg-slate-800/50 hover:bg-slate-800/70"
-                }`}
-                whileHover={prefersReducedMotion ? {} : { x: 4 }}
-                whileTap={{ scale: 0.99 }}
-                transition={springConfig}
+                } motion-safe:transition-transform`}
               >
                 <div className="flex items-center gap-4 text-left">
                   <div className={`flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br ${category.color} bg-opacity-20`}>
@@ -202,61 +192,46 @@ export function FeaturesSection() {
                     <h3 className="text-xl font-bold text-white">{category.title}</h3>
                   </div>
                 </div>
-                <motion.div
-                  animate={prefersReducedMotion ? {} : { rotate: expandedCategory === category.id ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                >
+                <div className={`transform transition-transform ${expandedCategory === category.id ? 'rotate-180' : ''}`}>
                   <ChevronDown className="w-5 h-5 text-slate-400" />
-                </motion.div>
-              </motion.button>
+                </div>
+              </button>
 
               {/* Expandable Features List */}
-              <AnimatePresence>
-                {expandedCategory === category.id && (
-                  <motion.div 
-                    initial={prefersReducedMotion ? {} : { opacity: 0, height: 0 }}
-                    animate={prefersReducedMotion ? {} : { opacity: 1, height: "auto" }}
-                    exit={prefersReducedMotion ? {} : { opacity: 0, height: 0 }}
-                    transition={springConfig}
-                    className="px-8 py-6 bg-slate-900/50 space-y-4 border-t border-slate-700/50 overflow-hidden"
-                  >
-                  <p className="text-base text-slate-300 mb-6 font-medium leading-relaxed">
+              {expandedCategory === category.id && (
+                <div className="px-8 py-6 bg-slate-900/50 space-y-4 border-t border-slate-700/50 overflow-hidden">
+                  <p className="text-base text-slate-300 mb-6 font-medium leading-relaxed opacity-0 animate-[fade-in_0.5s_ease-out_0.1s_forwards]">
                     {category.description}
                   </p>
-                    <div className="space-y-4">
-                      {category.features.map((feature, idx) => (
-                        <motion.div
-                          key={feature.title}
-                          initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
-                          animate={prefersReducedMotion ? {} : { opacity: 1, x: 0 }}
-                          transition={{ ...springConfig, delay: idx * 0.05 }}
-                          className="flex gap-4 p-5 rounded-lg bg-slate-800/50 border border-slate-700/30 group/item"
-                          whileHover={prefersReducedMotion ? {} : { x: 4 }}
-                          onMouseEnter={triggerHaptic}
-                        >
-                          <div className={`flex h-12 w-12 items-center justify-center rounded-lg flex-shrink-0 bg-gradient-to-br ${category.color} bg-opacity-20 group-hover/item:bg-opacity-40 transition-colors`}>
-                            <div className="text-blue-300">{feature.icon}</div>
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-white text-base mb-2 group-hover/item:text-blue-300 transition-colors">
-                              {feature.title}
-                            </h4>
-                            <p className="text-sm text-slate-400 leading-relaxed">
-                              {feature.description}
-                            </p>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+                  <div className="space-y-4">
+                    {category.features.map((feature, idx) => (
+                      <div
+                        key={feature.title}
+                        className="flex gap-4 p-5 rounded-lg bg-slate-800/50 border border-slate-700/30 group/item motion-safe:transition-transform"
+                        onMouseEnter={triggerHaptic}
+                      >
+                        <div className={`flex h-12 w-12 items-center justify-center rounded-lg flex-shrink-0 bg-gradient-to-br ${category.color} bg-opacity-20 group-hover/item:bg-opacity-40 transition-colors`}>
+                          <div className="text-blue-300">{feature.icon}</div>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-white text-base mb-2 group-hover/item:text-blue-300 transition-colors">
+                            {feature.title}
+                          </h4>
+                          <p className="text-sm text-slate-400 leading-relaxed">
+                            {feature.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </div>
 
         {/* Quick Stats */}
-        <div className="mt-16 p-8 md:p-12 rounded-xl bg-gradient-to-r from-blue-500/5 to-purple-600/5 border border-blue-500/10">
+        <div className="mt-16 p-8 md:p-12 rounded-xl bg-gradient-to-r from-blue-500/5 to-purple-600/5 border border-blue-500/10 opacity-0 animate-[fade-in_0.5s_ease-out_0.8s_forwards]">
           <p className="text-center text-base text-slate-300 mb-8 font-medium">
             Everything you need for thesis success
           </p>
@@ -277,7 +252,7 @@ export function FeaturesSection() {
         </div>
 
         {/* Tooltip for First-time Users */}
-        <div className="mt-12 text-center">
+        <div className="mt-12 text-center opacity-0 animate-[fade-in_0.5s_ease-out_1s_forwards]">
           <p className="text-sm text-slate-400 flex items-center justify-center gap-2">
             💡 Click any phase above to explore features for that stage
           </p>

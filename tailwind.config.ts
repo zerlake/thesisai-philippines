@@ -129,6 +129,38 @@ const config = {
           "0%": { backgroundPosition: "-200% center" },
           "100%": { backgroundPosition: "200% center" },
         },
+        "pulse-slow": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.5" },
+        },
+        "pulse-slower": {
+          "0%, 100%": { opacity: "0.8" },
+          "50%": { opacity: "0.3" },
+        },
+        "delay-100": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "delay-200": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "delay-300": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "delay-400": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "delay-500": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "delay-600": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -139,6 +171,14 @@ const config = {
         "scale-in": "scale-in 0.3s ease-out",
         "glow": "glow 2s ease-in-out infinite",
         "shimmer": "shimmer 2s ease-in-out infinite",
+        "pulse-slow": "pulse-slow 4s ease-in-out infinite",
+        "pulse-slower": "pulse-slower 6s ease-in-out infinite",
+        "delay-100": "delay-100 0.5s ease-out 0.1s forwards",
+        "delay-200": "delay-200 0.5s ease-out 0.2s forwards",
+        "delay-300": "delay-300 0.5s ease-out 0.3s forwards",
+        "delay-400": "delay-400 0.5s ease-out 0.4s forwards",
+        "delay-500": "delay-500 0.5s ease-out 0.5s forwards",
+        "delay-600": "delay-600 0.5s ease-out 0.6s forwards",
       },
     },
   },
