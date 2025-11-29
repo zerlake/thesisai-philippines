@@ -17,19 +17,15 @@ import { getAuthenticatedUser, AuthenticationError } from '@/lib/server-auth'; /
  */
 export async function GET(request: NextRequest) {
   try {
-    // const supabase = createServerSupabaseClient(); // Remove this
-    // const {
-    //   data: { session },
-    // } = await supabase.auth.getSession(); // Remove this
-
-    // if (!session) { // Remove this block
-    //   return NextResponse.json(
-    //     { error: 'Unauthorized' },
-    //     { status: 401 }
-    //   );
-    // }
-
-    const user = await getAuthenticatedUser(); // Add this line
+    // Try to get authenticated user, but allow unauthenticated access
+    let userId: string | undefined;
+    try {
+      const user = await getAuthenticatedUser();
+      userId = user.id;
+    } catch (authError) {
+      // If not authenticated, we'll return a public URL without user ID
+      console.info('Unauthenticated request to /api/realtime');
+    }
 
     // Return WebSocket endpoint information
     const protocol = process.env.NODE_ENV === 'production' ? 'wss' : 'ws';
@@ -39,17 +35,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       status: 'ready',
       wsUrl,
-      userId: user.id, // Replace session.user.id with user.id
+      userId: userId, // Include user ID if authenticated, otherwise undefined
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Error in realtime health check:', error);
-    if (error instanceof AuthenticationError) { // Add this block
-      return NextResponse.json(
-        { error: error.message },
-        { status: 401 }
-      );
-    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

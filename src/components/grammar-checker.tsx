@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Label } from "./ui/label";
 import { formatDistanceToNow } from "date-fns";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { loadPuterSDK } from "@/lib/puter-sdk";
+import { callPuterAI } from "@/lib/puter-ai-wrapper";
 
 type ScoreResults = {
   focus: number;
@@ -87,8 +87,7 @@ const criterionDescriptions: { [key: string]: string } = {
 };
 
 /**
- * Analyze text using Puter AI directly
- * No API keys required - Puter.js handles authentication
+ * Analyze text using Puter AI client-side wrapper
  */
 async function analyzeWithPuterAI(text: string): Promise<AnalysisResult> {
   const prompt = `You are an expert academic writing coach. Analyze the following text based on these criteria:
@@ -157,61 +156,15 @@ Text to analyze:
 Generate the JSON now.`;
 
   try {
-    // Access Puter from window (Puter.js SDK is loaded globally)
-    const puter = (window as any).puter;
-    if (!puter || !puter.ai) {
-      throw new Error("Puter AI not available. Please ensure Puter.js SDK is loaded.");
-    }
+    // Call Puter AI using client-side wrapper
+    const result = await callPuterAI(prompt, {
+      temperature: 0.3,  // Precise corrections
+      max_tokens: 2500,
+      timeout: 30000
+    });
 
-    // Call Puter AI chat endpoint
-    console.log('[grammar-check] Calling Puter AI...');
-    const response = await puter.ai.chat(prompt);
-    console.log('[grammar-check] Got Puter response:', response);
-    
-    if (!response) {
-      throw new Error("No response from Puter AI");
-    }
-
-    // Puter.ai.chat() returns a ChatResponse object with .message property
-    // ChatResponse.message can be a string or an object with .content
-    let responseText: string;
-    
-    if (typeof response === 'string') {
-      console.log('[grammar-check] Response is direct string');
-      responseText = response;
-    } else if (typeof response.message === 'string') {
-      // ChatResponse with message as string
-      console.log('[grammar-check] Response.message is string');
-      responseText = response.message;
-    } else if (response.message && typeof response.message === 'object') {
-      // ChatResponse where message is an object (e.g., with .content property)
-      if (typeof response.message.content === 'string') {
-        console.log('[grammar-check] Response.message.content is string');
-        responseText = response.message.content;
-      } else if (Array.isArray(response.message.content)) {
-        // Could be array of content blocks
-        console.log('[grammar-check] Response.message.content is array');
-        responseText = response.message.content
-          .map((block: any) => typeof block === 'string' ? block : block.text || '')
-          .join('');
-      } else {
-        responseText = JSON.stringify(response.message);
-      }
-    } else {
-      console.warn('[grammar-check] Unexpected response format:', response);
-      responseText = JSON.stringify(response);
-    }
-
-    console.log('[grammar-check] Response text (first 200 chars):', responseText.substring(0, 200));
-
-    // Extract JSON from response
-    const jsonStart = responseText.indexOf('{');
-    const jsonEnd = responseText.lastIndexOf('}') + 1;
-    const jsonString = jsonStart !== -1 && jsonEnd !== 0 
-      ? responseText.substring(jsonStart, jsonEnd)
-      : responseText;
-    
-    const result = JSON.parse(jsonString) as AnalysisResult;
+    // Parse JSON response
+    const parsed = JSON.parse(result) as AnalysisResult;
 
     // Validate and fill in missing scores
     const requiredScores = [
@@ -221,24 +174,24 @@ Generate the JSON now.`;
     ];
 
     for (const dimension of requiredScores) {
-      if (result.scores[dimension as keyof ScoreResults] === undefined) {
-        result.scores[dimension as keyof ScoreResults] = 3;
-        result.tips[dimension as keyof Tips] = result.tips[dimension as keyof Tips] || 'Review this aspect of your writing for improvement.';
+      if (parsed.scores[dimension as keyof ScoreResults] === undefined) {
+        parsed.scores[dimension as keyof ScoreResults] = 3;
+        parsed.tips[dimension as keyof Tips] = parsed.tips[dimension as keyof Tips] || 'Review this aspect of your writing for improvement.';
       }
     }
 
     // Recalculate overall score
-    const allScores = Object.entries(result.scores)
+    const allScores = Object.entries(parsed.scores)
       .filter(([key]) => key !== 'overall')
       .map(([_, value]) => value as number);
     
     if (allScores.length > 0) {
-      result.scores.overall = Math.round((allScores.reduce((a, b) => a + b, 0) / allScores.length) * 10) / 10;
+      parsed.scores.overall = Math.round((allScores.reduce((a, b) => a + b, 0) / allScores.length) * 10) / 10;
     }
 
-    return result;
+    return parsed;
   } catch (error) {
-    console.error("Puter AI analysis error:", error);
+    console.error("Grammar check analysis error:", error);
     throw new Error(`Analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
@@ -309,19 +262,7 @@ Research Problem: With the proliferation of digital technology and social media 
     setResults(null);
 
     try {
-      // Load Puter SDK and ensure user is authenticated
-      const puter = await loadPuterSDK();
-      
-      // Check if user is authenticated with Puter
-      try {
-        await puter.auth.getUser();
-      } catch {
-        // User not authenticated with Puter, prompt sign in
-        toast.info("Signing you in with Puter...");
-        await puter.auth.signIn();
-      }
-
-      // Call Puter AI directly
+      // Call Puter AI analysis
       const analysisData = await analyzeWithPuterAI(inputText);
       
       setResults(analysisData);

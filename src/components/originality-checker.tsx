@@ -50,7 +50,13 @@ function PlagiarismResultRenderer({ results }: { results: any }) {
 }
 
 export function OriginalityChecker() {
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState(
+    `The quick brown fox jumps over the lazy dog. This is a common pangram used to display all letters of the alphabet. For instance, in typography, it helps showcase fonts effectively.
+
+Some researchers argue that the rapid advancements in artificial intelligence will fundamentally reshape the future of work. However, other scholars contend that while AI will automate certain tasks, it will also create new opportunities and roles for human workers. There is an ongoing debate on the extent of AI's impact on employment. This paragraph could be considered original work or it could be plagiarized from another source. It all depends on proper citation.
+
+According to a study by Smith et al. (2023), "The integration of AI in educational settings presents both unprecedented opportunities and significant challenges for students and educators alike." This highlights the dual nature of technological adoption in academia. This sentence is directly quoted from a fictional source to demonstrate how plagiarism might be detected.`
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState('');
