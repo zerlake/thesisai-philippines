@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { useAuth } from "./auth-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useRouter } from "next/navigation";
-import { generateConclusion } from "@/lib/puter-sdk";
+import { callPuterAI } from "@/lib/puter-ai-wrapper";
 
 type ConclusionResult = {
   summary: string;
@@ -31,14 +31,34 @@ export function ConclusionGenerator() {
       toast.error("Please enter your research findings.");
       return;
     }
+    if (!session) {
+      toast.error("You must be logged in to use this feature.");
+      return;
+    }
 
     setIsLoading(true);
     setResults(null);
     
     try {
-      const conclusionText = await generateConclusion(findings);
+      const prompt = `Write a comprehensive thesis conclusion based on these research findings:
+
+"${findings}"
+
+Provide a professional academic conclusion that:
+- Summarizes key findings in 2-3 sentences
+- Discusses implications for the field
+- Suggests future research directions
+- Addresses limitations of the study
+
+Format the response as a structured conclusion suitable for a thesis Chapter V (Conclusion section).`;
+
+      const conclusionText = await callPuterAI(prompt, {
+        temperature: 0.4,  // Balanced, academic tone
+        max_tokens: 2500,
+        timeout: 30000
+      });
       
-      // Parse conclusion response - could be string or structured data
+      // Parse conclusion response
       let summary = '';
       let conclusion = '';
       let recommendations = '';
@@ -48,23 +68,13 @@ export function ConclusionGenerator() {
         conclusion = conclusionText;
         summary = findings.substring(0, 200);
         recommendations = 'Based on the findings above, further research is needed.';
-      } else if (conclusionText && typeof conclusionText === 'object') {
-        const data = conclusionText as Record<string, string>;
-        summary = data.summary || findings.substring(0, 200);
-        conclusion = data.conclusion || String(conclusionText);
-        recommendations = data.recommendations || 'Based on the findings above, further research is needed.';
       }
       
       setResults({ summary, conclusion, recommendations });
       toast.success("Conclusion sections generated!");
     } catch (err: any) {
       const msg = err.message || "Failed to generate conclusion.";
-      
-      if (msg.includes("auth")) {
-        toast.error("Please sign in to your Puter account");
-      } else {
-        toast.error(msg);
-      }
+      toast.error(msg);
       console.error(err);
     } finally {
       setIsLoading(false);
