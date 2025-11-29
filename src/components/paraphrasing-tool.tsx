@@ -10,7 +10,7 @@ import { Copy, FilePlus2, Languages, Loader2, Info, RotateCcw, Eye } from "lucid
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "./ui/alert";
-import { paraphraseText } from "@/lib/puter-sdk";
+import { callPuterAI } from "@/lib/puter-ai-wrapper";
 
 export function ParaphrasingTool() {
   const { session, supabase } = useAuth();
@@ -29,15 +29,34 @@ export function ParaphrasingTool() {
       toast.error("Please enter some text to paraphrase.");
       return;
     }
+    if (!session) {
+      toast.error("You must be logged in to use this feature.");
+      return;
+    }
 
     setIsLoading(true);
     setOutputText("");
 
     try {
-      const result = await paraphraseText(
-        inputText,
-        (mode as 'formal' | 'simple' | 'expand' | 'standard') || 'standard'
-      );
+      const modeInstructions: Record<string, string> = {
+        formal: 'Rewrite in formal academic language with technical terminology.',
+        simple: 'Rewrite using simpler, more accessible language.',
+        expand: 'Expand the text with more details and explanations (2-3x longer).',
+        standard: 'Rewrite naturally while maintaining the original meaning.'
+      };
+
+      const prompt = `${modeInstructions[mode] || modeInstructions.standard}
+
+Original text:
+"${inputText}"
+
+Provide only the rewritten text without explanations.`;
+
+      const result = await callPuterAI(prompt, {
+        temperature: 0.7,  // Varied phrasing
+        max_tokens: Math.min(inputText.length * 2, 3000),
+        timeout: 30000
+      });
       
       setOutputText(result);
       setHistory([...history, { mode, output: result }]);
@@ -45,14 +64,7 @@ export function ParaphrasingTool() {
       toast.success("Text paraphrased successfully!");
     } catch (error: any) {
       const errorMessage = error.message || "Failed to paraphrase text.";
-      
-      if (errorMessage.includes("auth")) {
-        toast.error("Please sign in to your Puter account");
-      } else if (errorMessage.includes("empty")) {
-        toast.error("AI returned empty response. Please try again.");
-      } else {
-        toast.error(errorMessage);
-      }
+      toast.error(errorMessage);
       console.error(error);
     } finally {
       setIsLoading(false);
