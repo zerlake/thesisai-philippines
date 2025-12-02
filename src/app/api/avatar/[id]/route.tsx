@@ -1,5 +1,4 @@
 import { ImageResponse } from 'next/og';
-import { ReactElement } from 'react';
 
 export const runtime = 'edge';
 
@@ -33,23 +32,21 @@ export async function GET(
     const config = avatarConfig[id] || { text: '?', bgColor: '#6B7280' }; // Gray for unknown
 
     return new ImageResponse(
-      (
-        <div
-          style={{
-            display: 'flex',
-            fontSize: 96,
-            background: config.bgColor,
-            width: '100%',
-            height: '100%',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '50%',
-            color: 'white',
-          } as React.CSSProperties}
-        >
-          {config.text}
-        </div>
-      ) as ReactElement,
+      <div
+        style={{
+          display: 'flex',
+          fontSize: 96,
+          background: config.bgColor,
+          width: '100%',
+          height: '100%',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '50%',
+          color: 'white',
+        }}
+      >
+        {config.text}
+      </div>,
       {
         width: 200,
         height: 200,
