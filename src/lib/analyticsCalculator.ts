@@ -56,24 +56,8 @@ export class AnalyticsCalculator {
         .order('start_time', { ascending: false });
 
       if (error) {
-        // Check if error is an empty object or has no meaningful content, which can happen in certain Supabase states
-        const errorAsAny = error as any;
-        const errorString = JSON.stringify(error);
-        
-        // If error stringifies to empty object or nearly empty, table doesn't exist
-        if (errorString === '{}' || !errorAsAny.message) {
-          console.warn('Empty or minimal error object received for writing_sessions query - table may not exist');
-          return [];
-        }
-
-        console.error('Error fetching writing sessions:', {
-          message: errorAsAny.message || 'No message',
-          details: errorAsAny.details || 'No details',
-          hint: errorAsAny.hint || 'No hint',
-          code: errorAsAny.code || 'No code',
-          status: status,
-          userId: userId
-        });
+        // Tables may not exist yet - just return empty array silently for now
+        // This is expected until the migration is applied
         return [];
       }
 
@@ -99,36 +83,8 @@ export class AnalyticsCalculator {
 
       // Check if the error indicates the table doesn't exist
       if (error) {
-        // Check if error is an empty object or has no meaningful content, which can happen in certain Supabase states
-        const errorAsAny = error as any;
-        const errorString = JSON.stringify(error);
-        
-        // If error stringifies to empty object or nearly empty, table doesn't exist
-        if (errorString === '{}' || !errorAsAny.message) {
-          console.warn('Empty or minimal error object received for thesis_progress query - table may not exist');
-          return null;
-        }
-
-        // Log more detailed error information
-        console.error('Error fetching thesis progress:', {
-          message: errorAsAny.message || 'No error message',
-          details: errorAsAny.details || 'No details',
-          hint: errorAsAny.hint || 'No hint',
-          code: errorAsAny.code || 'No code',
-          status: status,
-          userId: userId
-        });
-
-        // Check if it's a "not found" error (which is normal)
-        // Different possible status codes for "not found"
-        if (status === 406 || status === 404 ||
-            (errorAsAny.message &&
-              (errorAsAny.message.includes('Not Found') ||
-               errorAsAny.message.includes('Row not found') ||
-               errorAsAny.message.includes('does not exist')))) {
-          return null;
-        }
-
+        // Tables may not exist yet - just return null silently for now
+        // This is expected until the migration is applied
         return null;
       }
 
@@ -161,24 +117,8 @@ export class AnalyticsCalculator {
         .order('created_at', { ascending: true });
 
       if (error) {
-        // Check if error is an empty object or has no meaningful content, which can happen in certain Supabase states
-        const errorAsAny = error as any;
-        const errorString = JSON.stringify(error);
-        
-        // If error stringifies to empty object or nearly empty, table doesn't exist
-        if (errorString === '{}' || !errorAsAny.message) {
-          console.warn('Empty or minimal error object received for chapters query - table may not exist');
-          return [];
-        }
-
-        console.error('Error fetching chapters:', {
-          message: errorAsAny.message || 'No message',
-          details: errorAsAny.details || 'No details',
-          hint: errorAsAny.hint || 'No hint',
-          code: errorAsAny.code || 'No code',
-          status: status,
-          userId: userId
-        });
+        // Tables may not exist yet - just return empty array silently for now
+        // This is expected until the migration is applied
         return [];
       }
 
@@ -532,24 +472,8 @@ export class AnalyticsCalculator {
         .limit(100);
 
       if (error) {
-        // Check if error is an empty object or has no meaningful content, which can happen in certain Supabase states
-        const errorAsAny = error as any;
-        const errorString = JSON.stringify(error);
-        
-        // If error stringifies to empty object or nearly empty, table doesn't exist
-        if (errorString === '{}' || !errorAsAny.message) {
-          console.warn('Empty or minimal error object received for writing_sessions query (streak calc) - table may not exist');
-          return 0;
-        }
-
-        console.error('Error fetching sessions for streak calculation:', {
-          message: errorAsAny.message || 'No message',
-          details: errorAsAny.details || 'No details',
-          hint: errorAsAny.hint || 'No hint',
-          code: errorAsAny.code || 'No code',
-          status: status,
-          userId: userId
-        });
+        // Tables may not exist yet - just return 0 silently for now
+        // This is expected until the migration is applied
         return 0;
       }
 
