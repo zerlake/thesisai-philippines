@@ -464,6 +464,15 @@ Suggested Research Question: To what extent does ${problem.title.toLowerCase()} 
               <Search className="w-4 h-4 mr-2" />
               {isAnalyzing ? "Analyzing..." : "Identify Research Problems"}
             </Button>
+            <Button
+              variant="outline"
+              onClick={addSampleData}
+              disabled={isAnalyzing}
+              className="w-full sm:w-auto"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Load Sample Data
+            </Button>
           </div>
         </CardContent>
       </Card>

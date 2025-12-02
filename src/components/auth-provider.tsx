@@ -47,6 +47,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    // Check if Supabase is properly configured before making API calls
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.warn("Supabase not configured, using minimal profile");
+      setProfile({
+        id: user.id,
+        email: user.email,
+        role: "user",
+        created_at: null,
+        updated_at: null,
+        last_login_at: new Date().toISOString(),
+        first_name: '',
+        last_name: '',
+        institution: '',
+        department: '',
+        is_onboarded: false,
+        preferences: {},
+        avatar_url: null,
+        full_name: user.email?.split('@')[0] || 'User',
+        user_preferences: null
+      });
+      return;
+    }
+
     try {
       // Step 1: Fetch the main profile data
       const { data: profileData, error: profileError } = await supabase
@@ -56,6 +79,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (profileError) {
+        // Handle network errors gracefully
+        if (profileError.message && profileError.message.includes("Failed to fetch")) {
+          console.warn("Network error fetching profile, using minimal profile:", profileError.message);
+          setProfile({
+            id: user.id,
+            email: user.email,
+            role: "user",
+            created_at: null,
+            updated_at: null,
+            last_login_at: new Date().toISOString(),
+            first_name: '',
+            last_name: '',
+            institution: '',
+            department: '',
+            is_onboarded: false,
+            preferences: {},
+            avatar_url: null,
+            full_name: user.email?.split('@')[0] || 'User',
+            user_preferences: null
+          });
+          return;
+        }
+
         if (profileError.code === 'PGRST116') {
           // Create a default profile for the user
           const { error: createError } = await supabase
@@ -66,37 +112,101 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               email: user.email || undefined,
               plan: "free"
             });
-          
+
           if (createError) {
             console.error("Failed to create profile:", createError);
-            toast.error("Could not create user profile.");
+            // Check if it's a network error
+            if (createError.message && createError.message.includes("Failed to fetch")) {
+              toast.error("Unable to create user profile. Please check your internet connection.");
+            } else {
+              toast.error("Could not create user profile.");
+            }
+            // Set a minimal profile anyway to allow user access
+            setProfile({
+              id: user.id,
+              email: user.email,
+              role: "user",
+              created_at: null,
+              updated_at: null,
+              last_login_at: new Date().toISOString(),
+              first_name: '',
+              last_name: '',
+              institution: '',
+              department: '',
+              is_onboarded: false,
+              preferences: {},
+              avatar_url: null,
+              full_name: user.email?.split('@')[0] || 'User',
+              user_preferences: null
+            });
             return;
           }
-          
+
           // Fetch the newly created profile
           const { data: newProfile } = await supabase
             .from("profiles")
             .select("*")
             .eq("id", user.id)
             .single();
-          
+
           if (newProfile) {
             setProfile(newProfile);
           }
           return;
         }
-        throw profileError;
+        // For other errors, log them but continue with minimal profile
+         console.error("Profile fetch error:", profileError);
+         setProfile({
+           id: user.id,
+           email: user.email,
+           role: "user",
+           created_at: null,
+           updated_at: null,
+           last_login_at: new Date().toISOString(),
+           first_name: '',
+           last_name: '',
+           institution: '',
+           department: '',
+           is_onboarded: false,
+           preferences: {},
+           avatar_url: null,
+           full_name: user.email?.split('@')[0] || 'User',
+           user_preferences: null
+         });
+         return;
         }
 
         if (profileData) {
         setProfile(profileData);
         }
         } catch (e: any) {
-        const normalized = normalizeError(e, 'fetchProfile');
-        toast.error("Could not fetch user profile.");
-        console.error("Error fetching profile:", normalized.message);
-      setProfile(null);
-    }
+        console.error("Error in fetchProfile:", e);
+        // Check if it's a network error
+        if (e?.message?.includes("Failed to fetch") || e?.message?.includes("NetworkError")) {
+          toast.error("Unable to fetch user profile. Please check your internet connection.");
+        } else {
+          const normalized = normalizeError(e, 'fetchProfile');
+          toast.error("Could not fetch user profile.");
+        }
+        // Set a minimal profile anyway to allow the user to continue using the app
+        setProfile({
+          id: user.id,
+          email: user.email,
+          role: "user",
+          created_at: null,
+          updated_at: null,
+          last_login_at: new Date().toISOString(),
+          first_name: '',
+          last_name: '',
+          institution: '',
+          department: '',
+          is_onboarded: false,
+          preferences: {},
+          avatar_url: null,
+          full_name: user.email?.split('@')[0] || 'User',
+          user_preferences: null
+        });
+        }
   }, []);
 
   useEffect(() => {
@@ -129,7 +239,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 is_onboarded: false,
                 preferences: {},
                 avatar_url: null,
-                full_name: session.user?.email?.split('@')[0] || 'User'
+                full_name: session.user?.email?.split('@')[0] || 'User',
+                user_preferences: null
               });
             }, 10000); // Reduced to 10 seconds to provide faster fallback
           });
@@ -141,8 +252,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const profileResult = await Promise.race([fetchPromise, timeoutPromise]);
 
           // Only set profile if it's a valid profile (not an error)
-          if (profileResult && profileResult.id) {
-            setProfile(profileResult);
+          if (profileResult && typeof profileResult === 'object' && 'id' in profileResult) {
+            setProfile(profileResult as Profile);
             localStorage.setItem("lastProfileLoad", new Date().toISOString());
           } else {
             // If result is an error, set minimal profile to unblock user
@@ -160,7 +271,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               is_onboarded: false,
               preferences: {},
               avatar_url: null,
-              full_name: session.user?.email?.split('@')[0] || 'User'
+              full_name: session.user?.email?.split('@')[0] || 'User',
+              user_preferences: null
             });
           }
         } catch (error) {
@@ -180,7 +292,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             is_onboarded: false,
             preferences: {},
             avatar_url: null,
-            full_name: session.user?.email?.split('@')[0] || 'User'
+            full_name: session.user?.email?.split('@')[0] || 'User',
+            user_preferences: null
           });
         } finally {
           // Always clear the loading state, even on error
@@ -196,7 +309,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    // Check if Supabase is properly configured before setting up the auth listener
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.warn("Supabase not configured, skipping auth initialization");
+      setIsLoading(false);
+      return;
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: string, session: Session | null) => {
       if (!mounted) return;
       if (_event === 'SIGNED_OUT' || _event === 'TOKEN_REFRESHED') {
         if (_event === 'SIGNED_OUT') {
@@ -231,8 +351,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (error) {
           console.warn("[Auth] Error getting session:", error.message);
-          // Check if it's a refresh token error
-          if (error.message.includes("Refresh Token") || error.message.includes("Invalid") || error.message.includes("Not Found")) {
+          // Check if it's a network error vs auth error
+          if (error.message.includes("Failed to fetch") || error.message.includes("NetworkError")) {
+            console.warn("[Auth] Network error, using minimal session");
+            // Set a minimal session to allow the app to load with basic functionality
+            await handleAuthChange({
+              user: {
+                id: 'network-error-id',
+                email: 'network@offline.com',
+                // Add other minimal user properties as needed
+              } as User,
+              access_token: '',
+              refresh_token: '',
+              expires_in: 0,
+              token_type: 'bearer',
+            } as Session);
+          } else if (error.message.includes("Refresh Token") || error.message.includes("Invalid") || error.message.includes("Not Found")) {
             console.log("[Auth] Refresh token invalid/missing, signing out gracefully");
             await supabase.auth.signOut().catch(() => {
               // Ignore signout errors
@@ -244,9 +378,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           await handleAuthChange(session);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("[Auth] Error during session retrieval:", error);
-        if (mounted) {
+        // Check if it's a network error
+        if (error?.message?.includes("Failed to fetch") || error?.message?.includes("NetworkError")) {
+          console.warn("[Auth] Network error during initialization, using minimal session");
+          // Set a minimal session to allow the app to load with basic functionality
+          await handleAuthChange({
+            user: {
+              id: 'network-error-id',
+              email: 'network@offline.com',
+              // Add other minimal user properties as needed
+            } as User,
+            access_token: '',
+            refresh_token: '',
+            expires_in: 0,
+            token_type: 'bearer',
+          } as Session);
+        } else if (mounted) {
           await handleAuthChange(null);
         }
       }
@@ -258,7 +407,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('[Auth] Initialization timeout, stopping loading state');
         setIsLoading(false);
       }
-    }, 15000); // 15 second timeout for initialization
+    }, 10000); // Reduced timeout to 10 seconds
 
     initializeAuth();
 
@@ -326,10 +475,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (session?.user) {
       try {
         await fetchProfile(session.user);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error refreshing profile:", error);
-        toast.error("Error refreshing profile. Please try logging in again.");
-        await supabase.auth.signOut();
+        if (error?.message?.includes("Failed to fetch") || error?.message?.includes("NetworkError")) {
+          toast.error("Unable to refresh profile. Please check your internet connection.");
+        } else {
+          toast.error("Error refreshing profile. Please try logging in again.");
+          await supabase.auth.signOut();
+        }
       }
     }
   }, [session, fetchProfile]);  // Remove router from dependencies to prevent potential loops

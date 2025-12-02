@@ -18,11 +18,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { FieldOfStudySelector } from "./field-of-study-selector";
 import { Skeleton } from "./ui/skeleton";
-import {
-  generateResearchQuestions,
-  generateHypotheses,
-  alignQuestionsWithLiterature,
-} from "@/lib/puter-sdk";
+import { callPuterAI } from "@/lib/puter-ai-wrapper";
 
 type ResearchQuestion = {
   question: string;
@@ -69,28 +65,59 @@ export function ResearchQuestionGenerator() {
       toast.error("Please provide a topic and field of study.");
       return;
     }
+    if (!session) {
+      toast.error("You must be logged in to use this feature.");
+      return;
+    }
 
     setIsGenerating(true);
     setResearchQuestions([]);
 
     try {
-      const data = await generateResearchQuestions(topic);
-      
-      if (data?.questions) {
-        setResearchQuestions(data.questions);
-        toast.success("Research questions generated successfully!");
-      } else {
-        throw new Error("No research questions returned.");
+      const prompt = `You are an expert academic advisor. Generate EXACTLY 5-7 research questions for a thesis about "${topic}" in the field of "${field}".
+
+Requirements:
+- Questions should progress from broad to specific
+- Include descriptive, exploratory, explanatory, and evaluative questions
+- Each question should be 8-15 words
+- Questions must be answerable through research
+- Context: Philippines academic standards
+
+For each question, provide:
+1. The question itself
+2. Type (e.g., descriptive, exploratory, explanatory, evaluative)
+3. Chapter (e.g., Introduction, Literature Review, Methodology, Results, Discussion)
+4. Rationale (1-2 sentences explaining the question's importance)
+
+Return ONLY a valid JSON array with this structure:
+[
+  {
+    "question": "...",
+    "type": "descriptive|exploratory|explanatory|evaluative",
+    "chapter": "Introduction|Literature Review|Methodology|Results|Discussion",
+    "rationale": "..."
+  }
+]
+
+Do not include any text outside the JSON array.`;
+
+      const result = await callPuterAI(prompt, {
+        temperature: 0.6,
+        max_tokens: 2500,
+        timeout: 30000,
+      });
+
+      const parsed = JSON.parse(result);
+      if (!Array.isArray(parsed)) {
+        throw new Error("Invalid response format: expected JSON array");
       }
+
+      setResearchQuestions(parsed);
+      toast.success(`Generated ${parsed.length} research questions!`);
     } catch (error: any) {
-      const msg = error.message || "Failed to generate research questions";
-      
-      if (msg.includes("auth")) {
-        toast.error("Please sign in to your Puter account");
-      } else {
-        toast.error(msg);
-      }
-      console.error(error);
+      console.error("Research question generation error:", error);
+      const message = error?.message || "Failed to generate research questions. Please try again.";
+      toast.error(message);
     } finally {
       setIsGenerating(false);
     }
@@ -99,6 +126,10 @@ export function ResearchQuestionGenerator() {
   const handleGenerateHypotheses = async () => {
     if (!topic || !field) {
       toast.error("Please provide a topic and field of study.");
+      return;
+    }
+    if (!session) {
+      toast.error("You must be logged in to use this feature.");
       return;
     }
 
@@ -110,41 +141,53 @@ export function ResearchQuestionGenerator() {
     setHypotheses([]);
 
     try {
-      const data = await generateHypotheses(topic);
-      
-      // generateHypotheses returns string[], convert to Hypothesis objects
-      let hypothesesList: Hypothesis[] = [];
-      if (Array.isArray(data)) {
-        // Convert string hypotheses to Hypothesis objects
-        hypothesesList = data.map((h: any) => {
-          if (typeof h === 'string') {
-            return {
-              null_hypothesis: h,
-              alternative_hypothesis: `Not: ${h}`,
-              variables: { independent: [], dependent: [] },
-              testable: true
-            };
-          }
-          return h;
-        });
-      } else if (data && typeof data === 'object' && 'hypotheses' in data) {
-        const dataObj = data as Record<string, any>;
-        hypothesesList = dataObj.hypotheses;
-      } else {
-        throw new Error("No hypotheses returned.");
+      const prompt = `You are an expert researcher. Generate EXACTLY 3-5 testable research hypotheses for a thesis about "${topic}" in the field of "${field}".
+
+Requirements:
+- All hypotheses must be testable and falsifiable
+- Should follow null hypothesis (H₀) and alternative hypothesis (H₁) format
+- Include identified independent and dependent variables
+- Be scientifically rigorous and specific
+
+For each hypothesis, provide:
+1. Null hypothesis (H₀)
+2. Alternative hypothesis (H₁)
+3. Independent variables (list)
+4. Dependent variables (list)
+5. Whether it's testable (true/false)
+
+Return ONLY a valid JSON array with this structure:
+[
+  {
+    "null_hypothesis": "H₀: ...",
+    "alternative_hypothesis": "H₁: ...",
+    "variables": {
+      "independent": ["var1", "var2"],
+      "dependent": ["outcome1", "outcome2"]
+    },
+    "testable": true
+  }
+]
+
+Do not include any text outside the JSON array.`;
+
+      const result = await callPuterAI(prompt, {
+        temperature: 0.5,
+        max_tokens: 2500,
+        timeout: 30000,
+      });
+
+      const parsed = JSON.parse(result);
+      if (!Array.isArray(parsed)) {
+        throw new Error("Invalid response format: expected JSON array");
       }
-      
-      setHypotheses(hypothesesList);
-      toast.success("Hypotheses generated successfully!");
+
+      setHypotheses(parsed);
+      toast.success(`Generated ${parsed.length} hypotheses!`);
     } catch (error: any) {
-      const msg = error.message || "Failed to generate hypotheses";
-      
-      if (msg.includes("auth")) {
-        toast.error("Please sign in to your Puter account");
-      } else {
-        toast.error(msg);
-      }
-      console.error(error);
+      console.error("Hypothesis generation error:", error);
+      const message = error?.message || "Failed to generate hypotheses. Please try again.";
+      toast.error(message);
     } finally {
       setIsGenerating(false);
     }
@@ -153,6 +196,10 @@ export function ResearchQuestionGenerator() {
   const handleAlignWithLiterature = async () => {
     if (researchQuestions.length === 0) {
       toast.error("Please generate research questions first.");
+      return;
+    }
+    if (!session) {
+      toast.error("You must be logged in to use this feature.");
       return;
     }
 
@@ -165,28 +212,51 @@ export function ResearchQuestionGenerator() {
     setAlignmentSuggestions([]);
 
     try {
-      const data = await alignQuestionsWithLiterature(
-        researchQuestions.map(rq => rq.question),
-        topic
-      );
+      const questionsText = researchQuestions.map((q, i) => `${i + 1}. ${q.question}`).join('\n');
 
-      if (Array.isArray(data)) {
-        setAlignmentSuggestions(data);
-      } else if (data?.alignments) {
-        setAlignmentSuggestions(data.alignments);
-      } else {
-        throw new Error("No alignment suggestions returned.");
+      const prompt = `You are an expert academic researcher. Align these research questions with relevant academic literature about "${topic}" in the field of "${field}".
+
+Research Questions:
+${questionsText}
+
+Literature Context:
+${literatureContext}
+
+For EACH question, provide:
+1. The question itself
+2. Relevant aligned literature (3-4 key theories, frameworks, or authors)
+3. Research gaps this question addresses (2-3 specific gaps)
+4. Methodology implications (1-2 sentences on how this shapes the research approach)
+
+Return ONLY a valid JSON array with this structure:
+[
+  {
+    "question": "...",
+    "aligned_literature": ["theory/author1", "theory/author2", "theory/author3"],
+    "gaps_identified": ["gap1", "gap2", "gap3"],
+    "methodology_implications": "..."
+  }
+]
+
+Do not include any text outside the JSON array.`;
+
+      const result = await callPuterAI(prompt, {
+        temperature: 0.6,
+        max_tokens: 3000,
+        timeout: 30000,
+      });
+
+      const parsed = JSON.parse(result);
+      if (!Array.isArray(parsed)) {
+        throw new Error("Invalid response format: expected JSON array");
       }
+
+      setAlignmentSuggestions(parsed);
       toast.success("Alignment analysis complete!");
     } catch (error: any) {
-      const msg = error.message || "Failed to align questions with literature";
-      
-      if (msg.includes("auth")) {
-        toast.error("Please sign in to your Puter account");
-      } else {
-        toast.error(msg);
-      }
-      console.error(error);
+      console.error("Literature alignment error:", error);
+      const message = error?.message || "Failed to align questions with literature. Please try again.";
+      toast.error(message);
     } finally {
       setIsGenerating(false);
     }

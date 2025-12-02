@@ -3,6 +3,7 @@
 import { Calendar, Clock, TrendingUp } from "lucide-react";
 import { Button } from "./ui/button";
 import { DashboardSyncIndicator } from "./dashboard/DashboardSyncIndicator";
+import { DashboardPuterStatus } from "./dashboard-puter-status";
 
 interface DashboardHeaderProps {
   displayName: string;
@@ -24,8 +25,9 @@ export function DashboardHeader({ displayName, streak = 0, projectProgress = 0 }
           </p>
         </div>
         
-        {/* Sync Status Indicator */}
-        <div className="flex items-center">
+        {/* Status Indicators */}
+        <div className="flex items-center gap-4">
+          <DashboardPuterStatus />
           <DashboardSyncIndicator className="px-4 py-2 rounded-lg bg-card/50 border" />
         </div>
       </div>

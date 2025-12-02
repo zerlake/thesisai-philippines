@@ -7,13 +7,15 @@
  * - Sync progress
  * - Error states
  * 
+ * Features graceful fallback from WebSocket to HTTP polling
+ * 
  * @component
  */
 
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import { useWebSocketWithFallback } from '@/hooks/useWebSocketWithFallback';
 import { useRealtimeUpdates } from '@/hooks/useRealtimeUpdates';
 import { useBackgroundSync } from '@/hooks/useBackgroundSync';
 import { SyncStatus as BackgroundSyncStatus } from '@/lib/dashboard/background-sync';
@@ -45,8 +47,10 @@ export function DashboardSyncIndicator({
   onStatusChange
 }: DashboardSyncIndicatorProps) {
   const [wsError, setWsError] = useState<Error | null>(null);
-  const { isConnected } = useWebSocket({
+  const { isConnected, isFallbackMode, isReady } = useWebSocketWithFallback({
     autoConnect: true,
+    enableFallbackSync: true,
+    fallbackSyncInterval: 5000,
     onError: (error) => setWsError(error)
   });
   const { pending } = useRealtimeUpdates(undefined);
@@ -74,7 +78,9 @@ export function DashboardSyncIndicator({
 
   // Determine indicator color
   const getIndicatorColor = () => {
-    if (wsError) return 'bg-red-500';
+    if (wsError && !isFallbackMode) return 'bg-red-500';
+    if (!isReady) return 'bg-gray-400';
+    if (isFallbackMode) return 'bg-orange-500'; // Fallback mode
     if (!isConnected) return 'bg-yellow-500';
     if (status.pendingCount > 0) return 'bg-blue-500';
     return 'bg-green-500';
@@ -82,7 +88,9 @@ export function DashboardSyncIndicator({
 
   // Determine status text
   const getStatusText = () => {
-    if (wsError) return 'Connection Error';
+    if (!isReady) return 'Initializing...';
+    if (isFallbackMode) return 'Polling (Fallback)';
+    if (wsError && !isConnected) return 'Connection Error';
     if (!isConnected) return 'Disconnected';
     if (status.pendingCount > 0) return `Syncing (${status.pendingCount})`;
     if (syncStatus === BackgroundSyncStatus.SYNCING) return 'Syncing Data';

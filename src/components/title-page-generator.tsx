@@ -64,24 +64,48 @@ export function TitlePageGenerator() {
     }
     setIsSaving(true);
 
-    const { data: newDoc, error } = await supabase
-      .from("documents")
-      .insert({
-        user_id: user.id,
-        title: `Title Page: ${formData.title}`,
-        content: generatedHtml,
-      })
-      .select("id")
-      .single();
+    try {
+      const { data: newDoc, error } = await supabase
+        .from("documents")
+        .insert({
+          user_id: user.id,
+          title: `Title Page: ${formData.title}`,
+          content: generatedHtml,
+        })
+        .select("id")
+        .single();
 
-    if (error) {
-      toast.error("Failed to save draft.");
-    } else if (newDoc) {
-      toast.success("Title page saved as a new draft!");
-      router.push(`/drafts/${newDoc.id}`);
+      if (error) {
+        // Different error messages based on the type of error
+        if (error.message && error.message.includes("Failed to fetch")) {
+          toast.error("Unable to save draft. Please check your internet connection and try again.");
+        } else {
+          console.error("Error saving document:", error);
+          toast.error("Failed to save draft. Please try again.");
+        }
+      } else if (newDoc) {
+        toast.success("Title page saved as a new draft!");
+        router.push(`/drafts/${newDoc.id}`);
+      }
+    } catch (err: any) {
+      console.error("Unexpected error saving document:", err);
+      if (err?.message?.includes("Failed to fetch") || err?.message?.includes("NetworkError")) {
+        toast.error("Unable to save draft. Please check your internet connection and try again.");
+      } else {
+        toast.error("Failed to save draft. Please try again.");
+      }
+    } finally {
+      setIsSaving(false);
     }
-    setIsSaving(false);
   };
+
+  // To prevent hydration errors, ensure the server and client render the same content
+  // We'll use a state variable to track if we're on the client side
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -122,7 +146,36 @@ export function TitlePageGenerator() {
           <div className="space-y-4">
             <Label>Preview</Label>
             <div className="p-4 border rounded-md bg-tertiary min-h-[400px] flex items-center justify-center">
-              <div className="prose prose-sm" dangerouslySetInnerHTML={createSanitizedHtml(generatedHtml)} />
+              {isClient ? (
+                <div className="prose prose-sm" dangerouslySetInnerHTML={createSanitizedHtml(generatedHtml)} />
+              ) : (
+                // Render a placeholder during SSR to prevent hydration mismatch
+                <div className="prose prose-sm">
+                  <div style={{ textAlign: "center", lineHeight: 2 }}>
+                    <p style={{ fontWeight: "bold", textTransform: "uppercase", fontSize: "1.2em" }}>
+                      {formData.title || "[YOUR PROJECT TITLE IN ALL CAPS]"}
+                    </p>
+                    <br />
+                    <br />
+                    <p>A Paper Presented to the Faculty of the</p>
+                    <p>{formData.department || "[Your Department]"}</p>
+                    <p>{formData.university || "[Your University]"}</p>
+                    <br />
+                    <br />
+                    <p>In Partial Fulfillment</p>
+                    <p>of the Requirements for the Degree</p>
+                    <p>{formData.degree || "[Your Degree, e.g., Bachelor of Science in Computer Science]"}</p>
+                    <br />
+                    <br />
+                    <p>by</p>
+                    <br />
+                    <br />
+                    <p>{formData.author || "[Your Full Name]"}</p>
+                    <br />
+                    <p>{formData.date || "[Date of Completion, e.g., May 2024]"}</p>
+                  </div>
+                </div>
+              )}
             </div>
             <Button onClick={handleSaveAsDraft} disabled={isSaving || !formData.title}>
               <FilePlus2 className="w-4 h-4 mr-2" />

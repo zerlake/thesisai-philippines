@@ -5,58 +5,67 @@ import { useAuth } from "@/components/auth-provider";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Copy, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
-import { useApiCall } from "@/hooks/use-api-call";
+import { callPuterAI } from "@/lib/puter-ai-wrapper";
 
 export function SurveyQuestionGenerator() {
   const { session } = useAuth();
   const [surveyTopic, setSurveyTopic] = useState("");
   const [questionType, setQuestionType] = useState("Likert Scale (1-5)");
   const [generatedQuestions, setGeneratedQuestions] = useState<string[]>([]);
-  // const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false); // Replaced by useApiCall's loading state
-
-  const { execute: generateQuestions, loading: isGenerating } = useApiCall<any>({
-    onSuccess: (data) => {
-      if (!data.questions) {
-        throw new Error("API returned no questions data.");
-      }
-      setGeneratedQuestions(data.questions);
-      toast.success("Survey questions generated!");
-    },
-    onError: (error) => {
-      toast.error(error.message || "Failed to generate questions.");
-      console.error(error);
-    },
-    autoErrorToast: false,
-  });
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerateQuestions = async () => {
-    if (!surveyTopic || !questionType || !session) {
-        toast.error("Please provide a topic and question type.");
-        return;
+    if (!surveyTopic || !questionType) {
+      toast.error("Please provide a topic and question type.");
+      return;
     }
-    // setIsGeneratingQuestions(true); // Loading state managed by useApiCall
+
+    setIsGenerating(true);
     setGeneratedQuestions([]);
+
     try {
-      await generateQuestions(
-        getSupabaseFunctionUrl("generate-survey-questions"),
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-          },
-          body: JSON.stringify({ topic: surveyTopic, questionType }),
-        }
-      );
+      // Create a prompt for generating survey questions
+      let prompt = `Generate 5-8 survey questions for the research topic: "${surveyTopic}". `;
+
+      switch(questionType) {
+        case "Likert Scale (1-5)":
+          prompt += "Create Likert scale questions with a 1-5 agreement scale (Strongly Disagree, Disagree, Neutral, Agree, Strongly Agree).";
+          break;
+        case "Multiple Choice":
+          prompt += "Create multiple choice questions with 4-5 answer options each.";
+          break;
+        case "Open-Ended":
+          prompt += "Create open-ended questions that allow for detailed responses.";
+          break;
+        default:
+          prompt += "Create appropriate survey questions for the selected type.";
+      }
+
+      prompt += " Format the output as a numbered list with each question on a new line.";
+
+      const result = await callPuterAI(prompt, {
+        temperature: 0.6,  // Slightly creative but focused
+        max_tokens: 2000,
+        timeout: 60000
+      });
+
+      // Split the response into an array of questions
+      const questions = result
+        .split('\n')
+        .map(q => q.trim())
+        .filter(q => q.length > 0 && (/^\d+\./.test(q) || q.length > 3)); // Keep numbered items or substantial text
+
+      setGeneratedQuestions(questions);
+      toast.success("Survey questions generated!");
     } catch (error: any) {
-        // Errors are already handled by useApiCall's onError
-        console.error("Local error before API call in handleGenerateQuestions:", error);
+      console.error("Error generating survey questions:", error);
+      toast.error(error.message || "Failed to generate questions. Please try again.");
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -70,11 +79,17 @@ export function SurveyQuestionGenerator() {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="survey-topic">Research Topic</Label>
-        <Input id="survey-topic" placeholder="e.g., The Impact of AI on Higher Education" value={surveyTopic} onChange={e => setSurveyTopic(e.target.value)} />
+        <Input
+          id="survey-topic"
+          placeholder="e.g., The Impact of AI on Higher Education"
+          value={surveyTopic}
+          onChange={e => setSurveyTopic(e.target.value)}
+          disabled={isGenerating}
+        />
       </div>
       <div className="space-y-2">
         <Label>Question Type</Label>
-        <RadioGroup value={questionType} onValueChange={setQuestionType}>
+        <RadioGroup value={questionType} onValueChange={setQuestionType} disabled={isGenerating}>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="Likert Scale (1-5)" id="likert" />
             <Label htmlFor="likert">Likert Scale (1-5)</Label>
@@ -89,12 +104,20 @@ export function SurveyQuestionGenerator() {
           </div>
         </RadioGroup>
       </div>
-      <Button onClick={handleGenerateQuestions} disabled={isGenerating || !surveyTopic || !session}>
-        <Wand2 className="w-4 h-4 mr-2" /> {isGenerating ? "Generating..." : "Generate Questions"}
+      <Button
+        onClick={handleGenerateQuestions}
+        disabled={isGenerating || !surveyTopic}
+      >
+        <Wand2 className="w-4 h-4 mr-2" />
+        {isGenerating ? "Generating..." : "Generate Questions"}
       </Button>
       {generatedQuestions.length > 0 && (
         <div className="relative">
-          <Textarea value={generatedQuestions.join('\n\n')} readOnly rows={8} />
+          <Textarea
+            value={generatedQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n\n')}
+            readOnly
+            rows={Math.max(8, generatedQuestions.length)}
+          />
           <Button
             variant="ghost"
             size="icon"

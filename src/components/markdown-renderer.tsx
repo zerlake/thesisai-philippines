@@ -32,7 +32,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
           blockquote: ({ node, ...props }) => (
             <blockquote className="border-l-4 border-gray-300 pl-4 italic my-4" {...props} />
           ),
-          code: ({ node, inline, className, children, ...props }) => {
+          code: ({ node, inline, className, children, ...props }: any) => {
             const match = /language-(\w+)/.exec(className || '');
             return !inline && match ? (
               <pre className="bg-gray-800 text-white p-3 rounded-md overflow-x-auto my-2">

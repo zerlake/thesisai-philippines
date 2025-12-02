@@ -48,6 +48,7 @@ import { DashboardHeader } from "./dashboard-header";
 import { DashboardMetrics } from "./dashboard-metrics";
 import { DashboardNavigation } from "./dashboard-navigation";
 import { EnterpriseCard, EnterpriseCardContent } from "./enterprise-card";
+import { ThesisPhasesCard } from "./thesis-phases-card";
 import { DashboardRealtimeProvider } from "./dashboard/DashboardRealtimeProvider";
 
 const topToolsForQuickAccess = [
@@ -315,6 +316,9 @@ export function StudentDashboardEnterprise() {
             <ThesisChecklist />
           </div>
         )}
+
+        {/* Thesis Phases Workstations */}
+        <ThesisPhasesCard />
 
         {/* Quick Tools Navigation */}
         {widgets.quick_access && (

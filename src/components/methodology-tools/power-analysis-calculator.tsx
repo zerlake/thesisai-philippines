@@ -66,6 +66,18 @@ export function PowerAnalysisCalculator() {
     toast.success("Write-up copied to clipboard!");
   };
 
+  const handleLoadSampleData = () => {
+    const testTypes = Object.keys(powerAnalysisData);
+    let randomTestType = testTypes[Math.floor(Math.random() * testTypes.length)];
+    // Ensure it's different from current testType if possible
+    while (randomTestType === testType && testTypes.length > 1) {
+      randomTestType = testTypes[Math.floor(Math.random() * testTypes.length)];
+    }
+    setTestType(randomTestType);
+    setTimeout(handleCalculate, 0); // Automatically calculate after loading sample data
+    toast.info("Sample data loaded and calculated!");
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-end gap-4">
@@ -84,6 +96,9 @@ export function PowerAnalysisCalculator() {
         </div>
         <Button onClick={handleCalculate}>
           <Wand2 className="w-4 h-4 mr-2" /> Calculate
+        </Button>
+        <Button variant="outline" onClick={handleLoadSampleData}>
+          Load Sample Data
         </Button>
       </div>
 

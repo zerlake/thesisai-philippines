@@ -32,6 +32,18 @@ export function ResearchDesignSelector() {
     toast.success("Copied to clipboard!");
   };
 
+  const handleLoadSampleData = () => {
+    const designs = Object.keys(designRationales);
+    let randomDesign = designs[Math.floor(Math.random() * designs.length)];
+    // Ensure it's different from current design if possible
+    while (randomDesign === design && designs.length > 1) {
+      randomDesign = designs[Math.floor(Math.random() * designs.length)];
+    }
+    setDesign(randomDesign);
+    setRationale(designRationales[randomDesign as keyof typeof designRationales]);
+    toast.info("Sample research design loaded and rationale generated!");
+  };
+
   return (
     <div className="space-y-4">
       <RadioGroup value={design} onValueChange={setDesign}>
@@ -48,9 +60,14 @@ export function ResearchDesignSelector() {
           <Label htmlFor="mixed-methods">Mixed-Methods</Label>
         </div>
       </RadioGroup>
-      <Button onClick={handleGenerateRationale}>
-        <Wand2 className="w-4 h-4 mr-2" /> Generate Rationale
-      </Button>
+      <div className="flex gap-2">
+        <Button onClick={handleGenerateRationale}>
+          <Wand2 className="w-4 h-4 mr-2" /> Generate Rationale
+        </Button>
+        <Button variant="outline" onClick={handleLoadSampleData}>
+          Load Sample Data
+        </Button>
+      </div>
       {rationale && (
         <div className="relative">
           <Textarea value={rationale} readOnly rows={5} />

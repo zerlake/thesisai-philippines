@@ -14,10 +14,13 @@ import {
   FileCheck,
   Share2,
   BookOpen,
-  ChevronDown
+  ChevronDown,
+  ArrowRight
 } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { Button } from "@/components/ui/button";
 
 const featureCategories = [
   {
@@ -223,6 +226,16 @@ export function FeaturesSection() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                  
+                  {/* Explore Phase Button */}
+                  <div className="mt-8 pt-6 border-t border-slate-700/30 flex justify-center">
+                    <Link href={`/thesis-phases/${category.id}`}>
+                      <Button className="gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">
+                        Explore {category.title} Phase
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               )}

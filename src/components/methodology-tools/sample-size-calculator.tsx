@@ -12,16 +12,37 @@ export function SampleSizeCalculator() {
   const [margin, setMargin] = useState("0.05");
   const [sampleSize, setSampleSize] = useState<number | null>(null);
 
+  const sampleData = [
+    { population: "1500", margin: "0.05" }, // 5% margin of error
+    { population: "5000", margin: "0.03" }, // 3% margin of error
+    { population: "10000", margin: "0.01" }, // 1% margin of error
+    { population: "500", margin: "0.10" }, // 10% margin of error
+  ];
+
   const handleCalculateSample = () => {
     const N = parseInt(population);
     const e = parseFloat(margin);
     if (isNaN(N) || isNaN(e) || N <= 0 || e <= 0 || e >= 1) {
       toast.error("Please enter a valid population size and margin of error (0-1).");
+      setSampleSize(null);
       return;
     }
     const n = Math.ceil(N / (1 + N * e * e));
     setSampleSize(n);
     toast.success(`Calculated sample size is ${n}.`);
+  };
+
+  const handleLoadSampleData = () => {
+    let newSample = sampleData[Math.floor(Math.random() * sampleData.length)];
+    // Ensure the new sample is different from current if possible
+    while (newSample.population === population && newSample.margin === margin && sampleData.length > 1) {
+      newSample = sampleData[Math.floor(Math.random() * sampleData.length)];
+    }
+    setPopulation(newSample.population);
+    setMargin(newSample.margin);
+    // Automatically calculate after loading sample data
+    setTimeout(handleCalculateSample, 0); 
+    toast.info("Sample data loaded and calculated!");
   };
 
   return (
@@ -33,10 +54,15 @@ export function SampleSizeCalculator() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="margin">Margin of Error (e)</Label>
-          <Input id="margin" type="number" placeholder="e.g., 0.05 for 5%" value={margin} onChange={e => setMargin(e.target.value)} />
+          <Input id="margin" type="number" step="0.01" placeholder="e.g., 0.05 for 5%" value={margin} onChange={e => setMargin(e.target.value)} />
         </div>
       </div>
-      <Button onClick={handleCalculateSample} className="mt-4">Calculate</Button>
+      <div className="flex gap-2 mt-4">
+        <Button onClick={handleCalculateSample}>Calculate</Button>
+        <Button variant="outline" onClick={handleLoadSampleData}>
+          Load Sample Data
+        </Button>
+      </div>
       {sampleSize !== null && (
         <Alert className="mt-4">
           <AlertTitle>Required Sample Size: {sampleSize}</AlertTitle>

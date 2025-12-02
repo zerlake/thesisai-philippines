@@ -2,7 +2,8 @@
 > next-template@0.1.0 build C:\Users\Projects\thesis-ai
 > next build
 
-   ▲ Next.js 16.0.3 (Turbopack)
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   ▲ Next.js 16.0.5 (Turbopack)
    - Environments: .env.local, .env
    - Experiments (use with caution):
      · clientTraceMetadata
@@ -11,8 +12,9 @@
 
  ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
    Creating an optimized production build ...
-Turbopack build encountered 5 warnings:
-./node_modules/.pnpm/@opentelemetry+instrumentat_04f370d515cee0be955272f826166073/node_modules/@opentelemetry/instrumentation/build/esm/platform/node
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+Turbopack build encountered 3 warnings:
+./node_modules/.pnpm/@opentelemetry+instrumentat_6afa3aa63a1ee1e91372360a2d45582d/node_modules/@opentelemetry/instrumentation/build/esm/platform/node
 Package import-in-the-middle can't be external
 The request import-in-the-middle matches serverExternalPackages (or the default list).
 The request could not be resolved by Node.js from the project directory.
@@ -20,7 +22,7 @@ Packages that should be external need to be installed in the project directory, 
 Try to install it into the project directory by running npm install import-in-the-middle from the project directory.
 
 
-./node_modules/.pnpm/@opentelemetry+instrumentat_f652686f626c89883300e722e0beadcf/node_modules/@opentelemetry/instrumentation/build/esm/platform/node
+./node_modules/.pnpm/@sentry+node-core@10.27.0_@_62248f89c2d022bbab885c4a52bb757f/node_modules/@sentry/node-core/build/cjs/sdk
 Package import-in-the-middle can't be external
 The request import-in-the-middle matches serverExternalPackages (or the default list).
 The request could not be resolved by Node.js from the project directory.
@@ -28,15 +30,7 @@ Packages that should be external need to be installed in the project directory, 
 Try to install it into the project directory by running npm install import-in-the-middle from the project directory.
 
 
-./node_modules/.pnpm/@sentry+node-core@10.23.0_@_a85e3818cbaa54b6eac8eaf48d3af41b/node_modules/@sentry/node-core/build/cjs/sdk
-Package import-in-the-middle can't be external
-The request import-in-the-middle matches serverExternalPackages (or the default list).
-The request could not be resolved by Node.js from the project directory.
-Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.
-Try to install it into the project directory by running npm install import-in-the-middle from the project directory.
-
-
-./node_modules/.pnpm/@opentelemetry+instrumentat_04f370d515cee0be955272f826166073/node_modules/@opentelemetry/instrumentation/build/esm/platform/node
+./node_modules/.pnpm/@opentelemetry+instrumentat_6afa3aa63a1ee1e91372360a2d45582d/node_modules/@opentelemetry/instrumentation/build/esm/platform/node
 Package require-in-the-middle can't be external
 The request require-in-the-middle matches serverExternalPackages (or the default list).
 The request could not be resolved by Node.js from the project directory.
@@ -44,19 +38,21 @@ Packages that should be external need to be installed in the project directory, 
 Try to install it into the project directory by running npm install require-in-the-middle from the project directory.
 
 
-./node_modules/.pnpm/@opentelemetry+instrumentat_f652686f626c89883300e722e0beadcf/node_modules/@opentelemetry/instrumentation/build/esm/platform/node
-Package require-in-the-middle can't be external
-The request require-in-the-middle matches serverExternalPackages (or the default list).
-The request could not be resolved by Node.js from the project directory.
-Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.
-Try to install it into the project directory by running npm install require-in-the-middle from the project directory.
+ ✓ Compiled successfully in 52s
+   Running next.config.js provided runAfterProductionCompile ...
+ ✓ Completed runAfterProductionCompile in 1324ms
+   Running TypeScript ...
+Failed to compile.
 
+./src/components/ValidityDefender/DefenseResponseGenerator.tsx:171:46
+Type error: 'resp' is possibly 'undefined'.
 
-
-> Build error occurred
-Error: Turbopack build failed with 1 errors:
-./src/app/dashboard
-You cannot have two parallel pages that resolve to the same path. Please check /(app)/dashboard and /dashboard.
-
-    at ignore-listed frames
+[0m [90m 169 |[39m                 [33m<[39m[33mdiv[39m className[33m=[39m[32m"flex items-start justify-between gap-4"[39m[33m>[39m
+ [90m 170 |[39m                   [33m<[39m[33mdiv[39m className[33m=[39m[32m"flex-1"[39m[33m>[39m
+[31m[1m>[22m[39m[90m 171 |[39m                     [33m<[39m[33mBadge[39m className[33m=[39m[32m"mb-2"[39m[33m>[39m{resp[33m.[39mquestionType}[33m<[39m[33m/[39m[33mBadge[39m[33m>[39m
+ [90m     |[39m                                              [31m[1m^[22m[39m
+ [90m 172 |[39m                     [33m<[39m[33mCardTitle[39m className[33m=[39m[32m"text-base"[39m[33m>[39m{resp[33m.[39mquestionText}[33m<[39m[33m/[39m[33mCardTitle[39m[33m>[39m
+ [90m 173 |[39m                   [33m<[39m[33m/[39m[33mdiv[39m[33m>[39m
+ [90m 174 |[39m                   [33m<[39m[33mButton[39m[0m
+Next.js build worker exited with code: 1 and signal: null
  ELIFECYCLE  Command failed with exit code 1.

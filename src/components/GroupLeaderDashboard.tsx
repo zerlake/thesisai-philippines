@@ -113,7 +113,7 @@ export function GroupLeaderDashboard() {
     };
 
     fetchGroups();
-  }, [session?.user.id, supabase, selectedGroup]);
+  }, [session?.user.id, supabase]);
 
   // Fetch group details when selected group changes
   useEffect(() => {
@@ -426,12 +426,12 @@ export function GroupLeaderDashboard() {
                           value={newTask.title}
                           onChange={(e) => setNewTask({...newTask, title: e.target.value})}
                         />
-                        <Select value={newTask.assigned_to} onValueChange={(val) => setNewTask({...newTask, assigned_to: val})}>
+                        <Select value={newTask.assigned_to || 'unassigned'} onValueChange={(val) => setNewTask({...newTask, assigned_to: val === 'unassigned' ? '' : val})}>
                           <SelectTrigger>
                             <SelectValue placeholder="Assign to..." />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">Unassigned</SelectItem>
+                            <SelectItem value="unassigned">Unassigned</SelectItem>
                             {members
                               .filter(m => m.accepted_invite)
                               .map(member => (

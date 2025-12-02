@@ -18,6 +18,7 @@ import { CheckCircle, AlertTriangle, Check, X, Loader2, Bot, Monitor, Cpu, Setti
 import { formatDistanceToNow } from "date-fns";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { ReferralInspectionDialog } from "./referral-inspection-dialog";
+import { PaperSearchAdmin } from "./admin/paper-search-admin";
 
 type Profile = { id: string; first_name: string | null; last_name: string | null; role: string; };
 type InstitutionRequest = { id: string; name: string; created_at: string; profiles: { first_name: string | null; last_name: string | null; } | null; };
@@ -343,6 +344,7 @@ export function AdminDashboard() {
             <TabsTrigger value="institutions">Institution Requests <Badge className="ml-2">{requests.length}</Badge></TabsTrigger>
             <TabsTrigger value="testimonials">Testimonials <Badge className="ml-2">{testimonials.length}</Badge></TabsTrigger>
             <TabsTrigger value="payouts">Payout Requests <Badge className="ml-2">{payouts.length}</Badge></TabsTrigger>
+            <TabsTrigger value="paper-search">Paper Search</TabsTrigger>
             <TabsTrigger value="mcp">MCP Servers</TabsTrigger>
           </TabsList>
           <TabsContent value="users"><Card><CardHeader><CardTitle>All Users</CardTitle><CardDescription>Manage user roles and advisor assignments.</CardDescription></CardHeader><CardContent><Table><TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Role</TableHead><TableHead>Assigned Advisor</TableHead><TableHead className="text-right">Change Role</TableHead></TableRow></TableHeader><TableBody>{isLoading ? Array.from({ length: 3 }).map((_, i) => (<TableRow key={i}><TableCell><Skeleton className="h-5 w-24" /></TableCell><TableCell><Skeleton className="h-5 w-12" /></TableCell><TableCell><Skeleton className="h-8 w-32" /></TableCell><TableCell><Skeleton className="h-8 w-24 float-right" /></TableCell></TableRow>)) : profiles.map((profile) => (<TableRow key={profile.id}><TableCell>{profile.first_name || "N/A"} {profile.last_name || ""}</TableCell><TableCell><Badge variant="outline" className={cn("capitalize", profile.role === 'admin' ? "bg-blue-100 text-blue-800" : profile.role === 'advisor' ? "bg-purple-100 text-purple-800" : "bg-gray-100 text-gray-800")}>{profile.role}</Badge></TableCell><TableCell>{profile.role === 'user' && (<Select value={assignments.get(profile.id) || 'none'} onValueChange={(newAdvisorId: string) => handleAssignmentChange(profile.id, newAdvisorId)} disabled={isUpdatingAssignment === profile.id}><SelectTrigger className="w-[180px]"><SelectValue placeholder="Assign an advisor" /></SelectTrigger><SelectContent><SelectItem value="none"><span className="text-muted-foreground">None</span></SelectItem>{advisors.map(advisor => (<SelectItem key={advisor.id} value={advisor.id}>{advisor.first_name} {advisor.last_name}</SelectItem>))}</SelectContent></Select>)}</TableCell><TableCell className="text-right"><Select value={profile.role} onValueChange={(newRole: string) => handleRoleChange(profile.id, newRole)} disabled={isUpdatingRole === profile.id || (profile.role === 'admin' && isOnlyAdmin)}><SelectTrigger className="w-[110px] float-right"><SelectValue placeholder="Change role" /></SelectTrigger><SelectContent><SelectItem value="admin">Admin</SelectItem><SelectItem value="advisor">Advisor</SelectItem><SelectItem value="user">User</SelectItem></SelectContent></Select></TableCell></TableRow>))}</TableBody></Table></CardContent></Card></TabsContent>
@@ -520,6 +522,9 @@ export function AdminDashboard() {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+          <TabsContent value="paper-search">
+            <PaperSearchAdmin />
           </TabsContent>
           <TabsContent value="mcp">
             <div className="space-y-6">

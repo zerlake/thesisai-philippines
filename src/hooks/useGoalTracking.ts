@@ -69,15 +69,15 @@ export function useGoalTracking() {
               table: 'writing_goals',
               filter: `user_id=eq.${session.user.id}`,
             },
-            (payload) => {
-              if (!isMounted) return;
-              if (payload.new && (payload.new as WritingGoal).id === currentGoal?.id) {
-                setProgress((payload.new as WritingGoal).achieved);
-                setCurrentGoal(payload.new as WritingGoal);
-              }
-            }
+            (payload: any) => {
+               if (!isMounted) return;
+               if (payload.new && (payload.new as WritingGoal).id === currentGoal?.id) {
+                 setProgress((payload.new as WritingGoal).achieved);
+                 setCurrentGoal(payload.new as WritingGoal);
+               }
+             }
           )
-          .subscribe((status) => {
+          .subscribe((status: any) => {
             if (!isMounted) return;
 
             if (status === 'CHANNEL_ERROR') {
@@ -100,7 +100,7 @@ export function useGoalTracking() {
     return () => {
       isMounted = false;
       if (channel) {
-        supabase.removeChannel(channel).catch((err) => {
+        supabase.removeChannel(channel).catch((_err: any) => {
         });
       }
     };

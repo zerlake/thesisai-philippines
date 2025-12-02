@@ -1,95 +1,133 @@
+/**
+ * API Route: ArXiv Search (Server-side to avoid CORS)
+ * 
+ * Proxies requests to arXiv API to avoid browser CORS issues
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 
-interface PaperResult {
-  id: string;
-  title: string;
-  link: string;
-  publication_info: string;
-  snippet: string;
-  authors?: string;
-}
-
-function parseXMLEntries(xmlText: string): PaperResult[] {
-  const papers: PaperResult[] = [];
-
-  // Find all entry tags
-  const entryPattern = /<entry>([\s\S]*?)<\/entry>/g;
-  let match;
-
-  while ((match = entryPattern.exec(xmlText)) !== null) {
-    const entryXml = match[1];
-
-    // Extract fields using regex
-    const idMatch = entryXml.match(/<id>(.*?)<\/id>/);
-    const titleMatch = entryXml.match(/<title>(.*?)<\/title>/);
-    const summaryMatch = entryXml.match(/<summary>([\s\S]*?)<\/summary>/);
-    const publishedMatch = entryXml.match(/<published>(.*?)<\/published>/);
-    const authorMatches = [...entryXml.matchAll(/<author><name>(.*?)<\/name><\/author>/g)];
-
-    const id = idMatch ? idMatch[1].replace('http://arxiv.org/abs/', '') : '';
-    const title = titleMatch ? titleMatch[1].trim() : 'Untitled';
-    const summary = summaryMatch ? summaryMatch[1].trim().replace(/\n\s+/g, ' ') : 'No summary available';
-    const published = publishedMatch ? publishedMatch[1] : '';
-    const authors = authorMatches.map(m => m[1]).join(', ');
-
-    if (id && title) {
-      papers.push({
-        id,
-        title,
-        link: `https://arxiv.org/pdf/${id}.pdf`,
-        publication_info: published ? new Date(published).toLocaleDateString() : '',
-        snippet: summary,
-        authors,
-      });
-    }
-  }
-
-  return papers;
-}
-
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const query = searchParams.get('query');
-
-  if (!query) {
-    return NextResponse.json(
-      { error: 'Search query is required' },
-      { status: 400 }
-    );
-  }
-
   try {
-    // Build ArXiv API URL
-    const searchQuery = encodeURIComponent(`all:${query}`);
-    const arxivUrl = `https://export.arxiv.org/api/query?search_query=${searchQuery}&start=0&max_results=10&sortBy=submittedDate&sortOrder=descending`;
+    const { searchParams } = new URL(request.url);
+    const query = searchParams.get('q') ?? '';
+    const maxResults = Number(searchParams.get('max') ?? '20');
 
-    // Fetch from ArXiv (no CORS issues from server)
+    if (!query.trim()) {
+      return NextResponse.json(
+        { error: 'Query is required' },
+        { status: 400 }
+      );
+    }
+
+    // Build arXiv search query
+    const searchQuery = encodeURIComponent(`all:${query.split(' ').join(' AND ')}`);
+    const arxivUrl = `https://export.arxiv.org/api/query?search_query=${searchQuery}&max_results=${Math.min(maxResults, 100)}&sortBy=relevance&sortOrder=descending`;
+
+    console.log(`[API] ArXiv search: ${query}, max: ${maxResults}`);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
     const response = await fetch(arxivUrl, {
-      headers: {
-        'User-Agent': 'ThesisAI/1.0',
-      },
-      next: { revalidate: 3600 }, // Cache for 1 hour
-    });
+      headers: { 'User-Agent': 'ThesisAI/1.0' },
+      signal: controller.signal,
+    }).finally(() => clearTimeout(timeout));
 
     if (!response.ok) {
+      console.error(`[API] ArXiv returned ${response.status}`);
       return NextResponse.json(
-        { error: `ArXiv API returned status ${response.status}` },
+        { error: `ArXiv API error: ${response.status}`, entries: [] },
         { status: response.status }
       );
     }
 
-    const xmlText = await response.text();
+    const text = await response.text();
 
-    // Parse XML and extract papers
-    const papers = parseXMLEntries(xmlText);
+    // Parse XML entries - using regex matching which is safe in server environment
+    const entryMatches = text.match(/<entry[^>]*>([\s\S]*?)<\/entry>/g) || [];
+    const entries = [];
 
-    return NextResponse.json({ papers });
-  } catch (error: any) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
-    console.error('ArXiv search error:', errorMsg, error);
+    for (const entryText of entryMatches) {
+      // Extract entry properties using regex
+      const id = extractXMLTagContent(entryText, 'id') || '';
+      const title = extractXMLTagContent(entryText, 'title') || '';
+      const summary = extractXMLTagContent(entryText, 'summary') || '';
+      const published = extractXMLTagContent(entryText, 'published') || '';
+      const updated = extractXMLTagContent(entryText, 'updated') || '';
+
+      // Extract authors
+      const authorMatches = entryText.match(/<author>([\s\S]*?)<\/author>/g) || [];
+      const authors = authorMatches.map(authorText => {
+        const name = extractXMLTagContent(authorText, 'name');
+        return { name };
+      }).filter(author => author.name);
+
+      // Extract categories
+      const categoryMatches = entryText.match(/<category[^>]*\/?>/g) || [];
+      const categories = categoryMatches.map(cat => {
+        const match = cat.match(/term=["']([^"']*)["']/);
+        return match ? match[1] : null;
+      }).filter(Boolean);
+
+      // Extract links
+      const linkMatches = entryText.match(/<link[^>]*\/?>/g) || [];
+      const links = linkMatches.map(link => {
+        const hrefMatch = link.match(/href=["']([^"']*)["']/);
+        const relMatch = link.match(/rel=["']([^"']*)["']/);
+        const typeMatch = link.match(/type=["']([^"']*)["']/);
+
+        if (hrefMatch) {
+          return {
+            href: hrefMatch[1],
+            rel: relMatch ? relMatch[1] : undefined,
+            type: typeMatch ? typeMatch[1] : undefined
+          };
+        }
+        return null;
+      }).filter(Boolean);
+
+      entries.push({
+        id: id,
+        title: title,
+        summary: summary,
+        published: published,
+        updated: updated,
+        authors: authors,
+        categories: categories,
+        links: links
+      });
+    }
+
+    console.log(`[API] ArXiv found ${entries.length} papers`);
+
+    return NextResponse.json({
+      entries,
+      count: entries.length,
+      query: query,
+    });
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('[API] ArXiv search error:', msg);
     return NextResponse.json(
-      { error: `Failed to search ArXiv papers: ${errorMsg}` },
+      { error: `ArXiv search failed: ${msg}`, entries: [] },
       { status: 500 }
     );
   }
+}
+
+/**
+ * Helper function to extract content from XML tags
+ */
+function extractXMLTagContent(xml: string, tagName: string): string | null {
+  const startTag = `<${tagName}>`;
+  const endTag = `</${tagName}>`;
+
+  const startIndex = xml.indexOf(startTag);
+  if (startIndex === -1) return null;
+
+  const contentStart = startIndex + startTag.length;
+  const endIndex = xml.indexOf(endTag, contentStart);
+  if (endIndex === -1) return null;
+
+  return xml.substring(contentStart, endIndex).trim();
 }

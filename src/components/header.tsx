@@ -15,6 +15,7 @@ import {
   Gift,
   UserCheck,
   ClipboardCheck,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -73,21 +74,48 @@ export function Header() {
 
         {/* Main Navigation - Hidden on mobile */}
         <div className="hidden lg:flex items-center space-x-1">
+          {/* Thesis Phases Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="px-3">
+                Thesis Phases <ChevronDown className="ml-1 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuLabel>Thesis Chapters</DropdownMenuLabel>
+              <DropdownMenuItem>
+                <Link href="/thesis-phases/chapter-1">Chapter 1 - Introduction</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href="/thesis-phases/chapter-2">Chapter 2 - Literature Review</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href="/thesis-phases/chapter-3">Chapter 3 - Methodology</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href="/thesis-phases/chapter-4">Chapter 4 - Results & Analysis</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href="/thesis-phases/chapter-5">Chapter 5 - Conclusions</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           {/* Billing */}
           <Button variant="ghost" className="px-3" asChild>
             <Link href="/settings/billing">Billing</Link>
           </Button>
-          
+
           {/* Referrals */}
           <Button variant="ghost" className="px-3" asChild>
             <Link href="/settings/referrals">Referrals</Link>
           </Button>
-          
+
           {/* Manage Groups */}
           <Button variant="ghost" className="px-3" asChild>
             <Link href="/groups">Manage Groups</Link>
           </Button>
-          
+
           {/* Usage & Analytics */}
           <Button variant="ghost" className="px-3" asChild>
             <Link href="/analytics">Usage & Analytics</Link>
@@ -179,12 +207,6 @@ export function Header() {
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <Link href="/settings">Profile</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/settings">API Keys</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/settings">Preferences</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>

@@ -42,6 +42,7 @@ export function NotificationBell() {
       try {
          setIsLoading(true);
 
+        // Using the enhanced error handling approach
         const { data, error } = await supabase
           .from("notifications")
           .select("*")
@@ -52,18 +53,29 @@ export function NotificationBell() {
 
         if (error) {
           console.error("Failed to fetch notifications:", error);
-          toast.error("Failed to fetch notifications.");
+          // Only show toast for non-network errors (avoid spam during connection issues)
+          if (error.message && !error.message.includes("Failed to fetch")) {
+            toast.error("Failed to fetch notifications.");
+          }
           setNotifications([]);
           setUnreadCount(0);
         } else {
           setNotifications(data || []);
           setUnreadCount(data?.filter(n => !n.is_read).length || 0);
         }
-      } catch (err) {
+      } catch (err: any) {
         if (isMounted) {
           console.error("Error fetching notifications:", err);
-          setNotifications([]);
-          setUnreadCount(0);
+          // Check if it's a network error
+          if (err?.message?.includes("Failed to fetch") || err?.message?.includes("NetworkError")) {
+            // Don't show error toast for network issues, just set empty notifications
+            setNotifications([]);
+            setUnreadCount(0);
+          } else {
+            toast.error("Failed to fetch notifications.");
+            setNotifications([]);
+            setUnreadCount(0);
+          }
         }
       } finally {
         if (isMounted) {
@@ -76,8 +88,8 @@ export function NotificationBell() {
       try {
         await fetchNotifications();
 
-        // Only setup Realtime if we have a valid session with access token
-        if (!session?.access_token || !session?.user?.id) {
+        // Only setup Realtime if we have a valid session with access token and Supabase is configured
+        if (!session?.access_token || !session?.user?.id || !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
           return;
         }
 
@@ -95,11 +107,11 @@ export function NotificationBell() {
           })
           .on(
             'postgres_changes',
-            { 
-              event: 'INSERT', 
-              schema: 'public', 
-              table: 'notifications', 
-              filter: `user_id=eq.${session.user.id}` 
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'notifications',
+              filter: `user_id=eq.${session.user.id}`
             },
             (payload) => {
               if (!isMounted) return;
@@ -113,9 +125,11 @@ export function NotificationBell() {
             if (!isMounted) return;
 
             if (status === 'CHANNEL_ERROR') {
-               // Silently log, don't show error toast
+              console.warn('Channel error for notifications');
              } else if (status === 'TIMED_OUT') {
+              console.warn('Channel timed out for notifications');
              } else if (status === 'SUBSCRIBED') {
+              console.log('Successfully subscribed to notifications');
              }
           });
       } catch (err: any) {
@@ -126,7 +140,15 @@ export function NotificationBell() {
           return;
         }
 
+        // Check if it's a network error and handle appropriately
+        if (err?.message?.includes("Failed to fetch") || err?.message?.includes("NetworkError")) {
+          console.warn("Network error in notification setup:", err);
+          // Don't crash the component, just continue without realtime
+          return;
+        }
+
         // Log other errors but don't crash
+        console.error("Error in notification setup:", err);
       }
     };
 
@@ -136,6 +158,7 @@ export function NotificationBell() {
       isMounted = false;
       if (channel) {
         supabase.removeChannel(channel).catch((err) => {
+          console.warn("Error removing channel:", err);
         });
       }
     };

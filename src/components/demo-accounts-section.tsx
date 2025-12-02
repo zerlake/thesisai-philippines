@@ -147,9 +147,17 @@ export function DemoAccountsSection() {
     }
   };
 
-  // Don't render if demo is not available
+  // Show message if Supabase is not configured
   if (isDemoAvailable === false) {
-    return null;
+    return (
+      <div className="border-t pt-4">
+        <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800 p-3">
+          <p className="text-xs text-blue-800 dark:text-blue-200">
+            <strong>Demo login disabled:</strong> Requires Supabase configuration in .env.local
+          </p>
+        </div>
+      </div>
+    );
   }
 
   // Show loading indicator while checking if demo is available

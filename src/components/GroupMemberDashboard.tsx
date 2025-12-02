@@ -124,7 +124,7 @@ export function GroupMemberDashboard() {
     };
 
     fetchUserData();
-  }, [session?.user.id, session?.user.email, supabase, selectedGroup]);
+  }, [session?.user.id, session?.user.email, supabase]);
 
   // Fetch group details when selected group changes
   useEffect(() => {

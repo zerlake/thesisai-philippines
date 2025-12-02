@@ -50,13 +50,13 @@ function PlagiarismResultRenderer({ results }: { results: any }) {
 }
 
 export function OriginalityChecker() {
-  const [inputText, setInputText] = useState(
-    `The quick brown fox jumps over the lazy dog. This is a common pangram used to display all letters of the alphabet. For instance, in typography, it helps showcase fonts effectively.
+  const sampleText = `The quick brown fox jumps over the lazy dog. This is a common pangram used to display all letters of the alphabet. For instance, in typography, it helps showcase fonts effectively.
 
 Some researchers argue that the rapid advancements in artificial intelligence will fundamentally reshape the future of work. However, other scholars contend that while AI will automate certain tasks, it will also create new opportunities and roles for human workers. There is an ongoing debate on the extent of AI's impact on employment. This paragraph could be considered original work or it could be plagiarized from another source. It all depends on proper citation.
 
-According to a study by Smith et al. (2023), "The integration of AI in educational settings presents both unprecedented opportunities and significant challenges for students and educators alike." This highlights the dual nature of technological adoption in academia. This sentence is directly quoted from a fictional source to demonstrate how plagiarism might be detected.`
-  );
+According to a study by Smith et al. (2023), "The integration of AI in educational settings presents both unprecedented opportunities and significant challenges for students and educators alike." This highlights the dual nature of technological adoption in academia. This sentence is directly quoted from a fictional source to demonstrate how plagiarism might be detected.`;
+
+  const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState('');
@@ -82,6 +82,12 @@ According to a study by Smith et al. (2023), "The integration of AI in education
     }
   };
 
+  const handleLoadSampleData = () => {
+    setInputText(sampleText);
+    setResults(null); // Clear previous results when loading new sample data
+    setError(''); // Clear any previous errors
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
       <Card>
@@ -105,9 +111,14 @@ According to a study by Smith et al. (2023), "The integration of AI in education
             />
             <div className="flex justify-between items-center">
               <p className="text-sm text-muted-foreground">{wordCount} words</p>
-              <Button onClick={handleCheckOriginality} disabled={isLoading || !inputText}>
-                {isLoading ? "Checking..." : "Check Originality"}
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={handleLoadSampleData} disabled={isLoading}>
+                  Load Sample Data
+                </Button>
+                <Button onClick={handleCheckOriginality} disabled={isLoading || !inputText}>
+                  {isLoading ? "Checking..." : "Check Originality"}
+                </Button>
+              </div>
             </div>
           </div>
           {error && <p className="text-red-500 mt-4">{error}</p>}

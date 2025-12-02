@@ -19,6 +19,18 @@ pnpm test:coverage # Coverage report
 pnpm exec vitest src/__tests__/path/to/test.test.ts
 ```
 
+**Database Migrations:**
+```bash
+# Apply all pending migrations
+supabase migration up
+
+# Create new migration
+supabase migration new <migration_name>
+
+# View migration status
+supabase migration list
+```
+
 **Cleanup & Verification:**
 ```bash
 # Verify function usage (before cleanup)
@@ -26,6 +38,24 @@ grep -r "functions.invoke" src/ | grep -o "'[^']*'" | sort -u
 
 # List Supabase functions
 dir supabase\functions /B
+```
+
+**Validity Defender Feature:**
+```bash
+# After implementing Validity Defender feature:
+# 1. Apply migration
+supabase migration up
+
+# 2. Test endpoints
+curl -X POST http://localhost:3000/api/instruments/validate \
+  -H "Content-Type: application/json" \
+  -d '{"thesisId": "uuid", "instrumentName": "Survey", ...}'
+
+# 3. Run tests
+pnpm exec vitest src/__tests__/validity-defender/
+
+# 4. Access UI at
+# /thesis-phases/chapter-3/validity-defender
 ```
 
 **MCP server subproject** (Python, `web-app/arxiv-mcp-server/`):

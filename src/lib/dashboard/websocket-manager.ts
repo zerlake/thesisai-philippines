@@ -138,10 +138,23 @@ export class WebSocketManager {
     this.setState(ConnectionState.CONNECTING);
 
     return new Promise((resolve, reject) => {
+      // Add a timeout to handle connection failures more quickly
+      let connectionTimeout: NodeJS.Timeout | undefined;
+      
       try {
+        connectionTimeout = setTimeout(() => {
+          if (this.state === ConnectionState.CONNECTING) {
+            console.warn('[WebSocket] Connection timeout');
+            this.setState(ConnectionState.ERROR);
+            this.emit('error', new Error('Connection timeout'));
+            reject(new Error('WebSocket connection timeout'));
+          }
+        }, 10000); // 10 second timeout
+
         this.ws = new WebSocket(this.config.url);
 
         this.ws.onopen = () => {
+          if (connectionTimeout !== undefined) clearTimeout(connectionTimeout);
           this.setState(ConnectionState.CONNECTED);
           this.reconnectAttempts = 0;
           this.startHeartbeat();
@@ -155,23 +168,50 @@ export class WebSocketManager {
         };
 
         this.ws.onerror = (event) => {
-          console.error('[WebSocket] Connection error:', event);
+           if (connectionTimeout !== undefined) clearTimeout(connectionTimeout);
+          
+          // Extract error details from the typically empty WebSocket error event
+          const errorInfo = this.extractErrorInfo(event);
+
+          // Minimal logging to avoid noise
+          console.warn('[WebSocket] Error', {
+            code: errorInfo.code,
+            message: errorInfo.message,
+            attempt: `${this.reconnectAttempts + 1}/${this.config.reconnectAttempts}`
+          });
+
           this.setState(ConnectionState.ERROR);
-          this.emit('error', event);
+          this.emit('error', {
+            message: errorInfo.message,
+            code: errorInfo.code,
+            isRetryable: this.reconnectAttempts < this.config.reconnectAttempts,
+            attemptNumber: this.reconnectAttempts + 1,
+            maxAttempts: this.config.reconnectAttempts
+          });
 
           this.ws = null; // Clear the broken connection
-          reject(new Error('WebSocket connection failed')); // Reject the promise to indicate failure
+          // Trigger reconnection with exponential backoff
+          this.attemptReconnect();
         };
 
-        this.ws.onclose = () => {
-          this.setState(ConnectionState.DISCONNECTED);
+        this.ws.onclose = (closeEvent) => {
+           if (connectionTimeout !== undefined) clearTimeout(connectionTimeout);
+           this.setState(ConnectionState.DISCONNECTED);
           this.stopHeartbeat();
           this.emit('disconnected');
+
+          // Log close event details for debugging
+          if (closeEvent && (closeEvent as any).code) {
+            console.log(`[WebSocket] Closed with code: ${(closeEvent as any).code}, reason: ${(closeEvent as any).reason}`);
+          }
+
           this.attemptReconnect();
         };
       } catch (error) {
+         if (connectionTimeout !== undefined) clearTimeout(connectionTimeout);
          this.setState(ConnectionState.ERROR);
          const err = error instanceof Error ? error : new Error(String(error));
+         console.error('[WebSocket] Connection failed:', err);
          reject(err);
        }
     });
@@ -363,26 +403,90 @@ export class WebSocketManager {
   }
 
   /**
-   * Attempt to reconnect
+   * Attempt to reconnect with exponential backoff
    */
   private attemptReconnect(): void {
     if (this.reconnectAttempts >= this.config.reconnectAttempts) {
       this.setState(ConnectionState.ERROR);
+      console.warn(`[WebSocket] Max reconnection attempts (${this.config.reconnectAttempts}) reached. Giving up.`);
+      this.emit('connectionFailed', {
+        reason: 'max_attempts_reached',
+        attempts: this.reconnectAttempts
+      });
       return;
     }
 
     this.setState(ConnectionState.RECONNECTING);
     this.reconnectAttempts++;
 
-    const delay = this.config.reconnectDelay *
+    // Calculate delay with exponential backoff + jitter
+    const baseDelay = this.config.reconnectDelay *
       Math.pow(this.config.reconnectBackoffMultiplier, this.reconnectAttempts - 1);
+    const jitter = Math.random() * 1000; // Add up to 1 second of jitter
+    const delay = Math.min(baseDelay + jitter, 30000); // Cap at 30 seconds
 
+    console.log(`[WebSocket] Reconnecting (attempt ${this.reconnectAttempts}/${this.config.reconnectAttempts}) in ${Math.round(delay)}ms`);
+    
     this.reconnectTimer = setTimeout(() => {
       this.connect().catch((error) => {
-        console.error('[WebSocket] Reconnect failed:', error);
-        this.attemptReconnect();
+        console.warn('[WebSocket] Reconnect attempt failed:', error);
+        // Continue with reconnection if not at max attempts
+        if (this.reconnectAttempts < this.config.reconnectAttempts) {
+          this.attemptReconnect();
+        } else {
+          this.setState(ConnectionState.ERROR);
+          this.emit('connectionFailed', {
+            reason: 'reconnect_failed',
+            error: error instanceof Error ? error.message : String(error)
+          });
+        }
       });
     }, delay);
+  }
+
+  /**
+   * Extract meaningful error info from WebSocket error event
+   * @param event - WebSocket error event (often empty)
+   */
+  private extractErrorInfo(event: Event | any): {
+    message: string;
+    code?: string;
+    type?: string;
+    details?: string;
+  } {
+    // WebSocket error events are notoriously empty, build context from surrounding state
+    const errorObj = event as any;
+    
+    // Determine error message with fallback chain
+    let message = 'WebSocket connection error';
+    if (errorObj?.message && typeof errorObj.message === 'string') {
+      message = errorObj.message;
+    } else if (errorObj?.reason && typeof errorObj.reason === 'string') {
+      message = errorObj.reason;
+    } else if (this.ws?.readyState === WebSocket.CLOSED) {
+      message = 'WebSocket connection closed';
+    } else if (this.ws?.readyState === WebSocket.CONNECTING) {
+      message = 'WebSocket connection failed';
+    }
+
+    // Extract or infer error code
+    let code = errorObj?.code;
+    if (typeof code !== 'string') {
+      code = this.reconnectAttempts > 0 ? 'RECONNECT_FAILED' : 'CONNECTION_ERROR';
+    }
+
+    // Get error type (rarely populated)
+    const type = errorObj?.type || 'connection_error';
+
+    // Build context without verbose details
+    const details = `state=${this.state},readyState=${this.ws?.readyState || -1}`;
+
+    return {
+      message,
+      code,
+      type,
+      details
+    };
   }
 
   /**

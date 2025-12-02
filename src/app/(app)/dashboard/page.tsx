@@ -16,12 +16,8 @@ export default function DashboardPage() {
     return <BrandedLoader />;
   }
 
-  // If profile exists, proceed to render dashboard
-  if (profile) {
-    // Continue with dashboard rendering below...
-  }
   // If we have no profile but loading is still ongoing, we might want to render a partial dashboard
-  else if (isLoading) {
+  if (isLoading && !profile) {
     // Render a skeleton dashboard or fallback UI to avoid infinite loading
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -36,21 +32,21 @@ export default function DashboardPage() {
 
   // Add structured data based on user role
   const getStructuredData = () => {
-    if (profile.role === 'admin') {
+    if (profile?.role === 'admin') {
       return {
         "@context": "https://schema.org",
         "@type": "WebPage",
         "name": "Admin Dashboard",
         "description": "Administrative interface for managing users, institutions, and testimonials."
       };
-    } else if (profile.role === 'advisor') {
+    } else if (profile?.role === 'advisor') {
       return {
         "@context": "https://schema.org",
         "@type": "WebPage",
         "name": "Advisor Dashboard",
         "description": "Interface for thesis advisors to manage student progress and provide feedback."
       };
-    } else if (profile.role === 'critic') {
+    } else if (profile?.role === 'critic') {
       return {
         "@context": "https://schema.org",
         "@type": "WebPage",
@@ -66,6 +62,10 @@ export default function DashboardPage() {
       };
     }
   };
+
+  if (!profile) {
+    return <BrandedLoader />;
+  }
 
   switch (profile.role) {
     case 'admin':

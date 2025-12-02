@@ -20,6 +20,7 @@ import {
   Square,
   Users,
   Folder,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -156,7 +157,13 @@ const quickAccessItems = [
     title: "Research Problem Identifier",
     description: "Find research problems.",
     href: "/research-problem-identifier",
-  }
+  },
+  {
+    icon: Presentation,
+    title: "Defense PPT Coach",
+    description: "Create structured defense presentations.",
+    href: "/defense-ppt-coach",
+  },
 ];
 
 type Document = {

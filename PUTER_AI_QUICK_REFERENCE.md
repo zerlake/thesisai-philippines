@@ -1,429 +1,312 @@
-# Puter AI Quick Reference for Developers
+# Puter AI Client-Side Migration - Quick Reference
 
-## How to Use Puter AI in Supabase Functions
+## One-Minute Setup
 
-### Basic Pattern
-
+### Import
 ```typescript
-import { callPuterAI } from '../_shared/puter-ai.ts';
-
-async function myCustomFunction(topic: string) {
-  const prompt = `Your prompt here: ${topic}`;
-  
-  const systemPrompt = 'You are a helpful assistant.';
-  
-  const response = await callPuterAI(prompt, {
-    systemPrompt,
-    temperature: 0.7,
-    max_tokens: 2000,
-    timeout: 30000
-  });
-  
-  // Parse JSON from response
-  const jsonMatch = response.match(/\{[\s\S]*\}/);
-  const result = JSON.parse(jsonMatch?.[0] || response);
-  
-  return result;
-}
+import { callPuterAI } from "@/lib/puter-ai-wrapper";
+import { useState } from "react";
+import { toast } from "sonner";
 ```
 
-### With Error Handling
-
+### Basic Implementation
 ```typescript
-async function myFunction(topic: string) {
+const [isLoading, setIsLoading] = useState(false);
+
+const handleGenerate = async () => {
+  setIsLoading(true);
   try {
-    const response = await callPuterAI(prompt, {
-      systemPrompt: 'You are an expert...',
-      temperature: 0.7,
-      max_tokens: 1500,
-    });
+    const result = await callPuterAI(
+      `Your prompt here...`,
+      { temperature: 0.8, max_tokens: 2000, timeout: 30000 }
+    );
     
-    // Extract and parse JSON
-    const jsonStart = response.indexOf('{');
-    const jsonEnd = response.lastIndexOf('}') + 1;
-    const jsonString = jsonStart !== -1 && jsonEnd !== 0 
-      ? response.substring(jsonStart, jsonEnd)
-      : response;
-    
-    return JSON.parse(jsonString);
+    // Handle result
+    setData(result);
+    toast.success("Generated successfully!");
   } catch (error) {
-    console.error("Puter AI Error:", error);
-    throw new Error(`Failed to generate content: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    toast.error(error.message);
+  } finally {
+    setIsLoading(false);
   }
-}
-```
-
-### With Fallback
-
-```typescript
-import { callPuterAIWithFallback } from '../_shared/puter-ai.ts';
-
-async function myFunction(topic: string) {
-  const fallbackResponse = JSON.stringify({
-    data: [{
-      title: "Default " + topic,
-      description: "Fallback response for " + topic
-    }]
-  });
-  
-  const response = await callPuterAIWithFallback(
-    prompt,
-    fallbackResponse,
-    { systemPrompt: '...', temperature: 0.7 }
-  );
-  
-  return JSON.parse(response);
-}
+};
 ```
 
 ---
 
-## API Reference
+## Component Checklist
 
-### `callPuterAI(prompt, options)`
-
-Calls Puter AI API and returns the response text.
-
-**Parameters:**
-- `prompt: string` - The user prompt to send
-- `options?: PuterAIOptions`
-  - `temperature?: number` (default: 0.7) - Creativity vs coherence
-  - `max_tokens?: number` (default: 2000) - Max response length
-  - `timeout?: number` (default: 30000) - Request timeout in ms
-  - `systemPrompt?: string` (default: "You are a helpful assistant.") - System message
-
-**Returns:** `Promise<string>` - The AI response text
-
-**Throws:** Error if the request fails
-
-**Example:**
-```typescript
-const response = await callPuterAI("Explain quantum computing", {
-  temperature: 0.5,
-  max_tokens: 1000,
-  systemPrompt: "You are a physics expert"
-});
-```
-
----
-
-### `callPuterAIWithFallback(prompt, fallbackResponse, options)`
-
-Calls Puter AI but returns fallback if the API fails.
-
-**Parameters:**
-- `prompt: string` - The user prompt
-- `fallbackResponse: string` - Fallback response if API fails
-- `options?: PuterAIOptions` - Same as above
-
-**Returns:** `Promise<string>` - AI response or fallback
-
-**Never throws** - Always returns a valid response
-
-**Example:**
-```typescript
-const response = await callPuterAIWithFallback(
-  prompt,
-  '{"status": "fallback"}',
-  { temperature: 0.7 }
-);
-```
+### For Each Component
+- [ ] Import `callPuterAI` and `useState`
+- [ ] Remove old Supabase function imports
+- [ ] Remove `useApiCall` hook
+- [ ] Create local `isLoading` state
+- [ ] Update prompt with clear requirements
+- [ ] Add JSON parsing with error handling
+- [ ] Update error handling with toast
+- [ ] Test with sample data
+- [ ] Verify loading states
+- [ ] Check mobile responsiveness
 
 ---
 
 ## Common Patterns
 
-### JSON-based Tasks (Most Common)
-
+### 1. Simple Text Generation
 ```typescript
-const prompt = `Generate a JSON object with this structure:
-{
-  "items": [
-    {
-      "title": "...",
-      "description": "..."
-    }
-  ]
-}
-
-Topic: ${topic}`;
-
-const response = await callPuterAI(prompt, {
-  systemPrompt: 'You are a data generator.',
-  max_tokens: 1500
-});
-
-// Extract JSON
-const jsonMatch = response.match(/\{[\s\S]*\}/);
-const data = JSON.parse(jsonMatch[0]);
+const result = await callPuterAI(prompt, { temperature: 0.7, max_tokens: 1000 });
+// result is a string
 ```
 
-### Structured Analysis
-
+### 2. JSON Response Parsing
 ```typescript
-const prompt = `Analyze this text and provide:
-1. Key points
-2. Themes
-3. Recommendations
-
-Text: "${textContent.substring(0, 3000)}"`;
-
-const response = await callPuterAI(prompt, {
-  systemPrompt: 'You are an expert analyst.',
-  temperature: 0.6,
-  max_tokens: 2000
-});
+const result = await callPuterAI(prompt, { max_tokens: 2000 });
+const data = JSON.parse(result);
 ```
 
-### Multiple Choice Generation
-
+### 3. List Generation
 ```typescript
-const prompt = `Generate 5 multiple choice questions about ${topic}.
-Format as JSON array:
-{
-  "questions": [
-    {
-      "question": "...",
-      "options": ["A", "B", "C", "D"],
-      "answer": "A"
-    }
-  ]
-}`;
-
-const response = await callPuterAI(prompt);
-const jsonMatch = response.match(/\{[\s\S]*\}/);
-return JSON.parse(jsonMatch[0]);
+const result = await callPuterAI(prompt, { max_tokens: 1500 });
+const items = result.split('\n').filter(line => line.trim().length > 0);
 ```
 
----
-
-## Best Practices
-
-### 1. **System Prompts**
-Use descriptive system prompts for better results:
-```typescript
-// ✅ Good
-systemPrompt: "You are an expert thesis advisor specializing in Philippine universities."
-
-// ❌ Vague
-systemPrompt: "You are a helpful assistant."
-```
-
-### 2. **Temperature Selection**
-- `0.3-0.5`: Factual, consistent answers (research, data)
-- `0.5-0.7`: Balanced (most tasks)
-- `0.7-0.9`: Creative, varied answers (brainstorming)
-
-```typescript
-// Data generation
-{ temperature: 0.5 }
-
-// Creative writing
-{ temperature: 0.8 }
-```
-
-### 3. **Token Management**
-```typescript
-// Short responses
-{ max_tokens: 500 }
-
-// Medium responses
-{ max_tokens: 1000, 1500 }
-
-// Long analyses
-{ max_tokens: 2000, 3000 }
-```
-
-### 4. **JSON Extraction**
-Always handle JSON extraction carefully:
+### 4. With Error Handling
 ```typescript
 try {
-  // Method 1: Regex (most reliable)
-  const jsonMatch = response.match(/\{[\s\S]*\}/);
-  const data = JSON.parse(jsonMatch[0]);
-  
-  // Method 2: Direct parse (if response is pure JSON)
-  const data = JSON.parse(response);
+  const result = await callPuterAI(prompt);
+  // Process result
 } catch (error) {
-  console.error("JSON parse error:", error);
-  // Use fallback or retry
-}
-```
-
-### 5. **Error Handling**
-```typescript
-try {
-  const response = await callPuterAI(prompt, options);
-  // Process response
-} catch (error) {
-  if (error instanceof Error) {
-    if (error.message.includes('timeout')) {
-      // Handle timeout
-    } else if (error.message.includes('401')) {
-      // Invalid API key
-    } else {
-      // Other error
-    }
+  if (error.message.includes('timeout')) {
+    toast.error("Request took too long. Try again.");
+  } else {
+    toast.error(error.message);
   }
 }
 ```
 
 ---
 
-## Examples from Production
+## Temperature & Max Tokens Guide
 
-### Topic Idea Generator
+| Use Case | Temperature | Max Tokens |
+|----------|-------------|-----------|
+| **Creative** (brainstorming, ideas) | 0.8-1.0 | 2500 |
+| **Balanced** (summaries, rewrites) | 0.5-0.7 | 2000 |
+| **Precise** (grammar, corrections) | 0.3-0.5 | 1500 |
+| **Constrained** (titles, lists) | 0.7-0.8 | 1000 |
+
+---
+
+## Prompt Engineering Tips
+
+### ✅ DO
+- Be specific about format (JSON, list, etc.)
+- State "EXACTLY X items" if needed
+- Include context about Philippine education
+- Specify academic language level
+- Request only what's needed
+
+### ❌ DON'T
+- Ask for vague "good ideas"
+- Mix multiple tasks in one prompt
+- Forget to specify output format
+- Include sensitive information
+- Use multiple instructions without clarity
+
+### Example Good Prompt
+```
+Generate EXACTLY 5 unique research questions for: "${topic}"
+
+Requirements:
+- Each question must be 8-15 words
+- Must be answerable through research
+- Should relate to Philippines context
+- Format: Return ONLY a JSON array of strings
+
+Return only the JSON, no other text.
+```
+
+---
+
+## Debugging Checklist
+
+### Issue: "SDK failed to load"
+- ✅ Ensure Puter SDK is in layout
+- ✅ Check internet connection
+- ✅ Verify timeout is sufficient (30s default)
+- ✅ Clear browser cache
+
+### Issue: "Invalid JSON"
+- ✅ Check prompt includes proper JSON format
+- ✅ Verify AI isn't adding markdown
+- ✅ Try parsing with error handling
+- ✅ Increase max_tokens if response is cut off
+
+### Issue: "Timeout after 30s"
+- ✅ Reduce max_tokens
+- ✅ Simplify prompt
+- ✅ Increase timeout value
+- ✅ Check AI service status
+
+### Issue: "Empty or incomplete results"
+- ✅ Increase max_tokens
+- ✅ Make prompt more specific
+- ✅ Reduce temperature (more focused)
+- ✅ Add examples to prompt
+
+---
+
+## Testing Template
+
 ```typescript
-async function generateIdeasWithPuter(field: string) {
-  const prompt = `You are an expert academic advisor...
-Generate 3 thesis topics for field: ${field}...`;
-  
-  const response = await callPuterAI(prompt, {
-    systemPrompt: 'You are an expert academic advisor...',
-    temperature: 0.7,
-    max_tokens: 2000
+// Component Test
+describe("YourComponent", () => {
+  it("should generate content with Puter AI", async () => {
+    render(<YourComponent />);
+    
+    // Trigger generation
+    const button = screen.getByText("Generate");
+    await userEvent.click(button);
+    
+    // Wait for result
+    await waitFor(() => {
+      expect(screen.getByText(/Generated/)).toBeInTheDocument();
+    });
   });
-  
-  const jsonMatch = response.match(/\{[\s\S]*\}/);
-  return JSON.parse(jsonMatch[0]);
+});
+```
+
+---
+
+## Before & After Example
+
+### BEFORE (Supabase Function)
+```typescript
+const { data, error } = await supabase.functions.invoke('generate-titles', {
+  body: { summary },
+  headers: { Authorization: `Bearer ${token}` }
+});
+if (error) toast.error(error.message);
+else setTitles(data.titles);
+```
+
+### AFTER (Client-Side Puter AI)
+```typescript
+try {
+  const result = await callPuterAI(`Generate 5 titles for: ${summary}`);
+  const parsed = JSON.parse(result);
+  setTitles(parsed.titles);
+} catch (error) {
+  toast.error(error.message);
 }
 ```
 
-### Grammar Check
+**Reduction**: ~40 lines → ~8 lines (80% less code)
+
+---
+
+## Recommended Temperature Values by Component
+
+| Component | Temperature | Reason |
+|-----------|-------------|--------|
+| Title Generator | 0.8 | Varied but academic |
+| Topic Ideas | 0.8 | Creative brainstorming |
+| Questions | 0.6 | Structured, diverse |
+| Hypotheses | 0.5 | Scientifically precise |
+| Grammar Check | 0.3 | Consistent corrections |
+| Summaries | 0.5 | Balanced accuracy |
+| Paraphrasing | 0.7 | Varied phrasing |
+
+---
+
+## Common Response Formats
+
+### JSON Array
 ```typescript
-async function analyzeTextWithPuter(text: string) {
-  const prompt = `Analyze text for: focus, development, audience...
-Return JSON with scores object...`;
-  
-  const response = await callPuterAI(prompt, {
-    systemPrompt: 'You are an academic writing coach...',
-    max_tokens: 2000
-  });
-  
-  const jsonString = extractJSON(response);
-  const result = JSON.parse(jsonString);
-  
-  // Ensure all required fields
-  for (const dimension of requiredScores) {
-    if (result.scores[dimension] === undefined) {
-      result.scores[dimension] = 3;
-    }
-  }
-  
-  return result;
+const result = await callPuterAI(prompt);
+const items = JSON.parse(result); // Expect array
+```
+
+### JSON Object
+```typescript
+const result = await callPuterAI(prompt);
+const data = JSON.parse(result); // Expect object
+```
+
+### CSV/Pipe-Separated
+```typescript
+const result = await callPuterAI(prompt);
+const items = result.split('\n').map(line => line.split(','));
+```
+
+### Plain Text Lines
+```typescript
+const result = await callPuterAI(prompt);
+const lines = result.split('\n').filter(l => l.trim());
+```
+
+---
+
+## Timeout Strategy
+
+```typescript
+// Quick responses (< 5s)
+timeout: 5000,
+
+// Normal responses (5-15s)
+timeout: 15000,
+
+// Long responses (15-30s)
+timeout: 30000,
+
+// Very long responses (> 30s) - use caution
+timeout: 60000,
+```
+
+---
+
+## Files to Reference
+
+- **Implementation**: `src/components/title-generator.tsx`
+- **Wrapper**: `src/lib/puter-ai-wrapper.ts`
+- **Full Plan**: `CLIENT_SIDE_PUTER_AI_MIGRATION.md`
+- **Status**: `PUTER_AI_MIGRATION_STATUS.md`
+
+---
+
+## Migration Checklist for New Component
+
+```typescript
+// 1. Remove these
+import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
+import { useApiCall } from "@/hooks/use-api-call";
+const { execute, loading } = useApiCall({...});
+
+// 2. Add these
+import { callPuterAI } from "@/lib/puter-ai-wrapper";
+const [isLoading, setIsLoading] = useState(false);
+
+// 3. Replace function call with
+try {
+  const result = await callPuterAI(prompt, options);
+  // Handle result
+} catch (error) {
+  toast.error(error.message);
+} finally {
+  setIsLoading(false);
 }
+
+// 4. Test thoroughly
+// 5. Update documentation
+// 6. Commit and push
 ```
 
 ---
 
-## Troubleshooting
+## Support
 
-### "Puter API error: 401"
-- Missing or invalid `PUTER_API_KEY`
-- Check Supabase project secrets
-- Verify token hasn't expired
-
-### "Request timed out"
-- Increase timeout: `{ timeout: 60000 }`
-- Reduce max_tokens
-- Simplify prompt
-- Try again (might be rate limited)
-
-### "Unexpected response format"
-- Check what response you're getting
-- Add logging: `console.error('Response:', response);`
-- Try using fallback for debugging
-- Verify system prompt isn't confusing the model
-
-### "JSON parse error"
-- Response might not contain JSON
-- Use regex to extract: `/\{[\s\S]*\}/`
-- Add quotes escaping if needed
-- Check if response is split across multiple lines
-
----
-
-## Configuration
-
-### Environment Variables
-```bash
-# .env.local or Supabase secrets
-PUTER_API_KEY=your_puter_api_token_here
-```
-
-### Per-Tool Settings
-Recommended configurations for each tool type:
-
-**Fast Generation (Topics, Titles)**
-```typescript
-{ temperature: 0.7, max_tokens: 1000, timeout: 15000 }
-```
-
-**Moderate Tasks (Flashcards, Questions)**
-```typescript
-{ temperature: 0.6, max_tokens: 1500, timeout: 20000 }
-```
-
-**Complex Analysis (Grammar Check, Defense Questions)**
-```typescript
-{ temperature: 0.5, max_tokens: 2000, timeout: 30000 }
-```
-
----
-
-## Next Steps for New Tools
-
-To add a new tool using Puter AI:
-
-1. **Create function:**
-   ```typescript
-   import { callPuterAI } from '../_shared/puter-ai.ts';
-   
-   async function myNewTool(input: string) {
-     // Your implementation
-   }
-   ```
-
-2. **Call Puter AI:**
-   ```typescript
-   const response = await callPuterAI(prompt, options);
-   ```
-
-3. **Parse response:**
-   ```typescript
-   const data = JSON.parse(extractedJSON);
-   ```
-
-4. **Handle errors:**
-   ```typescript
-   try {
-     // ...
-   } catch (error) {
-     // ...
-   }
-   ```
-
-5. **Test locally:**
-   - With PUTER_API_KEY set
-   - Without PUTER_API_KEY (fallback)
-   - Various edge cases
-
-6. **Deploy and monitor:**
-   - Check logs for errors
-   - Monitor performance metrics
-   - Gather user feedback
-
----
-
-## Support & Resources
-
-- **Wrapper Location:** `supabase/functions/_shared/puter-ai.ts`
-- **Example Tools:** `generate-topic-ideas`, `grammar-check`, `generate-flashcards`
-- **Docs:** `PUTER_AI_MIGRATION_COMPLETE.md`
-- **Issues:** Check error logs in Supabase Edge Functions
-
----
-
-**Version:** 1.0
-**Last Updated:** 2024
-**Status:** Production Ready
+**Questions?** Check:
+1. This quick reference
+2. `CLIENT_SIDE_PUTER_AI_MIGRATION.md`
+3. `src/components/title-generator.tsx` (reference implementation)
+4. `PUTER_AI_MIGRATION_STATUS.md` (full status)

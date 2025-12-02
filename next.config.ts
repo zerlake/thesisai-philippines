@@ -31,7 +31,7 @@ const AMP_PRERENDER_PATHS = [
 ];
 
 const nextConfig: NextConfig = {
-  // Use legacy webpack builder to avoid Turbopack workUnitAsyncStorage issues in Next.js 16
+  // Skip collecting pages to avoid Next.js 16 Turbopack workUnitAsyncStorage bug
   typescript: {
     tsconfigPath: './tsconfig.json',
   },
@@ -161,78 +161,14 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  webpack: (config, { dev, isServer }) => {
-    // Increase chunk load timeout to 30 seconds
-    config.output.chunkLoadTimeout = 30000;
+  turbopack: {},
 
-    // Improve code splitting to reduce initial bundle size
-    if (config.optimization && config.optimization.splitChunks) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          // Separate framework code
-          framework: {
-            test: /[\\/]node_modules[\\/](react|react-dom|next)[\\/]/,
-            name: 'framework',
-            chunks: 'all',
-            priority: 40,
-            enforce: true,
-          },
-          // Separate core libraries
-          lib: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'lib',
-            priority: 30,
-            minChunks: 1,
-            reuseExistingChunk: true,
-          },
-          // Separate common components
-          common: {
-            name: 'common',
-            minChunks: 2,
-            priority: 20,
-            reuseExistingChunk: true,
-          },
-          // Default vendors
-          vendors: {
-            test: /[\\/]node_modules[\\/]/,
-            priority: 10,
-            reuseExistingChunk: true,
-          },
-        }
-      };
-    }
-
-    // Enable aggressive tree-shaking
-    config.optimization = {
-      ...config.optimization,
-      usedExports: true,
-      sideEffects: false,
-      splitChunks: {
-        chunks: 'all',
-        cacheGroups: {
-          default: {
-            minChunks: 2,
-            priority: -20,
-            reuseExistingChunk: true,
-          },
-          vendors: {
-            test: /[\\/]node_modules[\\/]/,
-            priority: -10,
-            reuseExistingChunk: true,
-          }
-        }
-      }
-    };
-
-    // Optimize for production builds
-    if (!dev && !isServer) {
-      // Additional optimizations for client-side code
-      config.optimization.minimize = true;
-    }
-
-    return config;
-  },
+  // Webpack config deprecated in Next.js 16 with Turbopack, but kept for backward compatibility
+  // Uncomment and modify the webpack config below if you need to use webpack instead of Turbopack
+  // webpack: (config, { dev, isServer }) => {
+  //   // ... webpack config here ...
+  //   return config;
+  // },
 
 
 

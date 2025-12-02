@@ -19,8 +19,7 @@ import {
 } from "./ui/carousel";
 import { Textarea } from "./ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
-import { useApiCall } from "@/hooks/use-api-call";
+import { callPuterAI } from "@/lib/puter-ai-wrapper";
 
 type Slide = {
   title: string;
@@ -35,23 +34,8 @@ export function PresentationGenerator() {
   const router = useRouter();
   const [chapterContent, setChapterContent] = useState("");
   const [slides, setSlides] = useState<Slide[]>([]);
-  // const [isLoading, setIsLoading] = useState(false); // Replaced by useApiCall's loading state
+  const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  const { execute: generatePresentation, loading: isGenerating } = useApiCall<any>({
-    onSuccess: (data) => {
-      if (!data.slides) {
-        throw new Error("API returned no slides data.");
-      }
-      setSlides(data.slides);
-      toast.success("Presentation slides generated!");
-    },
-    onError: (error) => {
-      toast.error(error.message || "An unexpected error occurred.");
-      console.error(error);
-    },
-    autoErrorToast: false,
-  });
 
   const addSampleData = () => {
     const sampleContent = `Chapter 3: Methodology
@@ -67,7 +51,7 @@ The primary research instrument was a structured questionnaire adapted from the 
 
 Ethical Considerations
 The study protocol was reviewed and approved by the University Research Ethics Committee (UREC). All participants provided informed consent, and parents of minors provided assent. Participation was voluntary with assurance of confidentiality and anonymity. Data was stored securely with access limited to the principal investigators.`;
-    
+
     setChapterContent(sampleContent);
     toast.success("Sample chapter content added! Click 'Generate Presentation' to see the tool in action.");
   };
@@ -75,10 +59,10 @@ The study protocol was reviewed and approved by the University Research Ethics C
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chapterContent) {
-        toast.error("Please provide chapter content.");
-        return;
+      toast.error("Please provide chapter content.");
+      return;
     }
-    
+
     if (!isReady) {
       toast.error("Please wait while your session is loading...");
       return;
@@ -89,25 +73,68 @@ The study protocol was reviewed and approved by the University Research Ethics C
       return;
     }
 
-    // setIsLoading(true); // Replaced
+    setIsGenerating(true);
     setSlides([]);
 
     try {
-      await generatePresentation(
-        getSupabaseFunctionUrl("generate-presentation-slides"),
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-          },
-          body: JSON.stringify({ chapterContent }),
+      // Create a prompt for generating presentation slides
+      const prompt = `Generate 5-8 presentation slides from the following chapter content.
+      Format your response as JSON with this structure:
+      {
+        "slides": [
+          {
+            "title": "Slide title",
+            "bulletPoints": ["bullet point 1", "bullet point 2", "bullet point 3"],
+            "speakerNotes": "Detailed speaker notes for the presenter"
+          }
+        ]
+      }
+
+      The content is:
+      ${chapterContent}`;
+
+      const result = await callPuterAI(prompt, {
+        temperature: 0.5,  // More focused for structured output
+        max_tokens: 4000,
+        timeout: 90000
+      });
+
+      // Try to parse the result as JSON
+      let parsedResult;
+      try {
+        // First try direct JSON parsing
+        parsedResult = JSON.parse(result);
+      } catch {
+        // If direct parsing fails, try to extract JSON from code blocks
+        const jsonMatch = result.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+        if (jsonMatch) {
+          try {
+            parsedResult = JSON.parse(jsonMatch[1]);
+          } catch {
+            // If that fails, look for JSON between curly braces
+            const jsonText = result.match(/\{[\s\S]*\}/);
+            if (jsonText) {
+              parsedResult = JSON.parse(jsonText[0]);
+            } else {
+              throw new Error("Could not extract valid JSON from AI response");
+            }
+          }
+        } else {
+          throw new Error("Could not extract valid JSON from AI response");
         }
-      );
+      }
+
+      if (parsedResult && Array.isArray(parsedResult.slides)) {
+        setSlides(parsedResult.slides);
+        toast.success("Presentation slides generated!");
+      } else {
+        throw new Error("AI response did not contain properly formatted slides");
+      }
     } catch (error: any) {
-        // Errors are already handled by useApiCall's onError
-        console.error("Local error before API call in handleGenerate:", error);
+      console.error("Error generating presentation:", error);
+      toast.error(error.message || "Failed to generate presentation. Please try again.");
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -159,11 +186,12 @@ The study protocol was reviewed and approved by the University Research Ethics C
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="chapterContent">Chapter / Section Content</Label>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   size="sm"
                   onClick={addSampleData}
+                  disabled={isGenerating}
                 >
                   Add Sample Data
                 </Button>
@@ -200,46 +228,54 @@ The study protocol was reviewed and approved by the University Research Ethics C
           </CardHeader>
           <CardContent>
             {isGenerating ? (
-              <Skeleton className="h-96 w-full" />
+              <div className="space-y-4">
+                <Skeleton className="h-6 w-1/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-4 w-4/6" />
+                <Skeleton className="h-96 w-full" />
+              </div>
             ) : (
-              <Carousel className="w-full max-w-2xl mx-auto">
-                <CarouselContent>
-                  {slides.map((slide, index) => (
-                    <CarouselItem key={index}>
-                      <div className="p-1">
-                        <Card className="aspect-video flex flex-col bg-background">
-                          <CardHeader>
-                            <CardTitle className="text-2xl">{slide.title}</CardTitle>
-                          </CardHeader>
-                          <CardContent className="pt-4 flex-1">
-                            <Tabs defaultValue="content">
-                              <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="content">Slide Content</TabsTrigger>
-                                <TabsTrigger value="notes">Speaker Notes</TabsTrigger>
-                              </TabsList>
-                              <TabsContent value="content" className="mt-4">
-                                <ul className="space-y-4 list-disc list-inside text-lg">
-                                  {slide.bulletPoints.map((point: string, i: number) => (
-                                    <li key={i}>{point}</li>
-                                  ))}
-                                </ul>
-                              </TabsContent>
-                              <TabsContent value="notes" className="mt-4">
-                                <p className="text-base text-muted-foreground">{slide.speakerNotes}</p>
-                              </TabsContent>
-                            </Tabs>
-                          </CardContent>
-                          <CardFooter className="text-sm text-muted-foreground justify-end">
-                            <p>Slide {index + 1} of {slides.length}</p>
-                          </CardFooter>
-                        </Card>
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious className="hidden sm:flex" />
-                <CarouselNext className="hidden sm:flex" />
-              </Carousel>
+              slides.length > 0 && (
+                <Carousel className="w-full max-w-2xl mx-auto">
+                  <CarouselContent>
+                    {slides.map((slide, index) => (
+                      <CarouselItem key={index}>
+                        <div className="p-1">
+                          <Card className="aspect-video flex flex-col bg-background">
+                            <CardHeader>
+                              <CardTitle className="text-2xl">{slide.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-4 flex-1">
+                              <Tabs defaultValue="content">
+                                <TabsList className="grid w-full grid-cols-2">
+                                  <TabsTrigger value="content">Slide Content</TabsTrigger>
+                                  <TabsTrigger value="notes">Speaker Notes</TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="content" className="mt-4">
+                                  <ul className="space-y-4 list-disc list-inside text-lg">
+                                    {slide.bulletPoints.map((point: string, i: number) => (
+                                      <li key={i}>{point}</li>
+                                    ))}
+                                  </ul>
+                                </TabsContent>
+                                <TabsContent value="notes" className="mt-4">
+                                  <p className="text-base text-muted-foreground">{slide.speakerNotes}</p>
+                                </TabsContent>
+                              </Tabs>
+                            </CardContent>
+                            <CardFooter className="text-sm text-muted-foreground justify-end">
+                              <p>Slide {index + 1} of {slides.length}</p>
+                            </CardFooter>
+                          </Card>
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="hidden sm:flex" />
+                  <CarouselNext className="hidden sm:flex" />
+                </Carousel>
+              )
             )}
           </CardContent>
         </Card>

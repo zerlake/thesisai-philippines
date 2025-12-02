@@ -1,0 +1,195 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                          START THE APP NOW                                     ║
+║                        (Copy & Paste Approach)                                  ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+
+STEP 1: TERMINAL 1 - Start MCP Server
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Open PowerShell or Command Prompt.
+
+Copy and paste this ENTIRE block:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+cd c:\Users\Projects\thesis-ai\web-app\arxiv-mcp-server
+.\start-server.ps1
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Wait for this message:
+
+    INFO:     Uvicorn running on http://0.0.0.0:3001 (Press CTRL+C to quit)
+
+Once you see this, move to STEP 2 (don't close this terminal).
+
+
+STEP 2: TERMINAL 2 - Start the App
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Open a NEW PowerShell or Command Prompt window.
+
+Copy and paste this ENTIRE block:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+cd c:\Users\Projects\thesis-ai
+pnpm dev
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Wait for this message:
+
+    Ready in 1234ms
+
+Once you see this, move to STEP 3 (don't close this terminal).
+
+
+STEP 3: OPEN YOUR BROWSER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Copy and paste this into your browser address bar:
+
+    http://localhost:3000/papers
+
+Press Enter.
+
+You should see the "Find Research Papers" page.
+
+
+STEP 4: TEST IT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+In the search box, type:
+
+    machine learning
+
+Press Enter or click Search.
+
+Wait 2-5 seconds.
+
+Results should appear showing papers about machine learning!
+
+If you see papers, ✅ SUCCESS! Everything is working!
+
+
+WHAT YOU SHOULD SEE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Terminal 1 (MCP Server):
+┌────────────────────────────────────────────────────────────────────────────────┐
+│ (.venv) C:\Users\Projects\thesis-ai\web-app\arxiv-mcp-server>                   │
+│ INFO:     Uvicorn running on http://0.0.0.0:3001 (Press CTRL+C to quit)        │
+│ INFO:     Application startup complete                                         │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+Terminal 2 (App):
+┌────────────────────────────────────────────────────────────────────────────────┐
+│ C:\Users\Projects\thesis-ai>                                                   │
+│ ✓ Ready in 1245ms                                                              │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+Browser:
+┌────────────────────────────────────────────────────────────────────────────────┐
+│ Find Research Papers                                                            │
+│                                                                                 │
+│ Search across CrossRef, ArXiv, PubMed, Google Scholar                          │
+│                                                                                 │
+│ [Search Box: "machine learning"]                                               │
+│                                                                                 │
+│ Results:                                                                        │
+│ - Paper 1: Attention is All You Need                                           │
+│ - Paper 2: Deep Learning for Text Classification                               │
+│ - Paper 3: ... [more papers]                                                   │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+
+TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"ERROR: The term '..\start-server.ps1' is not recognized"
+→ PowerShell execution policy issue. Run this first:
+  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+"ERROR: ModuleNotFoundError"
+→ Make sure you're IN the arxiv-mcp-server folder. Check terminal path.
+
+"ERROR: Port 3001 already in use"
+→ Something else is using that port. Use a different one:
+  python -m arxiv_mcp_server --port 3011
+
+"Search shows no results"
+→ Check that BOTH terminals show success messages
+→ Check browser console (press F12)
+→ Verify .env.local has ARXIV_MCP_ENDPOINT=http://localhost:3001
+
+"Stuck on 'Searching...'"
+→ Server might be down. Check Terminal 1 is still running.
+→ Try http://localhost:3001/health in browser
+
+
+AFTER IT'S WORKING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Try these searches:
+- "neural networks"
+- "machine learning 2023"
+- "deep learning"
+- "natural language processing"
+- "computer vision"
+
+Use filters:
+- Adjust year range
+- Set minimum citations
+- Toggle sources on/off
+- Filter open access only
+
+Collect papers:
+- Click heart to favorite
+- Click "Add to Collection"
+- Export as CSV
+
+Switch views:
+- List View: detailed cards
+- Network Map: citation relationships
+
+
+KEEPING IT RUNNING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Both terminals must keep running to use paper search.
+
+To stop:
+- Press Ctrl+C in either terminal
+
+To run again:
+- Repeat STEP 1 & 2 above
+
+To use different port:
+- Instead of: python -m arxiv_mcp_server --port 3001
+- Use: python -m arxiv_mcp_server --port 3011
+- Update .env.local: ARXIV_MCP_ENDPOINT=http://localhost:3011
+
+
+IMPORTANT NOTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Terminal 1 (MCP Server) must be running
+✓ Terminal 2 (App) must be running  
+✓ Browser must be at http://localhost:3000/papers
+✓ Both terminals show "ready" messages
+
+If any of these aren't true, go back and check the steps.
+
+
+═════════════════════════════════════════════════════════════════════════════════
+
+Ready? Start with STEP 1 above!
+
+Need help? See:
+  - HOW_TO_RUN_EVERYTHING.md (detailed guide)
+  - PAPER_SEARCH_START_HERE.md (app guide)
+  - START_MCP_SERVERS.md (server guide)
+
+═════════════════════════════════════════════════════════════════════════════════

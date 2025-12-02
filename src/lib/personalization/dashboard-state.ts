@@ -602,7 +602,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       })();
 
       // Race the fetch with timeout
-      const { results, errors } = await Promise.race([fetchPromise, timeoutPromise]);
+       const { results, errors } = await Promise.race([fetchPromise, timeoutPromise]) as Awaited<typeof fetchPromise>;
 
       // Update widget data with results
       set((state) => ({

@@ -139,6 +139,82 @@ export class SerenaClient extends EventEmitter {
     }
   }
 
+  async callTool(
+    toolName: string,
+    params: Record<string, unknown>
+  ): Promise<any> {
+    const startTime = Date.now();
+
+    try {
+      // Map tool names to their MCP servers
+      const toolToServer: Record<string, string> = {
+        'search_works_by_query': 'crossref',
+        'get_work_metadata': 'crossref',
+        'search_by_doi': 'crossref',
+        'search_arxiv': 'arxiv',
+        'download_arxiv': 'arxiv',
+        'get_paper_metadata': 'arxiv',
+        'search_openalex': 'openalex',
+        'get_openalex_work': 'openalex',
+        'search_by_openalex_id': 'openalex',
+        'search_semantic_scholar': 'semantic_scholar',
+        'get_paper_details': 'semantic_scholar',
+        'get_author_info': 'semantic_scholar',
+        'get_related_papers': 'crossref',
+      };
+
+      const serverId = toolToServer[toolName];
+      if (!serverId) {
+        throw new Error(`Unknown tool: ${toolName}`);
+      }
+
+      // Dynamically import mcp-config to avoid circular dependencies
+      const { getMCPServer } = await import('./mcp-config');
+      const server = getMCPServer(serverId);
+      
+      if (!server) {
+        throw new Error(`MCP Server ${serverId} not found`);
+      }
+
+      if (!server.enabled) {
+        throw new Error(`MCP Server ${serverId} is disabled`);
+      }
+
+      const message: MCPMessage = {
+        type: 'request',
+        id: this.generateRequestId(),
+        method: `tools/${toolName}`,
+        params,
+      };
+
+      // Call the MCP server endpoint directly
+      const response = await fetch(`${server.endpoint}/call`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tool: toolName,
+          params,
+          sessionId: this.sessionId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`MCP Server error: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      console.log(`[SerenaClient] Tool ${toolName} executed in ${Date.now() - startTime}ms`);
+      
+      return result;
+    } catch (error) {
+      console.error(`[SerenaClient] Tool call failed for ${toolName}:`, error);
+      throw error;
+    }
+  }
+
   async executeWorkflow(
     steps: Array<{
       name: string;

@@ -233,7 +233,9 @@ export function LiteratureReview() {
                   <div className="flex items-start gap-4">
                     <Checkbox id={`select-${paper.id}`} className="mt-1.5" onCheckedChange={(checked) => handlePaperSelection(paper, !!checked)} />
                     <div>
-                      <CardTitle className="text-base">{paper.title}</CardTitle>
+                      <CardTitle className="text-base">
+                        {Array.isArray(paper.title) ? (paper.title[0] || 'Untitled') : (paper.title || 'Untitled')}
+                      </CardTitle>
                       {paper.publication_info && <CardDescription>{paper.publication_info}</CardDescription>}
                     </div>
                   </div>

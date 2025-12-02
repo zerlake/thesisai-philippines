@@ -1,0 +1,103 @@
+╔════════════════════════════════════════════════════════════════════╗
+║                    RUN THESE FILES TO START SERVER                 ║
+╚════════════════════════════════════════════════════════════════════╝
+
+PICK ONE METHOD BELOW:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+METHOD 1: PowerShell (Recommended for Windows)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Right-click on this folder
+2. Select "Open in Terminal"
+3. Run this command:
+
+   .\start-server.ps1
+
+If you get an error about execution policy, run this first:
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+Then run:
+   .\start-server.ps1
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+METHOD 2: Command Prompt (Older Windows)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Open Command Prompt (cmd.exe)
+2. Navigate to this folder:
+   cd c:\Users\Projects\thesis-ai\web-app\arxiv-mcp-server
+
+3. Run:
+   start-server.bat
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+METHOD 3: Manual Commands (If scripts don't work)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Open Terminal in this folder
+2. Run commands ONE AT A TIME:
+
+   .venv\Scripts\activate
+   
+   uv pip install -e ".[test]"
+   
+   python -m arxiv_mcp_server --port 3001
+
+
+IMPORTANT: Type each line separately. Don't put them on one line.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT YOU SHOULD SEE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After running the script, you should see:
+
+INFO:     Uvicorn running on http://0.0.0.0:3001 (Press CTRL+C to quit)
+
+This means it's working!
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+NEXT STEPS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Once the server is running, open a NEW terminal and run:
+
+   cd c:\Users\Projects\thesis-ai
+   pnpm dev
+
+Then open your browser:
+
+   http://localhost:3000/papers
+
+Try searching for "machine learning"!
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TROUBLESHOOTING:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ERROR: "uv: command not found"
+   Install uv: pip install uv
+
+ERROR: "ModuleNotFoundError"
+   Make sure you're IN the arxiv-mcp-server folder
+
+ERROR: Port 3001 already in use
+   Use a different port: python -m arxiv_mcp_server --port 3011
+   Then update .env.local with the new port
+
+ERROR: Script won't run in PowerShell
+   Run: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+For more help, see: START_MCP_SERVERS.md

@@ -10,9 +10,12 @@
  *   const response = await puter.ai.chat("Your prompt here");
  */
 
+let sdkLoadPromise: Promise<Window['puter']> | null = null;
+
 /**
  * Load Puter SDK from CDN
  * Returns the Puter object when ready
+ * Deduplicates concurrent load attempts
  */
 export async function loadPuterSDK(): Promise<Window['puter']> {
   // If already loaded, return it
@@ -20,10 +23,26 @@ export async function loadPuterSDK(): Promise<Window['puter']> {
     return window.puter;
   }
 
+  // If already loading, return the existing promise
+  if (sdkLoadPromise) {
+    return sdkLoadPromise;
+  }
+
   // Load the Puter.js script from CDN
-  return new Promise((resolve, reject) => {
+  sdkLoadPromise = new Promise((resolve, reject) => {
+    if (typeof window === 'undefined') {
+      reject(new Error('Puter SDK can only be loaded in browser'));
+      return;
+    }
+
+    // Double-check it wasn't loaded while we were setting up
+    if (window.puter) {
+      resolve(window.puter);
+      return;
+    }
+
     const script = document.createElement('script');
-    script.src = 'https://js.puter.com/v2/';
+    script.src = 'https://js.puter.com/v2/?autoload=false'; // autoload=false to prevent automatic session checks
     script.async = true;
     script.onload = () => {
       // Wait a tick for Puter to initialize globally
@@ -36,10 +55,13 @@ export async function loadPuterSDK(): Promise<Window['puter']> {
       }, 100);
     };
     script.onerror = () => {
+      sdkLoadPromise = null; // Reset on error so retry works
       reject(new Error('Failed to load Puter.js SDK from CDN'));
     };
     document.head.appendChild(script);
   });
+
+  return sdkLoadPromise;
 }
 
 /**

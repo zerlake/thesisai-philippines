@@ -13,7 +13,7 @@ export function Sidebar() {
 
   const renderNavGroup = (group: NavGroup) => (
     <div key={group.title}>
-      <h3 className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <h3 className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-foreground bg-muted rounded-md mb-1">
         {group.title}
       </h3>
       {group.items.map((item: NavItem) => (
@@ -37,7 +37,7 @@ export function Sidebar() {
       case "admin":
         return (
           <div className="mb-4">
-            <h3 className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <h3 className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-foreground bg-muted rounded-md mb-1">
               Admin
             </h3>
             {adminNavItems.map((item: NavItem) => (

@@ -10,6 +10,10 @@ import { RootLayoutClient } from "@/components/root-layout-client";
 import { ChunkLoadErrorHandler } from "@/components/chunk-load-error-handler";
 import { LayoutStabilityOptimizer } from "@/components/performance/layout-stability";
 
+// Prevent static generation to avoid Next.js 16 Turbopack bug
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const fontSans = Outfit({
   subsets: ["latin"],
   variable: "--font-sans",

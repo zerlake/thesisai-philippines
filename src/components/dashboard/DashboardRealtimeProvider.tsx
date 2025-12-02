@@ -10,6 +10,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useRef, ReactNode } from 'react';
+import { useAuth } from '@/components/auth-provider';
 import { WebSocketManager, MessageType } from '@/lib/dashboard/websocket-manager';
 import { RealtimeStateManager } from '@/lib/dashboard/realtime-state';
 import { BackgroundSyncManager } from '@/lib/dashboard/background-sync';
@@ -61,7 +62,7 @@ interface DashboardRealtimeProviderProps {
 
 /**
  * DashboardRealtimeProvider Component
- * 
+ *
  * Initializes all realtime systems and provides them to children
  * via context. Handles connection lifecycle and error recovery.
  */
@@ -72,6 +73,7 @@ export function DashboardRealtimeProvider({
   onError,
   onInitialized
 }: DashboardRealtimeProviderProps) {
+  const authContext = useAuth(); // Access auth context at component level
   const contextRef = useRef<RealtimeContextType>({
     wsManager: null,
     stateManager: null,
@@ -105,20 +107,44 @@ export function DashboardRealtimeProvider({
             const initializeManagers = async () => {
               try {
                 let actualWsUrl = wsUrl;
-    
+
                 // If wsUrl is not provided, fetch it from the API
                 if (!actualWsUrl) {
-                  const response = await fetch('/api/realtime');
-                  if (!response.ok) {
-                    throw new Error(`Failed to fetch WebSocket URL: ${response.statusText}`);
+                  try {
+                    const response = await fetch('/api/realtime');
+                    if (!response.ok) {
+                      // If unauthorized, provide a fallback WebSocket URL
+                      if (response.status === 401 || response.status === 403) {
+                        console.warn('Unauthenticated access to realtime API, using fallback WebSocket URL');
+                        actualWsUrl = 'ws://localhost:3000/api/realtime';
+                      } else {
+                        throw new Error(`Failed to fetch WebSocket URL: ${response.statusText}`);
+                      }
+                    } else {
+                      const data = await response.json();
+                      actualWsUrl = data.wsUrl;
+                    }
+                  } catch (fetchError) {
+                    console.warn('Error fetching WebSocket URL from API, using fallback:', fetchError);
+                    // Use environment variable or fallback
+                    actualWsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3000/api/realtime';
                   }
-                  const data = await response.json();
-                  actualWsUrl = data.wsUrl;
                 }
-    
+
                 // Create WebSocket Manager
+                // Add authentication information to WebSocket URL if available
+                let wsUrlWithAuth = actualWsUrl || 'ws://localhost:3000/api/realtime';
+
+                // Use auth context to get user ID if available and context is not null
+                if (authContext && authContext.session?.user?.id) {
+                  // Append user ID to the WebSocket URL for authentication
+                  const url = new URL(wsUrlWithAuth);
+                  url.searchParams.set('userId', authContext.session.user.id);
+                  wsUrlWithAuth = url.toString();
+                }
+
                 const wsManager = new WebSocketManager(
-                  actualWsUrl || 'ws://localhost:3000/realtime', // Fallback to /realtime if API fails or wsUrl is empty
+                  wsUrlWithAuth,
                   WEBSOCKET_CONFIG as any
                 );
         // Create State Manager
@@ -193,22 +219,27 @@ export function DashboardRealtimeProvider({
           update: updateProcessor
         };
 
-        // Auto-connect if enabled
-        if (autoConnect) {
-          await wsManager.connect();
-        }
-        
-        // Update context ref AFTER successful connection
+        // Update context ref with initial managers
         contextRef.current = {
           wsManager,
           stateManager,
           syncManager,
           updateProcessor,
-          isInitialized: true // Set to true only after successful connection
+          isInitialized: true // Set to true after managers are created
         };
 
-        // Force a re-render to update the context
+        // Force a re-render to update the context initially
         forceUpdate();
+
+        // Auto-connect if enabled (handle separately to not block initialization)
+        if (autoConnect) {
+          // Don't let WebSocket connection failure break initialization
+          wsManager.connect().catch(connectionError => {
+            console.warn('WebSocket connection failed, continuing with disabled real-time updates:', connectionError);
+            // Don't fail the entire initialization if WebSocket connection fails
+            // The app should continue working with background sync only
+          });
+        }
 
         onInitialized?.();
       } catch (error) {
@@ -217,7 +248,7 @@ export function DashboardRealtimeProvider({
         contextRef.current = {
           ...contextRef.current,
           error: err,
-          isInitialized: contextRef.current.isInitialized
+          isInitialized: false // Indicate failure
         };
         onError?.(err);
         forceUpdate(); // Trigger re-render to show error

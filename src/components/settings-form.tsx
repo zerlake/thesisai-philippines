@@ -52,13 +52,20 @@ export function SettingsForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) return;
 
+    const updates: any = {
+      first_name: values.first_name,
+      last_name: values.last_name,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Only include avatar_url if it exists and is different
+    if (avatarUrl) {
+      updates.avatar_url = avatarUrl;
+    }
+
     const { error } = await supabase
       .from("profiles")
-      .update({
-        first_name: values.first_name,
-        last_name: values.last_name,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updates)
       .eq("id", user.id);
 
     if (error) {
