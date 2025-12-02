@@ -10,10 +10,7 @@ import {
   Target,
   FlaskConical,
   BarChart,
-  Settings,
   BookOpen,
-  ChevronDown,
-  Bell,
   CreditCard,
   Gift,
   UserCheck,
@@ -76,57 +73,29 @@ export function Header() {
 
         {/* Main Navigation - Hidden on mobile */}
         <div className="hidden lg:flex items-center space-x-1">
-          {/* Products Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="px-3">
-                Products <ChevronDown className="ml-1 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              <DropdownMenuLabel>Our Products</DropdownMenuLabel>
-              <DropdownMenuItem>
-                <Link href="/thesis">ThesisAI</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem disabled>
-                ARC Generator (Coming Soon)
-              </DropdownMenuItem>
-              <DropdownMenuItem disabled>
-                AI Copilot (Coming Soon)
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-
+          {/* Billing */}
+          <Button variant="ghost" className="px-3" asChild>
+            <Link href="/settings/billing">Billing</Link>
+          </Button>
+          
+          {/* Referrals */}
+          <Button variant="ghost" className="px-3" asChild>
+            <Link href="/settings/referrals">Referrals</Link>
+          </Button>
+          
+          {/* Manage Groups */}
+          <Button variant="ghost" className="px-3" asChild>
+            <Link href="/groups">Manage Groups</Link>
+          </Button>
+          
+          {/* Usage & Analytics */}
+          <Button variant="ghost" className="px-3" asChild>
+            <Link href="/analytics">Usage & Analytics</Link>
+          </Button>
         </div>
 
-        {/* Right side: Admin + User */}
+        {/* Right side: User */}
         <div className="flex items-center space-x-2">
-          {/* Admin Section */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2 hidden lg:flex">
-                <Settings className="h-4 w-4" />
-                Admin
-                <Bell className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end">
-              <DropdownMenuLabel>Organization Settings</DropdownMenuLabel>
-              <DropdownMenuItem>
-                <Link href="/settings/billing">Billing</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/settings/referrals">Referrals</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/groups">Manage Groups</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/analytics">Usage & Analytics</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
 
           {/* Mobile menu button */}
           <Sheet>
