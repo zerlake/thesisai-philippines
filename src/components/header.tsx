@@ -5,6 +5,19 @@ import {
   LogOut,
   Menu,
   User,
+  Users,
+  FileText,
+  Target,
+  FlaskConical,
+  BarChart,
+  Settings,
+  BookOpen,
+  ChevronDown,
+  Bell,
+  CreditCard,
+  Gift,
+  UserCheck,
+  ClipboardCheck,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -48,122 +61,167 @@ export function Header() {
   const userEmail = session?.user?.email || "";
   const fallback = userEmail ? userEmail.charAt(0).toUpperCase() : "U";
 
-  const renderNavGroup = (group: NavGroup) => (
-    <div key={group.title}>
-      <h3 className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-        {group.title}
-      </h3>
-      {group.items.map((item: NavItem) => (
-        <Link
-          key={item.label}
-          href={item.href}
-          className={cn(
-            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-            pathname === item.href && "bg-accent text-accent-foreground"
-          )}
-        >
-          <item.icon className="h-5 w-5" />
-          <span>{item.label}</span>
-        </Link>
-      ))}
-    </div>
-  );
-
-  const renderNav = () => {
-    switch (profile?.role) {
-      case "admin":
-        return (
-          <div className="mb-4">
-            <h3 className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Admin
-            </h3>
-            {adminNavItems.map((item: NavItem) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                  pathname === item.href && "bg-accent text-accent-foreground"
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </div>
-        );
-      case "advisor":
-        return advisorNavGroups.map(renderNavGroup);
-      case "critic":
-        return criticNavGroups.map(renderNavGroup);
-      default:
-        return studentNavGroups.map(renderNavGroup);
-    }
-  };
-
   return (
-    <header className="flex items-center justify-between h-16 px-4 md:px-6 border-b bg-card">
-      <div className="flex items-center gap-3">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden" aria-label="Toggle navigation menu">
-              <Menu className="w-6 h-6" />
-              <span className="sr-only">Toggle navigation menu</span>
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        {/* Logo */}
+        <div className="flex items-center space-x-2">
+          <Link href="/dashboard">
+            <Button variant="ghost" size="sm" className="h-9 px-0">
+              <BookText className="h-6 w-6 mr-2" />
+              <span className="font-bold">ThesisAI Philippines</span>
             </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-4 flex flex-col">
-            <SheetHeader className="text-left mb-2">
-              <SheetTitle>
-                <div className="flex items-center gap-3">
-                  <BookText className="w-6 h-6" />
-                  <span className="text-lg font-semibold">ThesisAI Philippines</span>
-                </div>
-              </SheetTitle>
-              <SheetDescription className="sr-only">
-                Main navigation menu.
-              </SheetDescription>
-            </SheetHeader>
-            <ScrollArea className="-mx-4 flex-1">
-              <nav className="space-y-2 px-4">
-                {renderNav()}
-              </nav>
-            </ScrollArea>
-          </SheetContent>
-        </Sheet>
-
-        <div className="hidden md:flex items-center gap-3">
-          <BookText className="w-6 h-6" />
-          <h1 className="text-lg font-semibold">ThesisAI Philippines</h1>
+          </Link>
         </div>
-      </div>
-      <div className="flex items-center gap-2 md:gap-4">
-        <AuthenticatedNotificationBell />
 
-        <ThemeToggle />
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Avatar className="h-8 w-8 cursor-pointer">
-              <AvatarImage src={profile?.avatar_url || undefined} />
-              <AvatarFallback>{fallback}</AvatarFallback>
-            </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <Link href="/settings">
+        {/* Main Navigation - Hidden on mobile */}
+        <div className="hidden lg:flex items-center space-x-1">
+          {/* Products Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="px-3">
+                Products <ChevronDown className="ml-1 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuLabel>Our Products</DropdownMenuLabel>
               <DropdownMenuItem>
-                <User className="w-4 h-4 mr-2" />
-                <span>Profile</span>
+                <Link href="/thesis">ThesisAI</Link>
               </DropdownMenuItem>
-            </Link>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              <span>Log out</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuItem disabled>
+                ARC Generator (Coming Soon)
+              </DropdownMenuItem>
+              <DropdownMenuItem disabled>
+                AI Copilot (Coming Soon)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+
+        </div>
+
+        {/* Right side: Admin + User */}
+        <div className="flex items-center space-x-2">
+          {/* Admin Section */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="gap-2 hidden lg:flex">
+                <Settings className="h-4 w-4" />
+                Admin
+                <Bell className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end">
+              <DropdownMenuLabel>Organization Settings</DropdownMenuLabel>
+              <DropdownMenuItem>
+                <Link href="/settings/billing">Billing</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href="/settings/referrals">Referrals</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href="/groups">Manage Groups</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href="/analytics">Usage & Analytics</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Mobile menu button */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Toggle navigation menu">
+                <Menu className="w-6 h-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-64 p-4 flex flex-col">
+              <SheetHeader className="text-left mb-2">
+                <SheetTitle>
+                  <div className="flex items-center gap-3">
+                    <BookText className="w-6 h-6" />
+                    <span className="text-lg font-semibold">ThesisAI Philippines</span>
+                  </div>
+                </SheetTitle>
+                <SheetDescription className="sr-only">
+                  Main navigation menu.
+                </SheetDescription>
+              </SheetHeader>
+              <ScrollArea className="-mx-4 flex-1">
+                <nav className="space-y-2 px-4">
+                  <div>
+                    <DropdownMenuLabel>Products</DropdownMenuLabel>
+                    <Link href="/thesis">
+                      <DropdownMenuItem>ThesisAI</DropdownMenuItem>
+                    </Link>
+                    <DropdownMenuItem disabled>ARC Generator</DropdownMenuItem>
+                  </div>
+                  <div>
+                    <DropdownMenuLabel>Resources</DropdownMenuLabel>
+                    <Link href="/documentation">
+                      <DropdownMenuItem>Documentation</DropdownMenuItem>
+                    </Link>
+                    <Link href="/support">
+                      <DropdownMenuItem>Support</DropdownMenuItem>
+                    </Link>
+                  </div>
+                  <div>
+                    <DropdownMenuLabel>Admin</DropdownMenuLabel>
+                    <Link href="/settings/billing">
+                      <DropdownMenuItem>Billing</DropdownMenuItem>
+                    </Link>
+                    <Link href="/settings/referrals">
+                      <DropdownMenuItem>Referrals</DropdownMenuItem>
+                    </Link>
+                    <Link href="/groups">
+                      <DropdownMenuItem>Manage Groups</DropdownMenuItem>
+                    </Link>
+                  </div>
+                </nav>
+              </ScrollArea>
+            </SheetContent>
+          </Sheet>
+
+          {/* Notification Bell */}
+          <AuthenticatedNotificationBell />
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
+          {/* User Profile */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={profile?.avatar_url || undefined} />
+                  <AvatarFallback>{fallback}</AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end">
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium">{profile?.first_name || 'User'}</p>
+                  <p className="w-[200px] truncate text-xs text-muted-foreground">
+                    {userEmail}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <Link href="/settings">Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href="/settings">API Keys</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href="/settings">Preferences</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );
