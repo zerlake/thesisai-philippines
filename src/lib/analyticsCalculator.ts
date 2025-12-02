@@ -46,66 +46,151 @@ export class AnalyticsCalculator {
   }
 
   private async getWritingSessions(userId: string, dateRange: { start: Date; end: Date }): Promise<WritingSession[]> {
-    const { data, error } = await this.supabase
-      .from('writing_sessions')
-      .select('*')
-      .eq('user_id', userId)
-      .gte('start_time', dateRange.start.toISOString())
-      .lte('start_time', dateRange.end.toISOString())
-      .order('start_time', { ascending: false });
+    try {
+      const { data, error, status } = await this.supabase
+        .from('writing_sessions')
+        .select('*')
+        .eq('user_id', userId)
+        .gte('start_time', dateRange.start.toISOString())
+        .lte('start_time', dateRange.end.toISOString())
+        .order('start_time', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching writing sessions:', error);
+      if (error) {
+        // Check if error is an empty object or has no meaningful content, which can happen in certain Supabase states
+        const errorAsAny = error as any;
+        const errorString = JSON.stringify(error);
+        
+        // If error stringifies to empty object or nearly empty, table doesn't exist
+        if (errorString === '{}' || !errorAsAny.message) {
+          console.warn('Empty or minimal error object received for writing_sessions query - table may not exist');
+          return [];
+        }
+
+        console.error('Error fetching writing sessions:', {
+          message: errorAsAny.message || 'No message',
+          details: errorAsAny.details || 'No details',
+          hint: errorAsAny.hint || 'No hint',
+          code: errorAsAny.code || 'No code',
+          status: status,
+          userId: userId
+        });
+        return [];
+      }
+
+      return data?.map((session: any) => ({
+         ...session,
+         startTime: new Date(session.start_time),
+         endTime: session.end_time ? new Date(session.end_time) : undefined,
+         createdAt: new Date(session.created_at)
+       })) || [];
+    } catch (err) {
+      console.error('Unexpected error in getWritingSessions:', err);
       return [];
     }
-
-    return data?.map(session => ({
-      ...session,
-      startTime: new Date(session.start_time),
-      endTime: session.end_time ? new Date(session.end_time) : undefined,
-      createdAt: new Date(session.created_at)
-    })) || [];
   }
 
   private async getThesisProgress(userId: string): Promise<ThesisProgress | null> {
-    const { data, error } = await this.supabase
-      .from('thesis_progress')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
+    try {
+      const { data, error, status } = await this.supabase
+        .from('thesis_progress')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
 
-    if (error) {
-      console.error('Error fetching thesis progress:', error);
+      // Check if the error indicates the table doesn't exist
+      if (error) {
+        // Check if error is an empty object or has no meaningful content, which can happen in certain Supabase states
+        const errorAsAny = error as any;
+        const errorString = JSON.stringify(error);
+        
+        // If error stringifies to empty object or nearly empty, table doesn't exist
+        if (errorString === '{}' || !errorAsAny.message) {
+          console.warn('Empty or minimal error object received for thesis_progress query - table may not exist');
+          return null;
+        }
+
+        // Log more detailed error information
+        console.error('Error fetching thesis progress:', {
+          message: errorAsAny.message || 'No error message',
+          details: errorAsAny.details || 'No details',
+          hint: errorAsAny.hint || 'No hint',
+          code: errorAsAny.code || 'No code',
+          status: status,
+          userId: userId
+        });
+
+        // Check if it's a "not found" error (which is normal)
+        // Different possible status codes for "not found"
+        if (status === 406 || status === 404 ||
+            (errorAsAny.message &&
+              (errorAsAny.message.includes('Not Found') ||
+               errorAsAny.message.includes('Row not found') ||
+               errorAsAny.message.includes('does not exist')))) {
+          return null;
+        }
+
+        return null;
+      }
+
+      if (!data) {
+        // This also means no records found
+        return null;
+      }
+
+      // Make sure we have all required fields before returning
+      return {
+        ...data,
+        updatedAt: data.updated_at ? new Date(data.updated_at) : new Date()
+      };
+    } catch (err: any) {
+      console.error('Unexpected error in getThesisProgress:', {
+        message: err?.message || 'Unknown error',
+        stack: err?.stack,
+        userId: userId
+      });
       return null;
     }
-
-    if (!data) {
-      return null;
-    }
-
-    return {
-      ...data,
-      updatedAt: new Date(data.updated_at)
-    };
   }
 
   private async getChapters(userId: string): Promise<Chapter[]> {
-    const { data, error } = await this.supabase
-      .from('chapters')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: true });
+    try {
+      const { data, error, status } = await this.supabase
+        .from('chapters')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: true });
 
-    if (error) {
-      console.error('Error fetching chapters:', error);
+      if (error) {
+        // Check if error is an empty object or has no meaningful content, which can happen in certain Supabase states
+        const errorAsAny = error as any;
+        const errorString = JSON.stringify(error);
+        
+        // If error stringifies to empty object or nearly empty, table doesn't exist
+        if (errorString === '{}' || !errorAsAny.message) {
+          console.warn('Empty or minimal error object received for chapters query - table may not exist');
+          return [];
+        }
+
+        console.error('Error fetching chapters:', {
+          message: errorAsAny.message || 'No message',
+          details: errorAsAny.details || 'No details',
+          hint: errorAsAny.hint || 'No hint',
+          code: errorAsAny.code || 'No code',
+          status: status,
+          userId: userId
+        });
+        return [];
+      }
+
+      return data?.map((chapter: any) => ({
+        ...chapter,
+        createdAt: new Date(chapter.created_at),
+        updatedAt: new Date(chapter.updated_at)
+      })) || [];
+    } catch (err) {
+      console.error('Unexpected error in getChapters:', err);
       return [];
     }
-
-    return data?.map(chapter => ({
-      ...chapter,
-      createdAt: new Date(chapter.created_at),
-      updatedAt: new Date(chapter.updated_at)
-    })) || [];
   }
 
   private calculateWordCountMetrics(sessions: WritingSession[]) {
@@ -438,47 +523,69 @@ export class AnalyticsCalculator {
   }
 
   private async calculateWritingStreak(userId: string): Promise<number> {
-    const { data, error } = await this.supabase
-      .from('writing_sessions')
-      .select('start_time')
-      .eq('user_id', userId)
-      .order('start_time', { ascending: false })
-      .limit(100);
+    try {
+      const { data, error, status } = await this.supabase
+        .from('writing_sessions')
+        .select('start_time')
+        .eq('user_id', userId)
+        .order('start_time', { ascending: false })
+        .limit(100);
 
-    if (error) {
-      console.error('Error fetching sessions for streak calculation:', error);
+      if (error) {
+        // Check if error is an empty object or has no meaningful content, which can happen in certain Supabase states
+        const errorAsAny = error as any;
+        const errorString = JSON.stringify(error);
+        
+        // If error stringifies to empty object or nearly empty, table doesn't exist
+        if (errorString === '{}' || !errorAsAny.message) {
+          console.warn('Empty or minimal error object received for writing_sessions query (streak calc) - table may not exist');
+          return 0;
+        }
+
+        console.error('Error fetching sessions for streak calculation:', {
+          message: errorAsAny.message || 'No message',
+          details: errorAsAny.details || 'No details',
+          hint: errorAsAny.hint || 'No hint',
+          code: errorAsAny.code || 'No code',
+          status: status,
+          userId: userId
+        });
+        return 0;
+      }
+
+      if (!data || data.length === 0) return 0;
+
+      let streak = 0;
+      let currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0);
+
+      // Extract unique dates from sessions
+      const sessionDates = Array.from(
+        new Set(data.map((s: any) => new Date(s.start_time).toISOString().split('T')[0]))
+      ).map((d: any) => new Date(d));
+
+      // Sort dates from newest to oldest
+      sessionDates.sort((a, b) => b.getTime() - a.getTime());
+
+      for (const sessionDate of sessionDates) {
+        const dateToCheck = new Date(sessionDate);
+        dateToCheck.setHours(0, 0, 0, 0);
+
+        const dayDiff = Math.floor(
+          (currentDate.getTime() - dateToCheck.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
+        if (dayDiff === streak) {
+          streak++;
+        } else if (dayDiff > streak) {
+          break;
+        }
+      }
+
+      return streak;
+    } catch (err) {
+      console.error('Unexpected error in calculateWritingStreak:', err);
       return 0;
     }
-
-    if (!data || data.length === 0) return 0;
-
-    let streak = 0;
-    let currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-
-    // Extract unique dates from sessions
-    const sessionDates = Array.from(
-      new Set(data.map(s => new Date(s.start_time).toISOString().split('T')[0]))
-    ).map(d => new Date(d));
-
-    // Sort dates from newest to oldest
-    sessionDates.sort((a, b) => b.getTime() - a.getTime());
-
-    for (const sessionDate of sessionDates) {
-      const dateToCheck = new Date(sessionDate);
-      dateToCheck.setHours(0, 0, 0, 0);
-
-      const dayDiff = Math.floor(
-        (currentDate.getTime() - dateToCheck.getTime()) / (1000 * 60 * 60 * 24)
-      );
-
-      if (dayDiff === streak) {
-        streak++;
-      } else if (dayDiff > streak) {
-        break;
-      }
-    }
-
-    return streak;
   }
 }
