@@ -1,443 +1,398 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { Textarea } from "./ui/textarea";
-import { useAuth } from "./auth-provider";
-import { toast } from "sonner";
-import { Download, Loader2, Zap, FilePlus2, Copy } from "lucide-react";
-import { callPuterAI } from "@/lib/puter-ai-wrapper";
-import { useRouter } from "next/navigation";
-import { Alert, AlertDescription } from "./ui/alert";
-import { Info } from "lucide-react";
-import { Badge } from "./ui/badge";
+import { useCallback, useState } from 'react';
+import { LoaderCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useAuth } from '@/components/auth-provider';
+import { callPuterAI } from '@/lib/puter-ai-wrapper';
+
+type QuestionCategory = 'methodology' | 'findings' | 'implications' | 'limitations' | 'critique';
+type DifficultyLevel = 'moderate' | 'challenging' | 'expert';
 
 interface DefenseQuestion {
   question: string;
-  category: "methodology" | "findings" | "implications" | "limitations" | "critique";
-  difficulty: "moderate" | "challenging" | "expert";
+  category: QuestionCategory;
+  difficulty: DifficultyLevel;
   answerFramework: string;
+  followUpQuestions: string[];
 }
 
-interface DefenseQuestionSet {
+interface DefenseQuestionsResponse {
   questions: DefenseQuestion[];
-  metadata: {
-    generatedAt: string;
-    questionCount: number;
-    thesisTopic: string;
-  };
+  totalCount: number;
+  generatedAt: string;
 }
 
-const categoryColors: Record<DefenseQuestion["category"], string> = {
-  methodology: "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100",
-  findings: "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100",
-  implications: "bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-100",
-  limitations: "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-100",
-  critique: "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100"
+const SAMPLE_DATA: DefenseQuestionsResponse = {
+  questions: [
+    {
+      question:
+        'If your methodology relies on quantitative analysis, how would you respond to critics who argue qualitative insights were missed?',
+      category: 'methodology',
+      difficulty: 'challenging',
+      answerFramework:
+        '1) Acknowledge validity of concern 2) Explain trade-offs of methodology 3) Present evidence of depth 4) Discuss future research directions',
+      followUpQuestions: [
+        'Can you provide an example from your research?',
+        'What would a mixed-methods approach have revealed?',
+      ],
+    },
+    {
+      question: 'What are the limitations of your findings and how do they affect broader applicability?',
+      category: 'limitations',
+      difficulty: 'moderate',
+      answerFramework:
+        '1) List specific limitations 2) Explain their impact 3) Discuss scope boundaries 4) Suggest mitigation strategies',
+      followUpQuestions: [
+        'How would you address these limitations in future work?',
+        'Do these limitations affect your conclusions?',
+      ],
+    },
+    {
+      question:
+        'How do your findings challenge or support existing theories in the field, and what are the theoretical implications?',
+      category: 'implications',
+      difficulty: 'challenging',
+      answerFramework:
+        '1) Reference key theories 2) Explain alignment/divergence 3) Discuss paradigm implications 4) Suggest theoretical extensions',
+      followUpQuestions: [
+        'Could your findings reshape the field?',
+        'What new questions do your results raise?',
+      ],
+    },
+  ],
+  totalCount: 3,
+  generatedAt: new Date().toISOString(),
 };
 
-const difficultyColors: Record<DefenseQuestion["difficulty"], string> = {
-  moderate: "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100",
-  challenging: "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-100",
-  expert: "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100"
+const categoryColors: Record<QuestionCategory, string> = {
+  methodology: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100',
+  findings: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-100',
+  implications: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-100',
+  limitations: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-100',
+  critique: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-100',
+};
+
+const difficultyColors: Record<DifficultyLevel, string> = {
+  moderate: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-100',
+  challenging: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-100',
+  expert: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-100',
 };
 
 export function DefenseQuestionGenerator() {
-  const { session, supabase } = useAuth();
-  const user = session?.user;
-  const router = useRouter();
-  const [inputText, setInputText] = useState("");
-  const [generatedQuestions, setGeneratedQuestions] = useState<DefenseQuestionSet | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const { session } = useAuth();
+  const [content, setContent] = useState('');
+  const [title, setTitle] = useState('');
+  const [difficulty, setDifficulty] = useState<DifficultyLevel>('challenging');
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<DefenseQuestionsResponse | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<QuestionCategory | 'all'>('all');
+  const [useSampleData, setUseSampleData] = useState(false);
 
-  const handleGenerateQuestions = async () => {
-    if (!inputText.trim()) {
-      toast.error("Please provide your thesis abstract or summary.");
-      return;
-    }
+  const generateQuestions = useCallback(async () => {
     if (!session) {
-      toast.error("You must be logged in to use this feature.");
+      toast.error('Please sign in to use this tool');
       return;
     }
 
-    setIsLoading(true);
+    if (!content.trim()) {
+      toast.error('Please enter thesis content');
+      return;
+    }
 
+    setLoading(true);
     try {
-      const prompt = `You are an experienced thesis committee member preparing challenging defense questions.
+      const prompt = `Generate 8-12 challenging thesis defense questions based on the content provided.
 
-Generate tough, probing defense questions for this thesis:
+Create questions in 5 categories:
+- Methodology: About research approach and methods
+- Findings: About results and data interpretation
+- Implications: About impact and significance
+- Limitations: About weaknesses and scope
+- Critique: About validity and assumptions
 
-${inputText}
+Difficulty level: ${difficulty}
 
-Create 8-12 questions that a thesis committee would ask to:
-- Challenge the methodology and research design
-- Probe the validity of findings and conclusions
-- Test understanding of contributions and implications
-- Explore limitations and alternative approaches
-- Assess the candidate's mastery of the subject
+Format as JSON:
+{
+  "questions": [
+    {
+      "question": "...",
+      "category": "methodology|findings|implications|limitations|critique",
+      "difficulty": "${difficulty}",
+      "answerFramework": "Key points to address: 1) ... 2) ... 3) ... 4) ...",
+      "followUpQuestions": ["...", "..."]
+    }
+  ],
+  "totalCount": number,
+  "generatedAt": ISO_DATE
+}
 
-Requirements for each question:
-- Question: Specific, probing, requires thoughtful answer (1-2 sentences)
-- Category: One of - methodology, findings, implications, limitations, critique
-- Difficulty: One of - moderate, challenging, expert
-- AnswerFramework: 2-3 bullet points suggesting answer approach
-
-Mix difficulty levels:
-- Moderate (40%): Requires good understanding
-- Challenging (40%): Requires deep analysis
-- Expert (20%): Requires synthesis and critical thinking
-
-Ensure questions cover different aspects:
-- Research design and methodology
-- Validity of findings
-- Practical/theoretical implications
-- Limitations and future work
-- Broader context and significance
-
-Output ONLY valid JSON array with structure:
-[
-  {
-    "question": "string",
-    "category": "methodology|findings|implications|limitations|critique",
-    "difficulty": "moderate|challenging|expert",
-    "answerFramework": "string with bullet points"
-  }
-]
-
-Generate the questions now.`;
+Thesis content:
+${content}`;
 
       const result = await callPuterAI(prompt, {
-        temperature: 0.6, // Creative, challenging questions
-        max_tokens: 3500,
-        timeout: 30000
+        temperature: 0.6,
       });
 
-      // Handle markdown code blocks if present
-      let cleanedResult = result;
-      if (result.includes("```")) {
-        cleanedResult = result.replace(/```json\n?|\n?```/g, "").trim();
-      }
-
-      const parsed: DefenseQuestion[] = JSON.parse(cleanedResult);
-
-      // Validate parsed data
-      if (!Array.isArray(parsed) || parsed.length === 0) {
-        throw new Error("Invalid question format received");
-      }
-
-      // Extract topic from input
-      const lines = inputText.split("\n").filter(l => l.trim());
-      const thesisTopic = lines[0].substring(0, 100); // First line as topic
-
-      setGeneratedQuestions({
-        questions: parsed,
-        metadata: {
-          generatedAt: new Date().toISOString(),
-          questionCount: parsed.length,
-          thesisTopic
-        }
-      });
-
-      toast.success(`Generated ${parsed.length} defense questions successfully!`);
-    } catch (error: any) {
-      const errorMessage = error.message || "Failed to generate defense questions.";
-      toast.error(errorMessage);
-      console.error("Question generation error:", error);
+      const parsed: DefenseQuestionsResponse = JSON.parse(result);
+      setData(parsed);
+      toast.success(`Generated ${parsed.totalCount} defense questions`);
+    } catch (error) {
+      console.error('Question generation failed:', error);
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to generate questions'
+      );
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  };
+  }, [content, difficulty, session]);
 
-  const addSampleData = () => {
-    const sampleContent = `The Impact of Social Media Usage on Academic Performance of Senior High School Students in the Philippines
+  const loadSampleData = useCallback(() => {
+    setData(SAMPLE_DATA);
+    setUseSampleData(true);
+    toast.success('Sample data loaded');
+  }, []);
 
-This mixed-methods study investigated the relationship between social media consumption patterns and academic achievement among Grade 12 students in Region III. The quantitative phase surveyed 500 students across 15 schools using validated instruments measuring social media use, time management, academic self-efficacy, and GPA.
-
-Key findings revealed a curvilinear relationship: moderate social media use (1-2 hours daily) correlated with higher academic performance (r = 0.34, p < .01), while excessive use (>3 hours daily) significantly predicted lower grades (β = -0.52, p < .001). Time management skills emerged as a significant moderator of this relationship.
-
-The qualitative phase involved 30 semi-structured interviews revealing how students navigated social media use alongside academic responsibilities. Thematic analysis identified adaptive strategies (scheduled use, platform curation) versus maladaptive patterns (distraction, procrastination).
-
-Implications include educational interventions focused on digital literacy and intentional technology use rather than abstinence. Limitations include self-reported data and cross-sectional design limiting causal inference.`;
-
-    setInputText(sampleContent);
-    setGeneratedQuestions(null);
-    toast.success("Sample thesis summary added! Click 'Generate Defense Questions' to create challenging questions.");
-  };
-
-  const handleSaveQuestions = async () => {
-    if (!user || !generatedQuestions) return;
-    setIsSaving(true);
-
-    try {
-      const { data: newDoc, error } = await supabase
-        .from("documents")
-        .insert({
-          user_id: user.id,
-          title: `Defense Questions: ${generatedQuestions.metadata.thesisTopic}`,
-          content: `<h2>Defense Questions</h2>
-<p>Topic: ${generatedQuestions.metadata.thesisTopic}</p>
-<p>Generated: ${new Date(generatedQuestions.metadata.generatedAt).toLocaleDateString()}</p>
-<p>Total Questions: ${generatedQuestions.metadata.questionCount}</p>
-<hr/>
-${generatedQuestions.questions.map((q, i) => `
-<div style="page-break-inside: avoid; margin-bottom: 25px; border-left: 4px solid #3b82f6; padding-left: 15px;">
-  <p><strong>Question ${i + 1} [${q.category.toUpperCase()}] - ${q.difficulty.toUpperCase()}</strong></p>
-  <p><strong>Q:</strong> ${q.question}</p>
-  <p><strong>Answer Framework:</strong></p>
-  <p style="white-space: pre-wrap; font-family: monospace; background: #f5f5f5; padding: 10px; border-radius: 5px;">${q.answerFramework}</p>
-</div>
-`).join("")}`,
-        })
-        .select("id")
-        .single();
-
-      if (error) {
-        toast.error("Failed to save questions.");
-        console.error(error);
-      } else if (newDoc) {
-        toast.success("Defense questions saved as document!");
-        router.push(`/drafts/${newDoc.id}`);
-      }
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleExportJSON = () => {
-    if (!generatedQuestions) return;
-
-    const dataStr = JSON.stringify(generatedQuestions, null, 2);
-    const dataBlob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `defense-questions-${Date.now()}.json`;
-    link.click();
+  const exportJSON = useCallback(() => {
+    if (!data) return;
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `defense-questions-${Date.now()}.json`;
+    a.click();
     URL.revokeObjectURL(url);
-    toast.success("Defense questions exported as JSON!");
-  };
+    toast.success('JSON exported');
+  }, [data]);
 
-  const handleCopyQuestions = () => {
-    if (!generatedQuestions) return;
-
-    const text = generatedQuestions.questions
+  const exportText = useCallback(() => {
+    if (!data) return;
+    const text = data.questions
       .map(
-        (q, i) =>
-          `Q${i + 1} [${q.category}] (${q.difficulty})\n${q.question}\n\nAnswer Framework:\n${q.answerFramework}`
+        (q) =>
+          `Q: ${q.question}\n\nCategory: ${q.category.toUpperCase()}\nDifficulty: ${q.difficulty.toUpperCase()}\n\nAnswer Framework:\n${q.answerFramework}\n\nFollow-up Questions:\n${q.followUpQuestions.map((fq) => `- ${fq}`).join('\n')}`
       )
-      .join("\n\n---\n\n");
+      .join('\n\n' + '='.repeat(80) + '\n\n');
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `defense-questions-${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Text exported');
+  }, [data]);
 
-    navigator.clipboard.writeText(text);
-    toast.success("Defense questions copied to clipboard!");
-  };
+  const copyToClipboard = useCallback(async () => {
+    if (!data) return;
+    const text = data.questions
+      .map((q) => `Q: ${q.question}\n\nA Framework: ${q.answerFramework}`)
+      .join('\n\n---\n\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success('Copied to clipboard');
+    } catch {
+      toast.error('Failed to copy');
+    }
+  }, [data]);
+
+  const saveToDatabase = useCallback(async () => {
+    if (!data) return;
+    try {
+      const response = await fetch('/api/documents/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: data,
+          title: title || 'Defense Questions',
+          type: 'educational_defense_questions',
+          metadata: {
+            tool: 'defense-question-generator',
+            count: data.totalCount,
+            difficulty,
+            generatedAt: data.generatedAt,
+          },
+        }),
+      });
+      if (!response.ok) throw new Error('Save failed');
+      toast.success('Saved to document library');
+    } catch (error) {
+      toast.error('Failed to save to database');
+    }
+  }, [data, title, difficulty]);
+
+  const filteredQuestions =
+    selectedCategory === 'all'
+      ? data?.questions
+      : data?.questions.filter((q) => q.category === selectedCategory);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="w-5 h-5" />
-                Defense Question Generator
-              </CardTitle>
-              <CardDescription>
-                Generate challenging questions a thesis committee would ask. Practice your defense with AI-powered questions covering methodology, findings, implications, and critiques.
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Content Input */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-medium">Thesis Abstract/Summary</label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addSampleData}
-              >
-                Add Sample
-              </Button>
-            </div>
-            <Textarea
-              placeholder="Paste your thesis abstract, summary, or full thesis content here. The more detailed, the better the questions."
-              className="min-h-[350px] resize-none"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              disabled={isLoading}
+    <div className="space-y-6">
+      <div className="rounded-lg border bg-card p-6">
+        <h2 className="mb-4 text-2xl font-bold">Defense Question Generator</h2>
+        <p className="mb-6 text-muted-foreground">
+          Generate challenging thesis defense questions with answer frameworks. Get questions across 5 categories at your chosen difficulty level.
+        </p>
+
+        <div className="space-y-4">
+          <div>
+            <label className="mb-2 block font-medium">Title (Optional)</label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., Defense Preparation - Methodology Focus"
             />
-            <p className="text-xs text-muted-foreground">
-              {inputText.split(/\s+/).filter(Boolean).length} words
-            </p>
           </div>
 
-          {/* Generate Button */}
-          <Button
-            onClick={handleGenerateQuestions}
-            disabled={isLoading || !inputText.trim()}
-            size="lg"
-            className="w-full gap-2"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Generating Defense Questions...
-              </>
-            ) : (
-              <>
-                <Zap className="w-4 h-4" />
-                Generate Defense Questions
-              </>
-            )}
-          </Button>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block font-medium">Difficulty Level</label>
+              <Select value={difficulty} onValueChange={(v) => setDifficulty(v as DifficultyLevel)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="moderate">Moderate</SelectItem>
+                  <SelectItem value="challenging">Challenging</SelectItem>
+                  <SelectItem value="expert">Expert</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
-          {isLoading && (
-            <Alert className="bg-blue-50 dark:bg-blue-950 border-blue-200">
-              <Info className="h-4 w-4" />
-              <AlertDescription className="text-blue-700 dark:text-blue-300">
-                Creating challenging defense questions with AI... This usually takes 5-15 seconds.
-              </AlertDescription>
-            </Alert>
-          )}
+          <div>
+            <label className="mb-2 block font-medium">Thesis Content</label>
+            <Textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Paste your thesis content here..."
+              rows={6}
+            />
+          </div>
 
-          {/* Tips */}
-          {!generatedQuestions && !isLoading && (
-            <Alert className="bg-green-50 dark:bg-green-950 border-green-200">
-              <Info className="h-4 w-4 text-green-700 dark:text-green-300" />
-              <AlertDescription className="text-green-800 dark:text-green-200">
-                <strong>Tips:</strong> Provide your full thesis abstract or summary for the most relevant questions. Questions will cover methodology, findings, implications, limitations, and scholarly critique. Use these to practice before your defense!
-              </AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
+          <div className="flex gap-2">
+            <Button
+              onClick={generateQuestions}
+              disabled={loading || !session}
+              className="flex-1"
+            >
+              {loading ? (
+                <>
+                  <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                'Generate Questions'
+              )}
+            </Button>
+            <Button onClick={loadSampleData} variant="outline">
+              Load Sample
+            </Button>
+          </div>
+        </div>
+      </div>
 
-      {/* Generated Questions Display */}
-      {generatedQuestions && (
-        <>
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle>Generated Defense Questions</CardTitle>
-                  <CardDescription>
-                    {generatedQuestions.metadata.questionCount} challenging questions to prepare for your thesis defense
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Action Buttons */}
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  onClick={handleSaveQuestions}
-                  disabled={isSaving}
-                  className="gap-2"
-                >
-                  {isSaving ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <FilePlus2 className="w-4 h-4" />
-                  )}
-                  Save as Document
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleCopyQuestions}
-                  className="gap-2"
-                >
-                  <Copy className="w-4 h-4" />
-                  Copy All
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleExportJSON}
-                  className="gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  Export JSON
-                </Button>
-              </div>
+      {data && (
+        <div className="rounded-lg border bg-card p-6">
+          <div className="mb-6 flex items-center justify-between">
+            <h3 className="text-xl font-bold">Defense Questions ({filteredQuestions?.length})</h3>
+            <Select
+              value={selectedCategory}
+              onValueChange={(v) => setSelectedCategory(v as QuestionCategory | 'all')}
+            >
+              <SelectTrigger className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="methodology">Methodology</SelectItem>
+                <SelectItem value="findings">Findings</SelectItem>
+                <SelectItem value="implications">Implications</SelectItem>
+                <SelectItem value="limitations">Limitations</SelectItem>
+                <SelectItem value="critique">Critique</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-              {/* Questions Grid */}
-              <div className="grid gap-4">
-                {generatedQuestions.questions.map((question, index) => (
-                  <div
-                    key={index}
-                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="mb-3 flex items-center justify-between flex-wrap gap-2">
-                      <p className="text-sm font-semibold">Question {index + 1}</p>
-                      <div className="flex gap-2">
-                        <Badge className={categoryColors[question.category]}>
-                          {question.category}
-                        </Badge>
-                        <Badge className={difficultyColors[question.difficulty]}>
-                          {question.difficulty}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">
-                          {question.question}
-                        </p>
-                      </div>
-
-                      <div className="bg-muted/50 rounded p-3 border-l-2 border-muted">
-                        <p className="text-xs font-semibold text-muted-foreground mb-2">
-                          SUGGESTED ANSWER APPROACH:
-                        </p>
-                        <p className="text-sm text-foreground whitespace-pre-wrap">
-                          {question.answerFramework}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Summary Stats */}
-              <div className="pt-4 border-t">
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Total</p>
-                    <p className="text-2xl font-bold">{generatedQuestions.metadata.questionCount}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Moderate</p>
-                    <p className="text-lg font-bold">
-                      {generatedQuestions.questions.filter(q => q.difficulty === "moderate").length}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Challenging</p>
-                    <p className="text-lg font-bold">
-                      {generatedQuestions.questions.filter(q => q.difficulty === "challenging").length}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Expert</p>
-                    <p className="text-lg font-bold">
-                      {generatedQuestions.questions.filter(q => q.difficulty === "expert").length}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Generated</p>
-                    <p className="text-sm mt-2">
-                      {new Date(generatedQuestions.metadata.generatedAt).toLocaleDateString()}
-                    </p>
+          <div className="mb-6 grid gap-4">
+            {filteredQuestions?.map((q, idx) => (
+              <div
+                key={idx}
+                className="rounded border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900"
+              >
+                <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                  <h4 className="flex-1 font-semibold">{q.question}</h4>
+                  <div className="flex gap-2">
+                    <span
+                      className={`rounded px-2 py-1 text-xs font-medium ${categoryColors[q.category]}`}
+                    >
+                      {q.category}
+                    </span>
+                    <span className={`rounded px-2 py-1 text-xs font-medium ${difficultyColors[q.difficulty]}`}>
+                      {q.difficulty}
+                    </span>
                   </div>
                 </div>
+                <div className="mb-3">
+                  <p className="mb-1 text-sm font-medium text-muted-foreground">Answer Framework:</p>
+                  <p className="text-sm">{q.answerFramework}</p>
+                </div>
+                {q.followUpQuestions.length > 0 && (
+                  <div>
+                    <p className="mb-1 text-sm font-medium text-muted-foreground">Follow-up Questions:</p>
+                    <ul className="text-sm">
+                      {q.followUpQuestions.map((fq, fIdx) => (
+                        <li key={fIdx} className="list-inside list-disc">
+                          {fq}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        </>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={exportJSON} variant="outline">
+              Export JSON
+            </Button>
+            <Button onClick={exportText} variant="outline">
+              Export Text
+            </Button>
+            <Button onClick={copyToClipboard} variant="outline">
+              Copy to Clipboard
+            </Button>
+            <Button onClick={saveToDatabase} variant="outline">
+              Save to Library
+            </Button>
+          </div>
+
+          {useSampleData && (
+            <div className="mt-4 rounded bg-blue-50 p-3 text-sm text-blue-700 dark:bg-blue-900 dark:text-blue-100">
+              This is sample data for demonstration. Generate with real content for actual use.
+            </div>
+          )}
+        </div>
+      )}
+
+      {!session && (
+        <div className="rounded bg-yellow-50 p-4 text-sm text-yellow-700 dark:bg-yellow-900 dark:text-yellow-100">
+          Please sign in to generate defense questions for your thesis.
+        </div>
       )}
     </div>
   );

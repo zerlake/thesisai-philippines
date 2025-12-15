@@ -1,461 +1,291 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { Textarea } from "./ui/textarea";
-import { useAuth } from "./auth-provider";
-import { toast } from "sonner";
-import { Download, Loader2, Sparkles, FilePlus2, Copy } from "lucide-react";
-import { callPuterAI } from "@/lib/puter-ai-wrapper";
-import { useRouter } from "next/navigation";
-import { Alert, AlertDescription } from "./ui/alert";
-import { Info } from "lucide-react";
+import { useCallback, useState } from 'react';
+import { LoaderCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { useAuth } from '@/components/auth-provider';
+import { callPuterAI } from '@/lib/puter-ai-wrapper';
 
-interface Flashcard {
+interface FlashcardData {
   question: string;
   answer: string;
-  type: "definition" | "explanation" | "application" | "example";
+  type: 'definition' | 'explanation' | 'application' | 'example';
 }
 
-interface FlashcardSet {
-  cards: Flashcard[];
-  metadata: {
-    generatedAt: string;
-    cardCount: number;
-    topic: string;
-  };
+interface FlashcardResponse {
+  flashcards: FlashcardData[];
+  count: number;
+  generatedAt: string;
 }
+
+const SAMPLE_DATA = {
+  flashcards: [
+    {
+      question: 'What is photosynthesis?',
+      answer: 'The process by which plants convert light energy into chemical energy stored in glucose.',
+      type: 'definition' as const,
+    },
+    {
+      question: 'How does photosynthesis relate to cellular respiration?',
+      answer:
+        'Photosynthesis produces glucose and oxygen; cellular respiration breaks down glucose to release energy. They are complementary processes.',
+      type: 'explanation' as const,
+    },
+    {
+      question: 'How would you apply photosynthesis knowledge to improve crop yields?',
+      answer:
+        'By understanding light requirements, CO2 levels, and chlorophyll production, farmers can optimize conditions for increased yields.',
+      type: 'application' as const,
+    },
+    {
+      question: 'Provide an example of photosynthesis in nature.',
+      answer: 'A maple tree using sunlight to convert water and CO2 into glucose and oxygen during spring growth.',
+      type: 'example' as const,
+    },
+  ],
+  count: 4,
+  generatedAt: new Date().toISOString(),
+};
 
 export function FlashcardGenerator() {
-  const { session, supabase } = useAuth();
-  const user = session?.user;
-  const router = useRouter();
-  const [inputText, setInputText] = useState("");
-  const [topic, setTopic] = useState("");
-  const [generatedCards, setGeneratedCards] = useState<FlashcardSet | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const { session } = useAuth();
+  const [content, setContent] = useState('');
+  const [title, setTitle] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<FlashcardResponse | null>(null);
+  const [useSampleData, setUseSampleData] = useState(false);
 
-  const handleGenerateFlashcards = async () => {
-    if (!inputText.trim()) {
-      toast.error("Please provide thesis content or summary.");
-      return;
-    }
-    if (!topic.trim()) {
-      toast.error("Please enter a topic for the flashcards.");
-      return;
-    }
+  const generateFlashcards = useCallback(async () => {
     if (!session) {
-      toast.error("You must be logged in to use this feature.");
+      toast.error('Please sign in to use this tool');
       return;
     }
 
-    setIsLoading(true);
+    if (!content.trim()) {
+      toast.error('Please enter thesis content');
+      return;
+    }
 
+    setLoading(true);
     try {
-      const prompt = `You are an expert educator creating flashcards for thesis study.
+      const prompt = `Generate 10-15 flashcard pairs from the following thesis content. 
+      
+Include 4 types of questions:
+- Definition: Basic concept definitions
+- Explanation: Deeper understanding questions
+- Application: How to apply concepts
+- Example: Concrete examples from the content
 
-Generate flashcard pairs based on this thesis content for the topic: "${topic}"
+Format as JSON with this structure:
+{
+  "flashcards": [
+    {"question": "...", "answer": "...", "type": "definition|explanation|application|example"},
+    ...
+  ],
+  "count": number,
+  "generatedAt": ISO_DATE
+}
 
-Content:
-${inputText}
-
-Create 10-15 flashcards with these requirements:
-- Question: Clear, specific, testable (no more than 2 sentences)
-- Answer: Concise but complete (2-3 sentences max)
-- Type: One of: definition, explanation, application, example
-
-Mix the types:
-- Definition: "What is X?" or "Define X"
-- Explanation: "Why/How does X work?" or "Explain X"
-- Application: "How would you use X in practice?"
-- Example: "Give an example of X"
-
-Make questions that are suitable for studying and exam preparation.
-Focus on key concepts, methodology, findings, and implications from the thesis.
-
-Output ONLY a valid JSON array with structure:
-[
-  {
-    "question": "string",
-    "answer": "string",
-    "type": "definition|explanation|application|example"
-  }
-]
-
-Generate the flashcards now.`;
+Content to process:
+${content}`;
 
       const result = await callPuterAI(prompt, {
-        temperature: 0.4, // Balanced Q&A generation
-        max_tokens: 3000,
-        timeout: 30000
+        temperature: 0.4,
       });
 
-      // Handle markdown code blocks if present
-      let cleanedResult = result;
-      if (result.includes("```")) {
-        cleanedResult = result.replace(/```json\n?|\n?```/g, "").trim();
-      }
-
-      const parsed: Flashcard[] = JSON.parse(cleanedResult);
-
-      // Validate parsed data
-      if (!Array.isArray(parsed) || parsed.length === 0) {
-        throw new Error("Invalid flashcard format received");
-      }
-
-      setGeneratedCards({
-        cards: parsed,
-        metadata: {
-          generatedAt: new Date().toISOString(),
-          cardCount: parsed.length,
-          topic
-        }
-      });
-
-      toast.success(`Generated ${parsed.length} flashcards successfully!`);
-    } catch (error: any) {
-      const errorMessage = error.message || "Failed to generate flashcards.";
-      toast.error(errorMessage);
-      console.error("Flashcard generation error:", error);
+      const parsed: FlashcardResponse = JSON.parse(result);
+      setData(parsed);
+      toast.success(`Generated ${parsed.count} flashcard pairs`);
+    } catch (error) {
+      console.error('Flashcard generation failed:', error);
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to generate flashcards'
+      );
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  };
+  }, [content, session]);
 
-  const addSampleData = () => {
-    const sampleTopic = "Thesis Research Methodology";
-    const sampleContent = `This thesis investigates the impact of social media on academic performance. The study employs a mixed-methods approach combining quantitative surveys with qualitative interviews. 
+  const loadSampleData = useCallback(() => {
+    setData(SAMPLE_DATA);
+    setUseSampleData(true);
+    toast.success('Sample data loaded');
+  }, []);
 
-Quantitative Phase:
-- 500 Grade 12 students across 15 schools
-- Validated scales for measuring social media usage, time management, and academic performance
-- Statistical analysis using SPSS with multiple regression
-
-Qualitative Phase:
-- 30 semi-structured interviews with students showing high/low social media use
-- Thematic analysis identifying patterns in behavior and academic outcomes
-- Member checking for validity
-
-Key Findings:
-- Moderate social media use (1-2 hours daily) correlated with better academic performance
-- Excessive use (>3 hours daily) significantly predicted lower grades
-- Time management skills moderated the relationship
-- Educational platforms showed positive associations, entertainment platforms negative
-
-Methodology Strengths:
-- Mixed methods provided comprehensive understanding
-- Large sample size for quantitative phase
-- Purposive sampling ensured diverse qualitative perspectives
-- Multiple validation strategies employed
-
-Limitations:
-- Self-reported data subject to social desirability bias
-- Cross-sectional design limits causal inference
-- Limited to one region in Philippines
-- Cannot generalize to all digital natives`;
-
-    setTopic(sampleTopic);
-    setInputText(sampleContent);
-    setGeneratedCards(null);
-    toast.success("Sample data added! Click 'Generate Flashcards' to create study cards.");
-  };
-
-  const handleSaveFlashcards = async () => {
-    if (!user || !generatedCards) return;
-    setIsSaving(true);
-
-    try {
-      const { data: newDoc, error } = await supabase
-        .from("documents")
-        .insert({
-          user_id: user.id,
-          title: `Flashcards: ${generatedCards.metadata.topic}`,
-          content: `<h2>Flashcard Set: ${generatedCards.metadata.topic}</h2>
-<p>Generated: ${new Date(generatedCards.metadata.generatedAt).toLocaleDateString()}</p>
-<p>Total Cards: ${generatedCards.metadata.cardCount}</p>
-<hr/>
-${generatedCards.cards.map((card, i) => `
-<div style="page-break-inside: avoid; margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
-  <p><strong>Card ${i + 1} [${card.type.toUpperCase()}]</strong></p>
-  <p><strong>Q:</strong> ${card.question}</p>
-  <p><strong>A:</strong> ${card.answer}</p>
-</div>
-`).join("")}`,
-        })
-        .select("id")
-        .single();
-
-      if (error) {
-        toast.error("Failed to save flashcards.");
-        console.error(error);
-      } else if (newDoc) {
-        toast.success("Flashcards saved as document!");
-        router.push(`/drafts/${newDoc.id}`);
-      }
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleExportJSON = () => {
-    if (!generatedCards) return;
-
-    const dataStr = JSON.stringify(generatedCards, null, 2);
-    const dataBlob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `flashcards-${generatedCards.metadata.topic.replace(/\s+/g, "-")}-${Date.now()}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-    toast.success("Flashcards exported as JSON!");
-  };
-
-  const handleExportCSV = () => {
-    if (!generatedCards) return;
-
-    const csvHeader = "Question,Answer,Type\n";
-    const csvData = generatedCards.cards
-      .map(card =>
-        `"${card.question.replace(/"/g, '""')}","${card.answer.replace(/"/g, '""')}","${card.type}"`
-      )
-      .join("\n");
-
-    const csv = csvHeader + csvData;
-    const blob = new Blob([csv], { type: "text/csv" });
+  const exportJSON = useCallback(() => {
+    if (!data) return;
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: 'application/json',
+    });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `flashcards-${generatedCards.metadata.topic.replace(/\s+/g, "-")}-${Date.now()}.csv`;
-    link.click();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `flashcards-${Date.now()}.json`;
+    a.click();
     URL.revokeObjectURL(url);
-    toast.success("Flashcards exported as CSV!");
-  };
+    toast.success('JSON exported');
+  }, [data]);
 
-  const handleCopyFlashcards = () => {
-    if (!generatedCards) return;
+  const exportCSV = useCallback(() => {
+    if (!data) return;
+    const headers = ['Question', 'Answer', 'Type'];
+    const rows = data.flashcards.map((f) => [
+      `"${f.question.replace(/"/g, '""')}"`,
+      `"${f.answer.replace(/"/g, '""')}"`,
+      f.type,
+    ]);
+    const csv = [headers, ...rows].map((r) => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `flashcards-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('CSV exported');
+  }, [data]);
 
-    const text = generatedCards.cards
-      .map((card, i) => `Card ${i + 1} [${card.type}]\nQ: ${card.question}\nA: ${card.answer}`)
-      .join("\n\n---\n\n");
+  const copyToClipboard = useCallback(async () => {
+    if (!data) return;
+    const text = data.flashcards
+      .map((f) => `Q: ${f.question}\nA: ${f.answer}\nType: ${f.type}`)
+      .join('\n\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success('Copied to clipboard');
+    } catch {
+      toast.error('Failed to copy');
+    }
+  }, [data]);
 
-    navigator.clipboard.writeText(text);
-    toast.success("Flashcards copied to clipboard!");
-  };
+  const saveToDatabase = useCallback(async () => {
+    if (!data) return;
+    try {
+      const response = await fetch('/api/documents/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: data,
+          title: title || 'Flashcard Generation',
+          type: 'educational_flashcards',
+          metadata: {
+            tool: 'flashcard-generator',
+            count: data.count,
+            generatedAt: data.generatedAt,
+          },
+        }),
+      });
+      if (!response.ok) throw new Error('Save failed');
+      toast.success('Saved to document library');
+    } catch (error) {
+      toast.error('Failed to save to database');
+    }
+  }, [data, title]);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5" />
-                AI Flashcard Generator
-              </CardTitle>
-              <CardDescription>
-                Create comprehensive flashcard sets from your thesis content. Perfect for studying and exam preparation.
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Topic Input */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Topic/Chapter</label>
-            <input
-              type="text"
-              placeholder="e.g., Thesis Methodology, Research Findings, Literature Review"
-              className="w-full px-3 py-2 border rounded-md border-input bg-background"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              disabled={isLoading}
+    <div className="space-y-6">
+      <div className="rounded-lg border bg-card p-6">
+        <h2 className="mb-4 text-2xl font-bold">Flashcard Generator</h2>
+        <p className="mb-6 text-muted-foreground">
+          Auto-generate Q&A flashcard pairs from your thesis content. Creates 4 types: Definition, Explanation, Application, and Example.
+        </p>
+
+        <div className="space-y-4">
+          <div>
+            <label className="mb-2 block font-medium">Title (Optional)</label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., Chapter 3 Flashcards"
             />
-            <p className="text-xs text-muted-foreground">
-              What topic or chapter are these flashcards for?
-            </p>
           </div>
 
-          {/* Content Input */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-medium">Thesis Content</label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addSampleData}
-              >
-                Add Sample
-              </Button>
-            </div>
+          <div>
+            <label className="mb-2 block font-medium">Thesis Content</label>
             <Textarea
-              placeholder="Paste your thesis content, chapter summary, or research notes here..."
-              className="min-h-[300px] resize-none"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              disabled={isLoading}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Paste your thesis content here..."
+              rows={6}
             />
-            <p className="text-xs text-muted-foreground">
-              {inputText.split(/\s+/).filter(Boolean).length} words
-            </p>
           </div>
 
-          {/* Generate Button */}
-          <Button
-            onClick={handleGenerateFlashcards}
-            disabled={isLoading || !inputText.trim() || !topic.trim()}
-            size="lg"
-            className="w-full gap-2"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Generating Flashcards...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4" />
-                Generate Flashcards
-              </>
-            )}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={generateFlashcards}
+              disabled={loading || !session}
+              className="flex-1"
+            >
+              {loading ? (
+                <>
+                  <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                'Generate Flashcards'
+              )}
+            </Button>
+            <Button
+              onClick={loadSampleData}
+              variant="outline"
+            >
+              Load Sample
+            </Button>
+          </div>
+        </div>
+      </div>
 
-          {isLoading && (
-            <Alert className="bg-blue-50 dark:bg-blue-950 border-blue-200">
-              <Info className="h-4 w-4" />
-              <AlertDescription className="text-blue-700 dark:text-blue-300">
-                Creating flashcard pairs with AI... This usually takes 5-15 seconds.
-              </AlertDescription>
-            </Alert>
-          )}
+      {data && (
+        <div className="rounded-lg border bg-card p-6">
+          <h3 className="mb-4 text-xl font-bold">Generated Flashcards ({data.count})</h3>
 
-          {/* Tips */}
-          {!generatedCards && !isLoading && (
-            <Alert className="bg-green-50 dark:bg-green-950 border-green-200">
-              <Info className="h-4 w-4 text-green-700 dark:text-green-300" />
-              <AlertDescription className="text-green-800 dark:text-green-200">
-                <strong>Tips:</strong> For best results, provide substantial content (500+ words). The AI will generate definition, explanation, application, and example-type questions suitable for studying.
-              </AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Generated Flashcards Display */}
-      {generatedCards && (
-        <>
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle>Generated Flashcards</CardTitle>
-                  <CardDescription>
-                    {generatedCards.metadata.cardCount} cards generated for "{generatedCards.metadata.topic}"
-                  </CardDescription>
+          <div className="mb-6 grid gap-4">
+            {data.flashcards.map((card, idx) => (
+              <div
+                key={idx}
+                className="rounded border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900"
+              >
+                <div className="mb-2 flex items-center justify-between">
+                  <h4 className="font-semibold">Q: {card.question}</h4>
+                  <span className="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-100">
+                    {card.type}
+                  </span>
                 </div>
+                <p className="text-muted-foreground">A: {card.answer}</p>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Action Buttons */}
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  onClick={handleSaveFlashcards}
-                  disabled={isSaving}
-                  className="gap-2"
-                >
-                  {isSaving ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <FilePlus2 className="w-4 h-4" />
-                  )}
-                  Save as Document
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleCopyFlashcards}
-                  className="gap-2"
-                >
-                  <Copy className="w-4 h-4" />
-                  Copy All
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleExportJSON}
-                  className="gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  Export JSON
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleExportCSV}
-                  className="gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  Export CSV
-                </Button>
-              </div>
+            ))}
+          </div>
 
-              {/* Flashcards Grid */}
-              <div className="grid gap-4">
-                {generatedCards.cards.map((card, index) => (
-                  <div
-                    key={index}
-                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="mb-3 flex items-start justify-between">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase">
-                        Card {index + 1} • {card.type}
-                      </p>
-                    </div>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={exportJSON} variant="outline">
+              Export JSON
+            </Button>
+            <Button onClick={exportCSV} variant="outline">
+              Export CSV
+            </Button>
+            <Button onClick={copyToClipboard} variant="outline">
+              Copy to Clipboard
+            </Button>
+            <Button onClick={saveToDatabase} variant="outline">
+              Save to Library
+            </Button>
+          </div>
 
-                    <div className="space-y-3">
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground mb-1">Question:</p>
-                        <p className="text-sm font-medium">{card.question}</p>
-                      </div>
+          {useSampleData && (
+            <div className="mt-4 rounded bg-blue-50 p-3 text-sm text-blue-700 dark:bg-blue-900 dark:text-blue-100">
+              This is sample data for demonstration. Generate with real content for actual use.
+            </div>
+          )}
+        </div>
+      )}
 
-                      <div className="border-t pt-3">
-                        <p className="text-xs font-medium text-muted-foreground mb-1">Answer:</p>
-                        <p className="text-sm text-foreground/90">{card.answer}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Summary Stats */}
-              <div className="pt-4 border-t">
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Total Cards</p>
-                    <p className="text-2xl font-bold">{generatedCards.metadata.cardCount}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Card Types</p>
-                    <p className="text-sm mt-2">
-                      <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 px-2 py-1 rounded text-xs mr-2">
-                        {generatedCards.cards.filter(c => c.type === "definition").length} Definition
-                      </span>
-                      <span className="inline-block bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 px-2 py-1 rounded text-xs">
-                        {generatedCards.cards.filter(c => c.type === "explanation").length} Explanation
-                      </span>
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Generated</p>
-                    <p className="text-sm mt-2">
-                      {new Date(generatedCards.metadata.generatedAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </>
+      {!session && (
+        <div className="rounded bg-yellow-50 p-4 text-sm text-yellow-700 dark:bg-yellow-900 dark:text-yellow-100">
+          Please sign in to generate flashcards from your thesis content.
+        </div>
       )}
     </div>
   );

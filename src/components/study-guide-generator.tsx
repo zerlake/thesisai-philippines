@@ -1,19 +1,21 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { Textarea } from "./ui/textarea";
-import { useAuth } from "./auth-provider";
-import { toast } from "sonner";
-import { Download, Loader2, BookMarked, FilePlus2, Copy } from "lucide-react";
-import { callPuterAI } from "@/lib/puter-ai-wrapper";
-import { useRouter } from "next/navigation";
-import { Alert, AlertDescription } from "./ui/alert";
-import { Info } from "lucide-react";
+import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
+import { ChevronDown, ChevronUp, LoaderCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { useAuth } from '@/components/auth-provider';
+import { callPuterAI } from '@/lib/puter-ai-wrapper';
+
+interface StudyGuideTerm {
+  term: string;
+  definition: string;
+}
 
 interface StudyGuideSection {
-  title: string;
+  heading: string;
   content: string;
   keyPoints: string[];
   reviewQuestions: string[];
@@ -21,516 +23,501 @@ interface StudyGuideSection {
 
 interface StudyGuide {
   title: string;
-  executive_summary: string;
+  executiveSummary: string;
   sections: StudyGuideSection[];
-  key_terms: Array<{ term: string; definition: string }>;
-  study_tips: string[];
-  important_citations: string[];
-  metadata: {
-    generatedAt: string;
-    sectionCount: number;
-    estimatedReadTime: number;
-  };
+  keyTerms: StudyGuideTerm[];
+  studyTips: string[];
+  citationsList: string[];
+  estimatedReadingTime: number;
+  generatedAt: string;
 }
+
+const SAMPLE_DATA: StudyGuide = {
+  title: 'Photosynthesis: A Comprehensive Study Guide',
+  executiveSummary:
+    'Photosynthesis is the fundamental biochemical process through which plants convert light energy into chemical energy stored in glucose molecules. This process occurs primarily in chloroplasts and involves two main stages: the light-dependent reactions and the light-independent reactions (Calvin cycle). Understanding photosynthesis is essential for comprehending energy flow in ecosystems and has practical applications in agriculture and renewable energy.',
+  sections: [
+    {
+      heading: 'Light-Dependent Reactions',
+      content:
+        'The light-dependent reactions occur in the thylakoid membrane of chloroplasts. These reactions capture light energy and convert it into chemical energy in the form of ATP and NADPH. The process begins with light absorption by chlorophyll in Photosystem II, which triggers the splitting of water molecules and releases oxygen as a byproduct. Electrons move through an electron transport chain, creating a proton gradient that drives ATP synthesis.',
+      keyPoints: [
+        'Occurs in thylakoid membranes',
+        'Requires light energy for activation',
+        'Produces ATP and NADPH',
+        'Results in oxygen release',
+        'Drives electron transport chain',
+      ],
+      reviewQuestions: [
+        'What are the main products of light reactions?',
+        'Where do light reactions occur in the chloroplast?',
+        'How does the electron transport chain contribute to ATP production?',
+      ],
+    },
+    {
+      heading: 'The Calvin Cycle',
+      content:
+        'The Calvin Cycle, also known as the light-independent reactions, occurs in the stroma of chloroplasts. This cycle uses the ATP and NADPH produced by the light reactions to convert CO2 into glucose through a series of enzymatic reactions. The cycle has three main phases: carbon fixation, reduction, and regeneration of ribulose-1,5-bisphosphate.',
+      keyPoints: [
+        'Occurs in the stroma',
+        'Does not directly require light',
+        'Uses ATP and NADPH from light reactions',
+        'Fixes CO2 into organic molecules',
+        'Produces glucose',
+      ],
+      reviewQuestions: [
+        'What are the three phases of the Calvin Cycle?',
+        'Why is the Calvin Cycle called light-independent?',
+        'What would happen if light reactions stopped?',
+      ],
+    },
+  ],
+  keyTerms: [
+    {
+      term: 'Chloroplast',
+      definition: 'Double-membrane bound organelle where photosynthesis occurs in plant cells',
+    },
+    {
+      term: 'Photosystem',
+      definition: 'Complex of proteins and pigments that captures light energy for electron excitation',
+    },
+    {
+      term: 'Electron Transport Chain',
+      definition: 'Series of protein complexes that move electrons and establish proton gradient',
+    },
+    {
+      term: 'NADPH',
+      definition: 'Electron carrier molecule produced in light reactions, used in Calvin Cycle',
+    },
+    {
+      term: 'RuBisCO',
+      definition: 'Most abundant enzyme on Earth, catalyzes CO2 fixation in Calvin Cycle',
+    },
+  ],
+  studyTips: [
+    'Create visual diagrams showing electron flow through the electron transport chain',
+    'Use color coding to distinguish between light and dark reactions',
+    'Memorize the overall equation: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2',
+    'Practice explaining energy flow from light to chemical bonds',
+    'Study the role of chlorophyll absorption spectra',
+  ],
+  citationsList: [
+    'Taiz & Zeiger (2015). Plant Physiology and Development',
+    'Buchanan et al. (2015). Biochemistry and Molecular Biology of Plants',
+    'Campbell & Reece (2020). Biology: A Global Approach',
+  ],
+  estimatedReadingTime: 45,
+  generatedAt: new Date().toISOString(),
+};
 
 export function StudyGuideGenerator() {
-  const { session, supabase } = useAuth();
-  const user = session?.user;
-  const router = useRouter();
-  const [inputText, setInputText] = useState("");
-  const [guideTitle, setGuideTitle] = useState("");
-  const [generatedGuide, setGeneratedGuide] = useState<StudyGuide | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const { session } = useAuth();
+  const [content, setContent] = useState('');
+  const [title, setTitle] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<StudyGuide | null>(null);
+  const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set([0]));
+  const [useSampleData, setUseSampleData] = useState(false);
 
-  const handleGenerateGuide = async () => {
-    if (!inputText.trim()) {
-      toast.error("Please provide thesis content or summary.");
-      return;
-    }
-    if (!guideTitle.trim()) {
-      toast.error("Please enter a title for the study guide.");
-      return;
-    }
+  const generateStudyGuide = useCallback(async () => {
     if (!session) {
-      toast.error("You must be logged in to use this feature.");
+      toast.error('Please sign in to use this tool');
       return;
     }
 
-    setIsLoading(true);
+    if (!content.trim()) {
+      toast.error('Please enter thesis content');
+      return;
+    }
 
+    setLoading(true);
     try {
-      const prompt = `You are an expert educator creating a comprehensive study guide for thesis preparation.
+      const prompt = `Create a comprehensive study guide from the following thesis content.
 
-Create a detailed study guide titled: "${guideTitle}"
+Structure the guide with:
+1. Executive Summary (2-3 paragraphs)
+2. 3-5 main sections, each with:
+   - Detailed content explanation
+   - Key points (as bullet list)
+   - Review questions for each section
+3. 8-12 key terms with definitions
+4. 5-7 practical study tips
+5. List of important citations
+6. Estimated reading time in minutes
 
-Based on this thesis content:
-${inputText}
-
-Structure the guide with the following components:
-
-1. EXECUTIVE SUMMARY (2-3 paragraphs):
-   - Overview of the thesis
-   - Main problem/question
-   - Key findings or contributions
-
-2. MAIN SECTIONS (3-5 sections):
-   For each section:
-   - Title and description
-   - Content overview
-   - 3-4 Key Points (bullet list)
-   - 2-3 Review Questions
-
-3. KEY TERMS & DEFINITIONS:
-   - 8-12 important terms with clear definitions
-
-4. STUDY TIPS:
-   - 5-7 practical tips for learning/retention
-   - Mnemonics or memory aids if applicable
-
-5. IMPORTANT CITATIONS:
-   - Key references or works cited
-
-Output as a properly formatted JSON object with this structure:
+Format as JSON:
 {
-  "title": "string",
-  "executive_summary": "string (full paragraph)",
+  "title": "...",
+  "executiveSummary": "...",
   "sections": [
     {
-      "title": "string",
-      "content": "string (descriptive overview)",
-      "keyPoints": ["point1", "point2", "point3", "point4"],
-      "reviewQuestions": ["question1", "question2", "question3"]
+      "heading": "...",
+      "content": "...",
+      "keyPoints": ["...", "..."],
+      "reviewQuestions": ["...", "..."]
     }
   ],
-  "key_terms": [
-    {
-      "term": "string",
-      "definition": "string (concise, clear definition)"
-    }
+  "keyTerms": [
+    {"term": "...", "definition": "..."}
   ],
-  "study_tips": ["tip1", "tip2", "tip3", "tip4", "tip5"],
-  "important_citations": ["citation1", "citation2", "citation3"]
+  "studyTips": ["...", "..."],
+  "citationsList": ["...", "..."],
+  "estimatedReadingTime": number,
+  "generatedAt": ISO_DATE
 }
 
-Create the study guide now. Ensure it's comprehensive, well-organized, and suitable for thorough thesis study.`;
+Thesis content to process:
+${content}`;
 
       const result = await callPuterAI(prompt, {
-        temperature: 0.5, // Balanced, organized content
-        max_tokens: 4000,
-        timeout: 30000
+        temperature: 0.5,
       });
 
-      // Handle markdown code blocks if present
-      let cleanedResult = result;
-      if (result.includes("```")) {
-        cleanedResult = result.replace(/```json\n?|\n?```/g, "").trim();
-      }
-
-      const parsed: StudyGuide = JSON.parse(cleanedResult);
-
-      // Validate and enhance
-      if (!parsed.sections || parsed.sections.length === 0) {
-        throw new Error("Invalid study guide format");
-      }
-
-      // Calculate estimated read time (rough estimate: 200 words per minute)
-      const totalWords = (parsed.executive_summary + parsed.sections.map(s => s.content).join(" ")).split(/\s+/).length;
-      const readTime = Math.ceil(totalWords / 200);
-
-      setGeneratedGuide({
-        ...parsed,
-        metadata: {
-          generatedAt: new Date().toISOString(),
-          sectionCount: parsed.sections.length,
-          estimatedReadTime: readTime
-        }
-      });
-
-      toast.success("Study guide generated successfully!");
-    } catch (error: any) {
-      const errorMessage = error.message || "Failed to generate study guide.";
-      toast.error(errorMessage);
-      console.error("Study guide generation error:", error);
+      const parsed: StudyGuide = JSON.parse(result);
+      setData(parsed);
+      setExpandedSections(new Set([0]));
+      toast.success('Study guide generated successfully');
+    } catch (error) {
+      console.error('Study guide generation failed:', error);
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to generate study guide'
+      );
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  };
+  }, [content, session]);
 
-  const addSampleData = () => {
-    const sampleTitle = "Social Media Impact on Academic Performance";
-    const sampleContent = `This thesis investigates the complex relationship between social media usage and academic performance among Philippine Grade 12 students through a mixed-methods lens.
+  const loadSampleData = useCallback(() => {
+    setData(SAMPLE_DATA);
+    setExpandedSections(new Set([0]));
+    setUseSampleData(true);
+    toast.success('Sample data loaded');
+  }, []);
 
-QUANTITATIVE PHASE:
-Participants: 500 Grade 12 students across 15 schools in Region III
-Instruments: 
-- Social Media Use Scale (SMUS)
-- Academic Self-Efficacy Scale
-- Time Management Inventory
-Measures: GPA, attendance records, course grades
-
-Results:
-- Moderate use (1-2 hrs/day) predicted higher academic performance (r=0.34, p<.01)
-- Excessive use (>3 hrs/day) significantly predicted lower grades (β=-0.52, p<.001)
-- Time management significantly moderated the relationship (F=12.4, p<.001)
-
-QUALITATIVE PHASE:
-30 semi-structured interviews exploring student experiences, strategies, and challenges.
-
-Key Themes:
-1. Adaptive Strategies: Students using scheduled breaks, platform curation, app restrictions
-2. Maladaptive Patterns: Distraction spirals, procrastination, FOMO-driven behavior
-3. Family Dynamics: Parental monitoring and guidance effects
-4. Digital Literacy: Understanding algorithm effects and intentional consumption
-
-FINDINGS:
-Social media impact is not inherently negative but depends on usage patterns and personal characteristics. Educational intervention should focus on digital literacy and intentional use rather than abstinence.
-
-IMPLICATIONS:
-For educators: Integrate digital citizenship into curriculum
-For parents: Guide rather than restrict; model healthy use
-For policymakers: Support digital literacy programs`;
-
-    setGuideTitle(sampleTitle);
-    setInputText(sampleContent);
-    setGeneratedGuide(null);
-    toast.success("Sample data added! Click 'Generate Study Guide' to create a comprehensive guide.");
-  };
-
-  const handleSaveGuide = async () => {
-    if (!user || !generatedGuide) return;
-    setIsSaving(true);
-
-    try {
-      const { data: newDoc, error } = await supabase
-        .from("documents")
-        .insert({
-          user_id: user.id,
-          title: `Study Guide: ${generatedGuide.title}`,
-          content: `<h1>${generatedGuide.title}</h1>
-<p><em>Generated: ${new Date(generatedGuide.metadata.generatedAt).toLocaleDateString()}</em></p>
-<p><strong>Estimated Reading Time: ${generatedGuide.metadata.estimatedReadTime} minutes</strong></p>
-<hr/>
-
-<h2>Executive Summary</h2>
-<p>${generatedGuide.executive_summary}</p>
-
-<h2>Main Topics</h2>
-${generatedGuide.sections.map((section, i) => `
-<h3>${i + 1}. ${section.title}</h3>
-<p>${section.content}</p>
-<h4>Key Points:</h4>
-<ul>
-${section.keyPoints.map(point => `<li>${point}</li>`).join("")}
-</ul>
-<h4>Review Questions:</h4>
-<ol>
-${section.reviewQuestions.map(q => `<li>${q}</li>`).join("")}
-</ol>
-`).join("")}
-
-<h2>Key Terms & Definitions</h2>
-<dl>
-${generatedGuide.key_terms.map(kt => `
-<dt><strong>${kt.term}</strong></dt>
-<dd>${kt.definition}</dd>
-`).join("")}
-</dl>
-
-<h2>Study Tips</h2>
-<ol>
-${generatedGuide.study_tips.map(tip => `<li>${tip}</li>`).join("")}
-</ol>
-
-<h2>Important Citations</h2>
-<ul>
-${generatedGuide.important_citations.map(cite => `<li>${cite}</li>`).join("")}
-</ul>`,
-        })
-        .select("id")
-        .single();
-
-      if (error) {
-        toast.error("Failed to save study guide.");
-        console.error(error);
-      } else if (newDoc) {
-        toast.success("Study guide saved as document!");
-        router.push(`/drafts/${newDoc.id}`);
+  const toggleSection = useCallback((idx: number) => {
+    setExpandedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(idx)) {
+        next.delete(idx);
+      } else {
+        next.add(idx);
       }
-    } finally {
-      setIsSaving(false);
-    }
-  };
+      return next;
+    });
+  }, []);
 
-  const handleExportJSON = () => {
-    if (!generatedGuide) return;
-
-    const dataStr = JSON.stringify(generatedGuide, null, 2);
-    const dataBlob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `study-guide-${generatedGuide.title.replace(/\s+/g, "-")}-${Date.now()}.json`;
-    link.click();
+  const exportJSON = useCallback(() => {
+    if (!data) return;
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `study-guide-${Date.now()}.json`;
+    a.click();
     URL.revokeObjectURL(url);
-    toast.success("Study guide exported as JSON!");
-  };
+    toast.success('JSON exported');
+  }, [data]);
 
-  const handleCopyGuide = () => {
-    if (!generatedGuide) return;
-
-    const text = `${generatedGuide.title}\n\nEXECUTIVE SUMMARY:\n${generatedGuide.executive_summary}\n\n${generatedGuide.sections
+  const exportHTML = useCallback(() => {
+    if (!data) return;
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${data.title}</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }
+    h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    h2 { color: #555; margin-top: 30px; }
+    h3 { color: #777; }
+    .summary { background: #f0f8ff; padding: 15px; border-left: 4px solid #007bff; margin: 20px 0; }
+    .section { margin: 20px 0; page-break-inside: avoid; }
+    .key-points { background: #f9f9f9; padding: 10px; margin: 10px 0; }
+    .key-points li { margin: 5px 0; }
+    .questions { background: #fff3cd; padding: 10px; margin: 10px 0; }
+    .terms { columns: 2; }
+    .term { margin: 10px 0; }
+    .tips { background: #d4edda; padding: 10px; margin: 10px 0; }
+    .citations { background: #e2e3e5; padding: 10px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>${data.title}</h1>
+  <p><small>Reading Time: ${data.estimatedReadingTime} minutes</small></p>
+  
+  <div class="summary">
+    <h2>Executive Summary</h2>
+    <p>${data.executiveSummary}</p>
+  </div>
+  
+  ${data.sections
+    .map(
+      (section) => `
+    <div class="section">
+      <h2>${section.heading}</h2>
+      <p>${section.content}</p>
+      <div class="key-points">
+        <h3>Key Points:</h3>
+        <ul>${section.keyPoints.map((kp) => `<li>${kp}</li>`).join('')}</ul>
+      </div>
+      <div class="questions">
+        <h3>Review Questions:</h3>
+        <ul>${section.reviewQuestions.map((q) => `<li>${q}</li>`).join('')}</ul>
+      </div>
+    </div>
+  `
+    )
+    .join('')}
+  
+  <div class="terms">
+    <h2>Key Terms</h2>
+    ${data.keyTerms
       .map(
-        s =>
-          `${s.title}\n${s.content}\n\nKey Points:\n${s.keyPoints.map(p => `• ${p}`).join("\n")}\n\nReview Questions:\n${s.reviewQuestions.map(q => `? ${q}`).join("\n")}`
+        (term) => `
+      <div class="term">
+        <strong>${term.term}:</strong> ${term.definition}
+      </div>
+    `
       )
-      .join("\n\n---\n\n")}\n\nKEY TERMS:\n${generatedGuide.key_terms.map(kt => `${kt.term}: ${kt.definition}`).join("\n")}\n\nSTUDY TIPS:\n${generatedGuide.study_tips.map((t, i) => `${i + 1}. ${t}`).join("\n")}`;
+      .join('')}
+  </div>
+  
+  <div class="tips">
+    <h2>Study Tips</h2>
+    <ul>${data.studyTips.map((tip) => `<li>${tip}</li>`).join('')}</ul>
+  </div>
+  
+  <div class="citations">
+    <h2>Citations</h2>
+    <ul>${data.citationsList.map((citation) => `<li>${citation}</li>`).join('')}</ul>
+  </div>
+</body>
+</html>`;
 
-    navigator.clipboard.writeText(text);
-    toast.success("Study guide copied to clipboard!");
-  };
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `study-guide-${Date.now()}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('HTML exported');
+  }, [data]);
+
+  const copyToClipboard = useCallback(async () => {
+    if (!data) return;
+    const text = `${data.title}\n\nExecutive Summary:\n${data.executiveSummary}\n\n${data.sections
+      .map((s) => `${s.heading}\n${s.content}\n\nKey Points:\n${s.keyPoints.map((kp) => `- ${kp}`).join('\n')}`)
+      .join('\n\n')}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success('Copied to clipboard');
+    } catch {
+      toast.error('Failed to copy');
+    }
+  }, [data]);
+
+  const saveToDatabase = useCallback(async () => {
+    if (!data) return;
+    try {
+      const response = await fetch('/api/documents/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: data,
+          title: title || data.title,
+          type: 'educational_study_guide',
+          metadata: {
+            tool: 'study-guide-generator',
+            estimatedReadingTime: data.estimatedReadingTime,
+            sectionCount: data.sections.length,
+            generatedAt: data.generatedAt,
+          },
+        }),
+      });
+      if (!response.ok) throw new Error('Save failed');
+      toast.success('Saved to document library');
+    } catch (error) {
+      toast.error('Failed to save to database');
+    }
+  }, [data, title]);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <BookMarked className="w-5 h-5" />
-                Study Guide Generator
-              </CardTitle>
-              <CardDescription>
-                Create a comprehensive, hierarchically-organized study guide from your thesis. Perfect for review and exam preparation.
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Guide Title */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Study Guide Title</label>
-            <input
-              type="text"
-              placeholder="e.g., Complete Study Guide: Social Media Impact on Student Performance"
-              className="w-full px-3 py-2 border rounded-md border-input bg-background"
-              value={guideTitle}
-              onChange={(e) => setGuideTitle(e.target.value)}
-              disabled={isLoading}
+    <div className="space-y-6">
+      <div className="rounded-lg border bg-card p-6">
+        <h2 className="mb-4 text-2xl font-bold">Study Guide Generator</h2>
+        <p className="mb-6 text-muted-foreground">
+          Create comprehensive, hierarchical study guides with executive summary, sections, key terms, study tips, and citations.
+        </p>
+
+        <div className="space-y-4">
+          <div>
+            <label className="mb-2 block font-medium">Title (Optional)</label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., Advanced Photosynthesis Study Guide"
             />
-            <p className="text-xs text-muted-foreground">
-              Title for your comprehensive study guide
-            </p>
           </div>
 
-          {/* Content Input */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-medium">Thesis Content/Summary</label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addSampleData}
-              >
-                Add Sample
-              </Button>
-            </div>
+          <div>
+            <label className="mb-2 block font-medium">Thesis Content</label>
             <Textarea
-              placeholder="Paste your complete thesis content, chapter summaries, or detailed research notes. More detailed content produces better study guides."
-              className="min-h-[350px] resize-none"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              disabled={isLoading}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Paste your thesis content here..."
+              rows={6}
             />
-            <p className="text-xs text-muted-foreground">
-              {inputText.split(/\s+/).filter(Boolean).length} words
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              onClick={generateStudyGuide}
+              disabled={loading || !session}
+              className="flex-1"
+            >
+              {loading ? (
+                <>
+                  <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                'Generate Study Guide'
+              )}
+            </Button>
+            <Button onClick={loadSampleData} variant="outline">
+              Load Sample
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {data && (
+        <div className="rounded-lg border bg-card p-6">
+          <div className="mb-6">
+            <h1 className="mb-2 text-3xl font-bold">{data.title}</h1>
+            <p className="text-sm text-muted-foreground">
+              Estimated reading time: {data.estimatedReadingTime} minutes
             </p>
           </div>
 
-          {/* Generate Button */}
-          <Button
-            onClick={handleGenerateGuide}
-            disabled={isLoading || !inputText.trim() || !guideTitle.trim()}
-            size="lg"
-            className="w-full gap-2"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Generating Study Guide...
-              </>
-            ) : (
-              <>
-                <BookMarked className="w-4 h-4" />
-                Generate Study Guide
-              </>
-            )}
-          </Button>
+          <div className="mb-6 rounded bg-blue-50 p-4 dark:bg-blue-900">
+            <h3 className="mb-3 font-semibold">Executive Summary</h3>
+            <p className="text-sm">{data.executiveSummary}</p>
+          </div>
 
-          {isLoading && (
-            <Alert className="bg-blue-50 dark:bg-blue-950 border-blue-200">
-              <Info className="h-4 w-4" />
-              <AlertDescription className="text-blue-700 dark:text-blue-300">
-                Creating comprehensive study guide with AI... This usually takes 10-20 seconds.
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* Tips */}
-          {!generatedGuide && !isLoading && (
-            <Alert className="bg-green-50 dark:bg-green-950 border-green-200">
-              <Info className="h-4 w-4 text-green-700 dark:text-green-300" />
-              <AlertDescription className="text-green-800 dark:text-green-200">
-                <strong>Tips:</strong> Provide comprehensive thesis content (1000+ words) for the best results. The guide will include sections, key terms, review questions, and study strategies.
-              </AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Generated Guide Display */}
-      {generatedGuide && (
-        <>
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle>{generatedGuide.title}</CardTitle>
-                  <CardDescription>
-                    {generatedGuide.metadata.sectionCount} sections • ~{generatedGuide.metadata.estimatedReadTime} min read
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Action Buttons */}
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  onClick={handleSaveGuide}
-                  disabled={isSaving}
-                  className="gap-2"
-                >
-                  {isSaving ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <FilePlus2 className="w-4 h-4" />
-                  )}
-                  Save as Document
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleCopyGuide}
-                  className="gap-2"
-                >
-                  <Copy className="w-4 h-4" />
-                  Copy All
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleExportJSON}
-                  className="gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  Export JSON
-                </Button>
-              </div>
-
-              {/* Executive Summary */}
-              <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-                <h3 className="text-lg font-semibold mb-2">Executive Summary</h3>
-                <p className="text-sm leading-relaxed">{generatedGuide.executive_summary}</p>
-              </div>
-
-              {/* Main Sections */}
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold">Main Topics</h3>
-                {generatedGuide.sections.map((section, index) => (
-                  <div key={index} className="border rounded-lg p-4">
-                    <h4 className="text-base font-semibold mb-2">
-                      {index + 1}. {section.title}
-                    </h4>
-                    <p className="text-sm text-foreground/80 mb-4">{section.content}</p>
-
-                    <div className="grid md:grid-cols-2 gap-4">
+          <div className="mb-6">
+            <h3 className="mb-3 text-xl font-bold">Content Sections</h3>
+            <div className="space-y-2">
+              {data.sections.map((section, idx) => (
+                <div key={idx} className="rounded border">
+                  <button
+                    onClick={() => toggleSection(idx)}
+                    className="flex w-full items-center justify-between bg-slate-100 p-4 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
+                  >
+                    <h4 className="font-semibold">{section.heading}</h4>
+                    {expandedSections.has(idx) ? (
+                      <ChevronUp className="h-5 w-5" />
+                    ) : (
+                      <ChevronDown className="h-5 w-5" />
+                    )}
+                  </button>
+                  {expandedSections.has(idx) && (
+                    <div className="space-y-4 p-4">
                       <div>
-                        <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
-                          Key Points
-                        </p>
+                        <p className="text-sm">{section.content}</p>
+                      </div>
+                      <div>
+                        <h5 className="mb-2 font-medium">Key Points:</h5>
                         <ul className="space-y-1">
-                          {section.keyPoints.map((point, i) => (
-                            <li key={i} className="text-sm flex gap-2">
-                              <span className="text-muted-foreground">•</span>
-                              <span>{point}</span>
+                          {section.keyPoints.map((kp, kIdx) => (
+                            <li key={kIdx} className="text-sm">
+                              • {kp}
                             </li>
                           ))}
                         </ul>
                       </div>
-
                       <div>
-                        <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
-                          Review Questions
-                        </p>
-                        <ol className="space-y-1">
-                          {section.reviewQuestions.map((q, i) => (
-                            <li key={i} className="text-sm flex gap-2">
-                              <span className="text-muted-foreground">{i + 1}.</span>
-                              <span>{q}</span>
+                        <h5 className="mb-2 font-medium">Review Questions:</h5>
+                        <ul className="space-y-1">
+                          {section.reviewQuestions.map((q, qIdx) => (
+                            <li key={qIdx} className="text-sm">
+                              ◦ {q}
                             </li>
                           ))}
-                        </ol>
+                        </ul>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Key Terms */}
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold">Key Terms & Definitions</h3>
-                <div className="grid gap-3">
-                  {generatedGuide.key_terms.map((kt, index) => (
-                    <div key={index} className="border-l-2 border-muted pl-4 py-2">
-                      <p className="font-medium text-sm">{kt.term}</p>
-                      <p className="text-sm text-foreground/80">{kt.definition}</p>
-                    </div>
-                  ))}
+                  )}
                 </div>
-              </div>
+              ))}
+            </div>
+          </div>
 
-              {/* Study Tips */}
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold">Study Tips & Strategies</h3>
-                <ol className="space-y-2">
-                  {generatedGuide.study_tips.map((tip, index) => (
-                    <li key={index} className="text-sm flex gap-3">
-                      <span className="font-semibold text-primary">{index + 1}.</span>
-                      <span>{tip}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
+          <div className="mb-6">
+            <h3 className="mb-3 text-xl font-bold">Key Terms ({data.keyTerms.length})</h3>
+            <div className="grid gap-3 md:grid-cols-2">
+              {data.keyTerms.map((term, idx) => (
+                <div key={idx} className="rounded border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900">
+                  <p className="font-semibold">{term.term}</p>
+                  <p className="text-sm text-muted-foreground">{term.definition}</p>
+                </div>
+              ))}
+            </div>
+          </div>
 
-              {/* Important Citations */}
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold">Important Citations</h3>
-                <ul className="space-y-2">
-                  {generatedGuide.important_citations.map((cite, index) => (
-                    <li key={index} className="text-sm text-foreground/80 flex gap-2">
-                      <span className="text-muted-foreground">•</span>
-                      <span>{cite}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          <div className="mb-6">
+            <h3 className="mb-3 text-xl font-bold">Study Tips</h3>
+            <ul className="space-y-2">
+              {data.studyTips.map((tip, idx) => (
+                <li key={idx} className="flex gap-3 text-sm">
+                  <span className="text-blue-600">✓</span>
+                  {tip}
+                </li>
+              ))}
+            </ul>
+          </div>
 
-              {/* Footer Info */}
-              <div className="pt-4 border-t text-xs text-muted-foreground">
-                <p>Generated: {new Date(generatedGuide.metadata.generatedAt).toLocaleString()}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </>
+          <div className="mb-6">
+            <h3 className="mb-3 text-xl font-bold">Citations</h3>
+            <ul className="space-y-2">
+              {data.citationsList.map((citation, idx) => (
+                <li key={idx} className="text-sm">
+                  {citation}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={exportJSON} variant="outline">
+              Export JSON
+            </Button>
+            <Button onClick={exportHTML} variant="outline">
+              Export HTML
+            </Button>
+            <Button onClick={copyToClipboard} variant="outline">
+              Copy to Clipboard
+            </Button>
+            <Button onClick={saveToDatabase} variant="outline">
+              Save to Library
+            </Button>
+          </div>
+
+          {useSampleData && (
+            <div className="mt-4 rounded bg-blue-50 p-3 text-sm text-blue-700 dark:bg-blue-900 dark:text-blue-100">
+              This is sample data for demonstration. Generate with real content for actual use.
+            </div>
+          )}
+        </div>
+      )}
+
+      {!session && (
+        <div className="rounded bg-yellow-50 p-4 text-sm text-yellow-700 dark:bg-yellow-900 dark:text-yellow-100">
+          Please sign in to generate study guides for your thesis content.
+        </div>
       )}
     </div>
   );
