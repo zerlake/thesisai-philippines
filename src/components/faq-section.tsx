@@ -1,7 +1,10 @@
+"use client";
+
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { BookOpenCheck, ShieldCheck, Users, Coins, GraduationCap, BrainCircuit, Settings2, MessageSquareMore, BarChart3, Search, HelpCircle } from "lucide-react";
+import { BookOpenCheck, ShieldCheck, Users, Coins, GraduationCap, BrainCircuit, Settings2, MessageSquareMore, BarChart3, Search, HelpCircle, X } from "lucide-react";
 import { Button } from "./ui/button";
+import { useState, useMemo } from "react";
 
 const faqCategories = [
   {
@@ -209,6 +212,33 @@ const faqCategories = [
 ];
 
 export function FaqSection() {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Filter FAQ categories and items based on search term
+  const filteredCategories = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return faqCategories;
+    }
+
+    const lowerSearch = searchTerm.toLowerCase();
+
+    return faqCategories
+      .map((category) => ({
+        ...category,
+        items: category.items.filter(
+          (item) =>
+            item.question.toLowerCase().includes(lowerSearch) ||
+            item.answer.toLowerCase().includes(lowerSearch)
+        ),
+      }))
+      .filter((category) => category.items.length > 0);
+  }, [searchTerm]);
+
+  const totalResults = filteredCategories.reduce(
+    (acc, cat) => acc + cat.items.length,
+    0
+  );
+
   return (
     <section className="py-16 md:py-24 bg-gradient-to-b from-slate-800 to-slate-900">
       <div className="container mx-auto max-w-5xl px-4">
@@ -228,21 +258,53 @@ export function FaqSection() {
           </p>
         </div>
 
-        {/* Quick Search Input */}
+        {/* Quick Search Input - Enhanced */}
         <div className="mb-12 max-w-2xl mx-auto">
-          <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50 flex items-center gap-3">
-            <Search className="w-5 h-5 text-accent-cyan ml-2" />
-            <input
-              type="text"
-              placeholder="Search questions..."
-              className="flex-1 bg-transparent text-white placeholder-text-tertiary outline-none text-sm px-2 py-2"
-            />
+          <div className="relative">
+            <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:border-slate-600/50 flex items-center gap-3 transition-colors focus-within:border-blue-500/50">
+              <Search className="w-5 h-5 text-accent-cyan ml-2 flex-shrink-0" />
+              <input
+                type="text"
+                placeholder="Search questions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="flex-1 bg-transparent text-white placeholder-slate-400 outline-none text-sm px-2 py-2"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="p-1 hover:bg-slate-700/50 rounded-md transition-colors flex-shrink-0"
+                  aria-label="Clear search"
+                >
+                  <X className="w-4 h-4 text-slate-400 hover:text-slate-200" />
+                </button>
+              )}
+            </div>
           </div>
+
+          {/* Search Results Info */}
+          {searchTerm && (
+            <div className="mt-3 text-sm text-slate-400 text-center">
+              {totalResults > 0 ? (
+                <span>
+                  Found <span className="text-blue-300 font-semibold">{totalResults}</span> result
+                  {totalResults !== 1 ? "s" : ""} in{" "}
+                  <span className="text-blue-300 font-semibold">{filteredCategories.length}</span>{" "}
+                  categor{filteredCategories.length !== 1 ? "ies" : "y"}
+                </span>
+              ) : (
+                <span>
+                  No results found for <span className="text-slate-300">"{searchTerm}"</span>
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* FAQ Categories */}
+        {/* FAQ Categories - Uses filtered results */}
         <div className="space-y-6">
-          {faqCategories.map((category) => (
+          {filteredCategories.length > 0 ? (
+            filteredCategories.map((category) => (
             <Card key={category.title} className="bg-slate-800/50 border border-slate-700/50 hover:border-slate-600/50 transition-colors overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 border-b border-slate-700/50 py-5">
                 <div className="flex items-center gap-4">
@@ -280,7 +342,24 @@ export function FaqSection() {
                 </Accordion>
               </CardContent>
             </Card>
-          ))}
+            ))
+          ) : (
+            <div className="text-center py-12">
+              <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-slate-700/30 mb-4">
+                <Search className="h-8 w-8 text-slate-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-300 mb-2">No results found</h3>
+              <p className="text-slate-400 mb-6">
+                We couldn't find any FAQs matching <span className="text-slate-300">"{searchTerm}"</span>
+              </p>
+              <button
+                onClick={() => setSearchTerm("")}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 hover:text-white transition-colors"
+              >
+                Clear search
+              </button>
+            </div>
+          )}
         </div>
 
         {/* CTA Section */}

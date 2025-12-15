@@ -14,134 +14,182 @@ import {
   FileCheck,
   Share2,
   BookOpen,
-  ChevronDown,
-  ArrowRight
+  ArrowRight,
+  Star
 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { Button } from "@/components/ui/button";
 
-const featureCategories = [
+// Flat feature list for grid layout
+const allFeatures = [
   {
-    id: "conceptualize",
+    id: "conceptualize-1",
     phase: "01. Conceptualize",
-    title: "Research Planning",
-    description: "Define your research focus and identify your research gap",
-    color: "from-blue-500 to-blue-600",
     icon: <Target className="h-8 w-8" />,
-    features: [
-      {
-        icon: <Target className="h-6 w-6" />,
-        title: "Research Conceptualization Tools",
-        description: "Variable Mapping Tool and Research Problem Identifier with Philippine-specific data",
-      },
-      {
-        icon: <Lightbulb className="h-6 w-6" />,
-        title: "AI Idea Generation",
-        description: "Generate research questions, topic ideas, and chapter outlines tailored to your field",
-      },
-      {
-        icon: <Lightbulb className="h-6 w-6" />,
-        title: "Research Workflow Management",
-        description: "Track tasks, deadlines, and progress with comprehensive workflow tools",
-      },
-    ]
+    color: "from-blue-500 to-blue-600",
+    title: "Research Conceptualization Tools",
+    description: "Variable Mapping Tool and Research Problem Identifier with Philippine-specific data",
+    badge: "Pro",
+    link: "/thesis-phases/conceptualize",
   },
   {
-    id: "research",
+    id: "conceptualize-2",
+    phase: "01. Conceptualize",
+    icon: <Lightbulb className="h-8 w-8" />,
+    color: "from-blue-500 to-blue-600",
+    title: "AI Idea Generation",
+    description: "Generate research questions, topic ideas, and chapter outlines tailored to your field",
+    badge: "AI",
+    link: "/thesis-phases/conceptualize",
+  },
+  {
+    id: "conceptualize-3",
+    phase: "01. Conceptualize",
+    icon: <Lightbulb className="h-8 w-8" />,
+    color: "from-blue-500 to-blue-600",
+    title: "Research Workflow Management",
+    description: "Track tasks, deadlines, and progress with comprehensive workflow tools",
+    badge: "Pro",
+    link: "/thesis-phases/conceptualize",
+  },
+  {
+    id: "research-1",
     phase: "02. Research",
-    title: "Literature & Analysis",
-    description: "Analyze sources and conduct your research with AI assistance",
-    color: "from-purple-500 to-purple-600",
     icon: <BookOpen className="h-8 w-8" />,
-    features: [
-      {
-        icon: <BookOpen className="h-6 w-6" />,
-        title: "Research Article Analyzer",
-        description: "Extract methodology, findings, conclusions with annotation tools and literature matrices",
-      },
-      {
-        icon: <Network className="h-6 w-6" />,
-        title: "Collaborative Literature Review",
-        description: "Annotate, tag, and analyze literature together with real-time collaboration",
-      },
-      {
-        icon: <FileText className="h-6 w-6" />,
-        title: "Privacy-Preserving PDF Analysis",
-        description: "Analyze PDFs directly in your browser—no server uploads, complete privacy",
-      },
-      {
-        icon: <FlaskConical className="h-6 w-6" />,
-        title: "Methodology & Data Tools",
-        description: "Design studies with interactive advisors, run statistical tests, generate charts",
-      },
-    ]
+    color: "from-purple-500 to-purple-600",
+    title: "Research Article Analyzer",
+    description: "Extract methodology, findings, conclusions with annotation tools and literature matrices",
+    badge: "Advanced",
+    link: "/thesis-phases/research",
   },
   {
-    id: "write",
+    id: "research-2",
+    phase: "02. Research",
+    icon: <Network className="h-8 w-8" />,
+    color: "from-purple-500 to-purple-600",
+    title: "Collaborative Literature Review",
+    description: "Annotate, tag, and analyze literature together with real-time collaboration",
+    badge: "Team",
+    link: "/thesis-phases/research",
+  },
+  {
+    id: "research-3",
+    phase: "02. Research",
+    icon: <FileText className="h-8 w-8" />,
+    color: "from-purple-500 to-purple-600",
+    title: "Privacy-Preserving PDF Analysis",
+    description: "Analyze PDFs directly in your browser—no server uploads, complete privacy",
+    badge: "Secure",
+    link: "/thesis-phases/research",
+  },
+  {
+    id: "research-4",
+    phase: "02. Research",
+    icon: <FlaskConical className="h-8 w-8" />,
+    color: "from-purple-500 to-purple-600",
+    title: "Methodology & Data Tools",
+    description: "Design studies with interactive advisors, run statistical tests, generate charts",
+    badge: "Advanced",
+    link: "/thesis-phases/research",
+  },
+  {
+    id: "write-1",
     phase: "03. Write & Refine",
-    title: "Content Creation",
-    description: "Draft and improve your thesis with AI-powered writing tools",
-    color: "from-emerald-500 to-emerald-600",
     icon: <Bot className="h-8 w-8" />,
-    features: [
-      {
-        icon: <Bot className="h-6 w-6" />,
-        title: "AI Writing & Research Suite",
-        description: "From topic ideas to conclusions, leverage AI at every step of your research process",
-      },
-      {
-        icon: <BookCopy className="h-6 w-6" />,
-        title: "Citation & Originality Hub",
-        description: "Generate citations, manage bibliography, and ensure academic integrity",
-      },
-      {
-        icon: <FileText className="h-6 w-6" />,
-        title: "Intelligent Synthesis & Paraphrasing",
-        description: "Synthesize sources, rewrite for clarity, and maintain academic tone",
-      },
-    ]
+    color: "from-emerald-500 to-emerald-600",
+    title: "AI Writing & Research Suite",
+    description: "From topic ideas to conclusions, leverage AI at every step of your research process",
+    badge: "AI",
+    link: "/thesis-phases/write",
   },
   {
-    id: "submit",
+    id: "write-2",
+    phase: "03. Write & Refine",
+    icon: <BookCopy className="h-8 w-8" />,
+    color: "from-emerald-500 to-emerald-600",
+    title: "Citation & Originality Hub",
+    description: "Generate citations, manage bibliography, and ensure academic integrity",
+    badge: "Essential",
+    link: "/thesis-phases/write",
+  },
+  {
+    id: "write-3",
+    phase: "03. Write & Refine",
+    icon: <FileText className="h-8 w-8" />,
+    color: "from-emerald-500 to-emerald-600",
+    title: "Intelligent Synthesis & Paraphrasing",
+    description: "Synthesize sources, rewrite for clarity, and maintain academic tone",
+    badge: "AI",
+    link: "/thesis-phases/write",
+  },
+  {
+    id: "submit-1",
     phase: "04. Submit & Present",
-    title: "Finalization & Defense",
-    description: "Polish, submit, and prepare for your defense",
+    icon: <University className="h-8 w-8" />,
     color: "from-orange-500 to-orange-600",
+    title: "University-Specific Formatting",
+    description: "Access formatting guides for major Philippine universities",
+    badge: "Essential",
+    link: "/thesis-phases/submit",
+  },
+  {
+    id: "submit-2",
+    phase: "04. Submit & Present",
+    icon: <FileCheck className="h-8 w-8" />,
+    color: "from-orange-500 to-orange-600",
+    title: "Format Compliance Checker",
+    description: "Automated checks against your university's specific requirements",
+    badge: "Pro",
+    link: "/thesis-phases/submit",
+  },
+  {
+    id: "submit-3",
+    phase: "04. Submit & Present",
+    icon: <Share2 className="h-8 w-8" />,
+    color: "from-orange-500 to-orange-600",
+    title: "Advisor & Critic Collaboration",
+    description: "Submit drafts for advisor feedback and manuscript critic certification",
+    badge: "Team",
+    link: "/thesis-phases/submit",
+  },
+  {
+    id: "submit-4",
+    phase: "04. Submit & Present",
+    icon: <Users className="h-8 w-8" />,
+    color: "from-orange-500 to-orange-600",
+    title: "Research Team Collaboration",
+    description: "Shared workspaces, task assignments, progress tracking for group projects",
+    badge: "Team",
+    link: "/thesis-phases/submit",
+  },
+  {
+    id: "submit-5",
+    phase: "04. Submit & Present",
     icon: <Presentation className="h-8 w-8" />,
-    features: [
-      {
-        icon: <University className="h-6 w-6" />,
-        title: "University-Specific Formatting",
-        description: "Access formatting guides for major Philippine universities",
-      },
-      {
-        icon: <FileCheck className="h-6 w-6" />,
-        title: "Format Compliance Checker",
-        description: "Automated checks against your university's specific requirements",
-      },
-      {
-        icon: <Share2 className="h-6 w-6" />,
-        title: "Advisor & Critic Collaboration",
-        description: "Submit drafts for advisor feedback and manuscript critic certification",
-      },
-      {
-        icon: <Users className="h-6 w-6" />,
-        title: "Research Team Collaboration",
-        description: "Shared workspaces, task assignments, progress tracking for group projects",
-      },
-      {
-        icon: <Presentation className="h-6 w-6" />,
-        title: "Defense Preparation Suite",
-        description: "Generate slides, practice with AI Q&A simulator, study with flashcards",
-      },
-    ]
+    color: "from-orange-500 to-orange-600",
+    title: "Defense Preparation Suite",
+    description: "Generate slides, practice with AI Q&A simulator, study with flashcards",
+    badge: "Advanced",
+    link: "/thesis-phases/submit",
   },
 ];
 
+// Get badge color based on badge type
+const getBadgeColor = (badge: string) => {
+  switch(badge) {
+    case "AI": return "bg-blue-500/20 text-blue-300 border border-blue-500/30";
+    case "Pro": return "bg-purple-500/20 text-purple-300 border border-purple-500/30";
+    case "Advanced": return "bg-pink-500/20 text-pink-300 border border-pink-500/30";
+    case "Team": return "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+    case "Secure": return "bg-green-500/20 text-green-300 border border-green-500/30";
+    case "Essential": return "bg-orange-500/20 text-orange-300 border border-orange-500/30";
+    default: return "bg-slate-500/20 text-slate-300 border border-slate-500/30";
+  }
+};
+
 export function FeaturesSection() {
-  const [expandedCategory, setExpandedCategory] = useState("conceptualize");
   const prefersReducedMotion = useReducedMotion();
 
   // Haptic feedback helper
@@ -163,88 +211,65 @@ export function FeaturesSection() {
           </p>
         </div>
 
-        {/* Phase-based Feature Accordion */}
-        <div className="grid gap-4 max-w-4xl mx-auto">
-          {featureCategories.map((category) => (
-            <div
-              key={category.id}
-              className="group border border-slate-700/50 rounded-xl overflow-hidden motion-safe:transition-colors"
+        {/* Modern Grid Layout - Feature Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12 opacity-0 animate-[fade-in_0.5s_ease-out_0.4s_forwards]">
+          {allFeatures.map((feature, idx) => (
+            <Link 
+              key={feature.id}
+              href={feature.link}
+              onMouseEnter={triggerHaptic}
             >
-              {/* Category Header - Always Visible */}
-              <button
-                onClick={() => {
-                  triggerHaptic();
-                  setExpandedCategory(expandedCategory === category.id ? "" : category.id);
-                }}
-                className={`w-full px-8 py-5 flex items-center justify-between transition-all ${
-                  expandedCategory === category.id
-                    ? `bg-gradient-to-r ${category.color} bg-opacity-10 border-b border-slate-700/50`
-                    : "bg-slate-800/50 hover:bg-slate-800/70"
-                } motion-safe:transition-transform`}
-              >
-                <div className="flex items-center gap-4 text-left">
-                  <div className={`flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br ${category.color} bg-opacity-20`}>
-                    <div className="text-white text-lg">{category.icon}</div>
-                  </div>
-                  <div>
-                    <p className={`text-xs font-semibold uppercase tracking-wider ${
-                      expandedCategory === category.id ? "text-blue-300" : "text-slate-400"
-                    }`}>
-                      {category.phase}
-                    </p>
-                    <h3 className="text-xl font-bold text-white">{category.title}</h3>
-                  </div>
-                </div>
-                <div className={`transform transition-transform ${expandedCategory === category.id ? 'rotate-180' : ''}`}>
-                  <ChevronDown className="w-5 h-5 text-slate-400" />
-                </div>
-              </button>
+              <div className="group relative h-full p-6 rounded-xl border border-slate-700/50 bg-slate-800/50 hover:border-slate-600/50 hover:shadow-xl hover:shadow-purple-500/10 transition-all cursor-pointer overflow-hidden">
+                {/* Gradient overlay on hover */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-              {/* Expandable Features List */}
-              {expandedCategory === category.id && (
-                <div className="px-8 py-6 bg-slate-900/50 space-y-4 border-t border-slate-700/50 overflow-hidden">
-                  <p className="text-base text-slate-300 mb-6 font-medium leading-relaxed opacity-0 animate-[fade-in_0.5s_ease-out_0.1s_forwards]">
-                    {category.description}
-                  </p>
-                  <div className="space-y-4">
-                    {category.features.map((feature, idx) => (
-                      <div
-                        key={feature.title}
-                        className="flex gap-4 p-5 rounded-lg bg-slate-800/50 border border-slate-700/30 group/item motion-safe:transition-transform"
-                        onMouseEnter={triggerHaptic}
-                      >
-                        <div className={`flex h-12 w-12 items-center justify-center rounded-lg flex-shrink-0 bg-gradient-to-br ${category.color} bg-opacity-20 group-hover/item:bg-opacity-40 transition-colors`}>
-                          <div className="text-blue-300">{feature.icon}</div>
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-white text-base mb-2 group-hover/item:text-blue-300 transition-colors">
-                            {feature.title}
-                          </h4>
-                          <p className="text-sm text-slate-400 leading-relaxed">
-                            {feature.description}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* Explore Phase Button */}
-                  <div className="mt-8 pt-6 border-t border-slate-700/30 flex justify-center">
-                    <Link href={`/thesis-phases/${category.id}`}>
-                      <Button className="gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">
-                        Explore {category.title} Phase
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    </Link>
+                {/* Premium Badge */}
+                <div className="absolute top-4 right-4 inline-flex items-center gap-1">
+                  <div className={`px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${getBadgeColor(feature.badge)}`}>
+                    {feature.badge === "AI" && <span>⚡</span>}
+                    {feature.badge === "Pro" && <Star className="w-3 h-3" />}
+                    {feature.badge === "Advanced" && <span>🎯</span>}
+                    {feature.badge === "Team" && <Users className="w-3 h-3" />}
+                    {feature.badge === "Secure" && <span>🔒</span>}
+                    {feature.badge === "Essential" && <span>✓</span>}
+                    {feature.badge}
                   </div>
                 </div>
-              )}
-            </div>
+
+                <div className="relative">
+                  {/* Icon Background */}
+                  <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br ${feature.color} bg-opacity-20 group-hover:bg-opacity-40 transition-colors`}>
+                    <div className="text-white">{feature.icon}</div>
+                  </div>
+
+                  {/* Phase Label */}
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 group-hover:text-blue-300 transition-colors mb-2">
+                    {feature.phase}
+                  </p>
+
+                  {/* Title */}
+                  <h3 className="text-lg font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-500 transition-all mb-2">
+                    {feature.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-sm text-slate-400 leading-relaxed">
+                    {feature.description}
+                  </p>
+
+                  {/* Arrow on hover */}
+                  <div className="mt-4 pt-4 border-t border-slate-700/50 flex items-center gap-2 text-sm text-slate-300 group-hover:text-blue-300 transition-colors">
+                    <span>Learn more</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </div>
+            </Link>
           ))}
         </div>
 
-        {/* Quick Stats */}
-        <div className="mt-16 p-8 md:p-12 rounded-xl bg-gradient-to-r from-blue-500/5 to-purple-600/5 border border-blue-500/10 opacity-0 animate-[fade-in_0.5s_ease-out_0.8s_forwards]">
+        {/* Quick Stats Section - Enhanced */}
+        <div className="mt-16 p-8 md:p-12 rounded-xl bg-gradient-to-r from-blue-500/10 to-purple-600/10 border border-blue-500/20 backdrop-blur-sm opacity-0 animate-[fade-in_0.5s_ease-out_0.8s_forwards]">
           <p className="text-center text-base text-slate-300 mb-8 font-medium">
             Trusted by researchers and institutions
           </p>
@@ -254,20 +279,24 @@ export function FeaturesSection() {
               { label: "100%", desc: "Privacy Protected" },
               { label: "99.9%", desc: "Platform Uptime" }
             ].map((item, idx) => (
-              <div key={idx} className="text-center">
-                <p className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-electric-purple to-accent-cyan">
+              <div 
+                key={idx} 
+                className="text-center group cursor-default"
+                style={{ animationDelay: `${800 + idx * 100}ms` }}
+              >
+                <p className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 group-hover:from-blue-300 group-hover:to-cyan-400 transition-all">
                   {item.label}
                 </p>
-                <p className="text-base text-slate-300 mt-3">{item.desc}</p>
+                <p className="text-base text-slate-300 mt-3 group-hover:text-slate-200 transition-colors">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Tooltip for First-time Users */}
+        {/* Feature Cards Summary CTA */}
         <div className="mt-12 text-center opacity-0 animate-[fade-in_0.5s_ease-out_1s_forwards]">
           <p className="text-sm text-slate-400 flex items-center justify-center gap-2">
-            💡 Click any phase above to explore features for that stage
+            💡 Click any card above to learn more about that feature
           </p>
         </div>
       </div>

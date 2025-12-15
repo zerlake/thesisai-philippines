@@ -1,58 +1,275 @@
-
-> next-template@0.1.0 build C:\Users\Projects\thesis-ai
+﻿
+> next-template@0.1.0 build C:\Users\Projects\thesis-ai-fresh
 > next build
 
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-   ▲ Next.js 16.0.5 (Turbopack)
-   - Environments: .env.local, .env
+node.exe : [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline 
+data, please update: `npm i baseline-browser-mapping@latest -D`
+At C:\nvm4w\nodejs\pnpm.ps1:16 char:5
++     & "$basedir/node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.cjs"  ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([baseline-brows...ping@latest -D`:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   Γû▓ Next.js 16.0.5 (Turbopack)
+   - Environments: .env.local
    - Experiments (use with caution):
-     · clientTraceMetadata
-     ✓ optimizeCss
-     · optimizePackageImports
+     ┬╖ clientTraceMetadata
+     Γ£ô optimizeCss
+     ┬╖ optimizePackageImports
 
- ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+ ΓÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: 
+https://nextjs.org/docs/messages/middleware-to-proxy
    Creating an optimized production build ...
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please 
+update: `npm i baseline-browser-mapping@latest -D`
 Turbopack build encountered 3 warnings:
-./node_modules/.pnpm/@opentelemetry+instrumentat_6afa3aa63a1ee1e91372360a2d45582d/node_modules/@opentelemetry/instrumentation/build/esm/platform/node
+./node_modules/.pnpm/@opentelemetry+instrumentat_6afa3aa63a1ee1e91372360a2d45582d/node_modules/@opentelemetry/instrume
+ntation/build/esm/platform/node
 Package import-in-the-middle can't be external
 The request import-in-the-middle matches serverExternalPackages (or the default list).
 The request could not be resolved by Node.js from the project directory.
-Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.
+Packages that should be external need to be installed in the project directory, so they can be resolved from the 
+output files.
 Try to install it into the project directory by running npm install import-in-the-middle from the project directory.
 
 
-./node_modules/.pnpm/@sentry+node-core@10.27.0_@_62248f89c2d022bbab885c4a52bb757f/node_modules/@sentry/node-core/build/cjs/sdk
+./node_modules/.pnpm/@sentry+node-core@10.27.0_@_62248f89c2d022bbab885c4a52bb757f/node_modules/@sentry/node-core/build
+/cjs/sdk
 Package import-in-the-middle can't be external
 The request import-in-the-middle matches serverExternalPackages (or the default list).
 The request could not be resolved by Node.js from the project directory.
-Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.
+Packages that should be external need to be installed in the project directory, so they can be resolved from the 
+output files.
 Try to install it into the project directory by running npm install import-in-the-middle from the project directory.
 
 
-./node_modules/.pnpm/@opentelemetry+instrumentat_6afa3aa63a1ee1e91372360a2d45582d/node_modules/@opentelemetry/instrumentation/build/esm/platform/node
+./node_modules/.pnpm/@opentelemetry+instrumentat_6afa3aa63a1ee1e91372360a2d45582d/node_modules/@opentelemetry/instrume
+ntation/build/esm/platform/node
 Package require-in-the-middle can't be external
 The request require-in-the-middle matches serverExternalPackages (or the default list).
 The request could not be resolved by Node.js from the project directory.
-Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.
+Packages that should be external need to be installed in the project directory, so they can be resolved from the 
+output files.
 Try to install it into the project directory by running npm install require-in-the-middle from the project directory.
 
 
- ✓ Compiled successfully in 52s
+ Γ£ô Compiled successfully in 2.5min
    Running next.config.js provided runAfterProductionCompile ...
- ✓ Completed runAfterProductionCompile in 1324ms
+ Γ£ô Completed runAfterProductionCompile in 7028ms
    Running TypeScript ...
-Failed to compile.
+   Collecting page data using 3 workers ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please 
+update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please 
+update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please 
+update: `npm i baseline-browser-mapping@latest -D`
+   Generating static pages using 3 workers (0/55) ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please 
+update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please 
+update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please 
+update: `npm i baseline-browser-mapping@latest -D`
+   Generating static pages using 3 workers (13/55) 
+   Generating static pages using 3 workers (27/55) 
+   Generating static pages using 3 workers (41/55) 
+ Γ£ô Generating static pages using 3 workers (55/55) in 3.3s
+   Finalizing page optimization ...
 
-./src/components/ValidityDefender/DefenseResponseGenerator.tsx:171:46
-Type error: 'resp' is possibly 'undefined'.
+Route (app)
+Γöî ╞Æ /
+Γö£ ╞Æ /_not-found
+Γö£ ╞Æ /(app/)/advisor/suggestion-engine
+Γö£ ╞Æ /(app/)/dashboard
+Γö£ ╞Æ /(app/)/test-advisor-notifications
+Γö£ ╞Æ /about
+Γö£ ╞Æ /admin
+Γö£ ╞Æ /admin/institutions
+Γö£ ╞Æ /admin/mcp-servers
+Γö£ ╞Æ /admin/payouts
+Γö£ ╞Æ /admin/puter-auth
+Γö£ ╞Æ /admin/testimonials
+Γö£ ╞Æ /admin/users
+Γö£ ╞Æ /admin/wiki
+Γö£ ╞Æ /advisor
+Γö£ ╞Æ /advisor-guide
+Γö£ ╞Æ /advisor/competency
+Γö£ ╞Æ /advisor/sample-data
+Γö£ ╞Æ /advisor/students/[studentId]
+Γö£ ╞Æ /ai-tools
+Γö£ ╞Æ /analytics
+Γö£ ╞Æ /api/admin/seed-demo-docs
+Γö£ ╞Æ /api/analyze-research-gaps
+Γö£ ╞Æ /api/arxiv-search
+Γö£ ╞Æ /api/auth/demo-login
+Γö£ ╞Æ /api/composio-mcp
+Γö£ ╞Æ /api/dashboard
+Γö£ ╞Æ /api/dashboard/layouts
+Γö£ ╞Æ /api/dashboard/layouts/[id]
+Γö£ ╞Æ /api/dashboard/widgets/[widgetId]
+Γö£ ╞Æ /api/dashboard/widgets/batch
+Γö£ ╞Æ /api/documents/save
+Γö£ ╞Æ /api/documents/submit
+Γö£ ╞Æ /api/documents/versions/checkpoint
+Γö£ ╞Æ /api/documents/versions/list
+Γö£ ╞Æ /api/documents/versions/restore
+Γö£ ╞Æ /api/instruments/defense-responses
+Γö£ ╞Æ /api/instruments/practice-session
+Γö£ ╞Æ /api/instruments/validate
+Γö£ ╞Æ /api/logs
+Γö£ ╞Æ /api/mcp/serena-connect
+Γö£ ╞Æ /api/mcp/serena-status
+Γö£ ╞Æ /api/mendeley/import
+Γö£ ╞Æ /api/mendeley/search
+Γö£ ╞Æ /api/messages/get
+Γö£ ╞Æ /api/messages/send
+Γö£ ╞Æ /api/metrics
+Γö£ ╞Æ /api/metrics/health
+Γö£ ╞Æ /api/notifications/dashboard-notification
+Γö£ ╞Æ /api/notifications/send-advisor-email
+Γö£ ╞Æ /api/notifications/send-critic-email
+Γö£ ╞Æ /api/notifications/send-email
+Γö£ ╞Æ /api/notifications/send-student-email
+Γö£ ╞Æ /api/notifications/test
+Γö£ ╞Æ /api/openalex-search
+Γö£ ╞Æ /api/papers
+Γö£ ╞Æ /api/papers/search
+Γö£ ╞Æ /api/papers/unlock
+Γö£ ╞Æ /api/paraphrase
+Γö£ ╞Æ /api/personalization/dashboard
+Γö£ ╞Æ /api/personalization/devices
+Γö£ ╞Æ /api/personalization/notifications
+Γö£ ╞Æ /api/personalization/preferences
+Γö£ ╞Æ /api/personalization/preferences/[section]
+Γö£ ╞Æ /api/personalization/sync
+Γö£ ╞Æ /api/pubmed-search
+Γö£ ╞Æ /api/realtime
+Γö£ ╞Æ /api/seed-documents
+Γö£ ╞Æ /api/semantic-scholar-search
+Γö£ ╞Æ /api/sentry-example-api
+Γö£ ╞Æ /api/user/notification-preferences
+Γö£ ╞Æ /api/wiki
+Γö£ ╞Æ /api/wiki/[slug]
+Γö£ ╞Æ /api/wiki/debug
+Γö£ ╞Æ /api/zotero/import
+Γö£ ╞Æ /api/zotero/verify
+Γö£ ╞Æ /apps
+Γö£ ╞Æ /apps/[id]
+Γö£ ╞Æ /bibliography
+Γö£ ╞Æ /blog
+Γö£ ╞Æ /citations
+Γö£ ╞Æ /conclusion
+Γö£ ╞Æ /contact
+Γö£ ╞Æ /context7
+Γö£ ╞Æ /critic
+Γö£ ╞Æ /critic-guide
+Γö£ ╞Æ /critic/billing
+Γö£ ╞Æ /critic/sample-data
+Γö£ ╞Æ /critic/students
+Γö£ ╞Æ /dashboard
+Γö£ ╞Æ /data-management
+Γö£ ╞Æ /defense-ppt-coach
+Γö£ ╞Æ /defense-ppt-coach/samples
+Γö£ ╞Æ /defense-qa-framework-trainer
+Γö£ ╞Æ /document-analyzer
+Γö£ ╞Æ /documentation
+Γö£ ╞Æ /documentation/academic-integrity
+Γö£ ╞Æ /documentation/account-setup
+Γö£ ╞Æ /documentation/citation-manager
+Γö£ ╞Æ /documentation/dashboard-overview
+Γö£ ╞Æ /documentation/essay-editor
+Γö£ ╞Æ /documentation/faq
+Γö£ ╞Æ /documentation/first-steps
+Γö£ ╞Æ /documentation/grammar-checker
+Γö£ ╞Æ /documentation/hero-section
+Γö£ ╞Æ /documentation/introduction
+Γö£ ╞Æ /documentation/navigation
+Γö£ ╞Æ /documentation/paraphraser
+Γö£ ╞Æ /documentation/privacy-policy
+Γö£ ╞Æ /documentation/research-gap-identifier
+Γö£ ╞Æ /documentation/support-center
+Γö£ ╞Æ /documentation/terms-of-service
+Γö£ ╞Æ /documentation/topic-generator
+Γö£ ╞Æ /documentation/university-guides
+Γö£ ╞Æ /drafts
+Γö£ ╞Æ /drafts/[documentId]
+Γö£ ╞Æ /editor/[id]
+Γö£ ╞Æ /email-confirmation
+Γö£ ╞Æ /explore
+Γö£ ╞Æ /faq
+Γö£ ╞Æ /features
+Γö£ ╞Æ /flashcards
+Γö£ ╞Æ /for-advisors
+Γö£ ╞Æ /for-critics
+Γö£ ╞Æ /forgot-password
+Γö£ ╞Æ /general-qa-framework-trainer
+Γö£ ╞Æ /grammar-check
+Γö£ ╞Æ /groups
+Γö£ ╞Æ /groups/[groupId]
+Γö£ ╞Æ /landing/referrals
+Γö£ ╞Æ /literature-review
+Γö£ ╞Æ /login
+Γö£ ╞Æ /mcp-demo
+Γö£ ╞Æ /mcp-demo-debug
+Γö£ ╞Æ /methodology
+Γö£ ╞Æ /originality-check
+Γö£ ╞Æ /outline
+Γö£ ╞Æ /papers
+Γö£ ╞Æ /paraphraser
+Γö£ ╞Æ /presentation
+Γö£ ╞Æ /pricing
+Γö£ ╞Æ /privacy-policy
+Γö£ ╞Æ /proposal-qa-framework-trainer
+Γö£ ╞Æ /qa-simulator
+Γö£ ╞Æ /references
+Γö£ ╞Æ /referrals
+Γö£ ╞Æ /register
+Γö£ ╞Æ /research
+Γö£ ╞Æ /research-article-analyzer
+Γö£ ╞Æ /research-gap
+Γö£ ╞Æ /research-groups
+Γö£ ╞Æ /research-integration
+Γö£ ╞Æ /research-problem-identifier
+Γö£ ╞Æ /reset-password
+Γö£ ╞Æ /resources
+Γö£ ╞Æ /results
+Γö£ ╞Æ /sentry-example-page
+Γö£ ╞Æ /settings
+Γö£ ╞Æ /settings/billing
+Γö£ ╞Æ /settings/referrals
+Γö£ ╞Æ /share/[documentId]
+Γö£ ╞Æ /statistical-analysis
+Γö£ ╞Æ /terms-of-service
+Γö£ ╞Æ /test-sample-data
+Γö£ ╞Æ /thesis-phases
+Γö£ ╞Æ /thesis-phases/[phaseId]
+Γö£ ╞Æ /thesis-phases/chapter-1
+Γö£ ╞Æ /thesis-phases/chapter-1/editor
+Γö£ ╞Æ /thesis-phases/chapter-2
+Γö£ ╞Æ /thesis-phases/chapter-2/editor
+Γö£ ╞Æ /thesis-phases/chapter-3
+Γö£ ╞Æ /thesis-phases/chapter-3/editor
+Γö£ ╞Æ /thesis-phases/chapter-3/validity-defender
+Γö£ ╞Æ /thesis-phases/chapter-4
+Γö£ ╞Æ /thesis-phases/chapter-4/editor
+Γö£ ╞Æ /thesis-phases/chapter-5
+Γö£ ╞Æ /thesis-phases/chapter-5/editor
+Γö£ ╞Æ /title-generator
+Γö£ ╞Æ /title-page
+Γö£ ╞Æ /topic-ideas
+Γö£ ╞Æ /topic-ideas-pro
+Γö£ ╞Æ /topic-ideation
+Γö£ ╞Æ /university-format-checker
+Γö£ ╞Æ /university-guides
+Γö£ ╞Æ /university-guides/[slug]
+Γö£ ╞Æ /user-guide
+Γö£ ╞Æ /variable-mapping-tool
+Γö£ ╞Æ /workflows
+Γöö ╞Æ /workflows/[id]
 
-[0m [90m 169 |[39m                 [33m<[39m[33mdiv[39m className[33m=[39m[32m"flex items-start justify-between gap-4"[39m[33m>[39m
- [90m 170 |[39m                   [33m<[39m[33mdiv[39m className[33m=[39m[32m"flex-1"[39m[33m>[39m
-[31m[1m>[22m[39m[90m 171 |[39m                     [33m<[39m[33mBadge[39m className[33m=[39m[32m"mb-2"[39m[33m>[39m{resp[33m.[39mquestionType}[33m<[39m[33m/[39m[33mBadge[39m[33m>[39m
- [90m     |[39m                                              [31m[1m^[22m[39m
- [90m 172 |[39m                     [33m<[39m[33mCardTitle[39m className[33m=[39m[32m"text-base"[39m[33m>[39m{resp[33m.[39mquestionText}[33m<[39m[33m/[39m[33mCardTitle[39m[33m>[39m
- [90m 173 |[39m                   [33m<[39m[33m/[39m[33mdiv[39m[33m>[39m
- [90m 174 |[39m                   [33m<[39m[33mButton[39m[0m
-Next.js build worker exited with code: 1 and signal: null
- ELIFECYCLE  Command failed with exit code 1.
+
+╞Æ Proxy (Middleware)
+
+╞Æ  (Dynamic)  server-rendered on demand
+

@@ -54,8 +54,8 @@ export function AiToolkitSection() {
               <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-accent-electric-purple/5 to-accent-cyan/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
               <div className="relative">
-                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-accent-electric-purple/20 to-accent-cyan/20 group-hover:from-accent-electric-purple/40 group-hover:to-accent-cyan/40 transition-colors">
-                  <span className="text-accent-cyan group-hover:text-accent-orange transition-colors">
+                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 group-hover:from-blue-500/40 group-hover:to-purple-600/40 transition-colors">
+                  <span className="text-blue-400 group-hover:text-cyan-300 transition-colors">
                     {tool.icon}
                   </span>
                 </div>

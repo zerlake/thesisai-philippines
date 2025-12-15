@@ -31,7 +31,7 @@ export function LandingHeader() {
           <Link
             key={item.href}
             href={item.href}
-            className="px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-md transition-colors"
+            className="px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-md transition-all motion-safe:duration-200"
           >
             {item.label}
           </Link>

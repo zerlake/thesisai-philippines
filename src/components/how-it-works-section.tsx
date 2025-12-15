@@ -54,15 +54,15 @@ export function HowItWorksSection() {
                 <div className="hidden lg:block absolute top-20 left-[60%] w-[200%] h-1 bg-gradient-to-r from-blue-500/30 to-transparent -z-10" />
               )}
 
-              <div className="p-6 md:p-8 rounded-xl bg-slate-900/50 border border-slate-700/50 hover:border-slate-600/50 transition-all h-full flex flex-col">
+              <div className="p-6 md:p-8 rounded-xl bg-slate-900/50 border border-slate-700/50 hover:border-slate-600/50 hover:shadow-xl hover:shadow-purple-500/10 transition-all h-full flex flex-col">
                 {/* Step number and icon */}
                 <div className="flex items-start justify-between mb-6">
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500/20 to-purple-600/20 group-hover:from-blue-500/40 group-hover:to-purple-600/40 transition-colors flex-shrink-0">
-                    <span className="text-blue-400 group-hover:text-blue-300 transition-colors">
+                    <span className="text-blue-400 group-hover:text-cyan-300 transition-colors">
                       {step.icon}
                     </span>
                   </div>
-                  <span className="text-3xl font-bold text-slate-300 group-hover:text-slate-200 transition-colors">
+                  <span className="text-3xl font-bold text-slate-400 group-hover:text-blue-300 transition-colors">
                     {step.step}
                   </span>
                 </div>
