@@ -1,0 +1,178 @@
+
+> next-template@0.1.0 build C:\Users\Projects\thesis-ai-fresh
+> next build
+
+   ▲ Next.js 16.0.5 (Turbopack)
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · clientTraceMetadata
+     ✓ optimizeCss
+     · optimizePackageImports
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 66s
+   Running next.config.js provided runAfterProductionCompile ...
+ ✓ Completed runAfterProductionCompile in 1497ms
+   Running TypeScript ...
+   Collecting page data using 3 workers ...
+   Generating static pages using 3 workers (0/44) ...
+   Generating static pages using 3 workers (11/44) 
+   Generating static pages using 3 workers (22/44) 
+   Generating static pages using 3 workers (33/44) 
+ ✓ Generating static pages using 3 workers (44/44) in 2.4s
+   Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /(app/)/advisor/suggestion-engine
+├ ƒ /(app/)/dashboard
+├ ƒ /(app/)/test-advisor-notifications
+├ ƒ /about
+├ ƒ /admin
+├ ƒ /admin/institutions
+├ ƒ /admin/mcp-servers
+├ ƒ /admin/payouts
+├ ƒ /admin/testimonials
+├ ƒ /admin/users
+├ ƒ /advisor
+├ ƒ /advisor-guide
+├ ƒ /advisor/competency
+├ ƒ /advisor/sample-data
+├ ƒ /advisor/students/[studentId]
+├ ƒ /ai-tools
+├ ƒ /analytics
+├ ƒ /api/admin/seed-demo-docs
+├ ƒ /api/analyze-research-gaps
+├ ƒ /api/arxiv-search
+├ ƒ /api/auth/demo-login
+├ ƒ /api/composio-mcp
+├ ƒ /api/dashboard
+├ ƒ /api/dashboard/layouts
+├ ƒ /api/dashboard/layouts/[id]
+├ ƒ /api/dashboard/widgets/[widgetId]
+├ ƒ /api/dashboard/widgets/batch
+├ ƒ /api/documents/submit
+├ ƒ /api/instruments/defense-responses
+├ ƒ /api/instruments/practice-session
+├ ƒ /api/instruments/validate
+├ ƒ /api/logs
+├ ƒ /api/mcp/serena-connect
+├ ƒ /api/mcp/serena-status
+├ ƒ /api/messages/get
+├ ƒ /api/messages/send
+├ ƒ /api/metrics
+├ ƒ /api/metrics/health
+├ ƒ /api/notifications/dashboard-notification
+├ ƒ /api/notifications/send-advisor-email
+├ ƒ /api/notifications/send-critic-email
+├ ƒ /api/notifications/send-email
+├ ƒ /api/notifications/send-student-email
+├ ƒ /api/notifications/test
+├ ƒ /api/openalex-search
+├ ƒ /api/papers
+├ ƒ /api/papers/search
+├ ƒ /api/paraphrase
+├ ƒ /api/personalization/dashboard
+├ ƒ /api/personalization/devices
+├ ƒ /api/personalization/notifications
+├ ƒ /api/personalization/preferences
+├ ƒ /api/personalization/preferences/[section]
+├ ƒ /api/personalization/sync
+├ ƒ /api/pubmed-search
+├ ƒ /api/realtime
+├ ƒ /api/seed-documents
+├ ƒ /api/semantic-scholar-search
+├ ƒ /api/sentry-example-api
+├ ƒ /api/user/notification-preferences
+├ ƒ /bibliography
+├ ƒ /blog
+├ ƒ /citations
+├ ƒ /conclusion
+├ ƒ /contact
+├ ƒ /context7
+├ ƒ /critic
+├ ƒ /critic-guide
+├ ƒ /critic/billing
+├ ƒ /critic/sample-data
+├ ƒ /critic/students
+├ ƒ /dashboard
+├ ƒ /data-management
+├ ƒ /defense-ppt-coach
+├ ƒ /defense-ppt-coach/samples
+├ ƒ /defense-qa-framework-trainer
+├ ƒ /document-analyzer
+├ ƒ /documentation
+├ ƒ /drafts
+├ ƒ /drafts/[documentId]
+├ ƒ /email-confirmation
+├ ƒ /explore
+├ ƒ /faq
+├ ƒ /features
+├ ƒ /flashcards
+├ ƒ /for-advisors
+├ ƒ /for-critics
+├ ƒ /forgot-password
+├ ƒ /general-qa-framework-trainer
+├ ƒ /grammar-check
+├ ƒ /groups
+├ ƒ /groups/[groupId]
+├ ƒ /landing/referrals
+├ ƒ /literature-review
+├ ƒ /login
+├ ƒ /mcp-demo
+├ ƒ /mcp-demo-debug
+├ ƒ /methodology
+├ ƒ /originality-check
+├ ƒ /outline
+├ ƒ /papers
+├ ƒ /paraphraser
+├ ƒ /presentation
+├ ƒ /pricing
+├ ƒ /privacy-policy
+├ ƒ /proposal-qa-framework-trainer
+├ ƒ /qa-simulator
+├ ƒ /references
+├ ƒ /referrals
+├ ƒ /register
+├ ƒ /research
+├ ƒ /research-article-analyzer
+├ ƒ /research-gap
+├ ƒ /research-groups
+├ ƒ /research-integration
+├ ƒ /research-problem-identifier
+├ ƒ /reset-password
+├ ƒ /resources
+├ ƒ /results
+├ ƒ /sentry-example-page
+├ ƒ /settings
+├ ƒ /settings/billing
+├ ƒ /settings/referrals
+├ ƒ /share/[documentId]
+├ ƒ /statistical-analysis
+├ ƒ /terms-of-service
+├ ƒ /test-sample-data
+├ ƒ /thesis-phases
+├ ƒ /thesis-phases/[phaseId]
+├ ƒ /thesis-phases/chapter-1
+├ ƒ /thesis-phases/chapter-2
+├ ƒ /thesis-phases/chapter-3
+├ ƒ /thesis-phases/chapter-3/validity-defender
+├ ƒ /thesis-phases/chapter-4
+├ ƒ /thesis-phases/chapter-5
+├ ƒ /title-generator
+├ ƒ /title-page
+├ ƒ /topic-ideas
+├ ƒ /topic-ideas-pro
+├ ƒ /topic-ideation
+├ ƒ /university-format-checker
+├ ƒ /university-guides
+├ ƒ /university-guides/[slug]
+├ ƒ /user-guide
+└ ƒ /variable-mapping-tool
+
+
+ƒ Proxy (Middleware)
+
+ƒ  (Dynamic)  server-rendered on demand
+

@@ -1,0 +1,61 @@
+
+> next-template@0.1.0 build
+> next build
+
+   ▲ Next.js 16.0.3 (Turbopack)
+   - Environments: .env.local, .env
+   - Experiments (use with caution):
+     · clientTraceMetadata
+     ✓ optimizeCss
+     · optimizePackageImports
+     ✓ scrollRestoration
+     · staticGenerationRetryCount: 3
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 70s
+   Running next.config.js provided runAfterProductionCompile ...
+ ✓ Completed runAfterProductionCompile in 3029ms
+   Running TypeScript ...
+   Collecting page data using 3 workers ...
+   Generating static pages using 3 workers (0/73) ...
+Failed to build /(app)/admin/institutions/page: /admin/institutions (attempt 1 of 3). Retrying again shortly.
+Failed to build /_not-found/page: /_not-found (attempt 1 of 3). Retrying again shortly.
+Failed to build /_global-error/page: /_global-error (attempt 1 of 3). Retrying again shortly.
+Failed to build /(app)/admin/mcp-servers/page: /admin/mcp-servers (attempt 1 of 3). Retrying again shortly.
+Failed to build /(app)/admin/payouts/page: /admin/payouts (attempt 1 of 3). Retrying again shortly.
+Failed to build /(app)/admin/page: /admin (attempt 1 of 3). Retrying again shortly.
+Failed to build /(app)/admin/testimonials/page: /admin/testimonials (attempt 1 of 3). Retrying again shortly.
+Failed to build /(app)/literature-review/page: /literature-review (attempt 1 of 3). Retrying again shortly.
+Failed to build /(app)/admin/users/page: /admin/users (attempt 1 of 3). Retrying again shortly.
+Failed to build /(app)/methodology/page: /methodology (attempt 1 of 3). Retrying again shortly.
+Failed to build /(app)/originality-check/page: /originality-check (attempt 1 of 3). Retrying again shortly.
+Failed to build /(app)/outline/page: /outline (attempt 1 of 3). Retrying again shortly.
+Failed to build /(app)/paraphraser/page: /paraphraser (attempt 1 of 3). Retrying again shortly.
+Failed to build /(app)/presentation/page: /presentation (attempt 1 of 3). Retrying again shortly.
+Failed to build /(app)/research-article-analyzer/page: /research-article-analyzer (attempt 1 of 3). Retrying again shortly.
+Failed to build /(app)/qa-simulator/page: /qa-simulator (attempt 1 of 3). Retrying again shortly.
+Failed to build /admin/puter-auth/page: /admin/puter-auth (attempt 1 of 3). Retrying again shortly.
+Failed to build /explore/page: /explore (attempt 1 of 3). Retrying again shortly.
+Failed to build /faq/page: /faq (attempt 1 of 3). Retrying again shortly.
+Failed to build /document-analyzer/page: /document-analyzer (attempt 1 of 3). Retrying again shortly.
+Failed to build /(app)/admin/institutions/page: /admin/institutions (attempt 2 of 3). Retrying again shortly.
+Failed to build /(app)/admin/mcp-servers/page: /admin/mcp-servers (attempt 2 of 3). Retrying again shortly.
+Failed to build /_global-error/page: /_global-error (attempt 2 of 3). Retrying again shortly.
+Failed to build /(app)/admin/payouts/page: /admin/payouts (attempt 2 of 3). Retrying again shortly.
+Failed to build /(app)/admin/users/page: /admin/users (attempt 2 of 3). Retrying again shortly.
+Failed to build /_not-found/page: /_not-found (attempt 2 of 3). Retrying again shortly.
+Failed to build /(app)/research-article-analyzer/page: /research-article-analyzer (attempt 2 of 3). Retrying again shortly.
+Failed to build /(app)/originality-check/page: /originality-check (attempt 2 of 3). Retrying again shortly.
+Failed to build /(app)/admin/testimonials/page: /admin/testimonials (attempt 2 of 3). Retrying again shortly.
+Failed to build /(app)/methodology/page: /methodology (attempt 2 of 3). Retrying again shortly.
+Failed to build /(app)/admin/page: /admin (attempt 2 of 3). Retrying again shortly.
+Failed to build /(app)/qa-simulator/page: /qa-simulator (attempt 2 of 3). Retrying again shortly.
+Failed to build /(app)/paraphraser/page: /paraphraser (attempt 2 of 3). Retrying again shortly.
+Failed to build /(app)/outline/page: /outline (attempt 2 of 3). Retrying again shortly.
+Failed to build /(app)/literature-review/page: /literature-review (attempt 2 of 3). Retrying again shortly.
+Failed to build /(app)/presentation/page: /presentation (attempt 2 of 3). Retrying again shortly.
+Failed to build /admin/puter-auth/page: /admin/puter-auth (attempt 2 of 3). Retrying again shortly.
+Failed to build /faq/page: /faq (attempt 2 of 3). Retrying again shortly.
+Failed to build /explore/page: /explore (attempt 2 of 3). Retrying again shortly.
+Failed to build /document-analyzer/page: /document-analyzer (attempt 2 of 3). Retrying again shortly.
+Failed to build /(app)/admin/institutions/page: /admin/institutions after 3 attempts.

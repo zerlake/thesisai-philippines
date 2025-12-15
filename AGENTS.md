@@ -101,3 +101,42 @@ python -m arxiv_mcp_server         # Run server
 **UI Components**: Radix UI primitives + Tailwind classes. Follow existing component patterns in `src/components/`.
 
 **Testing**: Vitest + @testing-library/react. Test files co-locate with source or in `src/__tests__/`.
+
+## CI/CD Pipeline
+
+**GitHub Actions Workflows:**
+```bash
+# View all workflows
+# https://github.com/zerlake/thesisai-philippines/actions
+
+# Main CI workflows:
+# ci-tests.yml              - Unit & integration tests (on push/PR)
+# lint-code.yml             - ESLint & TypeScript (on code changes)
+# e2e-tests.yml             - Critical path E2E tests
+# performance-tests.yml     - Lighthouse audits & bundle analysis
+# pr-checks.yml             - PR validation & coverage
+# scheduled-tests.yml       - Nightly tests & maintenance
+# deployment.yml            - Build artifacts & security scan
+```
+
+**CI/CD Local Pre-flight Check:**
+```bash
+# Before pushing changes, run:
+pnpm lint                                # ESLint
+pnpm exec tsc --noEmit                   # TypeScript
+pnpm test -- --run                       # Tests
+pnpm build                               # Build verification
+
+# Or in one command:
+pnpm lint && pnpm exec tsc --noEmit && pnpm test -- --run && pnpm build
+```
+
+**Performance & Coverage:**
+```bash
+pnpm test:coverage -- --run              # Generate coverage report
+# Coverage targets: Lines >80%, Branches >75%, Functions >80%
+```
+
+**Documentation:**
+- [CI/CD Setup Guide](./CI_CD_SETUP_GUIDE.md) - Comprehensive documentation
+- [CI/CD Quick Reference](./CI_CD_QUICK_REFERENCE.md) - Quick lookup

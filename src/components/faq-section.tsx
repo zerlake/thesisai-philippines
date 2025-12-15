@@ -214,8 +214,11 @@ export function FaqSection() {
       <div className="container mx-auto max-w-5xl px-4">
         {/* Header */}
         <div className="mb-12 text-center">
-          <div className="flex items-center justify-center mb-4">
-            <HelpCircle className="w-8 h-8 text-blue-400" />
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <HelpCircle className="w-5 h-5 text-accent-cyan" />
+            <span className="text-sm font-semibold text-accent-cyan bg-accent-electric-purple/10 px-3 py-1 rounded-full">
+              Professional Support
+            </span>
           </div>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
             Frequently Asked Questions
@@ -225,14 +228,14 @@ export function FaqSection() {
           </p>
         </div>
 
-        {/* Quick Search CTA */}
+        {/* Quick Search Input */}
         <div className="mb-12 max-w-2xl mx-auto">
-          <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50 flex items-center gap-3">
-            <Search className="w-5 h-5 text-slate-400" />
+          <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50 flex items-center gap-3">
+            <Search className="w-5 h-5 text-accent-cyan ml-2" />
             <input
               type="text"
-              placeholder="Search FAQs..."
-              className="flex-1 bg-transparent text-white placeholder-slate-400 outline-none text-sm"
+              placeholder="Search questions..."
+              className="flex-1 bg-transparent text-white placeholder-text-tertiary outline-none text-sm px-2 py-2"
             />
           </div>
         </div>
@@ -260,15 +263,15 @@ export function FaqSection() {
                       key={`${category.title}-${index}`}
                       className="border-0"
                     >
-                      <AccordionTrigger className="text-left font-semibold text-white hover:text-blue-400 hover:no-underline py-4 px-0 group">
+                      <AccordionTrigger className="text-left font-semibold text-white hover:text-accent-cyan hover:no-underline py-4 px-0 group">
                         <span className="text-base flex items-start gap-3">
-                          <span className="text-blue-400/60 group-hover:text-blue-400 transition-colors mt-1">Q</span>
+                          <span className="text-accent-cyan/60 group-hover:text-accent-cyan transition-colors mt-1 text-xs font-bold px-2.5 py-1 rounded-full bg-accent-electric-purple/10">Q</span>
                           <span>{faq.question}</span>
                         </span>
                       </AccordionTrigger>
                       <AccordionContent className="text-slate-300 text-base pb-4 pl-8 pr-0">
                         <div className="flex gap-3">
-                          <span className="text-purple-400/60 flex-shrink-0 mt-1">A</span>
+                          <span className="text-accent-orange/60 flex-shrink-0 mt-1 text-xs font-bold px-2.5 py-1 rounded-full bg-accent-cyan/10">A</span>
                           <div>{faq.answer}</div>
                         </div>
                       </AccordionContent>

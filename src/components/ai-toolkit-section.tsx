@@ -31,8 +31,8 @@ export function AiToolkitSection() {
       <div className="container">
         <div className="mx-auto mb-16 max-w-3xl text-center">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <Zap className="w-5 h-5 text-yellow-400" />
-            <span className="text-sm font-semibold text-blue-300 bg-blue-500/10 px-3 py-1 rounded-full">
+            <Zap className="w-5 h-5 text-accent-orange" />
+            <span className="text-sm font-semibold text-accent-cyan bg-accent-electric-purple/10 px-3 py-1 rounded-full">
               Powered by Advanced AI
             </span>
           </div>
@@ -48,18 +48,18 @@ export function AiToolkitSection() {
           {tools.map((tool) => (
             <div
               key={tool.title}
-              className="group relative p-8 rounded-xl border border-slate-700/50 bg-slate-800/50 hover:border-slate-600/50 hover:bg-slate-800/80 transition-all hover:shadow-xl hover:shadow-purple-500/10"
+              className="group relative p-8 rounded-xl border border-slate-700/50 bg-slate-800/50 hover:border-accent-electric-purple/30 hover:bg-slate-800/80 transition-all hover:shadow-xl hover:shadow-accent-electric-purple/10"
             >
               {/* Accent border on hover */}
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-              
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-accent-electric-purple/5 to-accent-cyan/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+
               <div className="relative">
-                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 group-hover:from-blue-500/40 group-hover:to-purple-600/40 transition-colors">
-                  <span className="text-blue-400 group-hover:text-blue-300 transition-colors">
+                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-accent-electric-purple/20 to-accent-cyan/20 group-hover:from-accent-electric-purple/40 group-hover:to-accent-cyan/40 transition-colors">
+                  <span className="text-accent-cyan group-hover:text-accent-orange transition-colors">
                     {tool.icon}
                   </span>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-500 transition-all">
+                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-accent-electric-purple group-hover:to-accent-cyan transition-all">
                   {tool.title}
                 </h3>
                 <p className="text-slate-300 leading-relaxed mb-6">
@@ -70,7 +70,7 @@ export function AiToolkitSection() {
                 <div className="space-y-2 pt-6 border-t border-slate-700/50">
                   {tool.benefits.map((benefit) => (
                     <div key={benefit} className="flex items-center gap-2 text-sm text-slate-300">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan" />
                       {benefit}
                     </div>
                   ))}

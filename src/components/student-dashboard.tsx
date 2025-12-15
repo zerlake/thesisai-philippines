@@ -54,6 +54,7 @@ import { UpgradePromptCard } from "./upgrade-prompt-card";
 import { WellbeingWidget } from "./student-dashboard-enhancements";
 import { ProgressMilestones } from "./student-dashboard-enhancements";
 import { QuickAccessToolsDropdown } from "./quick-access-dropdown";
+import { useWorkContextListener } from "../hooks/useWorkContextListener";
 
 const quickAccessItems = [
   {
@@ -249,6 +250,24 @@ export function StudentDashboard() {
     }
     setIsLoadingNextAction(false);
   }, [user, supabase]);
+
+  // Listen to work context changes - real-time updates
+  useWorkContextListener(
+    () => {
+      console.log('[StudentDashboard] Work context changed, refreshing next action');
+      getNextAction();
+    },
+    { debounceMs: 500, enabled: true }
+  );
+
+  // Periodic refresh while user is active (every 30 seconds)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      getNextAction();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [getNextAction]);
 
   useEffect(() => {
     if (!user) return;

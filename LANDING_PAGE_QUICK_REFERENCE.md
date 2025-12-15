@@ -1,389 +1,283 @@
-# Landing Page Quick Reference
+# Landing Page - Quick Reference
 
-## Files Modified
+## Color Palette (Copy-Paste Ready)
 
-| File | Changes | Purpose |
-|------|---------|---------|
-| `src/components/landing-header.tsx` | Mobile menu, gradient logo, enhanced nav | Professional header with mobile support |
-| `src/components/landing-footer.tsx` | Multi-column layout, social links, trust badges | Enterprise footer structure |
-| `src/components/landing/hero-section.tsx` | Badge, stats, improved animations | Stronger value proposition |
-| `src/components/landing/features-section.tsx` | Card redesign, stats section | Showcase 13+ features |
-| `src/components/how-it-works-section.tsx` | 4-step journey, benefits, CTA | Clear research journey |
-| `src/components/faq-section.tsx` | Search, category badges, Q&A formatting | Professional FAQ section |
-| `src/components/ai-toolkit-section.tsx` | Security section, stats, benefits | Trust + AI positioning |
+```css
+/* Primary Colors */
+--primary-blue: #0A2540;
+--navy-dark: #1B3A52;
+--electric-purple: #7C3AED;
+--bright-cyan: #06B6D4;
 
----
+/* Neutral Colors */
+--dark-bg: #0F172A;
+--card-bg: #1E293B;
+--text-primary: #F1F5F9;
+--text-secondary: #CBD5E1;
+--text-tertiary: #94A3B8;
+--border: #334155;
 
-## Design Quick Copy-Paste
-
-### Primary CTA Button
-```jsx
-<Button
-  size="lg"
-  asChild
-  className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-2xl hover:shadow-purple-500/50 transition-all h-12 px-8 text-base font-semibold"
->
-  <Link href="/register">Get Started Free</Link>
-</Button>
+/* Status Colors */
+--success: #10B981;
+--warning: #F59E0B;
+--error: #EF4444;
+--info: #3B82F6;
 ```
 
-### Secondary Button
-```jsx
-<Button
-  size="lg"
-  variant="outline"
-  asChild
-  className="border border-slate-600 text-white hover:bg-slate-800 h-12 px-8 text-base font-semibold"
->
-  <Link href="#features">Explore Features</Link>
-</Button>
+## Tailwind Classes
+
+```tailwind
+/* Colors */
+from-accent-electric-purple to-accent-cyan
+bg-gradient-to-r from-slate-800 to-slate-900
+
+/* Animations */
+animate-pulse-slow
+animate-[fade-in_0.5s_ease-out_0.3s_forwards]
+
+/* Sizing */
+container mx-auto px-4
+py-20 lg:py-32
+rounded-2xl
 ```
 
-### Feature Card
-```jsx
-<div className="group relative overflow-hidden rounded-xl bg-slate-800/50 border border-slate-700/50 p-8 hover:border-slate-600/50 transition-all hover:shadow-xl hover:shadow-purple-500/10">
-  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-  <div className="relative">
-    {/* Content here */}
-  </div>
+## Component Usage
+
+### Social Proof Section
+```tsx
+import { SocialProofSectionEnhanced } from '@/components/landing/social-proof-section-enhanced';
+
+<SocialProofSectionEnhanced />
+```
+
+### Premium CTA Section
+```tsx
+import { PremiumCTAEnhanced } from '@/components/landing/premium-cta-enhanced';
+
+<PremiumCTAEnhanced />
+```
+
+### Animation Variants
+```tsx
+import { fadeInUp, scaleIn, buttonHover } from '@/lib/landing/animation-variants';
+import { motion } from 'framer-motion';
+
+<motion.div variants={fadeInUp}>Content</motion.div>
+```
+
+### Scroll Animation Hook
+```tsx
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+
+const { elementRef, isVisible } = useScrollAnimation();
+
+<div ref={elementRef}>
+  {isVisible && <AnimatedContent />}
 </div>
 ```
 
-### Icon Container
-```jsx
-<div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 group-hover:from-blue-500/40 group-hover:to-purple-600/40 transition-colors">
-  <span className="text-blue-400 group-hover:text-blue-300 transition-colors">
-    <Icon className="h-8 w-8" />
-  </span>
-</div>
+### Counter Animation Hook
+```tsx
+import { useCounterAnimation } from '@/hooks/useScrollAnimation';
+
+const count = useCounterAnimation(50000, 2000);
+
+<p>{count}+</p>
 ```
 
-### Section Header
-```jsx
-<div className="mx-auto mb-16 max-w-3xl text-center">
-  <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
-    Your Heading
-  </h2>
-  <p className="mt-6 text-lg text-slate-300 max-w-2xl mx-auto">
-    Your description
-  </p>
-</div>
-```
+## Files Created/Updated
 
-### CTA Section
-```jsx
-<div className="mt-16 p-8 md:p-12 rounded-xl bg-gradient-to-r from-blue-500/10 to-purple-600/10 border border-blue-500/20 text-center">
-  <h3 className="text-2xl font-bold text-white mb-3">Heading</h3>
-  <p className="text-slate-300 mb-6">Description</p>
-  <Button asChild>
-    <Link href="#">Action</Link>
-  </Button>
-</div>
-```
+| File | Type | Purpose |
+|------|------|---------|
+| `LANDING_PAGE_SPEC_UPDATED.md` | Spec | Design system & specs |
+| `LANDING_PAGE_IMPLEMENTATION_SUMMARY.md` | Doc | Integration guide |
+| `src/lib/landing/animation-variants.ts` | Code | Animation presets |
+| `src/hooks/useScrollAnimation.ts` | Code | Animation hooks |
+| `src/components/landing/social-proof-section-enhanced.tsx` | Code | Social proof section |
+| `src/components/landing/premium-cta-enhanced.tsx` | Code | CTA section |
 
----
-
-## Colors Reference
+## Integration Checklist
 
 ```
-Gradients:
-  from-blue-500 to-purple-600     (Primary)
-  from-blue-400 via-purple-500 to-pink-500   (Heading)
-  from-blue-500/20 to-purple-600/20   (Icon background)
-  from-blue-500/10 to-purple-600/10   (Section background)
-
-Text:
-  text-white              (Primary)
-  text-slate-300          (Secondary)
-  text-slate-400          (Tertiary)
-  text-blue-400           (Accent)
-
-Background:
-  bg-slate-900            (Darkest)
-  bg-slate-800/50         (Semi-transparent)
-  bg-slate-900/50         (More transparent)
-
-Borders:
-  border-slate-700/50     (Subtle)
-  border-slate-600/50     (Hover)
-  border-blue-500/20      (Accent)
-
-Shadows:
-  shadow-purple-500/50    (On hover)
-  shadow-purple-500/10    (Card hover)
+[ ] Copy animation-variants.ts to src/lib/landing/
+[ ] Copy useScrollAnimation.ts to src/hooks/
+[ ] Copy enhanced component files to src/components/landing/
+[ ] Update src/app/page.tsx with new imports
+[ ] Run pnpm install (verify dependencies)
+[ ] Test with pnpm dev
+[ ] Run Lighthouse audit
+[ ] Test on mobile, tablet, desktop
+[ ] Deploy to staging
 ```
 
----
+## Typography Scale
 
-## Spacing Cheat Sheet
+| Component | Size | Weight |
+|-----------|------|--------|
+| H1 | 56px | 700 |
+| H2 | 42px | 700 |
+| H3 | 32px | 700 |
+| H4 | 24px | 600 |
+| Body Large | 18px | 400 |
+| Body Regular | 16px | 400 |
+| Body Small | 14px | 400 |
+| Button | 16px | 600 |
 
-```
-Sections:        py-12  |  py-16  |  py-20  |  py-24
-Cards:           p-6    |  p-8    |  p-12
-Gaps:            gap-3  |  gap-4  |  gap-6  |  gap-8
-Margins:         mt-4   |  mt-6   |  mb-12  |  mb-16
-Button Height:   h-12 (48px)
-Icon Size:       w-6 h-6  |  w-8 h-8  |  w-16 h-16
-```
+## Animation Timing
 
----
+| Type | Duration | Easing |
+|------|----------|--------|
+| Micro-interactions | 150-300ms | easeOut |
+| Section transitions | 500-600ms | easeOut |
+| Complex sequences | 800-1200ms | easeOut |
+| Looping effects | 4-6s | easeInOut |
 
-## Responsive Classes
-
-```
-Mobile First:
-  Default = Mobile (320px)
-  md:      = Tablet (768px)
-  lg:      = Desktop (1024px)
-  xl:      = Large (1280px)
-
-Common Patterns:
-  text-sm md:text-base          // Text size progression
-  grid-cols-1 md:grid-cols-2 lg:grid-cols-3   // Grid progression
-  py-12 md:py-16 lg:py-24       // Padding progression
-  px-4 lg:px-8                  // Horizontal padding
-```
-
----
-
-## Hover & Animation
+## Performance Targets
 
 ```
-Hover Classes:
-  hover:border-slate-600/50       (Border change)
-  hover:text-white                (Text color)
-  hover:bg-slate-800              (Background)
-  hover:text-blue-400             (Accent color)
-  hover:from-blue-500/40          (Gradient change)
-  group-hover:opacity-100         (Parent hover effect)
-
-Transitions:
-  transition-all              (All properties)
-  transition-colors           (Color only)
-  transition-opacity          (Opacity only)
-  duration-300                (Default 300ms)
-
-Shadows:
-  hover:shadow-xl hover:shadow-purple-500/50   (Large colored shadow)
-  hover:shadow-lg hover:shadow-purple-500/10   (Subtle colored shadow)
+LCP:  < 2.5s
+FID:  < 100ms
+CLS:  < 0.1
+Lighthouse Performance: 90+
+Lighthouse Accessibility: 95+
+Lighthouse Best Practices: 95+
+Lighthouse SEO: 100
 ```
 
----
+## Responsive Breakpoints
+
+```
+sm: 640px
+md: 768px
+lg: 1024px
+xl: 1280px
+2xl: 1536px
+```
+
+## Key Commands
+
+```bash
+# Development
+pnpm dev
+
+# Build
+pnpm build
+
+# Lint
+pnpm lint
+
+# Test
+pnpm test
+
+# Lighthouse audit
+npm run lighthouse
+
+# Bundle analyzer
+pnpm run analyze
+```
 
 ## Common Patterns
 
-### Badge
-```jsx
-<span className="text-sm font-semibold text-blue-300 bg-blue-500/10 px-4 py-2 rounded-full">
-  Label
-</span>
+### Staggered Animation
+```tsx
+<motion.div variants={staggerContainer} initial="initial" whileInView="animate">
+  {items.map((item, i) => (
+    <motion.div key={i} variants={cardVariant}>{item}</motion.div>
+  ))}
+</motion.div>
 ```
 
-### Gradient Text
-```jsx
-className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500"
+### Scroll-Triggered Animation
+```tsx
+<motion.div
+  initial={{ opacity: 0, y: 40 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true, margin: "-100px" }}
+  transition={{ duration: 0.6 }}
+>
+  Content
+</motion.div>
 ```
 
-### Stat Box
-```jsx
-<div>
-  <p className="text-sm text-slate-400">Label</p>
-  <p className="text-3xl font-bold text-blue-400">123</p>
-  <p className="text-xs text-slate-500">Description</p>
-</div>
+### Counter with Hook
+```tsx
+const count = useCounterAnimation(50000, 2000, 0);
+return <p>{count}+</p>
 ```
 
-### List Item with Icon
-```jsx
-<li className="flex items-center gap-3 text-slate-300">
-  <Icon className="w-5 h-5 text-green-400 flex-shrink-0" />
-  Text
-</li>
+### Hover Effects
+```tsx
+<motion.button
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.98 }}
+  transition={{ duration: 0.2 }}
+>
+  Click me
+</motion.button>
 ```
 
-### Group Hover Gradient Text
-```jsx
-className="group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-500 transition-all"
+## Styling Convention
+
+```tsx
+// Button with Tailwind + Framer Motion
+<motion.div variants={buttonHover}>
+  <Button 
+    className="bg-gradient-to-r from-accent-electric-purple to-accent-cyan"
+  >
+    Start Free Trial
+  </Button>
+</motion.div>
 ```
+
+## Accessibility Checklist
+
+- [ ] Semantic HTML (h1, h2, button, a)
+- [ ] Color contrast WCAG AA
+- [ ] Keyboard navigation (Tab, Enter)
+- [ ] prefers-reduced-motion support
+- [ ] ARIA labels where needed
+- [ ] Alt text on images
+- [ ] Focus indicators visible
+
+## Mobile Optimization
+
+```tsx
+// Font sizes scale on mobile
+<h1 className="text-5xl md:text-7xl">Heading</h1>
+
+// Spacing reduces on mobile
+<div className="px-4 md:px-6 lg:px-8">Content</div>
+
+// Grid stacks on mobile
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">Items</div>
+
+// Images use next/image
+<Image src="/hero.webp" alt="Hero" width={1200} height={600} />
+```
+
+## Deployment Checklist
+
+```
+[ ] Lighthouse all scores 90+
+[ ] Mobile responsiveness verified
+[ ] Cross-browser tested
+[ ] Accessibility audit passed
+[ ] Analytics configured
+[ ] Meta tags correct
+[ ] SSL/TLS enabled
+[ ] CDN configured
+[ ] Performance baseline established
+```
+
+## Support
+
+For detailed implementation info, see:
+- **Spec:** `LANDING_PAGE_SPEC_UPDATED.md`
+- **Integration:** `LANDING_PAGE_IMPLEMENTATION_SUMMARY.md`
+- **Animations:** `src/lib/landing/animation-variants.ts`
+- **Hooks:** `src/hooks/useScrollAnimation.ts`
 
 ---
 
-## Section Padding Standards
-
-```
-Hero:         py-20 md:py-32 lg:py-40
-Features:     py-16 md:py-24
-How It Works:  py-16 md:py-24
-FAQ:          py-16 md:py-24
-Footer:       py-12 md:py-16 lg:py-20
-```
-
----
-
-## Typography Standards
-
-```
-H1 (Main):     text-5xl md:text-7xl font-black
-H2 (Section):  text-3xl md:text-5xl font-bold
-H3 (Card):     text-xl font-bold
-H4 (Small):    text-lg font-semibold
-P (Body):      text-base text-slate-300
-P (Small):     text-sm text-slate-400
-P (Tiny):      text-xs text-slate-500
-```
-
----
-
-## Grid Patterns
-
-```
-3-Column:     grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6
-2-Column:     grid-cols-1 md:grid-cols-2 gap-8
-4-Column:     grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6
-2x2 Cols:     md:grid-cols-2 gap-8
-```
-
----
-
-## Adding New Sections
-
-Template:
-```jsx
-export function SectionName() {
-  return (
-    <section className="py-16 md:py-24 bg-slate-900">
-      <div className="container">
-        {/* Section Header */}
-        <div className="mx-auto mb-16 max-w-3xl text-center">
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
-            Title
-          </h2>
-          <p className="mt-6 text-lg text-slate-300 max-w-2xl mx-auto">
-            Description
-          </p>
-        </div>
-
-        {/* Content Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* Card/Item */}
-        </div>
-
-        {/* CTA */}
-        <div className="mt-16 text-center">
-          <Button>Action</Button>
-        </div>
-      </div>
-    </section>
-  );
-}
-```
-
----
-
-## Common Updates
-
-### Change Section Background
-```
-bg-slate-900    →  bg-slate-800
-bg-slate-800    →  bg-gradient-to-b from-slate-900 to-slate-800
-```
-
-### Change Button Style
-Replace the entire className with:
-```jsx
-Primary:    bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-2xl hover:shadow-purple-500/50
-Secondary:  border border-slate-600 text-white hover:bg-slate-800
-Ghost:      text-slate-300 hover:text-white hover:bg-slate-800
-```
-
-### Change Grid Columns
-```
-gap-6 md:grid-cols-2 lg:grid-cols-3    →  gap-8 md:grid-cols-2 lg:grid-cols-4
-grid-cols-1 md:grid-cols-2              →  grid-cols-1 md:grid-cols-2 lg:grid-cols-3
-```
-
-### Add Hover Effect
-```
-border border-slate-700/50    →    border border-slate-700/50 hover:border-slate-600/50 hover:shadow-lg hover:shadow-purple-500/10
-```
-
----
-
-## Testing Checklist
-
-- [ ] All links work
-- [ ] Buttons are clickable
-- [ ] Mobile responsive (320px, 768px, 1024px)
-- [ ] Hover effects visible
-- [ ] Animations smooth
-- [ ] Colors have proper contrast
-- [ ] Text is readable
-- [ ] Images load properly
-- [ ] No console errors
-- [ ] Accessibility check (keyboard nav)
-
----
-
-## Performance Tips
-
-1. **Lazy load images**: Use Next.js Image component
-2. **Optimize animations**: Use Framer Motion with proper config
-3. **Code split sections**: Import dynamically if needed
-4. **Use CSS over JS**: Leverage Tailwind for styling
-5. **Responsive images**: Proper srcSet and sizes attributes
-
----
-
-## Browser Support
-
-✅ Chrome 90+  
-✅ Firefox 88+  
-✅ Safari 14+  
-✅ Edge 90+  
-✅ Mobile browsers (iOS Safari, Chrome Mobile)  
-
----
-
-## Common Issues & Fixes
-
-| Issue | Fix |
-|-------|-----|
-| Text not visible | Add text-white or text-slate-300 |
-| Button not clickable | Check z-index or pointer-events |
-| Border not showing | Use border border-color, not just border-color |
-| Hover effect not working | Ensure parent has group class if using group-hover |
-| Mobile layout broken | Check responsive classes (md:, lg:) |
-| Animation laggy | Reduce animation duration or complexity |
-| Colors not matching | Use exact Tailwind class names |
-
----
-
-## Quick Update Commands
-
-### To modify a section color:
-Find: `bg-slate-900`
-Replace: `bg-slate-800`
-
-### To add margin:
-`className="mt-6"` → `className="mt-8"`
-
-### To change button text:
-Look for button text between `<>` and update
-
-### To add new link:
-```jsx
-<Link href="/path" className="...">Label</Link>
-```
-
----
-
-## Resource Links
-
-- Tailwind CSS: https://tailwindcss.com
-- Framer Motion: https://www.framer.com/motion/
-- Lucide Icons: https://lucide.dev/
-- Color Tools: https://chir.ps/
-
----
-
-This quick reference is designed for rapid updates and maintenance. Keep it handy for all landing page modifications!
+**Last Updated:** December 15, 2025  
+**Status:** Production Ready ✅

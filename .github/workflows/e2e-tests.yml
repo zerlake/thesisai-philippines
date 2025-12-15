@@ -1,0 +1,100 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/**'
+      - 'supabase/**'
+      - 'package.json'
+      - '.github/workflows/e2e-tests.yml'
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 3 * * *'  # Daily at 3 AM UTC
+
+permissions:
+  contents: read
+
+jobs:
+  integration-tests:
+    name: Integration Tests Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.x
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run auth workflow tests
+        run: pnpm test:integration-auth -- --run
+        continue-on-error: true
+
+      - name: Run thesis workflow tests
+        run: pnpm test:integration-thesis -- --run
+        continue-on-error: true
+
+      - name: Run AI tools workflow tests
+        run: pnpm test:integration-ai -- --run
+        continue-on-error: true
+
+      - name: Run all integration tests
+        run: pnpm test:integration -- --run
+
+  critical-path-tests:
+    name: Critical Path Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.x
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test Sign In Flow
+        run: pnpm test:sign-in -- --run
+
+      - name: Test Dashboard
+        run: pnpm test:dashboard -- --run
+
+      - name: Test Editor Component
+        run: pnpm test:editor -- --run
+
+      - name: Test Research Questions
+        run: pnpm test:research-questions -- --run
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: coverage
+          retention-days: 5
+        continue-on-error: true

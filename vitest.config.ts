@@ -9,6 +9,12 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      // Exclude integration tests if Supabase env vars not set
+      ...(process.env.NEXT_PUBLIC_SUPABASE_URL ? [] : ['**/*.integration.test.ts']),
+    ],
   },
   resolve: {
     alias: {

@@ -86,24 +86,24 @@ export function PhasePageClient({ phase, navigation }: PhasePageClientProps) {
               <div className="space-y-3">
                 {phase.features.map((feature) => (
                   <button
-                    key={feature.id}
-                    onClick={() => setSelectedFeature(feature.id)}
-                    className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                      selectedFeature === feature.id
-                        ? `border-slate-900 ${phase.bgColor} shadow-md`
-                        : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                    }`}
+                     key={feature.id}
+                     onClick={() => setSelectedFeature(feature.id)}
+                     className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                       selectedFeature === feature.id
+                         ? `border-primary bg-muted shadow-md`
+                         : 'border-border hover:border-primary hover:bg-card'
+                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`text-slate-600 mt-1`}>
+                      <div className={`text-muted-foreground mt-1`}>
                         {(() => {
                           const Icon = getIcon(feature.icon);
                           return <Icon className="h-5 w-5" />;
                         })()}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-sm">{feature.title}</h3>
-                        <p className="text-xs text-slate-600 mt-1">{feature.tools?.length || 0} tools</p>
+                        <h3 className="font-semibold text-sm text-foreground">{feature.title}</h3>
+                        <p className="text-xs text-muted-foreground mt-1">{feature.tools?.length || 0} tools</p>
                       </div>
                     </div>
                   </button>
@@ -117,17 +117,17 @@ export function PhasePageClient({ phase, navigation }: PhasePageClientProps) {
             {selectedFeatureData && (
               <div className="space-y-6">
                 {/* Feature Header */}
-                <Card className="p-8 border-2 border-slate-200">
+                <Card className="p-8 border-2 border-border">
                   <div className="flex items-start gap-4 mb-4">
-                    <div className="text-slate-600 mt-1">
+                    <div className="text-muted-foreground mt-1">
                       {(() => {
                         const Icon = getIcon(selectedFeatureData.icon);
                         return <Icon className="h-8 w-8" />;
                       })()}
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold mb-2">{selectedFeatureData.title}</h2>
-                      <p className="text-lg text-slate-600">{selectedFeatureData.description}</p>
+                      <h2 className="text-3xl font-bold mb-2 text-foreground">{selectedFeatureData.title}</h2>
+                      <p className="text-lg text-muted-foreground">{selectedFeatureData.description}</p>
                     </div>
                   </div>
                 </Card>
@@ -162,12 +162,12 @@ export function PhasePageClient({ phase, navigation }: PhasePageClientProps) {
 
                 {/* Learning Resources */}
                 <Link href="/resources">
-                  <Card className="p-6 bg-blue-50 border border-blue-200 hover:border-blue-400 hover:shadow-md transition-all cursor-pointer h-full">
+                  <Card className="p-6 bg-card border border-border hover:border-primary hover:shadow-md transition-all cursor-pointer h-full">
                     <div className="flex items-start gap-3">
-                      <BookOpen className="h-5 w-5 text-blue-600 mt-1 flex-shrink-0" />
+                      <BookOpen className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
                       <div>
-                        <h3 className="font-semibold text-blue-900 mb-1">Learning Resources</h3>
-                        <p className="text-sm text-blue-700">
+                        <h3 className="font-semibold text-foreground mb-1">Learning Resources</h3>
+                        <p className="text-sm text-muted-foreground">
                           Access tutorials, guides, and best practices for maximizing your use of all tools in this phase.
                         </p>
                       </div>
@@ -199,10 +199,10 @@ export function PhasePageClient({ phase, navigation }: PhasePageClientProps) {
                   key={i}
                   className={`h-3 w-3 rounded-full transition-all ${
                     i < phase.phaseNumber
-                      ? 'bg-slate-900'
+                      ? 'bg-primary'
                       : i === phase.phaseNumber - 1
-                      ? 'bg-slate-400'
-                      : 'bg-slate-200'
+                      ? 'bg-muted'
+                      : 'bg-border'
                   }`}
                 />
               ))}

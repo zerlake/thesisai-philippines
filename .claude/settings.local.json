@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(supabase db push --include-all)",
+      "Bash(supabase migration:*)",
+      "Bash(npm run build:*)",
+      "Bash(powershell \"Remove-Item -Recurse -Force .next\")",
+      "Bash(cat:*)",
+      "Bash(pnpm add:*)",
+      "Bash(ls:*)",
+      "Bash(npm run dev:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

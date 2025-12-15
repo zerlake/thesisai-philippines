@@ -10,7 +10,7 @@ import { AvatarSelector } from "./avatar-selector";
 
 interface AvatarUploadProps {
   currentAvatarUrl: string | null;
-  onUpload: (url: string) => void;
+  onUpload: (url: string | null) => void;
 }
 
 export function AvatarUpload({ currentAvatarUrl, onUpload }: AvatarUploadProps) {

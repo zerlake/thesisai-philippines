@@ -1,0 +1,229 @@
+name: Scheduled Tests & Maintenance
+
+on:
+  schedule:
+    - cron: '0 4 * * *'   # Daily at 4 AM UTC (comprehensive tests)
+    - cron: '0 */6 * * *' # Every 6 hours (smoke tests)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  nightly-tests:
+    name: Nightly Full Test Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    if: github.event.schedule == '0 4 * * *' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.x
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run all tests
+        run: pnpm test:all-categories -- --run
+
+      - name: Run linter
+        run: pnpm lint
+        continue-on-error: true
+
+      - name: TypeScript check
+        run: pnpm exec tsc --noEmit
+        continue-on-error: true
+
+      - name: Build project
+        run: pnpm build
+        continue-on-error: true
+
+      - name: Generate comprehensive report
+        run: pnpm test:coverage -- --run
+        continue-on-error: true
+
+      - name: Create issue if tests fail
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔴 Nightly Test Suite Failed',
+              body: `The nightly test suite failed on ${new Date().toISOString()}\n\n[View workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+              labels: ['bug', 'testing']
+            });
+
+  smoke-tests:
+    name: Quick Smoke Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event.schedule == '0 */6 * * *'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.x
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run critical path tests
+        run: |
+          pnpm test:sign-in -- --run
+          pnpm test:dashboard -- --run
+          pnpm test:editor -- --run
+
+      - name: Quick build check
+        run: pnpm build --mode standalone
+        continue-on-error: true
+
+  dependency-update:
+    name: Check Dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event.schedule == '0 4 * * *'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.x
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for outdated packages
+        run: pnpm outdated
+        continue-on-error: true
+
+      - name: Security audit
+        run: pnpm audit --audit-level high
+        continue-on-error: true
+
+      - name: Create issue for outdated dependencies
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            try {
+              const outdated = execSync('pnpm outdated', { encoding: 'utf-8' });
+              if (outdated) {
+                github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: '📦 Outdated Dependencies Detected',
+                  body: `\`\`\`\n${outdated}\n\`\`\`\n\nConsider updating dependencies.`,
+                  labels: ['dependencies']
+                });
+              }
+            } catch (e) {
+              console.log('No outdated packages or error occurred');
+            }
+        continue-on-error: true
+
+  performance-baseline:
+    name: Performance Baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event.schedule == '0 4 * * *'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.x
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build project
+        run: pnpm build
+
+      - name: Analyze build stats
+        run: |
+          echo "Build Analysis Report" > build-stats.txt
+          du -sh .next >> build-stats.txt
+          find .next -name "*.json" -o -name "*.js" | wc -l >> build-stats.txt
+
+      - name: Upload performance baseline
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-baseline-${{ github.run_number }}
+          path: build-stats.txt
+          retention-days: 90
+
+  cleanup:
+    name: Cleanup Old Artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Delete old workflow runs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const days = 30;
+            const ms = days * 24 * 60 * 60 * 1000;
+            const cutoff = Date.now() - ms;
+            
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+            
+            for (const run of runs.data.workflow_runs) {
+              if (new Date(run.created_at).getTime() < cutoff) {
+                console.log(`Deleting workflow run ${run.id}`);
+                await github.rest.actions.deleteWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: run.id
+                });
+              }
+            }
+        continue-on-error: true

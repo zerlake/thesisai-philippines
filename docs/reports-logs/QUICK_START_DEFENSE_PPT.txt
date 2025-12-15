@@ -1,0 +1,229 @@
+================================================================================
+           DEFENSE PPT COACH - QUICK START REFERENCE
+================================================================================
+
+🚀 GET STARTED IN 3 CLICKS
+
+1. Open: /defense-ppt-coach
+2. Click: "Proposal Defense" or "Final Defense" button
+3. Done: Sample loads with 8-10 slides ready to customize
+
+================================================================================
+📋 WHAT YOU GET WITH SAMPLES
+================================================================================
+
+PROPOSAL DEFENSE (8 slides, 15 minutes)
+  ✓ Title slide with research topic
+  ✓ Background & significance
+  ✓ Research problem statement
+  ✓ Research questions & objectives
+  ✓ Proposed methodology
+  ✓ Expected outcomes
+  ✓ Timeline
+  ✓ Q&A preparation
+
+FINAL DEFENSE (10 slides, 25 minutes)
+  ✓ Title slide
+  ✓ Introduction & background
+  ✓ Problem statement
+  ✓ Literature review summary
+  ✓ Methodology
+  ✓ Results & findings
+  ✓ Discussion
+  ✓ Conclusions & recommendations
+  ✓ Limitations & future work
+  ✓ Q&A preparation
+
+ALL SAMPLES INCLUDE:
+  ✓ Realistic research content
+  ✓ Speaker notes for each slide
+  ✓ Professional timing per slide
+  ✓ Proper academic structure
+
+================================================================================
+⌨️  KEYBOARD SHORTCUTS
+================================================================================
+
+NAVIGATION
+  → or Space     Next slide
+  ←              Previous slide
+  1-9            Jump to slide (1=first slide)
+
+FEATURES
+  N              Toggle speaker notes
+  P              Toggle presentation mode
+  Ctrl+F         Toggle fullscreen
+  Esc            Exit presentation mode
+
+MOUSE
+  Click number   Jump to specific slide
+  Click buttons  Use UI controls
+
+================================================================================
+📑 TABS IN DEFENSE PPT COACH
+================================================================================
+
+SETUP (Default)
+  • Quick Start buttons for samples
+  • Wizard for creating custom presentations
+  • Choose defense type & time
+
+EDIT SLIDES
+  • Edit each slide's title, bullets, notes
+  • Adjust timing per slide
+  • Add/remove slides
+  • Reorder slides
+
+PREVIEW
+  • View slides full-screen
+  • Navigate between slides
+  • Check formatting & content
+
+PRESENT ⭐ NEW
+  • Full presentation mode
+  • Speaker notes on side
+  • Professional view
+  • Perfect for practicing
+
+Q&A
+  • Sample questions & answers
+  • Prepare for panel questions
+  • Practice responses
+
+================================================================================
+🎯 COMMON TASKS
+================================================================================
+
+LOAD A SAMPLE
+  1. Go to /defense-ppt-coach
+  2. Click sample button
+  3. Edit as needed
+
+VIEW YOUR PRESENTATION
+  1. Click [Preview] tab
+  2. Use ← and → to navigate
+  3. Or use Space to advance
+
+PRESENT LIVE
+  1. Click [Present] tab
+  2. Press Ctrl+F for fullscreen
+  3. Press → or Space to advance
+  4. Press N to see speaker notes
+  5. Press Esc to exit
+
+EDIT SLIDES
+  1. Click [Edit Slides] tab
+  2. Click slide in left panel
+  3. Edit title, bullets, notes
+  4. Save automatically
+
+PRACTICE Q&A
+  1. Click [Q&A] tab
+  2. Read sample questions
+  3. Prepare your answers
+  4. Practice responses
+
+================================================================================
+💡 TIPS & TRICKS
+================================================================================
+
+✓ USE SAMPLES FIRST
+  Samples show proper structure and timing
+
+✓ WRITE GOOD NOTES
+  Speaker notes help during presentation
+
+✓ PRACTICE WITH KEYBOARD
+  Keyboard control feels more natural
+
+✓ FULLSCREEN MODE
+  Press Ctrl+F for immersive experience
+
+✓ SPEAKER NOTES
+  Press N during practice to see reminders
+
+✓ TIME YOURSELF
+  Each slide has realistic time estimates
+
+✓ LEARN KEYBOARD SHORTCUTS
+  Makes you more confident during actual defense
+
+================================================================================
+🔗 USEFUL LINKS
+================================================================================
+
+Defense PPT Coach: /defense-ppt-coach
+Sample Pages:      /defense-ppt-coach/samples
+Documentation:     See SHADCN_DECK_IMPLEMENTATION_GUIDE.md
+Visual Guide:      See DEFENSE_PPT_VISUAL_GUIDE.md
+
+================================================================================
+❓ FAQ
+================================================================================
+
+Q: Can I load a sample and edit it?
+A: Yes! Load sample, then click Edit Slides tab and customize.
+
+Q: Can I save my edited sample?
+A: Yes, edits are saved to localStorage. Custom edits in Edit tab.
+
+Q: Can I present without fullscreen?
+A: Yes, Present tab works in windowed mode. Ctrl+F for fullscreen.
+
+Q: How long does a sample take to go through?
+A: Proposal: ~15 min, Final: ~25 min based on slide timings
+
+Q: Can I add more slides?
+A: Yes, click Edit Slides tab, then [+ Add Slide] button
+
+Q: Do I need to memorize keyboard shortcuts?
+A: No, UI buttons are always available. Keyboard is optional.
+
+Q: Can I export my presentation?
+A: Currently edit and present. Future: PDF/video export planned.
+
+Q: Are speaker notes included?
+A: Yes! All samples have detailed speaker notes for each slide.
+
+Q: What if I make mistakes during practice?
+A: Reload the sample - no changes are saved permanently.
+
+================================================================================
+🏆 SUCCESS CHECKLIST
+================================================================================
+
+Before Your Defense:
+  ☐ Load appropriate sample (Proposal or Final)
+  ☐ Customize slides with your research
+  ☐ Write clear speaker notes
+  ☐ Practice multiple times
+  ☐ Time yourself on each slide
+  ☐ Learn keyboard shortcuts
+  ☐ Test fullscreen mode
+  ☐ Practice Q&A responses
+  ☐ Review slide transitions
+  ☐ Get comfortable with presentation
+
+================================================================================
+📞 NEED HELP?
+================================================================================
+
+DOCUMENTATION FILES:
+  • SHADCN_DECK_IMPLEMENTATION_GUIDE.md (Complete reference)
+  • SHADCN_DECK_QUICK_START.md (Quick tips)
+  • DEFENSE_PPT_VISUAL_GUIDE.md (Visual walkthrough)
+  • DEFENSE_PPT_COACH_GUIDE.md (Comprehensive guide)
+
+KEY FEATURES:
+  • Sample data in Setup tab ✓
+  • Full presentation mode ✓
+  • Keyboard navigation ✓
+  • Speaker notes ✓
+  • Professional styling ✓
+
+READY TO GO?
+  Just click a sample button and start practicing!
+
+================================================================================
+Version 1.0 - Updated: December 1, 2024
+================================================================================

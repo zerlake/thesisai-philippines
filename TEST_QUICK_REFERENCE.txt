@@ -1,0 +1,163 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                         TEST COMMANDS QUICK REFERENCE                       ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+┌─ BASIC COMMANDS ───────────────────────────────────────────────────────────┐
+│                                                                              │
+│  pnpm test                    → Run all tests                              │
+│  pnpm test:ui                 → Run tests with visual UI                   │
+│  pnpm test:coverage           → Generate coverage report                   │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ CATEGORY TESTS ───────────────────────────────────────────────────────────┐
+│                                                                              │
+│  pnpm test:components         → Run all 13 component tests                │
+│  pnpm test:hooks              → Run all 3 hook tests                      │
+│  pnpm test:api                → Run all 2 API tests                       │
+│  pnpm test:integration        → Run all 3 integration tests               │
+│  pnpm test:personalization    → Run all 7 personalization tests           │
+│  pnpm test:all-categories     → Run all 28 tests (organized)              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ COMPONENT TESTS ──────────────────────────────────────────────────────────┐
+│                                                                              │
+│  Feature Components:                                                        │
+│  ├─ pnpm test:editor                    → Editor component                │
+│  ├─ pnpm test:sign-in                   → Sign in form                    │
+│  ├─ pnpm test:dashboard                 → Student dashboard               │
+│  ├─ pnpm test:research-questions        → Research question generator    │
+│  ├─ pnpm test:outline                   → Outline builder                │
+│  ├─ pnpm test:grammar                   → Grammar checker                │
+│  ├─ pnpm test:notifications             → Notification bell               │
+│  ├─ pnpm test:papers                    → Paper search bar                │
+│  ├─ pnpm test:theme                     → Theme toggle                   │
+│  └─ pnpm test:bibliography               → Bibliography generator         │
+│                                                                              │
+│  UI Components:                                                             │
+│  ├─ pnpm test:button                    → Button UI component             │
+│  ├─ pnpm test:input                     → Input UI component              │
+│  └─ pnpm test:card                      → Card UI component               │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ HOOK TESTS ───────────────────────────────────────────────────────────────┐
+│                                                                              │
+│  pnpm test:use-auth                   → Authentication hook               │
+│  pnpm test:use-theme                  → Theme context hook                │
+│  pnpm test:use-debounce               → Debounce utility hook             │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ API TESTS ────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│  pnpm test:api-thesis                 → Thesis API (CRUD)                 │
+│  pnpm test:api-papers                 → Papers API (search, save)         │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ INTEGRATION TESTS ────────────────────────────────────────────────────────┐
+│                                                                              │
+│  pnpm test:integration-auth           → Auth workflow                     │
+│  pnpm test:integration-thesis         → Thesis creation workflow          │
+│  pnpm test:integration-ai             → AI tools workflow                 │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ WATCH MODE TESTS ─────────────────────────────────────────────────────────┐
+│                                                                              │
+│  pnpm test:watch:components           → Watch component tests             │
+│  pnpm test:watch:hooks                → Watch hook tests                  │
+│  pnpm test:watch:api                  → Watch API tests                   │
+│  pnpm test:watch:integration          → Watch integration tests           │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ TEST RUNNER SCRIPT ───────────────────────────────────────────────────────┐
+│                                                                              │
+│  node scripts/run-tests.js COMPONENT_TESTS         → Batch test components│
+│  node scripts/run-tests.js HOOK_TESTS              → Batch test hooks     │
+│  node scripts/run-tests.js API_TESTS               → Batch test APIs      │
+│  node scripts/run-tests.js INTEGRATION_TESTS       → Batch test workflows │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                            TEST STATISTICS                                 ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Total Tests Created:            31 files
+├─ Component Tests:             13 files
+├─ Hook Tests:                  3 files
+├─ API Tests:                   2 files
+└─ Integration Tests:           3 files
+
+Total pnpm Test Scripts:        49+ commands
+├─ Category Commands:           6
+├─ Component Commands:          13
+├─ Hook Commands:               3
+├─ API Commands:                2
+├─ Integration Commands:        3
+└─ Watch Mode Commands:         4
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                         COMMON WORKFLOWS                                   ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Develop & Test Components:
+  $ pnpm test:watch:components
+
+Test Everything Before Commit:
+  $ pnpm test:all-categories
+
+Check Coverage:
+  $ pnpm test:coverage
+
+Batch Test All Components:
+  $ node scripts/run-tests.js COMPONENT_TESTS
+
+Test With UI:
+  $ pnpm test:ui
+
+CI/CD Pipeline:
+  $ pnpm test && pnpm test:coverage
+
+Debug Single Component:
+  $ pnpm test:editor
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                     TEST FILE ORGANIZATION                                ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+src/__tests__/
+├── components/               (13 tests)
+│   ├── editor.test.tsx
+│   ├── sign-in-form.test.tsx
+│   ├── student-dashboard.test.tsx
+│   ├── research-question-generator.test.tsx
+│   ├── outline-builder.test.tsx
+│   ├── grammar-checker.test.tsx
+│   ├── notification-bell.test.tsx
+│   ├── paper-search-bar.test.tsx
+│   ├── theme-toggle.test.tsx
+│   ├── bibliography-generator.test.tsx
+│   ├── button.test.tsx
+│   ├── input.test.tsx
+│   └── card.test.tsx
+├── hooks/                   (3 tests)
+│   ├── useAuth.test.ts
+│   ├── useTheme.test.ts
+│   └── useDebounce.test.ts
+├── api/                     (2 tests)
+│   ├── thesis.test.ts
+│   └── papers.test.ts
+└── integration/             (3 tests)
+    ├── auth-workflow.test.tsx
+    ├── thesis-creation-workflow.test.tsx
+    └── ai-tools-workflow.test.ts
+
+═══════════════════════════════════════════════════════════════════════════════
+
+For detailed information, see: TEST_COMMANDS_REFERENCE.md
+For test file details, see: TEST_FILES_CREATED_SESSION.md

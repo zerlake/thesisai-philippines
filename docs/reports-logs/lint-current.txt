@@ -1,0 +1,5 @@
+
+> next-template@0.1.0 lint
+> next lint ; type lint-current.txt
+
+Invalid project directory provided, no such directory: c:\Users\Projects\thesis-ai\;

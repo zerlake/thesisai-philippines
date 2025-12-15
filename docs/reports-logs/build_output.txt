@@ -1,0 +1,33 @@
+
+> next-template@0.1.0 build C:\Users\Projects\thesis-ai-fresh
+> next build
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   ▲ Next.js 16.0.5 (Turbopack)
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · clientTraceMetadata
+     ✓ optimizeCss
+     · optimizePackageImports
+
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ✓ Compiled successfully in 66s
+   Running next.config.js provided runAfterProductionCompile ...
+ ✓ Completed runAfterProductionCompile in 1659ms
+   Running TypeScript ...
+Failed to compile.
+
+./src/components/conversation-panel.tsx:88:10
+Type error: Parameter 'payload' implicitly has an 'any' type.
+
+[0m [90m 86 |[39m           filter[33m:[39m [32m`sender_id=eq.${recipientId || ''}or recipient_id=eq.${userId}`[39m[33m,[39m
+ [90m 87 |[39m         }[33m,[39m
+[31m[1m>[22m[39m[90m 88 |[39m         (payload) [33m=>[39m {
+ [90m    |[39m          [31m[1m^[22m[39m
+ [90m 89 |[39m           [90m// Add new message to the list in real-time[39m
+ [90m 90 |[39m           [36mconst[39m newMsg [33m=[39m payload[33m.[39m[36mnew[39m [36mas[39m [33mMessage[39m[33m;[39m
+ [90m 91 |[39m           setMessages((prev) [33m=>[39m {[0m
+Next.js build worker exited with code: 1 and signal: null
+ ELIFECYCLE  Command failed with exit code 1.

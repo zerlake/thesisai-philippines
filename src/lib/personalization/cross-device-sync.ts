@@ -309,3 +309,4 @@ class CrossDeviceSyncManager {
 }
 
 export const crossDeviceSyncManager = new CrossDeviceSyncManager();
+export { CrossDeviceSyncManager };

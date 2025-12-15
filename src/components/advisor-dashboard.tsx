@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { ArrowRight, ArrowUp, ArrowDown } from "lucide-react";
 import Link from "next/link";
+import { DashboardNotificationSettings } from "./dashboard-notification-settings";
 import { thesisChecklist, type ChecklistPhase } from "../lib/checklist-items";
 import { Progress } from "./ui/progress";
 import { PendingReviewsCard } from "./pending-reviews-card";
@@ -172,9 +173,12 @@ export function AdvisorDashboard() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">Advisor Dashboard</h1>
-        <p className="text-muted-foreground">Monitor and guide your assigned students.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Advisor Dashboard</h1>
+          <p className="text-muted-foreground">Monitor and guide your assigned students.</p>
+        </div>
+        <DashboardNotificationSettings userRole="advisor" />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

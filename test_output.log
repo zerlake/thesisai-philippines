@@ -1,0 +1,117 @@
+
+> next-template@0.1.0 test:components C:\Users\Projects\thesis-ai-fresh
+> vitest run src/__tests__/components "--reporter=verbose"
+
+
+[1m[46m RUN [49m[22m [36mv4.0.14 [39m[90mC:/Users/Projects/thesis-ai-fresh[39m
+
+ [32m✓[39m src/__tests__/components/bibliography-generator.test.tsx[2m > [22mBibliographyGenerator Component[2m > [22mcomponent exists at src/components/bibliography-generator.tsx[32m 3[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/bibliography-generator.test.tsx[2m > [22mBibliographyGenerator Component[2m > [22maccepts citation format selection[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/bibliography-generator.test.tsx[2m > [22mBibliographyGenerator Component[2m > [22mtakes source metadata as input[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/bibliography-generator.test.tsx[2m > [22mBibliographyGenerator Component[2m > [22mgenerates properly formatted citation[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/bibliography-generator.test.tsx[2m > [22mBibliographyGenerator Component[2m > [22msupports multiple citation formats[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/bibliography-generator.test.tsx[2m > [22mBibliographyGenerator Component[2m > [22mallows copying generated entry[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/bibliography-generator.test.tsx[2m > [22mBibliographyGenerator Component[2m > [22mvalidates required fields[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/bibliography-generator.test.tsx[2m > [22mBibliographyGenerator Component[2m > [22mdisplays preview of formatted entry[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/bibliography-generator.test.tsx[2m > [22mBibliographyGenerator Component[2m > [22mtested in AI tools workflow[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/outline-builder.test.tsx[2m > [22mOutlineBuilder Component[2m > [22mcomponent exists at src/components/outline-builder.tsx[32m 3[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/outline-builder.test.tsx[2m > [22mOutlineBuilder Component[2m > [22mrequires AuthProvider for user context[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/outline-builder.test.tsx[2m > [22mOutlineBuilder Component[2m > [22maccepts thesis title as input[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/outline-builder.test.tsx[2m > [22mOutlineBuilder Component[2m > [22muses Puter AI for outline generation[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/outline-builder.test.tsx[2m > [22mOutlineBuilder Component[2m > [22mdisplays outline sections[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/outline-builder.test.tsx[2m > [22mOutlineBuilder Component[2m > [22mallows adding new sections[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/outline-builder.test.tsx[2m > [22mOutlineBuilder Component[2m > [22msupports section editing[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/outline-builder.test.tsx[2m > [22mOutlineBuilder Component[2m > [22mfull testing in integration tests[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/card.test.tsx[2m > [22mCard Component[2m > [22mrenders card element[32m 89[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/card.test.tsx[2m > [22mCard Component[2m > [22mrenders card with text content[32m 33[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/card.test.tsx[2m > [22mCard Component[2m > [22mrenders CardHeader[32m 11[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/card.test.tsx[2m > [22mCard Component[2m > [22mrenders CardTitle[32m 13[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/card.test.tsx[2m > [22mCard Component[2m > [22mrenders CardDescription[32m 10[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/card.test.tsx[2m > [22mCard Component[2m > [22mrenders CardContent[32m 10[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/card.test.tsx[2m > [22mCard Component[2m > [22mrenders complete card structure[32m 13[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/card.test.tsx[2m > [22mCard Component[2m > [22msupports multiple children in CardHeader[32m 13[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/card.test.tsx[2m > [22mCard Component[2m > [22mrenders multiple CardContent blocks[32m 13[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/card.test.tsx[2m > [22mCard Component[2m > [22mcard has styling classes[32m 20[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/paper-search-bar.test.tsx[2m > [22mPaperSearchBar Component[2m > [22mcomponent exists at src/components/paper-search/paper-search-bar.tsx[32m 3[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/paper-search-bar.test.tsx[2m > [22mPaperSearchBar Component[2m > [22maccepts search query input[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/paper-search-bar.test.tsx[2m > [22mPaperSearchBar Component[2m > [22mcalls paper search API[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/paper-search-bar.test.tsx[2m > [22mPaperSearchBar Component[2m > [22mdisplays search results[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/paper-search-bar.test.tsx[2m > [22mPaperSearchBar Component[2m > [22mshows paper metadata[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/paper-search-bar.test.tsx[2m > [22mPaperSearchBar Component[2m > [22mimplements pagination[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/paper-search-bar.test.tsx[2m > [22mPaperSearchBar Component[2m > [22mvalidates search input[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/paper-search-bar.test.tsx[2m > [22mPaperSearchBar Component[2m > [22mallows filtering and sorting[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/paper-search-bar.test.tsx[2m > [22mPaperSearchBar Component[2m > [22mtested in paper search integration[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/theme-toggle.test.tsx[2m > [22mThemeToggle Component[2m > [22mcomponent exists at src/components/theme-toggle.tsx[32m 3[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/theme-toggle.test.tsx[2m > [22mThemeToggle Component[2m > [22mrequires ThemeProvider context[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/theme-toggle.test.tsx[2m > [22mThemeToggle Component[2m > [22mdisplays current theme[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/theme-toggle.test.tsx[2m > [22mThemeToggle Component[2m > [22mprovides theme options dropdown[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/theme-toggle.test.tsx[2m > [22mThemeToggle Component[2m > [22mtoggles to dark theme[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/theme-toggle.test.tsx[2m > [22mThemeToggle Component[2m > [22mpersists theme preference[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/theme-toggle.test.tsx[2m > [22mThemeToggle Component[2m > [22mrespects system preference[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/theme-toggle.test.tsx[2m > [22mThemeToggle Component[2m > [22mapplies theme to document[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/theme-toggle.test.tsx[2m > [22mThemeToggle Component[2m > [22mprovides visual feedback[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/notification-bell.test.tsx[2m > [22mNotificationBell Component[2m > [22mcomponent exists at src/components/notification-bell.tsx[32m 4[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/notification-bell.test.tsx[2m > [22mNotificationBell Component[2m > [22mrequires AuthProvider for user context[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/notification-bell.test.tsx[2m > [22mNotificationBell Component[2m > [22mdisplays notification badge[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/notification-bell.test.tsx[2m > [22mNotificationBell Component[2m > [22mopens notification dropdown[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/notification-bell.test.tsx[2m > [22mNotificationBell Component[2m > [22mdisplays notification list[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/notification-bell.test.tsx[2m > [22mNotificationBell Component[2m > [22mmarks notifications as read[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/notification-bell.test.tsx[2m > [22mNotificationBell Component[2m > [22mcloses dropdown on outside click[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/notification-bell.test.tsx[2m > [22mNotificationBell Component[2m > [22mfetches notifications from backend[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/notification-bell.test.tsx[2m > [22mNotificationBell Component[2m > [22mtested with dashboard integration[32m 2[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/research-question-generator.test.tsx[2m > [22mResearchQuestionGenerator Component[2m > [22mcomponent exists at src/components/research-question-generator.tsx[32m 5[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/research-question-generator.test.tsx[2m > [22mResearchQuestionGenerator Component[2m > [22maccepts research topic input[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/research-question-generator.test.tsx[2m > [22mResearchQuestionGenerator Component[2m > [22muses Puter AI for generation[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/research-question-generator.test.tsx[2m > [22mResearchQuestionGenerator Component[2m > [22mdisplays generated questions[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/research-question-generator.test.tsx[2m > [22mResearchQuestionGenerator Component[2m > [22mallows copying generated questions[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/research-question-generator.test.tsx[2m > [22mResearchQuestionGenerator Component[2m > [22mvalidates empty input appropriately[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/research-question-generator.test.tsx[2m > [22mResearchQuestionGenerator Component[2m > [22mtested in integration workflows[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/sign-in-form.test.tsx[2m > [22mSignInForm Component[2m > [22mcomponent exists at src/components/sign-in-form.tsx[32m 3[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/sign-in-form.test.tsx[2m > [22mSignInForm Component[2m > [22mcomponent can be imported and used[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/sign-in-form.test.tsx[2m > [22mSignInForm Component[2m > [22mvalidates through integration tests[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/sign-in-form.test.tsx[2m > [22mSignInForm Component[2m > [22msupports email and password inputs[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/sign-in-form.test.tsx[2m > [22mSignInForm Component[2m > [22mhandles form submission[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/grammar-checker.test.tsx[2m > [22mGrammarChecker Component[2m > [22mcomponent exists at src/components/grammar-checker.tsx[32m 3[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/grammar-checker.test.tsx[2m > [22mGrammarChecker Component[2m > [22maccepts text input for checking[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/grammar-checker.test.tsx[2m > [22mGrammarChecker Component[2m > [22muses Puter AI for grammar analysis[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/grammar-checker.test.tsx[2m > [22mGrammarChecker Component[2m > [22mdisplays correction suggestions[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/grammar-checker.test.tsx[2m > [22mGrammarChecker Component[2m > [22mallows accepting corrections[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/grammar-checker.test.tsx[2m > [22mGrammarChecker Component[2m > [22mvalidates non-empty input[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/grammar-checker.test.tsx[2m > [22mGrammarChecker Component[2m > [22mhandles multiple error types[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/grammar-checker.test.tsx[2m > [22mGrammarChecker Component[2m > [22mtested in AI tools integration workflow[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/student-dashboard.test.tsx[2m > [22mStudentDashboard Component[2m > [22mcomponent exists at src/components/student-dashboard.tsx[32m 4[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/student-dashboard.test.tsx[2m > [22mStudentDashboard Component[2m > [22mrequires AuthProvider and ThemeProvider context[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/student-dashboard.test.tsx[2m > [22mStudentDashboard Component[2m > [22mdisplays thesis progress information[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/student-dashboard.test.tsx[2m > [22mStudentDashboard Component[2m > [22mshows recent activity section[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/student-dashboard.test.tsx[2m > [22mStudentDashboard Component[2m > [22mrenders navigation menu[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/student-dashboard.test.tsx[2m > [22mStudentDashboard Component[2m > [22mdisplays personalized user greeting[32m 0[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/editor.test.tsx[2m > [22mEditor Component[2m > [22mcomponent exists and can be imported[32m 4[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/editor.test.tsx[2m > [22mEditor Component[2m > [22mvalidates component module structure[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/editor.test.tsx[2m > [22mEditor Component[2m > [22mcomponent has expected structure[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/editor.test.tsx[2m > [22mEditor Component[2m > [22mcan be tested with proper context providers[32m 1[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/input.test.tsx[2m > [22mInput Component[2m > [22mrenders input element[33m 464[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/input.test.tsx[2m > [22mInput Component[2m > [22maccepts text input[33m 308[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/input.test.tsx[2m > [22mInput Component[2m > [22mhandles change events[32m 145[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/input.test.tsx[2m > [22mInput Component[2m > [22mdisplays placeholder text[32m 70[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/input.test.tsx[2m > [22mInput Component[2m > [22msupports disabled state[32m 53[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/input.test.tsx[2m > [22mInput Component[2m > [22mhandles focus events[32m 44[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/input.test.tsx[2m > [22mInput Component[2m > [22mhandles blur events[32m 49[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/input.test.tsx[2m > [22mInput Component[2m > [22maccepts type prop[32m 36[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/input.test.tsx[2m > [22mInput Component[2m > [22mworks with value prop[32m 38[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/input.test.tsx[2m > [22mInput Component[2m > [22mclears value on change[32m 50[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/button.test.tsx[2m > [22mButton Component[2m > [22mrenders button with text[33m 458[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/button.test.tsx[2m > [22mButton Component[2m > [22mhandles click events[32m 62[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/button.test.tsx[2m > [22mButton Component[2m > [22mapplies default variant[32m 9[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/button.test.tsx[2m > [22mButton Component[2m > [22mapplies secondary variant[32m 8[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/button.test.tsx[2m > [22mButton Component[2m > [22mapplies destructive variant[32m 11[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/button.test.tsx[2m > [22mButton Component[2m > [22msupports disabled state[32m 69[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/button.test.tsx[2m > [22mButton Component[2m > [22msupports different sizes[32m 84[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/button.test.tsx[2m > [22mButton Component[2m > [22mrenders with children[32m 9[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/button.test.tsx[2m > [22mButton Component[2m > [22msupports click handler[32m 39[2mms[22m[39m
+ [32m✓[39m src/__tests__/components/button.test.tsx[2m > [22mButton Component[2m > [22mdisabled button does not fire click[32m 45[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m13 passed[39m[22m[90m (13)[39m
+[2m      Tests [22m [1m[32m104 passed[39m[22m[90m (104)[39m
+[2m   Start at [22m 00:24:59
+[2m   Duration [22m 24.41s[2m (transform 676ms, setup 6.34s, import 3.74s, tests 2.41s, environment 42.39s)[22m
+

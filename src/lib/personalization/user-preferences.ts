@@ -224,3 +224,4 @@ class UserPreferencesManager {
 }
 
 export const userPreferencesManager = new UserPreferencesManager();
+export { UserPreferencesManager };

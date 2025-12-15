@@ -1,0 +1,2215 @@
+{
+  "files": {
+    "large": [
+      {
+        "path": "\\src\\components\\admin-dashboard.tsx",
+        "lines": 661,
+        "size": 36728
+      },
+      {
+        "path": "\\src\\components\\context7-collaborative-literature-review.tsx",
+        "lines": 522,
+        "size": 20238
+      },
+      {
+        "path": "\\src\\components\\context7-statistical-analysis.tsx",
+        "lines": 514,
+        "size": 20936
+      },
+      {
+        "path": "\\src\\components\\document-analyzer.tsx",
+        "lines": 801,
+        "size": 33529
+      },
+      {
+        "path": "\\src\\components\\EnhancedAnalyticsDashboard.tsx",
+        "lines": 535,
+        "size": 19322
+      },
+      {
+        "path": "\\src\\components\\enterprise-topic-generator.tsx",
+        "lines": 534,
+        "size": 20816
+      },
+      {
+        "path": "\\src\\components\\grammar-checker.tsx",
+        "lines": 647,
+        "size": 28148
+      },
+      {
+        "path": "\\src\\components\\GroupLeaderDashboard.tsx",
+        "lines": 637,
+        "size": 22660
+      },
+      {
+        "path": "\\src\\components\\GroupMemberDashboard.tsx",
+        "lines": 515,
+        "size": 18589
+      },
+      {
+        "path": "\\src\\components\\GroupTaskManager.tsx",
+        "lines": 624,
+        "size": 23423
+      },
+      {
+        "path": "\\src\\components\\literature-review-collaboration.tsx",
+        "lines": 681,
+        "size": 27580
+      },
+      {
+        "path": "\\src\\components\\research-article-analyzer.tsx",
+        "lines": 967,
+        "size": 40399
+      },
+      {
+        "path": "\\src\\components\\research-problem-identifier.tsx",
+        "lines": 717,
+        "size": 32618
+      },
+      {
+        "path": "\\src\\components\\research-question-generator.tsx",
+        "lines": 574,
+        "size": 22556
+      },
+      {
+        "path": "\\src\\components\\research-question-integration.tsx",
+        "lines": 842,
+        "size": 35877
+      },
+      {
+        "path": "\\src\\components\\ResearchGapIdentifier.tsx",
+        "lines": 1031,
+        "size": 50252
+      },
+      {
+        "path": "\\src\\components\\ResearchProjectGroups.tsx",
+        "lines": 596,
+        "size": 23757
+      },
+      {
+        "path": "\\src\\components\\reviewer-ai-toolkit.tsx",
+        "lines": 503,
+        "size": 20356
+      },
+      {
+        "path": "\\src\\components\\ui\\sidebar.tsx",
+        "lines": 775,
+        "size": 23622
+      },
+      {
+        "path": "\\src\\components\\variable-mapping-tool.tsx",
+        "lines": 864,
+        "size": 40595
+      },
+      {
+        "path": "\\src\\contexts\\context7-provider.tsx",
+        "lines": 577,
+        "size": 19447
+      },
+      {
+        "path": "\\src\\lib\\personalization\\dashboard-state.ts",
+        "lines": 807,
+        "size": 20619
+      },
+      {
+        "path": "\\src\\lib\\puter-ai-facade.ts",
+        "lines": 684,
+        "size": 19966
+      },
+      {
+        "path": "\\src\\lib\\realtime-server.ts",
+        "lines": 767,
+        "size": 19578
+      },
+      {
+        "path": "\\src\\__tests__\\ai-tools-integration.test.tsx",
+        "lines": 590,
+        "size": 18051
+      },
+      {
+        "path": "\\src\\__tests__\\personalization\\api-integration.test.ts",
+        "lines": 618,
+        "size": 18014
+      },
+      {
+        "path": "\\src\\__tests__\\ResearchGapIdentifier.integration.actual.test.tsx",
+        "lines": 545,
+        "size": 18965
+      }
+    ],
+    "unused_imports": [
+      {
+        "path": "\\src\\app\\(app)\\statistical-analysis\\page.tsx",
+        "unused": [
+          "type AnalysisResult"
+        ]
+      },
+      {
+        "path": "\\src\\app\\api\\dashboard\\route.ts",
+        "unused": [
+          "ZodError"
+        ]
+      },
+      {
+        "path": "\\src\\app\\global-error.tsx",
+        "unused": [
+          "NextError"
+        ]
+      },
+      {
+        "path": "\\src\\app\\groups\\page.tsx",
+        "unused": [
+          "GroupCollaborationSampleDataGenerator"
+        ]
+      },
+      {
+        "path": "\\src\\app\\university-guides\\page.tsx",
+        "unused": [
+          "type UniversityGuide",
+          "type GuideItem"
+        ]
+      },
+      {
+        "path": "\\src\\app\\university-guides\\[slug]\\page.tsx",
+        "unused": [
+          "type UniversityGuide"
+        ]
+      },
+      {
+        "path": "\\src\\components\\accessibility-settings-panel.tsx",
+        "unused": [
+          "Volume2"
+        ]
+      },
+      {
+        "path": "\\src\\components\\advisor-dashboard.tsx",
+        "unused": [
+          "type ChecklistPhase"
+        ]
+      },
+      {
+        "path": "\\src\\components\\ai-assistant-panel.tsx",
+        "unused": [
+          "type Editor"
+        ]
+      },
+      {
+        "path": "\\src\\components\\comment-sidebar.tsx",
+        "unused": [
+          "type Editor",
+          "type Comment"
+        ]
+      },
+      {
+        "path": "\\src\\components\\dashboard\\DashboardRealtimeProvider.tsx",
+        "unused": [
+          "REALTIME_STATE_CONFIG"
+        ]
+      },
+      {
+        "path": "\\src\\components\\dashboard\\__tests__\\EmptyState.test.tsx",
+        "unused": [
+          "userEvent"
+        ]
+      },
+      {
+        "path": "\\src\\components\\dashboard\\__tests__\\LoadingSkeleton.test.tsx",
+        "unused": [
+          "screen"
+        ]
+      },
+      {
+        "path": "\\src\\components\\dashboard\\__tests__\\WidgetError.test.tsx",
+        "unused": [
+          "userEvent"
+        ]
+      },
+      {
+        "path": "\\src\\components\\dashboard-header.tsx",
+        "unused": [
+          "Calendar",
+          "Button"
+        ]
+      },
+      {
+        "path": "\\src\\components\\editor-ai-companion.tsx",
+        "unused": [
+          "type Editor",
+          "type Comment"
+        ]
+      },
+      {
+        "path": "\\src\\components\\editor-header.tsx",
+        "unused": [
+          "RotateCcw"
+        ]
+      },
+      {
+        "path": "\\src\\components\\editor-old.tsx",
+        "unused": [
+          "htmlDocx",
+          "CharacterCount",
+          "BubbleMenuExtension",
+          "Paragraph",
+          "Text",
+          "Heading",
+          "Bold",
+          "Italic",
+          "Strike",
+          "BulletList",
+          "OrderedList",
+          "ListItem",
+          "History",
+          "HorizontalRule",
+          "Dropcursor",
+          "Gapcursor",
+          "HardBreak"
+        ]
+      },
+      {
+        "path": "\\src\\components\\editor-toolbar.tsx",
+        "unused": [
+          "type Editor"
+        ]
+      },
+      {
+        "path": "\\src\\components\\editor.tsx",
+        "unused": [
+          "Document",
+          "Paragraph",
+          "Text",
+          "Heading",
+          "Bold",
+          "Italic",
+          "Strike",
+          "BulletList",
+          "OrderedList",
+          "ListItem",
+          "History"
+        ]
+      },
+      {
+        "path": "\\src\\components\\email-confirmation-page.tsx",
+        "unused": [
+          "BookText"
+        ]
+      },
+      {
+        "path": "\\src\\components\\enterprise-card.tsx",
+        "unused": [
+          "ChevronRight"
+        ]
+      },
+      {
+        "path": "\\src\\components\\enterprise-topic-generator.tsx",
+        "unused": [
+          "Clock",
+          "Target",
+          "ChevronDown",
+          "ChevronUp"
+        ]
+      },
+      {
+        "path": "\\src\\components\\grammar-checker.tsx",
+        "unused": [
+          "useAuthReady",
+          "Separator"
+        ]
+      },
+      {
+        "path": "\\src\\components\\header.tsx",
+        "unused": [
+          "type NavItem",
+          "type NavGroup"
+        ]
+      },
+      {
+        "path": "\\src\\components\\landing\\hero-section.tsx",
+        "unused": [
+          "Image"
+        ]
+      },
+      {
+        "path": "\\src\\components\\mcp\\MCPProvider.tsx",
+        "unused": [
+          "type MCPOrchestrator"
+        ]
+      },
+      {
+        "path": "\\src\\components\\methodology-tool-card.tsx",
+        "unused": [
+          "type LucideIcon"
+        ]
+      },
+      {
+        "path": "\\src\\components\\my-milestones-card.tsx",
+        "unused": [
+          "type Milestone"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\DashboardCustomizer.tsx",
+        "unused": [
+          "useDebounce"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\notification-center.tsx",
+        "unused": [
+          "X"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\preference-panels\\accessibility-settings.tsx",
+        "unused": [
+          "Type"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\preference-panels\\privacy-settings.tsx",
+        "unused": [
+          "Eye",
+          "Trash2"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\settings-page.tsx",
+        "unused": [
+          "ThemeSettings",
+          "NotificationSettings",
+          "AccessibilitySettings",
+          "LayoutSettings",
+          "PrivacySettings",
+          "DeviceManagement"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\WidgetGallery.tsx",
+        "unused": [
+          "searchWidgets"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\widgets\\CalendarWidget.tsx",
+        "unused": [
+          "React"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\widgets\\CitationWidget.tsx",
+        "unused": [
+          "React"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\widgets\\CollaborationWidget.tsx",
+        "unused": [
+          "React"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\widgets\\NotesWidget.tsx",
+        "unused": [
+          "React"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\widgets\\RecentPapersWidget.tsx",
+        "unused": [
+          "React"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\widgets\\ResearchProgressWidget.tsx",
+        "unused": [
+          "React"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\widgets\\StatsWidget.tsx",
+        "unused": [
+          "React"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\widgets\\SuggestionsWidget.tsx",
+        "unused": [
+          "React"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\widgets\\TimeTrackerWidget.tsx",
+        "unused": [
+          "React"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\widgets\\TrendsWidget.tsx",
+        "unused": [
+          "React"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization\\widgets\\WritingGoalsWidget.tsx",
+        "unused": [
+          "React"
+        ]
+      },
+      {
+        "path": "\\src\\components\\personalization-showcase.tsx",
+        "unused": [
+          "Settings"
+        ]
+      },
+      {
+        "path": "\\src\\components\\premium-features-showcase.tsx",
+        "unused": [
+          "React"
+        ]
+      },
+      {
+        "path": "\\src\\components\\premium-landing-hero.tsx",
+        "unused": [
+          "React"
+        ]
+      },
+      {
+        "path": "\\src\\components\\puter-ai-tools.tsx",
+        "unused": [
+          "DialogTrigger"
+        ]
+      },
+      {
+        "path": "\\src\\components\\quick-access-dropdown.tsx",
+        "unused": [
+          "type LucideIcon"
+        ]
+      },
+      {
+        "path": "\\src\\components\\reset-password-page.tsx",
+        "unused": [
+          "Key"
+        ]
+      },
+      {
+        "path": "\\src\\components\\reviewer-ai-toolkit.tsx",
+        "unused": [
+          "type Editor"
+        ]
+      },
+      {
+        "path": "\\src\\components\\rich-text-editor.tsx",
+        "unused": [
+          "type Editor"
+        ]
+      },
+      {
+        "path": "\\src\\components\\sidebar.tsx",
+        "unused": [
+          "type NavItem",
+          "type NavGroup"
+        ]
+      },
+      {
+        "path": "\\src\\components\\SmartAIAssistant.tsx",
+        "unused": [
+          "type Editor"
+        ]
+      },
+      {
+        "path": "\\src\\components\\SmartSessionGoalCard.tsx",
+        "unused": [
+          "type GoalRecommendation"
+        ]
+      },
+      {
+        "path": "\\src\\components\\stat-card.tsx",
+        "unused": [
+          "type LucideIcon",
+          "React"
+        ]
+      },
+      {
+        "path": "\\src\\components\\student-checklist.tsx",
+        "unused": [
+          "type ChecklistPhase"
+        ]
+      },
+      {
+        "path": "\\src\\components\\student-dashboard-enterprise.tsx",
+        "unused": [
+          "FileText",
+          "Lightbulb",
+          "Presentation",
+          "ShieldCheck",
+          "BookOpenCheck",
+          "BookOpen",
+          "Square",
+          "Users",
+          "Folder",
+          "type LucideIcon",
+          "Skeleton",
+          "EnterpriseCard",
+          "EnterpriseCardContent"
+        ]
+      },
+      {
+        "path": "\\src\\components\\student-dashboard.tsx",
+        "unused": [
+          "type LucideIcon",
+          "Card",
+          "CardDescription",
+          "CardHeader",
+          "CardTitle"
+        ]
+      },
+      {
+        "path": "\\src\\components\\thesis-checklist.tsx",
+        "unused": [
+          "type ChecklistItem",
+          "type ChecklistPhase",
+          "Confetti"
+        ]
+      },
+      {
+        "path": "\\src\\components\\thesis-context7-docs.tsx",
+        "unused": [
+          "type DocumentationEntry"
+        ]
+      },
+      {
+        "path": "\\src\\components\\ui\\alert.tsx",
+        "unused": [
+          "type VariantProps"
+        ]
+      },
+      {
+        "path": "\\src\\components\\ui\\badge.tsx",
+        "unused": [
+          "type VariantProps"
+        ]
+      },
+      {
+        "path": "\\src\\components\\ui\\button.tsx",
+        "unused": [
+          "type VariantProps"
+        ]
+      },
+      {
+        "path": "\\src\\components\\ui\\command.tsx",
+        "unused": [
+          "type DialogProps"
+        ]
+      },
+      {
+        "path": "\\src\\components\\ui\\form.tsx",
+        "unused": [
+          "type ControllerProps",
+          "type FieldPath",
+          "type FieldValues"
+        ]
+      },
+      {
+        "path": "\\src\\components\\ui\\label.tsx",
+        "unused": [
+          "type VariantProps"
+        ]
+      },
+      {
+        "path": "\\src\\components\\ui\\sheet.tsx",
+        "unused": [
+          "type VariantProps"
+        ]
+      },
+      {
+        "path": "\\src\\components\\ui\\toggle-group.tsx",
+        "unused": [
+          "type VariantProps"
+        ]
+      },
+      {
+        "path": "\\src\\components\\ui\\toggle.tsx",
+        "unused": [
+          "type VariantProps"
+        ]
+      },
+      {
+        "path": "\\src\\components\\university-guide-detail.tsx",
+        "unused": [
+          "type UniversityGuide",
+          "type GuideItem",
+          "type LucideIcon"
+        ]
+      },
+      {
+        "path": "\\src\\components\\whats-next-card.tsx",
+        "unused": [
+          "type LucideIcon"
+        ]
+      },
+      {
+        "path": "\\src\\contexts\\puter-context.tsx",
+        "unused": [
+          "isPuterSDKLoaded"
+        ]
+      },
+      {
+        "path": "\\src\\hooks\\use-api-call.ts",
+        "unused": [
+          "ApiResponse"
+        ]
+      },
+      {
+        "path": "\\src\\hooks\\useAITool.ts",
+        "unused": [
+          "type AIToolInput",
+          "type AIToolConfig",
+          "type AIToolResponse"
+        ]
+      },
+      {
+        "path": "\\src\\hooks\\useDocument.ts",
+        "unused": [
+          "type Editor"
+        ]
+      },
+      {
+        "path": "\\src\\hooks\\useMCP.ts",
+        "unused": [
+          "type WorkflowStep",
+          "type WorkflowResult",
+          "type AgentResponse",
+          "type PuterResponse"
+        ]
+      },
+      {
+        "path": "\\src\\hooks\\usePersonalization.ts",
+        "unused": [
+          "crossDeviceSyncManager",
+          "smartNotificationManager"
+        ]
+      },
+      {
+        "path": "\\src\\hooks\\usePuterTool.ts",
+        "unused": [
+          "type PuterAIResponse"
+        ]
+      },
+      {
+        "path": "\\src\\hooks\\useRealtimeUpdates.ts",
+        "unused": [
+          "RealtimeStateManager",
+          "OperationStatus"
+        ]
+      },
+      {
+        "path": "\\src\\hooks\\useWebSocket.ts",
+        "unused": [
+          "resetWebSocketManager"
+        ]
+      },
+      {
+        "path": "\\src\\integrations\\supabase\\server-client.ts",
+        "unused": [
+          "type CookieOptions"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\checklist-items.ts",
+        "unused": [
+          "type LucideIcon"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\competencies.ts",
+        "unused": [
+          "type LucideIcon"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\dashboard\\data-source-manager.ts",
+        "unused": [
+          "dashboardErrorHandler"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\guides\\bsu.ts",
+        "unused": [
+          "type UniversityGuide"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\guides\\buksu.ts",
+        "unused": [
+          "type UniversityGuide"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\guides\\cmu.ts",
+        "unused": [
+          "type UniversityGuide"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\guides\\dlsu.ts",
+        "unused": [
+          "type UniversityGuide"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\guides\\index.ts",
+        "unused": [
+          "type UniversityGuide"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\guides\\msu.ts",
+        "unused": [
+          "type UniversityGuide"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\guides\\nemsu.ts",
+        "unused": [
+          "type UniversityGuide"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\guides\\pnu.ts",
+        "unused": [
+          "type UniversityGuide"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\guides\\pup.ts",
+        "unused": [
+          "type UniversityGuide"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\guides\\vsu.ts",
+        "unused": [
+          "type UniversityGuide"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\mcp\\orchestrator.ts",
+        "unused": [
+          "type AgentRequest",
+          "type AgentResponse",
+          "type SerenaContext",
+          "type PuterRequest",
+          "type PuterResponse"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\mcp\\utils.ts",
+        "unused": [
+          "type WorkflowStep"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\mcp\\__tests__\\serena-client.test.ts",
+        "unused": [
+          "vi"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\milestones.ts",
+        "unused": [
+          "type LucideIcon"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\navigation.ts",
+        "unused": [
+          "BookText",
+          "type LucideIcon"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\personalization\\cross-device-sync.ts",
+        "unused": [
+          "UserPreferences"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\personalization\\smart-notifications.ts",
+        "unused": [
+          "NotificationPreferences"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\personalization\\user-preferences.ts",
+        "unused": [
+          "BehaviorSettings"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\puter-ai-integration.ts",
+        "unused": [
+          "isRetryableError"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\server-auth.ts",
+        "unused": [
+          "cookies"
+        ]
+      },
+      {
+        "path": "\\src\\lib\\utils.ts",
+        "unused": [
+          "type ClassValue"
+        ]
+      },
+      {
+        "path": "\\src\\tests\\api-client.test.ts",
+        "unused": [
+          "PayloadError"
+        ]
+      },
+      {
+        "path": "\\src\\tests\\integration\\topic-idea-generator.integration.test.ts",
+        "unused": [
+          "NextResponse"
+        ]
+      },
+      {
+        "path": "\\src\\utils\\puter-ai-retry.ts",
+        "unused": [
+          "isRetryableError"
+        ]
+      },
+      {
+        "path": "\\src\\__tests__\\personalization\\user-preferences.test.ts",
+        "unused": [
+          "vi"
+        ]
+      },
+      {
+        "path": "\\src\\__tests__\\puter-ai-tools-migration.test.ts",
+        "unused": [
+          "type AIToolResponse"
+        ]
+      }
+    ],
+    "large_dependencies": []
+  },
+  "metrics": {
+    "total_components": 320,
+    "total_utilities": 95,
+    "avg_file_size": 0,
+    "largest_files": []
+  },
+  "issues": [
+    {
+      "type": "inline-function",
+      "file": "\\src\\app\\(app)\\admin\\institutions\\page.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\(app)\\admin\\institutions\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\(app)\\admin\\mcp-servers\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\(app)\\admin\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\app\\(app)\\admin\\payouts\\page.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\(app)\\admin\\payouts\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\app\\(app)\\admin\\testimonials\\page.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\(app)\\admin\\testimonials\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\(app)\\admin\\users\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\app\\(app)\\ai-tools\\page.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\(app)\\ai-tools\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\app\\(app)\\mcp-demo\\page.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\app\\(app)\\mcp-demo\\page.tsx",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\(app)\\mcp-demo\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\(app)\\settings\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\(app)\\statistical-analysis\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\about\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\admin\\puter-auth\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\app\\api\\auth\\demo-login\\route.ts",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\blog\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\app\\components\\dashboard\\DashboardErrorBoundary.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\contact\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\documentation\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\app\\global-error.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\app\\groups\\page.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\groups\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\app\\groups\\[groupId]\\page.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\groups\\[groupId]\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\layout.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\pricing\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\privacy-policy\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\app\\sentry-example-page\\page.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\app\\sentry-example-page\\page.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\sentry-example-page\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\terms-of-service\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\app\\university-guides\\page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\accessibility-settings-panel.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\admin-dashboard.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\advisor-dashboard.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\advisor-requests-card.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\advisor-review-panel.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\ai-tool-preview-modal.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\ai-tool-with-examples.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\at-risk-students-card.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\components\\auth-provider.tsx",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\bibliography-generator.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\citation-manager.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\comment-sidebar.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\conclusion-generator.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\context7-collaborative-literature-review.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\context7-dashboard.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\context7-docs.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\context7-statistical-analysis.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\critic-requests-card.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\critic-review-panel.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\dashboard\\ConflictResolutionUI.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\dashboard\\PendingOperationsBadge.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\demo-accounts-section.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\components\\demo-accounts-section.tsx",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\document-analyzer.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\document-share-dialog.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\editor-ai-companion.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\EnhancedAnalyticsDashboard.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\enterprise-card.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\enterprise-topic-generator.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\external-review-dialog.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\flashcards-generator.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\focus-timer.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\forgot-password-page.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\grammar-checker.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\components\\grammar-checker.tsx",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\GroupInvitationManager.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\GroupLeaderDashboard.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\GroupMemberDashboard.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\GroupTaskManager.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\institution-request-dialog.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\intelligent-assistant.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\landing\\features-section-animated.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\components\\landing\\features-section-animated.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\landing\\features-section-static.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\components\\landing\\features-section-static.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\landing\\features-section.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\landing-header.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\literature-review-collaboration.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\mcp\\DocumentAnalyzer.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\mcp\\ExampleMCPComponent.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\methodology-tools\\informed-consent-generator.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\methodology-tools\\research-design-selector.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\methodology-tools\\sampling-method-advisor.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\methodology-tools\\statistical-test-advisor.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\methodology-tools\\survey-question-generator.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\mobile-bottom-navigation.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\new-document-dialog.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\new-document-list.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\originality-check-panel.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\paraphrasing-tool.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\performance\\CodeSplittingExamples.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\personalization\\DashboardCustomizer.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\personalization\\notification-center.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\components\\personalization\\notification-center.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\components\\personalization\\preference-panels\\accessibility-settings.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\personalization\\preference-panels\\device-management.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\components\\personalization\\preference-panels\\device-management.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\components\\personalization\\preference-panels\\layout-settings.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\components\\personalization\\preference-panels\\notification-settings.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\components\\personalization\\preference-panels\\privacy-settings.tsx",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\components\\personalization\\preference-panels\\privacy-settings.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\personalization\\preference-panels\\theme-settings.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\components\\personalization\\preference-panels\\theme-settings.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\personalization\\settings-page.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\components\\personalization\\settings-page.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\personalization\\WidgetGallery.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\personalization\\WidgetSettingsModal.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\personalization-showcase.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\puter-ai-tools.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\puter-tool-example.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\components\\puter-tool-example.tsx",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\qa-simulator.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\reference-manager.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\referrals-page.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\research-article-analyzer.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\research-problem-identifier.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\research-question-generator.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\research-question-integration.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\ResearchGapIdentifier.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\ResearchProjectGroups.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\results-tools\\chart-generator.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\results-tools\\kappa-calculator.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\reviewer-ai-toolkit.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\components\\rich-text-editor.tsx",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\components\\sample-data\\group-collaboration-sample-generator.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\SmartAIAssistant.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\SmartSessionGoalCard.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\student-dashboard-enhancements.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\components\\student-dashboard-enterprise.tsx",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\student-detail-view.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\student-dmp-form.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\theme-provider.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\theme-toggle.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\theme-toggle.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\thesis-context7-docs.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\title-generator.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\topic-ideation-tool.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\accordion.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\alert-dialog.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\alert.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\aspect-ratio.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\avatar.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\badge.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\breadcrumb.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\button.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\calendar.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\card.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\carousel.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\chart.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\checkbox.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\collapsible.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\command.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\context-menu.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\dialog.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\drawer.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\dropdown-menu.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\form.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\hover-card.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\input-otp.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\input.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\label.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\menubar.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\navigation-menu.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\pagination.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\popover.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\progress.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\radio-group.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\resizable.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\scroll-area.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\select.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\separator.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\sheet.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\ui\\sidebar.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\sidebar.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\slider.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\switch.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\table.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\tabs.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\textarea.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\toggle-group.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\toggle.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\components\\ui\\tooltip.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\user-nav.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\variable-mapping-tool.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\components\\welcome-modal.tsx",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "large-component",
+      "file": "\\src\\contexts\\context7-provider.tsx",
+      "severity": "medium",
+      "description": "Large component should consider React.memo or useMemo"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\contexts\\context7-theme-provider.tsx",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\hooks\\use-analytics-logging.ts",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\hooks\\use-api-call.ts",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\hooks\\use-skip-links.ts",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "inline-function",
+      "file": "\\src\\hooks\\useAITool.ts",
+      "severity": "medium",
+      "description": "Inline functions in JSX can cause unnecessary re-renders"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\hooks\\useBackgroundSync.ts",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\hooks\\useRealtimeUpdates.ts",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\hooks\\useWebSocket.ts",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\instrumentation-client.ts",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\instrumentation.ts",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\lib\\dashboard\\api-error-handler.ts",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\lib\\personalization\\smart-notifications.ts",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "namespace-import",
+      "file": "\\src\\lib\\personalization\\widget-registry.ts",
+      "severity": "medium",
+      "description": "Namespace imports prevent tree-shaking"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\lib\\puter-sdk-loader.ts",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\lib\\puter-sdk.ts",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\lib\\realtime-init.ts",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\lib\\realtime-server.ts",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    },
+    {
+      "type": "console-logs",
+      "file": "\\src\\utils\\puter-ai-retry.ts",
+      "severity": "low",
+      "description": "Remove console.log statements from production code"
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": "high",
+      "category": "Code Splitting",
+      "description": "27 files are over 500 lines. Consider splitting them:",
+      "files": [
+        {
+          "path": "\\src\\components\\admin-dashboard.tsx",
+          "lines": 661,
+          "size": 36728
+        },
+        {
+          "path": "\\src\\components\\context7-collaborative-literature-review.tsx",
+          "lines": 522,
+          "size": 20238
+        },
+        {
+          "path": "\\src\\components\\context7-statistical-analysis.tsx",
+          "lines": 514,
+          "size": 20936
+        },
+        {
+          "path": "\\src\\components\\document-analyzer.tsx",
+          "lines": 801,
+          "size": 33529
+        },
+        {
+          "path": "\\src\\components\\EnhancedAnalyticsDashboard.tsx",
+          "lines": 535,
+          "size": 19322
+        }
+      ],
+      "action": "Implement code splitting with dynamic imports"
+    },
+    {
+      "priority": "medium",
+      "category": "Cleanup",
+      "description": "Found 113 files with potentially unused imports",
+      "action": "Remove unused imports to reduce bundle size"
+    },
+    {
+      "priority": "medium",
+      "category": "Code Quality",
+      "description": "Found 210 potential performance issues",
+      "count": 210,
+      "action": "Fix anti-patterns to improve rendering performance"
+    }
+  ]
+}

@@ -37,6 +37,7 @@ import { UserGuideCard } from "./user-guide-card";
 import { TestimonialSubmissionCard } from "./testimonial-submission-card";
 import { WhatsNextCard } from "./whats-next-card";
 import { AdvisorFeedbackCard } from "./advisor-feedback-card";
+import { DashboardNotificationSettings } from "./dashboard-notification-settings";
 import { thesisChecklist } from "../lib/checklist-items";
 import { thesisMilestones } from "../lib/milestones";
 import { ContextualActions } from "./contextual-actions";
@@ -50,6 +51,8 @@ import { DashboardNavigation } from "./dashboard-navigation";
 import { EnterpriseCard, EnterpriseCardContent } from "./enterprise-card";
 import { ThesisPhasesCard } from "./thesis-phases-card";
 import { DashboardRealtimeProvider } from "./dashboard/DashboardRealtimeProvider";
+import { EnterpriseAppsCard } from "./enterprise-apps-card";
+import { EnterpriseWorkflowsCard } from "./enterprise-workflows-card";
 
 const topToolsForQuickAccess = [
   {
@@ -143,34 +146,136 @@ export function StudentDashboardEnterprise() {
     if (!user) return;
     setIsLoadingNextAction(true);
 
-    const { data: nextActionData, error } = await supabase.rpc('get_student_next_action', { p_student_id: user.id });
+    try {
+      // First try to call the RPC function if it exists
+      let nextActionData = null;
+      let rpcError = null;
 
-    if (error) {
-      console.error("Error fetching next action:", error);
-    } else if (nextActionData) {
-      if (nextActionData.type === 'feedback') {
-        setNextAction({ type: 'feedback', title: `Revise "${nextActionData.title || 'Untitled Document'}"`, detail: "Your advisor has requested revisions.", urgency: 'high', href: `/drafts/${nextActionData.id}`, icon: MessageSquare });
-      } else if (nextActionData.type === 'milestone_overdue') {
-        const milestoneInfo = thesisMilestones.find(m => m.key === nextActionData.key);
-        const daysOverdue = differenceInDays(new Date(), new Date(nextActionData.deadline!));
-        setNextAction({ type: 'milestone', title: `Overdue: ${milestoneInfo?.title || "Task"}`, detail: `This was due ${daysOverdue} day${daysOverdue > 1 ? 's' : ''} ago.`, urgency: 'critical', href: '/dashboard', icon: Target });
-      } else if (nextActionData.type === 'milestone_upcoming') {
-        const milestoneInfo = thesisMilestones.find(m => m.key === nextActionData.key);
-        const daysUntil = differenceInDays(new Date(nextActionData.deadline!), new Date());
-        setNextAction({ type: 'milestone', title: `Upcoming: ${milestoneInfo?.title || "Task"}`, detail: `Due in ${daysUntil} day${daysUntil > 1 ? 's' : ''}.`, urgency: 'high', href: '/dashboard', icon: Target });
+      try {
+        const { data, error } = await supabase.rpc('get_student_next_action', { p_student_id: user.id });
+        nextActionData = data;
+        rpcError = error;
+      } catch (rpcCallError) {
+        // RPC function doesn't exist or has an issue
+        rpcError = rpcCallError;
       }
-    } else {
-      const { data: completedItems } = await supabase.from("checklist_progress").select("item_id").eq("user_id", user.id);
-      const completedIds = new Set((completedItems || []).map(i => i.item_id));
-      const allChecklistItems = thesisChecklist.flatMap(phase => phase.items);
-      const nextTask = allChecklistItems.find(item => !completedIds.has(item.id));
-      if (nextTask) {
-        setNextAction({ type: 'task', title: nextTask.title, detail: nextTask.description, urgency: 'normal', href: nextTask.href || '/dashboard', icon: CheckSquare });
+
+      if (rpcError) {
+        // If the RPC function doesn't exist, use fallback logic
+        console.warn("Next action RPC unavailable, using fallback logic:", rpcError);
+
+        // Use checklist-based logic
+        const { data: completedItems, error: checklistError } = await supabase
+          .from("checklist_progress")
+          .select("item_id")
+          .eq("user_id", user.id)
+          .throwOnError(); // This will throw if there's an error
+
+        if (checklistError) {
+          throw checklistError;
+        }
+
+        const completedIds = new Set((completedItems || []).map(i => i.item_id));
+        const allChecklistItems = thesisChecklist.flatMap(phase => phase.items);
+        const nextTask = allChecklistItems.find(item => !completedIds.has(item.id));
+
+        if (nextTask) {
+          setNextAction({
+            type: 'task',
+            title: nextTask.title,
+            detail: nextTask.description,
+            urgency: 'normal',
+            href: nextTask.href || '/dashboard',
+            icon: CheckSquare
+          });
+        } else {
+          setNextAction({
+            type: 'task',
+            title: "Prepare for Submission",
+            detail: "You've completed all checklist items! Run a final originality check and prepare your presentation.",
+            urgency: 'normal',
+            href: '/originality-check',
+            icon: BookCheck
+          });
+        }
+      } else if (nextActionData) {
+        if (nextActionData.type === 'feedback') {
+          setNextAction({
+            type: 'feedback',
+            title: `Revise "${nextActionData.title || 'Untitled Document'}"`,
+            detail: "Your advisor has requested revisions.",
+            urgency: 'high',
+            href: `/drafts/${nextActionData.id}`,
+            icon: MessageSquare
+          });
+        } else if (nextActionData.type === 'milestone_overdue') {
+          const milestoneInfo = thesisMilestones.find(m => m.key === nextActionData.key);
+          const daysOverdue = differenceInDays(new Date(), new Date(nextActionData.deadline!));
+          setNextAction({
+            type: 'milestone',
+            title: `Overdue: ${milestoneInfo?.title || "Task"}`,
+            detail: `This was due ${daysOverdue} day${daysOverdue > 1 ? 's' : ''} ago.`,
+            urgency: 'critical',
+            href: '/dashboard',
+            icon: Target
+          });
+        } else if (nextActionData.type === 'milestone_upcoming') {
+          const milestoneInfo = thesisMilestones.find(m => m.key === nextActionData.key);
+          const daysUntil = differenceInDays(new Date(nextActionData.deadline!), new Date());
+          setNextAction({
+            type: 'milestone',
+            title: `Upcoming: ${milestoneInfo?.title || "Task"}`,
+            detail: `Due in ${daysUntil} day${daysUntil > 1 ? 's' : ''}.`,
+            urgency: 'high',
+            href: '/dashboard',
+            icon: Target
+          });
+        }
       } else {
-        setNextAction({ type: 'task', title: "Prepare for Submission", detail: "You've completed all checklist items! Run a final originality check and prepare your presentation.", urgency: 'normal', href: '/originality-check', icon: BookCheck });
+        // No specific next action, fall back to checklist logic
+        const { data: completedItems } = await supabase
+          .from("checklist_progress")
+          .select("item_id")
+          .eq("user_id", user.id);
+
+        const completedIds = new Set((completedItems || []).map(i => i.item_id));
+        const allChecklistItems = thesisChecklist.flatMap(phase => phase.items);
+        const nextTask = allChecklistItems.find(item => !completedIds.has(item.id));
+
+        if (nextTask) {
+          setNextAction({
+            type: 'task',
+            title: nextTask.title,
+            detail: nextTask.description,
+            urgency: 'normal',
+            href: nextTask.href || '/dashboard',
+            icon: CheckSquare
+          });
+        } else {
+          setNextAction({
+            type: 'task',
+            title: "Prepare for Submission",
+            detail: "You've completed all checklist items! Run a final originality check and prepare your presentation.",
+            urgency: 'normal',
+            href: '/originality-check',
+            icon: BookCheck
+          });
+        }
       }
+    } catch (err) {
+      console.error("Error fetching next action (fallback in use):", err);
+      // Set a default next action if something unexpected happens
+      setNextAction({
+        type: 'task',
+        title: "Continue Your Research",
+        detail: "Check out the new Apps and Workflows to accelerate your thesis work.",
+        urgency: 'normal',
+        href: '/apps',
+        icon: Target
+      });
+    } finally {
+      setIsLoadingNextAction(false);
     }
-    setIsLoadingNextAction(false);
   }, [user, supabase]);
 
   useEffect(() => {
@@ -271,12 +376,19 @@ export function StudentDashboardEnterprise() {
       <div className="min-h-screen space-y-8 bg-background">
         <WelcomeModal open={showWelcomeModal} onOpenChange={handleModalClose} name={displayName} />
         
-        {/* Enterprise Dashboard Header */}
-        <DashboardHeader
-          displayName={displayName}
-          streak={5}
-          projectProgress={65}
-        />
+        {/* Dashboard Header with Email Notifications */}
+        <div className="flex items-start justify-between border-b bg-gradient-to-b from-background to-background/50 pb-8 space-y-6 px-1">
+          <div className="flex-1">
+            <DashboardHeader
+              displayName={displayName}
+              streak={5}
+              projectProgress={65}
+            />
+          </div>
+          <div className="pt-8">
+            <DashboardNotificationSettings userRole="student" />
+          </div>
+        </div>
 
       <div className="space-y-8 px-1">
         {/* Upgrade Banner */}
@@ -319,6 +431,12 @@ export function StudentDashboardEnterprise() {
 
         {/* Thesis Phases Workstations */}
         <ThesisPhasesCard />
+
+        {/* Apps & Workflows */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <EnterpriseAppsCard />
+          <EnterpriseWorkflowsCard />
+        </div>
 
         {/* Quick Tools Navigation */}
         {widgets.quick_access && (

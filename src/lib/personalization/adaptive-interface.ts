@@ -241,3 +241,4 @@ class AdaptiveInterfaceManager {
 }
 
 export const adaptiveInterfaceManager = new AdaptiveInterfaceManager();
+export { AdaptiveInterfaceManager };

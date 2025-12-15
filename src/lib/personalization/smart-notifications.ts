@@ -330,3 +330,4 @@ class SmartNotificationManager {
 }
 
 export const smartNotificationManager = new SmartNotificationManager();
+export { SmartNotificationManager };

@@ -1,0 +1,68 @@
+═════════════════════════════════════════════════════════════════════════════════
+  EMAIL NOTIFICATIONS - QUICK RESTORE GUIDE
+═════════════════════════════════════════════════════════════════════════════════
+
+SITUATION:
+  Email notification code exists and works
+  Button missing from dashboard UI
+  Fix takes < 5 minutes
+
+SOLUTION - 2 STEPS:
+
+Step 1: Open this file
+  └─ src/components/dashboard/DashboardPageContent.tsx
+
+Step 2: Add one line at the top with other imports
+  └─ import { DashboardNotificationSettings } from '@/components/dashboard-notification-settings';
+
+Step 3: Add component to dashboard header
+  
+  FIND THIS:
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        ...
+      </div>
+
+  ADD THIS AT THE END (before closing div):
+    <DashboardNotificationSettings userRole="student" />
+
+  RESULT:
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        ...
+      </div>
+      <DashboardNotificationSettings userRole="student" />
+    </div>
+
+═════════════════════════════════════════════════════════════════════════════════
+
+TESTING:
+  pnpm dev
+  → Navigate to dashboard
+  → Button should appear in top right
+  → Click to open email preferences dialog
+
+FEATURE CHECK:
+  ✓ Master toggle for all notifications
+  ✓ Individual event toggles (Feedback, Milestones, Submissions, Group Activity)
+  ✓ Role-specific options
+  ✓ Auto-save preferences
+  ✓ Dark mode support
+
+═════════════════════════════════════════════════════════════════════════════════
+
+VERIFICATION:
+  ✓ 74 integration tests passing
+  ✓ All AI commands working
+  ✓ Document versioning working
+  ✓ Email sidebar in editors working
+  ✓ Component exists and is functional
+
+═════════════════════════════════════════════════════════════════════════════════
+
+For detailed guide: See RESTORE_EMAIL_NOTIFICATIONS_UI.md
+For test results: See NOVEL_SH_INTEGRATION_VERIFICATION.md
+
+═════════════════════════════════════════════════════════════════════════════════

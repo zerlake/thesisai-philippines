@@ -6,6 +6,7 @@ import { useAuth } from "./auth-provider";
 import { Skeleton } from "./ui/skeleton";
 import { toast } from "sonner";
 import { Timer, Users } from "lucide-react";
+import { DashboardNotificationSettings } from "./dashboard-notification-settings";
 import { CriticStudentList } from "./critic-student-list";
 import { StatCard } from "./stat-card";
 import { CriticReviewQueueCard } from "./critic-review-queue-card";
@@ -50,9 +51,12 @@ export function CriticDashboard() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">Critic Dashboard</h1>
-        <p className="text-muted-foreground">Review assigned manuscripts and manage your workflow.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Critic Dashboard</h1>
+          <p className="text-muted-foreground">Review assigned manuscripts and manage your workflow.</p>
+        </div>
+        <DashboardNotificationSettings userRole="critic" />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

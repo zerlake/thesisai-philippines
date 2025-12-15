@@ -1,0 +1,12 @@
+
+> next-template@0.1.0 build C:\Users\Projects\thesis-ai-fresh
+> next build
+
+   ▲ Next.js 16.0.5 (Turbopack)
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · clientTraceMetadata
+     ✓ optimizeCss
+     · optimizePackageImports
+
+   Creating an optimized production build ...

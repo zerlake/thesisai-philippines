@@ -83,6 +83,20 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Brand colors from gist specification
+        'brand-academic-blue': 'hsl(var(--brand-academic-blue))',
+        'brand-primary-dark-blue': 'hsl(var(--brand-primary-dark-blue))',
+        'brand-dark-bg': 'hsl(var(--brand-dark-bg))',
+        // Accent colors from gist specification
+        'accent-electric-purple': 'hsl(var(--accent-electric-purple))',
+        'accent-cyan': 'hsl(var(--accent-cyan))',
+        'accent-orange': 'hsl(var(--accent-orange))',
+        // Neutral colors from gist specification
+        'text-primary': 'hsl(var(--text-primary))',
+        'text-secondary': 'hsl(var(--text-secondary))',
+        'text-tertiary': 'hsl(var(--text-tertiary))',
+        'bg-light': 'hsl(var(--bg-light))',
+        'white': 'hsl(var(--white))',
       },
       borderRadius: {
         lg: "var(--radius)",

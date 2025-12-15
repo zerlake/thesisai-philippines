@@ -48,8 +48,8 @@ export function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/60 to-slate-900" />
 
       {/* Simplified background elements with CSS animations for performance */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse-slow" />
-      <div className="absolute bottom-0 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse-slower" />
+      <div className="absolute top-20 left-10 w-72 h-72 bg-accent-electric-purple/10 rounded-full blur-3xl animate-pulse-slow" />
+      <div className="absolute bottom-0 right-10 w-96 h-96 bg-accent-cyan/10 rounded-full blur-3xl animate-pulse-slower" />
 
       <div className="relative container flex flex-col items-center justify-center text-center py-4 md:py-6 lg:py-8">
         <div className="max-w-4xl mx-auto">
@@ -64,7 +64,7 @@ export function HeroSection() {
           {/* Main heading */}
           <h1 className="text-5xl md:text-7xl font-black tracking-tight text-white mb-6 opacity-0 animate-[fade-in_0.5s_ease-out_0.3s_forwards]">
             Your Thesis,{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-electric-purple via-accent-cyan to-pink-500">
               Perfected
             </span>
           </h1>
@@ -74,21 +74,22 @@ export function HeroSection() {
             From research conceptualization to final defense, ThesisAI provides enterprise-grade tools to streamline every stage of your academic journey.
           </p>
 
-          {/* Stats */}
+          {/* Social Proof Stats */}
           <div className="grid grid-cols-3 gap-4 md:gap-8 mb-10 max-w-2xl mx-auto opacity-0 animate-[fade-in_0.5s_ease-out_0.5s_forwards]">
             {[
-              { icon: Users, label: "AI-Powered", value: "Research Tools" },
-              { icon: TrendingUp, label: "Smart", value: "Analysis Engine" },
-              { icon: Sparkles, label: "Instant", value: "AI Feedback" }
+              { value: "10K+", label: "Students", icon: Users },
+              { value: "98%", label: "Approval Rate", icon: TrendingUp },
+              { value: "24/7", label: "Support", icon: Sparkles }
             ].map((stat, idx) => (
               <div
                 key={idx}
-                className="p-3 rounded-lg bg-slate-800/30 border border-slate-700/50 opacity-0 animate-[fade-in_0.5s_ease-out_0.6s_forwards]"
+                className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:border-slate-600/50 hover:shadow-xl hover:shadow-purple-500/10 transition-all opacity-0 animate-[fade-in_0.5s_ease-out_0.6s_forwards]"
                 style={{ animationDelay: `${500 + idx * 100}ms` }}
               >
-                <stat.icon className="w-5 h-5 text-blue-400 mx-auto mb-2" />
-                <p className="text-sm font-semibold text-white">{stat.label}</p>
-                <p className="text-xs text-slate-400">{stat.value}</p>
+                <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-electric-purple to-accent-cyan mb-1">
+                  {stat.value}
+                </p>
+                <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -102,7 +103,7 @@ export function HeroSection() {
               <Button
                 size="lg"
                 asChild
-                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-2xl hover:shadow-purple-500/50 transition-all h-12 px-8 text-base font-semibold w-full"
+                className="bg-gradient-to-r from-accent-electric-purple to-accent-cyan text-white hover:shadow-2xl hover:shadow-accent-electric-purple/50 transition-all h-12 px-8 text-base font-semibold w-full"
               >
                 <Link href="/register" className="flex items-center gap-2">
                   Get Started Free <ArrowRightIcon className="w-5 h-5" />

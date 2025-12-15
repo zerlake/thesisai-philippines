@@ -323,3 +323,4 @@ class DashboardCustomizationManager {
 }
 
 export const dashboardCustomizationManager = new DashboardCustomizationManager();
+export { DashboardCustomizationManager };

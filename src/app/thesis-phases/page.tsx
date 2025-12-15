@@ -14,12 +14,12 @@ import {
 
 export default function ThesisPhasesOverview() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-slate-100">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b border-slate-200 bg-white sticky top-0 z-40">
+      <div className="border-b border-border bg-card sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors">
+            <Link href="/dashboard" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="h-4 w-4" />
               Back to Dashboard
             </Link>
@@ -31,10 +31,10 @@ export default function ThesisPhasesOverview() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-slate-900 mb-4">
+          <h1 className="text-5xl font-bold text-foreground mb-4">
             Thesis Writing Phases
           </h1>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Navigate your thesis journey with dedicated workstations for each phase.
             Each phase includes specialized tools and resources to guide you to success.
           </p>
@@ -44,7 +44,7 @@ export default function ThesisPhasesOverview() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
           {THESIS_PHASES.map((phase) => (
             <Link key={phase.id} href={`/thesis-phases/${phase.id}`}>
-              <Card className="h-full p-8 hover:shadow-xl transition-all border-2 border-slate-200 hover:border-slate-400 cursor-pointer group">
+              <Card className="h-full p-8 hover:shadow-xl transition-all border-2 border-border hover:border-primary/50 cursor-pointer group">
                 {/* Phase Header */}
                 <div className={`rounded-lg p-4 mb-6 bg-gradient-to-r ${phase.color} text-white`}>
                   <div className="flex items-center gap-3 mb-2">
@@ -57,13 +57,13 @@ export default function ThesisPhasesOverview() {
                 </div>
 
                 {/* Phase Content */}
-                <h2 className="text-2xl font-bold text-slate-900 mb-2 group-hover:text-slate-700 transition-colors">
+                <h2 className="text-2xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                   {phase.title}
                 </h2>
-                <p className="text-slate-600 mb-6">{phase.description}</p>
+                <p className="text-muted-foreground mb-6">{phase.description}</p>
 
                 {/* Stats */}
-                <div className="flex items-center gap-6 text-sm text-slate-600 mb-6">
+                <div className="flex items-center gap-6 text-sm text-muted-foreground mb-6">
                   <div className="flex items-center gap-2">
                     <Zap className="h-4 w-4 text-yellow-500" />
                     <span>{phase.toolsCount} tools</span>
@@ -77,20 +77,20 @@ export default function ThesisPhasesOverview() {
                 {/* Features Preview */}
                 <div className="space-y-2 mb-6">
                   {phase.features.slice(0, 3).map((feature) => (
-                    <div key={feature.id} className="text-sm text-slate-600 flex items-start gap-2">
-                      <span className="text-slate-400 mt-1">•</span>
+                    <div key={feature.id} className="text-sm text-muted-foreground flex items-start gap-2">
+                      <span className="text-border mt-1">•</span>
                       <span>{feature.title}</span>
                     </div>
                   ))}
                   {phase.features.length > 3 && (
-                    <p className="text-sm text-slate-500 italic">
+                    <p className="text-sm text-muted-foreground italic">
                       +{phase.features.length - 3} more features
                     </p>
                   )}
                 </div>
 
                 {/* CTA */}
-                <div className="flex items-center gap-2 text-blue-600 font-semibold group-hover:gap-3 transition-all">
+                <div className="flex items-center gap-2 text-primary font-semibold group-hover:gap-3 transition-all">
                   Enter Workstation
                   <ArrowRight className="h-4 w-4" />
                 </div>
@@ -100,8 +100,8 @@ export default function ThesisPhasesOverview() {
         </div>
 
         {/* Timeline View */}
-        <div className="bg-white rounded-xl border border-slate-200 p-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-12">Your Thesis Journey</h2>
+        <div className="bg-card rounded-xl border border-border p-8">
+          <h2 className="text-2xl font-bold text-foreground mb-12">Your Thesis Journey</h2>
           
           <div className="space-y-8">
             {THESIS_PHASES.map((phase, index) => (
@@ -114,17 +114,17 @@ export default function ThesisPhasesOverview() {
                     {phase.phaseNumber}
                   </div>
                   {index < THESIS_PHASES.length - 1 && (
-                    <div className="w-1 h-24 bg-slate-200 mt-4"></div>
+                    <div className="w-1 h-24 bg-border mt-4"></div>
                   )}
                 </div>
 
                 {/* Phase info */}
                 <div className="pb-8 flex-1">
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">
+                  <h3 className="text-xl font-bold text-foreground mb-2">
                     {phase.phase}: {phase.title}
                   </h3>
-                  <p className="text-slate-600 mb-4">{phase.longDescription}</p>
-                  <div className="flex items-center gap-4 text-sm text-slate-600">
+                  <p className="text-muted-foreground mb-4">{phase.longDescription}</p>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Zap className="h-4 w-4 text-yellow-500" />
                       {phase.toolsCount} tools
@@ -142,7 +142,7 @@ export default function ThesisPhasesOverview() {
 
         {/* CTA Section */}
         <div className="mt-16 text-center">
-          <p className="text-slate-600 mb-6">
+          <p className="text-muted-foreground mb-6">
             Ready to start your thesis journey?
           </p>
           <Link href={`/thesis-phases/${THESIS_PHASES[0].id}`}>

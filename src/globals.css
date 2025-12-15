@@ -53,33 +53,56 @@
     --shadow-2: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --shadow-3: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     --shadow-4: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+    /* Brand colors from gist specification */
+    --brand-academic-blue: 10 14% 15%; /* #0A2540 */
+    --brand-primary-dark-blue: 15 22% 23%; /* #1A365D */
+    --brand-dark-bg: 15 28% 9%; /* #0F172A */
+
+    /* Accent colors from gist specification */
+    --accent-electric-purple: 267 75% 47%; /* #7C3AED */
+    --accent-cyan: 186 74% 61%; /* #06B6D4 */
+    --accent-orange: 22 100% 52%; /* #F97316 */
+
+    /* Neutral colors from gist specification */
+    --text-primary: 220 8% 12%; /* #1F2937 */
+    --text-secondary: 220 9% 34%; /* #4B5563 */
+    --text-tertiary: 220 9% 62%; /* #9CA3AF */
+    --bg-light: 218 26% 95%; /* #F6F9FC */
+    --white: 0 0% 100%; /* #FFFFFF */
+
+    /* Status colors from gist specification */
+    --success: 156 48% 30%; /* #10B981 */
+    --warning: 37 91% 45%; /* #F59E0B */
+    --error: 354 90% 48%; /* #EF4444 */
+    --info: 217 91% 51%; /* #3B82F6 */
   }
- 
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
- 
+
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
- 
+
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
- 
+
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
- 
+
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
     --tertiary: 217.2 32.6% 22.5%;
     --tertiary-foreground: 210 40% 98%;
- 
+
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
- 
+
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
- 
+
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
@@ -91,7 +114,7 @@
 
     --info: 198.3 88.6% 48.4%;
     --info-foreground: 210 40% 98%;
- 
+
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 217.2 91.2% 59.8%;
@@ -100,6 +123,29 @@
     --shadow-2: 0 4px 6px -1px rgb(0 0 0 / 0.2), 0 2px 4px -2px rgb(0 0 0 / 0.2);
     --shadow-3: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.2);
     --shadow-4: 0 20px 25px -5px rgb(0 0 0 / 0.2), 0 8px 10px -6px rgb(0 0 0 / 0.2);
+
+    /* Dark theme versions of brand colors from gist specification */
+    --brand-academic-blue: 10 14% 30%; /* Darker version of #0A2540 */
+    --brand-primary-dark-blue: 15 22% 40%; /* Darker version of #1A365D */
+    --brand-dark-bg: 15 28% 5%; /* Darker version of #0F172A */
+
+    /* Dark theme versions of accent colors from gist specification */
+    --accent-electric-purple: 267 75% 60%; /* Lighter version of #7C3AED */
+    --accent-cyan: 186 74% 70%; /* Lighter version of #06B6D4 */
+    --accent-orange: 22 100% 65%; /* Lighter version of #F97316 */
+
+    /* Dark theme versions of neutral colors from gist specification */
+    --text-primary: 220 8% 90%; /* Lighter version of #1F2937 */
+    --text-secondary: 220 9% 70%; /* Lighter version of #4B5563 */
+    --text-tertiary: 220 9% 50%; /* Lighter version of #9CA3AF */
+    --bg-light: 218 26% 15%; /* Darker version of #F6F9FC */
+    --white: 0 0% 100%; /* #FFFFFF remains the same */
+
+    /* Dark theme versions of status colors from gist specification */
+    --success: 156 48% 40%; /* Lighter version of #10B981 */
+    --warning: 37 91% 60%; /* Lighter version of #F59E0B */
+    --error: 354 90% 60%; /* Lighter version of #EF4444 */
+    --info: 217 91% 65%; /* Lighter version of #3B82F6 */
   }
 
   .theme-high-contrast {

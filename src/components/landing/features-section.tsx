@@ -156,10 +156,10 @@ export function FeaturesSection() {
       <div className="container">
         <div className="mx-auto mb-16 max-w-3xl text-center">
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white opacity-0 animate-[fade-in_0.5s_ease-out_0.2s_forwards]">
-            Features for Every Stage
+            Enterprise-Grade Academic Tools
           </h2>
           <p className="mt-6 text-lg text-slate-300 opacity-0 animate-[fade-in_0.5s_ease-out_0.3s_forwards]">
-            Follow your research journey with tools designed for each phase—from planning through defense.
+            Comprehensive AI-powered tools for every stage of your academic journey.
           </p>
         </div>
 
@@ -246,16 +246,16 @@ export function FeaturesSection() {
         {/* Quick Stats */}
         <div className="mt-16 p-8 md:p-12 rounded-xl bg-gradient-to-r from-blue-500/5 to-purple-600/5 border border-blue-500/10 opacity-0 animate-[fade-in_0.5s_ease-out_0.8s_forwards]">
           <p className="text-center text-base text-slate-300 mb-8 font-medium">
-            Everything you need for thesis success
+            Trusted by researchers and institutions
           </p>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { label: "13+", desc: "Advanced Tools" },
+              { label: "13+", desc: "Enterprise Tools" },
               { label: "100%", desc: "Privacy Protected" },
               { label: "99.9%", desc: "Platform Uptime" }
             ].map((item, idx) => (
               <div key={idx} className="text-center">
-                <p className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                <p className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent-electric-purple to-accent-cyan">
                   {item.label}
                 </p>
                 <p className="text-base text-slate-300 mt-3">{item.desc}</p>
