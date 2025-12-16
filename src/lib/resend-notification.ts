@@ -1,7 +1,18 @@
 import { Resend } from 'resend';
 import { generateAdvisorNotificationEmail, generateStudentNotificationEmail } from './email-templates';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialization to avoid build-time errors when RESEND_API_KEY is not set
+let resendClient: Resend | null = null;
+
+function getResendClient(): Resend {
+  if (!resendClient) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY environment variable is not set');
+    }
+    resendClient = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendClient;
+}
 
 export interface SendNotificationEmailProps {
   to: string;
@@ -35,7 +46,7 @@ export async function sendNotificationEmail({
       actionButtonText,
     });
 
-    const data = await resend.emails.send({
+    const data = await getResendClient().emails.send({
       from: process.env.RESEND_FROM_EMAIL || 'noreply@thesisai-philippines.com',
       to,
       subject: getEmailSubject(actionType, studentName),
@@ -200,7 +211,7 @@ export async function sendStudentNotificationEmail({
       actionButtonText,
     });
 
-    const data = await resend.emails.send({
+    const data = await getResendClient().emails.send({
       from: process.env.RESEND_FROM_EMAIL || 'noreply@thesisai-philippines.com',
       to,
       subject: getStudentEmailSubject(actionType, senderName),
@@ -369,7 +380,7 @@ export async function sendAdvisorToStudentNotificationEmail({
       actionButtonText,
     });
 
-    const data = await resend.emails.send({
+    const data = await getResendClient().emails.send({
       from: process.env.RESEND_FROM_EMAIL || 'noreply@thesisai-philippines.com',
       to,
       subject: getAdvisorToStudentEmailSubject(actionType, advisorName),
@@ -512,7 +523,7 @@ export async function sendCriticToStudentNotificationEmail({
       actionButtonText,
     });
 
-    const data = await resend.emails.send({
+    const data = await getResendClient().emails.send({
       from: process.env.RESEND_FROM_EMAIL || 'noreply@thesisai-philippines.com',
       to,
       subject: getCriticToStudentEmailSubject(actionType, criticName),
