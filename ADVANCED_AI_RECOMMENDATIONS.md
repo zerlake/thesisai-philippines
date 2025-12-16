@@ -284,6 +284,108 @@ interface Recommendation {
 }
 ```
 
+## Predictive Analytics for Thesis Completion
+
+The system also includes predictive analytics to estimate thesis completion time based on user behavior and progress patterns.
+
+### Completion Prediction Model
+
+The `CompletionPredictor` class analyzes multiple factors to predict completion time:
+
+- Writing pace (words per day)
+- Consistency of work schedule
+- User engagement with tools
+- Frequency of interruptions
+- Utilization of support resources
+
+### Key Features
+
+1. **Dynamic Prediction**: Updates estimates based on recent activity patterns
+2. **Risk Factor Analysis**: Identifies potential obstacles to timely completion
+3. **Actionable Recommendations**: Provides specific suggestions to improve timeline
+4. **Confidence Scoring**: Provides reliability estimates for predictions
+5. **Trend Tracking**: Historical view of prediction accuracy over time
+
+### Data Models
+
+```typescript
+interface ThesisProgressData {
+  userId: string;
+  sectionsCompleted: number;
+  totalSections: number;
+  wordsWritten: number;
+  targetWords: number;
+  daysSinceStart: number;
+  currentMilestone: string;
+  milestones: string[];
+  weeklyProgress: number[];
+  timePerDay: number;
+  engagementScore: number;
+  interruptions: number;
+  helpRequests: number;
+  feedbackReceived: number;
+  resourcesUsed: string[];
+}
+
+interface CompletionPrediction {
+  id: string;
+  userId: string;
+  predictedDaysRemaining: number;
+  confidence: number;
+  completionDate: Date;
+  factors: {
+    pace: number;
+    consistency: number;
+    engagement: number;
+    interruptions: number;
+    support: number;
+  };
+  riskFactors: {
+    lowPace: boolean;
+    inconsistent: boolean;
+    disengaged: boolean;
+    manyInterruptions: boolean;
+    insufficientSupport: boolean;
+  };
+  recommendations: string[];
+  updatedAt: Date;
+}
+```
+
+### API Endpoints
+
+#### GET /api/learning/completion-predictions
+Retrieves the current completion prediction for the authenticated user.
+
+**Response Format:**
+```json
+{
+  "success": true,
+  "prediction": {
+    "id": "pred-123",
+    "userId": "user-123",
+    "predictedDaysRemaining": 45,
+    "confidence": 0.85,
+    "completionDate": "2025-03-15T10:00:00Z",
+    "factors": { ... },
+    "riskFactors": { ... },
+    "recommendations": ["Recommendation 1", "Recommendation 2"],
+    "updatedAt": "2025-01-15T10:00:00Z"
+  },
+  "timestamp": "2025-01-15T10:00:00Z"
+}
+```
+
+#### POST /api/learning/completion-predictions
+Retrieves historical prediction data.
+
+**Request Body:**
+```json
+{
+  "action": "history"
+}
+```
+
 ## Future Enhancements
 
 1. **Deep Learning Models**: Implement neural networks for more sophisticated pattern recognition
@@ -291,6 +393,7 @@ interface Recommendation {
 3. **Natural Language Processing**: Analyze content quality and difficulty automatically
 4. **Real-time Adaptation**: Adjust recommendations based on immediate user feedback
 5. **A/B Testing Framework**: Continuously optimize recommendation effectiveness
+6. **Advanced Predictive Models**: Implement time-series forecasting for more accurate completion estimates
 
 ## Security and Privacy
 

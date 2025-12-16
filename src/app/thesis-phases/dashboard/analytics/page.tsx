@@ -49,6 +49,10 @@ import {
   Recommendation,
   recommendationService
 } from '@/services/recommendation-service';
+import {
+  CompletionPrediction,
+  completionPredictionService
+} from '@/services/completion-prediction-service';
 
 export default function AnalyticsDashboardPage() {
   const { session } = useAuth();
@@ -59,22 +63,25 @@ export default function AnalyticsDashboardPage() {
   const [defenseData, setDefenseData] = useState<DefenseData | null>(null);
   const [studyGuideData, setStudyGuideData] = useState<StudyGuideData | null>(null);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [completionPrediction, setCompletionPrediction] = useState<CompletionPrediction | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingInsights, setLoadingInsights] = useState(true);
   const [loadingRecommendations, setLoadingRecommendations] = useState(true);
+  const [loadingPredictions, setLoadingPredictions] = useState(true);
 
   // Fetch initial data
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [progress, flashcards, defense, studyGuides, insightsData, recommendationsData] = await Promise.all([
+        const [progress, flashcards, defense, studyGuides, insightsData, recommendationsData, prediction] = await Promise.all([
           fetchProgressData(),
           fetchFlashcardData(),
           fetchDefenseData(),
           fetchStudyGuideData(),
           fetchInsights(),
-          recommendationService.fetchRecommendations()
+          recommendationService.fetchRecommendations(),
+          completionPredictionService.fetchCurrentPrediction()
         ]);
 
         setProgressData(progress);
@@ -83,6 +90,7 @@ export default function AnalyticsDashboardPage() {
         setStudyGuideData(studyGuides);
         setInsights(insightsData);
         setRecommendations(recommendationsData);
+        setCompletionPrediction(prediction);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
@@ -96,13 +104,14 @@ export default function AnalyticsDashboardPage() {
   const handleRefreshData = async () => {
     setLoading(true);
     try {
-      const [progress, flashcards, defense, studyGuides, insightsData, recommendationsData] = await Promise.all([
+      const [progress, flashcards, defense, studyGuides, insightsData, recommendationsData, prediction] = await Promise.all([
         fetchProgressData(),
         fetchFlashcardData(),
         fetchDefenseData(),
         fetchStudyGuideData(),
         fetchInsights(),
-        recommendationService.fetchRecommendations()
+        recommendationService.fetchRecommendations(),
+        completionPredictionService.fetchCurrentPrediction()
       ]);
 
       setProgressData(progress);
@@ -111,6 +120,7 @@ export default function AnalyticsDashboardPage() {
       setStudyGuideData(studyGuides);
       setInsights(insightsData);
       setRecommendations(recommendationsData);
+      setCompletionPrediction(prediction);
     } catch (error) {
       console.error('Error refreshing dashboard data:', error);
     } finally {
@@ -243,13 +253,14 @@ export default function AnalyticsDashboardPage() {
 
         {/* Main Dashboard Content */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 lg:w-[700px]">
+          <TabsList className="grid w-full grid-cols-7 lg:w-[800px]">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="flashcards">Flashcards</TabsTrigger>
             <TabsTrigger value="defense">Defense</TabsTrigger>
             <TabsTrigger value="study">Study Guides</TabsTrigger>
             <TabsTrigger value="insights">Insights</TabsTrigger>
             <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
+            <TabsTrigger value="predictions">Predictions</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -646,6 +657,169 @@ export default function AnalyticsDashboardPage() {
                           <h3 className="text-lg font-medium">No recommendations available</h3>
                           <p className="text-muted-foreground">
                             Complete more activities to receive personalized recommendations
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Completion Predictions Tab */}
+          <TabsContent value="predictions" className="space-y-6">
+            <div className="grid gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    Thesis Completion Predictions
+                  </CardTitle>
+                  <CardDescription>
+                    AI-powered estimates for your thesis completion based on your progress and activity patterns
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {completionPrediction ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <Card>
+                            <CardContent className="p-4">
+                              <div className="flex items-center">
+                                <Target className="h-6 w-6 text-blue-500 mr-2" />
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Days Remaining</p>
+                                  <p className="text-2xl font-bold">{completionPrediction.predictedDaysRemaining}</p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          <Card>
+                            <CardContent className="p-4">
+                              <div className="flex items-center">
+                                <Calendar className="h-6 w-6 text-green-500 mr-2" />
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Estimated Completion</p>
+                                  <p className="text-xl font-bold">{completionPrediction.completionDate.toLocaleDateString()}</p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          <Card>
+                            <CardContent className="p-4">
+                              <div className="flex items-center">
+                                <Activity className="h-6 w-6 text-orange-500 mr-2" />
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Confidence</p>
+                                  <p className="text-xl font-bold">{Math.round(completionPrediction.confidence * 100)}%</p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          <Card>
+                            <CardContent className="p-4">
+                              <div className="flex items-center">
+                                <BarChart3 className="h-6 w-6 text-purple-500 mr-2" />
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Risk Level</p>
+                                  <Badge
+                                    variant={completionPrediction.riskFactors.lowPace || completionPrediction.riskFactors.inconsistent ||
+                                            completionPrediction.riskFactors.disengaged || completionPrediction.riskFactors.manyInterruptions ||
+                                            completionPrediction.riskFactors.insufficientSupport ? 'destructive' : 'default'}
+                                    className="capitalize"
+                                  >
+                                    {(Object.values(completionPrediction.riskFactors).filter(Boolean).length > 2 ? 'high' :
+                                      Object.values(completionPrediction.riskFactors).filter(Boolean).length > 0 ? 'medium' : 'low')} risk
+                                  </Badge>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-lg">Risk Factors</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex flex-wrap gap-2">
+                              {completionPrediction.riskFactors.lowPace && (
+                                <Badge variant="destructive">Low Writing Pace</Badge>
+                              )}
+                              {completionPrediction.riskFactors.inconsistent && (
+                                <Badge variant="destructive">Inconsistent Schedule</Badge>
+                              )}
+                              {completionPrediction.riskFactors.disengaged && (
+                                <Badge variant="destructive">Low Engagement</Badge>
+                              )}
+                              {completionPrediction.riskFactors.manyInterruptions && (
+                                <Badge variant="destructive">Frequent Interruptions</Badge>
+                              )}
+                              {completionPrediction.riskFactors.insufficientSupport && (
+                                <Badge variant="destructive">Insufficient Support</Badge>
+                              )}
+                              {Object.values(completionPrediction.riskFactors).every(v => !v) && (
+                                <Badge variant="default">No Significant Risk Factors</Badge>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-lg">Recommendations</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <ul className="list-disc pl-5 space-y-2">
+                              {completionPrediction.recommendations.map((rec, idx) => (
+                                <li key={idx} className="text-sm">{rec}</li>
+                              ))}
+                            </ul>
+                          </CardContent>
+                        </Card>
+
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-lg">Factors Affecting Timeline</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                              <div className="text-center">
+                                <p className="text-sm text-muted-foreground">Writing Pace</p>
+                                <p className="text-lg font-semibold">{(completionPrediction.factors.pace * 100).toFixed(0)}%</p>
+                              </div>
+                              <div className="text-center">
+                                <p className="text-sm text-muted-foreground">Consistency</p>
+                                <p className="text-lg font-semibold">{(completionPrediction.factors.consistency * 100).toFixed(0)}%</p>
+                              </div>
+                              <div className="text-center">
+                                <p className="text-sm text-muted-foreground">Engagement</p>
+                                <p className="text-lg font-semibold">{(completionPrediction.factors.engagement * 100).toFixed(0)}%</p>
+                              </div>
+                              <div className="text-center">
+                                <p className="text-sm text-muted-foreground">Interruptions</p>
+                                <p className="text-lg font-semibold">{(completionPrediction.factors.interruptions * 100).toFixed(0)}%</p>
+                              </div>
+                              <div className="text-center">
+                                <p className="text-sm text-muted-foreground">Support</p>
+                                <p className="text-lg font-semibold">{(completionPrediction.factors.support * 100).toFixed(0)}%</p>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    ) : (
+                      <Card>
+                        <CardContent className="py-8 text-center">
+                          <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                          <h3 className="text-lg font-medium">No completion prediction available</h3>
+                          <p className="text-muted-foreground">
+                            Complete more activities to receive thesis completion estimates
                           </p>
                         </CardContent>
                       </Card>
