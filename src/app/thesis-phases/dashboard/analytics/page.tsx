@@ -32,12 +32,12 @@ import { TimeSpentChart } from './charts/time-spent-chart';
 import { RetentionCurveChart } from './charts/retention-curve-chart';
 import { LearningVelocityChart } from './charts/learning-velocity-chart';
 import { useAuth } from '@/components/auth-provider';
-import { 
-  fetchProgressData, 
-  fetchFlashcardData, 
-  fetchDefenseData, 
-  fetchStudyGuideData, 
-  fetchInsights, 
+import {
+  fetchProgressData,
+  fetchFlashcardData,
+  fetchDefenseData,
+  fetchStudyGuideData,
+  fetchInsights,
   dismissInsight,
   ProgressData,
   FlashcardData,
@@ -45,6 +45,10 @@ import {
   StudyGuideData,
   Insight
 } from '@/services/analytics-service';
+import {
+  Recommendation,
+  recommendationService
+} from '@/services/recommendation-service';
 
 export default function AnalyticsDashboardPage() {
   const { session } = useAuth();
@@ -54,27 +58,31 @@ export default function AnalyticsDashboardPage() {
   const [flashcardData, setFlashcardData] = useState<FlashcardData | null>(null);
   const [defenseData, setDefenseData] = useState<DefenseData | null>(null);
   const [studyGuideData, setStudyGuideData] = useState<StudyGuideData | null>(null);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingInsights, setLoadingInsights] = useState(true);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(true);
 
   // Fetch initial data
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [progress, flashcards, defense, studyGuides, insightsData] = await Promise.all([
+        const [progress, flashcards, defense, studyGuides, insightsData, recommendationsData] = await Promise.all([
           fetchProgressData(),
           fetchFlashcardData(),
           fetchDefenseData(),
           fetchStudyGuideData(),
-          fetchInsights()
+          fetchInsights(),
+          recommendationService.fetchRecommendations()
         ]);
-        
+
         setProgressData(progress);
         setFlashcardData(flashcards);
         setDefenseData(defense);
         setStudyGuideData(studyGuides);
         setInsights(insightsData);
+        setRecommendations(recommendationsData);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
@@ -88,19 +96,21 @@ export default function AnalyticsDashboardPage() {
   const handleRefreshData = async () => {
     setLoading(true);
     try {
-      const [progress, flashcards, defense, studyGuides, insightsData] = await Promise.all([
+      const [progress, flashcards, defense, studyGuides, insightsData, recommendationsData] = await Promise.all([
         fetchProgressData(),
         fetchFlashcardData(),
         fetchDefenseData(),
         fetchStudyGuideData(),
-        fetchInsights()
+        fetchInsights(),
+        recommendationService.fetchRecommendations()
       ]);
-      
+
       setProgressData(progress);
       setFlashcardData(flashcards);
       setDefenseData(defense);
       setStudyGuideData(studyGuides);
       setInsights(insightsData);
+      setRecommendations(recommendationsData);
     } catch (error) {
       console.error('Error refreshing dashboard data:', error);
     } finally {
@@ -112,13 +122,47 @@ export default function AnalyticsDashboardPage() {
     try {
       // Optimistically remove the insight
       setInsights(prev => prev.filter(insight => insight.id !== id));
-      
+
       // In a real app, we would await the API call
       await dismissInsight(id);
     } catch (error) {
       console.error('Error dismissing insight:', error);
       // Revert optimistic update if API call fails
       // This would require keeping track of the dismissed insight
+    }
+  };
+
+  const trackRecommendationInteraction = async (id: string, action: 'viewed' | 'completed' | 'dismissed' | 'ignored') => {
+    try {
+      await recommendationService.trackRecommendationInteraction(id, action);
+
+      // If the action is 'dismissed', remove it from the list
+      if (action === 'dismissed') {
+        setRecommendations(prev => prev.filter(rec => rec.id !== id));
+      }
+    } catch (error) {
+      console.error('Error tracking recommendation interaction:', error);
+    }
+  };
+
+  const handleRecommendationAction = (rec: Recommendation) => {
+    // Track the action
+    trackRecommendationInteraction(rec.id, 'completed');
+
+    // Redirect to the appropriate tool based on the recommendation
+    switch (rec.targetTool) {
+      case 'flashcard':
+        window.location.href = '/thesis-phases/flashcard-generator';
+        break;
+      case 'defense':
+        window.location.href = '/thesis-phases/defense-question-generator';
+        break;
+      case 'study_guide':
+        window.location.href = '/thesis-phases/study-guide-generator';
+        break;
+      default:
+        // For content/resource recommendations, we might show a modal or navigate differently
+        console.log(`Recommendation action: ${rec.title}`);
     }
   };
 
@@ -199,12 +243,13 @@ export default function AnalyticsDashboardPage() {
 
         {/* Main Dashboard Content */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-[600px]">
+          <TabsList className="grid w-full grid-cols-6 lg:w-[700px]">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="flashcards">Flashcards</TabsTrigger>
             <TabsTrigger value="defense">Defense</TabsTrigger>
             <TabsTrigger value="study">Study Guides</TabsTrigger>
             <TabsTrigger value="insights">Insights</TabsTrigger>
+            <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -525,6 +570,90 @@ export default function AnalyticsDashboardPage() {
                 )}
               </div>
             )}
+          </TabsContent>
+
+          {/* Recommendations Tab */}
+          <TabsContent value="recommendations" className="space-y-6">
+            <div className="grid gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Lightbulb className="h-5 w-5" />
+                    Personalized Recommendations
+                  </CardTitle>
+                  <CardDescription>
+                    AI-powered suggestions based on your learning patterns and progress
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {recommendations.length > 0 ? (
+                      recommendations.map((rec) => (
+                        <Card key={rec.id} className="hover:shadow-md transition-shadow">
+                          <CardHeader className="pb-2">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start gap-3">
+                                {rec.type === 'content' && <BookOpen className="h-5 w-5 text-blue-500 mt-0.5" />}
+                                {rec.type === 'tool' && <Target className="h-5 w-5 text-green-500 mt-0.5" />}
+                                {rec.type === 'activity' && <Activity className="h-5 w-5 text-orange-500 mt-0.5" />}
+                                {rec.type === 'resource' && <Users className="h-5 w-5 text-purple-500 mt-0.5" />}
+                                <div>
+                                  <CardTitle className="text-base">{rec.title}</CardTitle>
+                                  <CardDescription className="mt-1 text-sm">{rec.description}</CardDescription>
+                                  <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                                    <Badge variant={rec.priority === 'high' ? 'default' : rec.priority === 'medium' ? 'secondary' : 'outline'}>
+                                      {rec.priority} priority
+                                    </Badge>
+                                    {rec.targetTool && (
+                                      <Badge variant="outline" className="capitalize">
+                                        {rec.targetTool.replace('_', ' ')}
+                                      </Badge>
+                                    )}
+                                    <Badge variant="outline">
+                                      ~{rec.estimatedTime} min
+                                    </Badge>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => trackRecommendationInteraction(rec.id, 'dismissed')}
+                                >
+                                  Dismiss
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleRecommendationAction(rec)}
+                                >
+                                  Try Now
+                                </Button>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-sm text-muted-foreground">
+                              <span className="font-medium">Reason:</span> {rec.reason}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <Card>
+                        <CardContent className="py-8 text-center">
+                          <Lightbulb className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                          <h3 className="text-lg font-medium">No recommendations available</h3>
+                          <p className="text-muted-foreground">
+                            Complete more activities to receive personalized recommendations
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
