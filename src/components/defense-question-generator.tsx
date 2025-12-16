@@ -209,30 +209,65 @@ ${content}`;
     }
   }, [data]);
 
+  // Load existing question sets
+  const [sets, setSets] = useState<any[]>([]);
+  const [loadingSets, setLoadingSets] = useState(false);
+  const [selectedSetId, setSelectedSetId] = useState<string | null>(null);
+
+  const loadSets = useCallback(async () => {
+    if (!session) return;
+
+    setLoadingSets(true);
+    try {
+      const response = await fetch('/api/defense/sets');
+      const result = await response.json();
+      if (response.ok) {
+        setSets(result.sets);
+      } else {
+        throw new Error(result.error || 'Failed to load sets');
+      }
+    } catch (error) {
+      toast.error('Failed to load defense question sets');
+    } finally {
+      setLoadingSets(false);
+    }
+  }, [session]);
+
+  // Load specific set
+  const loadSet = useCallback(async (setId: string) => {
+    if (!session) return;
+
+    try {
+      // For now, we'll implement this functionality later when we have the detailed API
+      // For now, let's just show a message
+      toast.info('Loading specific sets functionality coming soon');
+    } catch (error) {
+      toast.error('Failed to load question set');
+    }
+  }, [session]);
+
   const saveToDatabase = useCallback(async () => {
     if (!data) return;
     try {
-      const response = await fetch('/api/documents/save', {
+      const response = await fetch('/api/defense/sets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          content: data,
-          title: title || 'Defense Questions',
-          type: 'educational_defense_questions',
-          metadata: {
-            tool: 'defense-question-generator',
-            count: data.totalCount,
-            difficulty,
-            generatedAt: data.generatedAt,
-          },
+          title: title || 'Defense Question Set',
+          questions: data.questions,
+          difficulty: difficulty
         }),
       });
-      if (!response.ok) throw new Error('Save failed');
-      toast.success('Saved to document library');
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Save failed');
+      toast.success(`Saved ${result.questionCount} questions to your library`);
+
+      // Refresh the sets list after saving
+      loadSets();
     } catch (error) {
-      toast.error('Failed to save to database');
+      toast.error('Failed to save questions to database');
     }
-  }, [data, title, difficulty]);
+  }, [data, title, difficulty, loadSets]);
 
   const filteredQuestions =
     selectedCategory === 'all'
@@ -283,7 +318,7 @@ ${content}`;
             />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               onClick={generateQuestions}
               disabled={loading || !session}
@@ -301,7 +336,39 @@ ${content}`;
             <Button onClick={loadSampleData} variant="outline">
               Load Sample
             </Button>
+            <Button
+              onClick={loadSets}
+              variant="outline"
+              disabled={loadingSets}
+            >
+              {loadingSets ? (
+                <>
+                  <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Load Sets'
+              )}
+            </Button>
           </div>
+
+          {sets.length > 0 && (
+            <div className="mt-4">
+              <label className="mb-2 block font-medium">Select Question Set to Load</label>
+              <div className="flex flex-wrap gap-2">
+                {sets.map((set) => (
+                  <Button
+                    key={set.id}
+                    variant={selectedSetId === set.id ? "default" : "outline"}
+                    onClick={() => loadSet(set.id)}
+                    size="sm"
+                  >
+                    {set.title || 'Untitled Set'}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

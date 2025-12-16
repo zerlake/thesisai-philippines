@@ -161,29 +161,80 @@ ${content}`;
     }
   }, [data]);
 
+  // Load existing decks
+  const [decks, setDecks] = useState<any[]>([]);
+  const [loadingDecks, setLoadingDecks] = useState(false);
+  const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
+
+  const loadDecks = useCallback(async () => {
+    if (!session) return;
+
+    setLoadingDecks(true);
+    try {
+      const response = await fetch('/api/flashcards/decks');
+      const result = await response.json();
+      if (response.ok) {
+        setDecks(result.decks);
+      } else {
+        throw new Error(result.error || 'Failed to load decks');
+      }
+    } catch (error) {
+      toast.error('Failed to load flashcard decks');
+    } finally {
+      setLoadingDecks(false);
+    }
+  }, [session]);
+
+  // Load specific deck
+  const loadDeck = useCallback(async (deckId: string) => {
+    if (!session) return;
+
+    try {
+      const response = await fetch(`/api/flashcards/${deckId}/cards`);
+      const result = await response.json();
+      if (response.ok) {
+        setData({
+          flashcards: result.cards.map((card: any) => ({
+            question: card.front,
+            answer: card.back,
+            type: card.card_type,
+          })),
+          count: result.cards.length,
+          generatedAt: new Date().toISOString(),
+        });
+        setSelectedDeckId(deckId);
+        toast.success('Deck loaded successfully');
+      } else {
+        throw new Error(result.error || 'Failed to load deck');
+      }
+    } catch (error) {
+      toast.error('Failed to load flashcard deck');
+    }
+  }, [session]);
+
   const saveToDatabase = useCallback(async () => {
     if (!data) return;
     try {
-      const response = await fetch('/api/documents/save', {
+      const response = await fetch('/api/flashcards/decks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          content: data,
-          title: title || 'Flashcard Generation',
-          type: 'educational_flashcards',
-          metadata: {
-            tool: 'flashcard-generator',
-            count: data.count,
-            generatedAt: data.generatedAt,
-          },
+          title: title || 'Flashcard Deck',
+          description: 'Generated flashcards from thesis content',
+          cards: data.flashcards,
+          difficulty: 'medium'
         }),
       });
-      if (!response.ok) throw new Error('Save failed');
-      toast.success('Saved to document library');
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Save failed');
+      toast.success(`Saved ${result.cardCount} flashcards to your library`);
+
+      // Refresh the deck list after saving
+      loadDecks();
     } catch (error) {
-      toast.error('Failed to save to database');
+      toast.error('Failed to save flashcards to database');
     }
-  }, [data, title]);
+  }, [data, title, loadDecks]);
 
   return (
     <div className="space-y-6">
@@ -213,7 +264,7 @@ ${content}`;
             />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               onClick={generateFlashcards}
               disabled={loading || !session}
@@ -234,7 +285,39 @@ ${content}`;
             >
               Load Sample
             </Button>
+            <Button
+              onClick={loadDecks}
+              variant="outline"
+              disabled={loadingDecks}
+            >
+              {loadingDecks ? (
+                <>
+                  <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Load Decks'
+              )}
+            </Button>
           </div>
+
+          {decks.length > 0 && (
+            <div className="mt-4">
+              <label className="mb-2 block font-medium">Select Deck to Load</label>
+              <div className="flex flex-wrap gap-2">
+                {decks.map((deck) => (
+                  <Button
+                    key={deck.id}
+                    variant={selectedDeckId === deck.id ? "default" : "outline"}
+                    onClick={() => loadDeck(deck.id)}
+                    size="sm"
+                  >
+                    {deck.title || 'Untitled Deck'}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

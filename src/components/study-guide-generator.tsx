@@ -319,30 +319,69 @@ ${content}`;
     }
   }, [data]);
 
+  // Load existing study guides
+  const [guides, setGuides] = useState<any[]>([]);
+  const [loadingGuides, setLoadingGuides] = useState(false);
+  const [selectedGuideId, setSelectedGuideId] = useState<string | null>(null);
+
+  const loadGuides = useCallback(async () => {
+    if (!session) return;
+
+    setLoadingGuides(true);
+    try {
+      const response = await fetch('/api/study-guides');
+      const result = await response.json();
+      if (response.ok) {
+        setGuides(result.guides);
+      } else {
+        throw new Error(result.error || 'Failed to load guides');
+      }
+    } catch (error) {
+      toast.error('Failed to load study guides');
+    } finally {
+      setLoadingGuides(false);
+    }
+  }, [session]);
+
+  // Load specific guide
+  const loadGuide = useCallback(async (guideId: string) => {
+    if (!session) return;
+
+    try {
+      // For now, we'll implement this functionality later when we have the detailed API
+      // For now, let's just show a message
+      toast.info('Loading specific guides functionality coming soon');
+    } catch (error) {
+      toast.error('Failed to load study guide');
+    }
+  }, [session]);
+
   const saveToDatabase = useCallback(async () => {
     if (!data) return;
     try {
-      const response = await fetch('/api/documents/save', {
+      const response = await fetch('/api/study-guides', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          content: data,
           title: title || data.title,
-          type: 'educational_study_guide',
-          metadata: {
-            tool: 'study-guide-generator',
-            estimatedReadingTime: data.estimatedReadingTime,
-            sectionCount: data.sections.length,
-            generatedAt: data.generatedAt,
-          },
+          executiveSummary: data.executiveSummary,
+          sections: data.sections,
+          keyTerms: data.keyTerms,
+          studyTips: data.studyTips,
+          citationsList: data.citationsList,
+          estimatedReadingTime: data.estimatedReadingTime
         }),
       });
-      if (!response.ok) throw new Error('Save failed');
-      toast.success('Saved to document library');
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Save failed');
+      toast.success(`Saved study guide to your library`);
+
+      // Refresh the guides list after saving
+      loadGuides();
     } catch (error) {
-      toast.error('Failed to save to database');
+      toast.error('Failed to save study guide to database');
     }
-  }, [data, title]);
+  }, [data, title, loadGuides]);
 
   return (
     <div className="space-y-6">
@@ -372,7 +411,7 @@ ${content}`;
             />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               onClick={generateStudyGuide}
               disabled={loading || !session}
@@ -390,7 +429,39 @@ ${content}`;
             <Button onClick={loadSampleData} variant="outline">
               Load Sample
             </Button>
+            <Button
+              onClick={loadGuides}
+              variant="outline"
+              disabled={loadingGuides}
+            >
+              {loadingGuides ? (
+                <>
+                  <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Load Guides'
+              )}
+            </Button>
           </div>
+
+          {guides.length > 0 && (
+            <div className="mt-4">
+              <label className="mb-2 block font-medium">Select Guide to Load</label>
+              <div className="flex flex-wrap gap-2">
+                {guides.map((guide) => (
+                  <Button
+                    key={guide.id}
+                    variant={selectedGuideId === guide.id ? "default" : "outline"}
+                    onClick={() => loadGuide(guide.id)}
+                    size="sm"
+                  >
+                    {guide.title || 'Untitled Guide'}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
