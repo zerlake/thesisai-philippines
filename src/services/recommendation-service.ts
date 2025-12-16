@@ -1,6 +1,8 @@
 // src/services/recommendation-service.ts
+export type { Recommendation } from '@/lib/ai/recommendation-engine';
+import type { Recommendation } from '@/lib/ai/recommendation-engine';
 
-import { Recommendation } from '@/lib/ai/recommendation-engine';
+
 
 export interface RecommendationPreferences {
   preferredTopics?: string[];

@@ -1,7 +1,7 @@
 import { createServerClient } from '@/lib/supabase-server';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest, { params }: { params: { deckId: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ deckId: string }> }) {
   try {
     const supabase = await createServerClient();
     const { data: { session } } = await supabase.auth.getSession();
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest, { params }: { params: { deckId:
     }
 
     const userId = session.user.id;
-    const deckId = params.deckId;
+    const { deckId } = await params;
     const { cards } = await request.json();
 
     // Verify that the deck belongs to the user
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest, { params }: { params: { deckId:
   }
 }
 
-export async function GET(request: NextRequest, { params }: { params: { deckId: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ deckId: string }> }) {
   try {
     const supabase = await createServerClient();
     const { data: { session } } = await supabase.auth.getSession();
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest, { params }: { params: { deckId: 
     }
 
     const userId = session.user.id;
-    const deckId = params.deckId;
+    const { deckId } = await params;
 
     // Verify that the deck belongs to the user
     const { data: deck, error: deckError } = await supabase

@@ -1,6 +1,8 @@
 // src/services/completion-prediction-service.ts
+export type { CompletionPrediction, CompletionTrend } from '@/lib/ai/predictive/completion-predictor';
+import type { CompletionPrediction, CompletionTrend } from '@/lib/ai/predictive/completion-predictor';
 
-import { CompletionPrediction, CompletionTrend } from '@/lib/ai/predictive/completion-predictor';
+
 
 /**
  * Service class to handle completion prediction-related operations

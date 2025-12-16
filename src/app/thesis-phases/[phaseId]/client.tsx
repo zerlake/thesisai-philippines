@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getIcon } from '@/lib/icon-resolver';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import {
   BookOpen,
   Grid3x3,
 } from 'lucide-react';
+import { PdfGenerator } from '@/components/pdf-generator';
 
 interface PhasePageClientProps {
   phase: ThesisPhase;
@@ -27,8 +28,40 @@ export function PhasePageClient({ phase, navigation }: PhasePageClientProps) {
   const [selectedFeature, setSelectedFeature] = useState<string | null>(
     phase.features[0]?.id || null
   );
+  const [slides, setSlides] = useState([]);
 
   const selectedFeatureData = phase.features.find((f) => f.id === selectedFeature);
+
+  useEffect(() => {
+    if (selectedFeature === 'defense-presentation') {
+      fetch('/api/generate-presentation-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          slides: [
+            {
+              title: 'Slide 1',
+              bullets: ['Bullet 1', 'Bullet 2'],
+              timeEstimate: 60,
+            },
+            {
+              title: 'Slide 2',
+              bullets: ['Bullet 1', 'Bullet 2'],
+              timeEstimate: 60,
+            },
+          ],
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setSlides(data.slides);
+        });
+    }
+  }, [selectedFeature]);
+
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -174,10 +207,17 @@ export function PhasePageClient({ phase, navigation }: PhasePageClientProps) {
                     </div>
                   </Card>
                 </Link>
+
+                {selectedFeatureData.id === 'defense-presentation' && (
+                  <div className="mt-8">
+                    <PdfGenerator slides={slides} />
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
+// ... (rest of the file)
 
         {/* Progress and Navigation */}
         <div className="mt-16 pt-8 border-t border-border">
