@@ -24,7 +24,7 @@ interface RateLimitStore {
 const rateLimitStore: RateLimitStore = {};
 
 // Rate limits configuration
-const RATE_LIMITS = {
+const RATE_LIMITS: Record<string, { requests: number; window: number }> = {
   'api/ai': { requests: 50, window: 60 * 60 * 1000 }, // 50 requests per hour
   'api/documents': { requests: 100, window: 60 * 60 * 1000 }, // 100 requests per hour
   'api/projects': { requests: 200, window: 60 * 60 * 1000 }, // 200 requests per hour
@@ -36,9 +36,8 @@ const RATE_LIMITS = {
 
 export async function middleware(request: NextRequest) {
   // Get the user's identity (IP + User-Agent for anonymous users)
-  const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
-                  request.headers.get('x-real-ip') || 
-                  request.ip || 
+  const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                  request.headers.get('x-real-ip') ||
                   'unknown';
   const userAgent = request.headers.get('user-agent') || 'unknown';
 

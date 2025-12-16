@@ -178,8 +178,9 @@ const nextConfig: NextConfig = {
   // Enable PoweredBy header removal for security
   poweredByHeader: false,
 
-  // Set production source maps for debugging
-  productionBrowserSourceMaps: true,
+  // Disable production source maps to avoid Next.js 16 source map warnings
+  // Enable only when debugging production issues
+  productionBrowserSourceMaps: false,
 
   // Enable trailing slashes for CDN compatibility
   trailingSlash: false,

@@ -191,14 +191,14 @@ export async function GET(request: NextRequest) {
       createdAt: doc.created_at,
       updatedAt: doc.updated_at,
       project: doc.thesis_projects ? {
-        id: doc.thesis_projects.id,
-        title: doc.thesis_projects.title,
-        status: doc.thesis_projects.status,
+        id: (doc.thesis_projects as any).id,
+        title: (doc.thesis_projects as any).title,
+        status: (doc.thesis_projects as any).status,
       } : null,
       user: doc.profiles ? {
-        id: doc.profiles.id,
-        fullName: doc.profiles.full_name,
-        email: doc.profiles.email,
+        id: (doc.profiles as any).id,
+        fullName: (doc.profiles as any).full_name,
+        email: (doc.profiles as any).email,
       } : null,
     }));
 

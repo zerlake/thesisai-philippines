@@ -156,14 +156,14 @@ export async function GET(request: NextRequest) {
       updatedAt: project.updated_at,
       defenseScheduledAt: project.defense_scheduled_at,
       student: project.profiles ? {
-        id: project.profiles.id,
-        fullName: project.profiles.full_name,
-        email: project.profiles.email,
+        id: (project.profiles as any).id,
+        fullName: (project.profiles as any).full_name,
+        email: (project.profiles as any).email,
       } : null,
       advisor: project.advisors ? {
-        id: project.advisors.id,
-        profileId: project.advisors.profile_id,
-        specializationArea: project.advisors.specialization_area,
+        id: (project.advisors as any).id,
+        profileId: (project.advisors as any).profile_id,
+        specializationArea: (project.advisors as any).specialization_area,
       } : null,
     }));
 

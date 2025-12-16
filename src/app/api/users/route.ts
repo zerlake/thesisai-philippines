@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof Error && 'issues' in error) {
       // Handle Zod validation errors
-      return validationErrorResponse(error.issues);
+      return validationErrorResponse((error as any).issues);
     }
     
     console.error('Error in POST /api/users:', error);
