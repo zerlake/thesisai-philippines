@@ -88,7 +88,7 @@ const CATEGORIES: FeedbackCategory[] = [
   },
 ];
 
-class ThesisFeedbackEngine {
+export export class ThesisFeedbackEngine {
   private generateId(): string {
     return `fb_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
