@@ -10,7 +10,8 @@
       "Bash(ls:*)",
       "Bash(npm run dev:*)",
       "Bash(find:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(pnpm run build:*)"
     ],
     "deny": [],
     "ask": []

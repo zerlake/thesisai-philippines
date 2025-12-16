@@ -4,11 +4,12 @@ import { generateAdvisorNotificationEmail, generateStudentNotificationEmail } fr
 // Lazy initialization to avoid build-time errors when RESEND_API_KEY is not set
 let resendClient: Resend | null = null;
 
-function getResendClient(): Resend {
+function getResendClient(): Resend | null {
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('RESEND_API_KEY environment variable is not set. Email functionality will be disabled.');
+    return null;
+  }
   if (!resendClient) {
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error('RESEND_API_KEY environment variable is not set');
-    }
     resendClient = new Resend(process.env.RESEND_API_KEY);
   }
   return resendClient;
@@ -46,7 +47,12 @@ export async function sendNotificationEmail({
       actionButtonText,
     });
 
-    const data = await getResendClient().emails.send({
+    const client = getResendClient();
+    if (!client) {
+      return { success: false, error: 'Email service not configured' };
+    }
+    const data = await client.emails.send({
+
       from: process.env.RESEND_FROM_EMAIL || 'noreply@thesisai-philippines.com',
       to,
       subject: getEmailSubject(actionType, studentName),
@@ -211,7 +217,12 @@ export async function sendStudentNotificationEmail({
       actionButtonText,
     });
 
-    const data = await getResendClient().emails.send({
+    const client = getResendClient();
+    if (!client) {
+      return { success: false, error: 'Email service not configured' };
+    }
+    const data = await client.emails.send({
+
       from: process.env.RESEND_FROM_EMAIL || 'noreply@thesisai-philippines.com',
       to,
       subject: getStudentEmailSubject(actionType, senderName),
@@ -380,7 +391,12 @@ export async function sendAdvisorToStudentNotificationEmail({
       actionButtonText,
     });
 
-    const data = await getResendClient().emails.send({
+    const client = getResendClient();
+    if (!client) {
+      return { success: false, error: 'Email service not configured' };
+    }
+    const data = await client.emails.send({
+
       from: process.env.RESEND_FROM_EMAIL || 'noreply@thesisai-philippines.com',
       to,
       subject: getAdvisorToStudentEmailSubject(actionType, advisorName),
@@ -523,7 +539,12 @@ export async function sendCriticToStudentNotificationEmail({
       actionButtonText,
     });
 
-    const data = await getResendClient().emails.send({
+    const client = getResendClient();
+    if (!client) {
+      return { success: false, error: 'Email service not configured' };
+    }
+    const data = await client.emails.send({
+
       from: process.env.RESEND_FROM_EMAIL || 'noreply@thesisai-philippines.com',
       to,
       subject: getCriticToStudentEmailSubject(actionType, criticName),
