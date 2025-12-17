@@ -1,4 +1,4 @@
-import { BotMessageSquare, Mail, Github, Linkedin, Twitter } from "lucide-react";
+import { Mail, Github, Linkedin, Twitter } from "lucide-react";
 import Link from "next/link";
 
 const footerSections = [
@@ -47,10 +47,11 @@ export function LandingFooter() {
           {/* Brand section */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4 group">
-              <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 group-hover:shadow-lg group-hover:shadow-purple-500/50 transition-all">
-                <BotMessageSquare className="h-5 w-5 text-white" />
-              </div>
-              <span className="font-bold text-white">ThesisAI</span>
+              <img src="/THESIS-AI-LOGO2.png" alt="ThesisAI Logo" width={32} height={32} className="group-hover:opacity-80 transition-opacity" />
+              <span className="font-bold">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-electric-purple via-accent-cyan to-pink-500">ThesisAI</span>
+                <span className="text-white"> Philippines</span>
+              </span>
             </Link>
             <p className="text-sm text-slate-300 mb-4">
               Empowering Filipino researchers with intelligent academic tools.

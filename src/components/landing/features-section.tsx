@@ -32,7 +32,7 @@ const allFeatures = [
     title: "Research Conceptualization Tools",
     description: "Variable Mapping Tool and Research Problem Identifier with Philippine-specific data",
     badge: "Pro",
-    link: "/thesis-phases/conceptualize",
+    link: "/documentation/research-conceptualization",
   },
   {
     id: "conceptualize-2",
@@ -42,7 +42,7 @@ const allFeatures = [
     title: "AI Idea Generation",
     description: "Generate research questions, topic ideas, and chapter outlines tailored to your field",
     badge: "AI",
-    link: "/thesis-phases/conceptualize",
+    link: "/documentation/ai-idea-generation",
   },
   {
     id: "conceptualize-3",
@@ -52,7 +52,7 @@ const allFeatures = [
     title: "Research Workflow Management",
     description: "Track tasks, deadlines, and progress with comprehensive workflow tools",
     badge: "Pro",
-    link: "/thesis-phases/conceptualize",
+    link: "/documentation/workflow-management",
   },
   {
     id: "research-1",
@@ -62,7 +62,7 @@ const allFeatures = [
     title: "Research Article Analyzer",
     description: "Extract methodology, findings, conclusions with annotation tools and literature matrices",
     badge: "Advanced",
-    link: "/thesis-phases/research",
+    link: "/documentation/article-analyzer",
   },
   {
     id: "research-2",
@@ -72,7 +72,7 @@ const allFeatures = [
     title: "Collaborative Literature Review",
     description: "Annotate, tag, and analyze literature together with real-time collaboration",
     badge: "Team",
-    link: "/thesis-phases/research",
+    link: "/documentation/collaborative-literature-review",
   },
   {
     id: "research-3",
@@ -82,7 +82,7 @@ const allFeatures = [
     title: "Privacy-Preserving PDF Analysis",
     description: "Analyze PDFs directly in your browser—no server uploads, complete privacy",
     badge: "Secure",
-    link: "/thesis-phases/research",
+    link: "/documentation/pdf-analysis",
   },
   {
     id: "research-4",
@@ -92,7 +92,7 @@ const allFeatures = [
     title: "Methodology & Data Tools",
     description: "Design studies with interactive advisors, run statistical tests, generate charts",
     badge: "Advanced",
-    link: "/thesis-phases/research",
+    link: "/documentation/methodology-tools",
   },
   {
     id: "write-1",
@@ -102,7 +102,7 @@ const allFeatures = [
     title: "AI Writing & Research Suite",
     description: "From topic ideas to conclusions, leverage AI at every step of your research process",
     badge: "AI",
-    link: "/thesis-phases/write",
+    link: "/documentation/ai-writing-suite",
   },
   {
     id: "write-2",
@@ -112,7 +112,7 @@ const allFeatures = [
     title: "Citation & Originality Hub",
     description: "Generate citations, manage bibliography, and ensure academic integrity",
     badge: "Essential",
-    link: "/thesis-phases/write",
+    link: "/documentation/citation-hub",
   },
   {
     id: "write-3",
@@ -122,7 +122,7 @@ const allFeatures = [
     title: "Intelligent Synthesis & Paraphrasing",
     description: "Synthesize sources, rewrite for clarity, and maintain academic tone",
     badge: "AI",
-    link: "/thesis-phases/write",
+    link: "/documentation/synthesis-paraphrasing",
   },
   {
     id: "submit-1",
@@ -132,7 +132,7 @@ const allFeatures = [
     title: "University-Specific Formatting",
     description: "Access formatting guides for major Philippine universities",
     badge: "Essential",
-    link: "/thesis-phases/submit",
+    link: "/documentation/university-formatting",
   },
   {
     id: "submit-2",
@@ -142,7 +142,7 @@ const allFeatures = [
     title: "Format Compliance Checker",
     description: "Automated checks against your university's specific requirements",
     badge: "Pro",
-    link: "/thesis-phases/submit",
+    link: "/documentation/format-checker",
   },
   {
     id: "submit-3",
@@ -152,7 +152,7 @@ const allFeatures = [
     title: "Advisor & Critic Collaboration",
     description: "Submit drafts for advisor feedback and manuscript critic certification",
     badge: "Team",
-    link: "/thesis-phases/submit",
+    link: "/documentation/advisor-collaboration",
   },
   {
     id: "submit-4",
@@ -162,7 +162,7 @@ const allFeatures = [
     title: "Research Team Collaboration",
     description: "Shared workspaces, task assignments, progress tracking for group projects",
     badge: "Team",
-    link: "/thesis-phases/submit",
+    link: "/documentation/team-collaboration",
   },
   {
     id: "submit-5",
@@ -172,7 +172,7 @@ const allFeatures = [
     title: "Defense Preparation Suite",
     description: "Generate slides, practice with AI Q&A simulator, study with flashcards",
     badge: "Advanced",
-    link: "/thesis-phases/submit",
+    link: "/documentation/defense-preparation",
   },
 ];
 

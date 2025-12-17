@@ -171,25 +171,98 @@ export default function LiteratureReviewAssistantPage() {
     setThematicClusters(clusters);
   };
 
-  const handleExport = () => {
-    // Export the current literature review state
-    const exportData = {
-      selectedSources,
-      reviewNotes,
-      thematicClusters,
-      generatedSynthesis: generateLiteratureSynthesis(),
-      exportDate: new Date().toISOString()
-    };
+  const handleExport = (format: 'json' | 'pdf' | 'bibtex') => {
+    if (selectedSources.length === 0) {
+      alert('Please select sources before exporting.');
+      return;
+    }
+
+    if (format === 'json') {
+      const exportData = {
+        selectedSources,
+        reviewNotes,
+        thematicClusters,
+        generatedSynthesis: generateLiteratureSynthesis(),
+        exportDate: new Date().toISOString()
+      };
+      
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      
+      const exportFileDefaultName = `literature-review-${new Date().toISOString().slice(0, 10)}.json`;
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+    } else if (format === 'pdf') {
+      exportAsPDF();
+    } else if (format === 'bibtex') {
+      exportAsBibTeX();
+    }
+  };
+
+  const exportAsPDF = () => {
+    let content = `Literature Review\n\n`;
     
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    // Add synthesis if available
+    if (thematicClusters.length > 0) {
+      content += `Generated Synthesis:\n${generateLiteratureSynthesis()}\n\n`;
+    }
+
+    // Add selected sources
+    content += `Selected Sources (${selectedSources.length}):\n\n`;
+    selectedSources.forEach((source, index) => {
+      content += `${index + 1}. ${source.title}\n`;
+      content += `   Authors: ${source.authors.join(', ')}\n`;
+      content += `   Journal: ${source.journal}\n`;
+      content += `   Year: ${source.year}\n`;
+      content += `   Relevance: ${source.relevance}%\n`;
+      content += `   Summary: ${source.summary}\n`;
+      content += `   Themes: ${source.keyThemes.join(', ')}\n\n`;
+    });
+
+    // Add review notes if available
+    if (reviewNotes) {
+      content += `\nReview Notes:\n${reviewNotes}\n`;
+    }
+
+    // Create blob and download (as text/plain for compatibility)
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `literature-review-${new Date().toISOString().slice(0, 10)}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const exportAsBibTeX = () => {
+    let bibtexContent = '';
     
-    const exportFileDefaultName = `literature-review-${new Date().toISOString().slice(0, 10)}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
+    selectedSources.forEach((source, index) => {
+      const authors = source.authors.join(' and ');
+      const cleanTitle = source.title.replace(/[{}]/g, '');
+      
+      bibtexContent += `@article{reference${index + 1},\n`;
+      bibtexContent += `  author={${authors}},\n`;
+      bibtexContent += `  title={${cleanTitle}},\n`;
+      bibtexContent += `  journal={${source.journal}},\n`;
+      bibtexContent += `  year={${source.year}},\n`;
+      bibtexContent += `}\n\n`;
+    });
+
+    const blob = new Blob([bibtexContent], { type: 'application/x-bibtex' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `literature-review-${new Date().toISOString().slice(0, 10)}.bib`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -538,17 +611,35 @@ export default function LiteratureReviewAssistantPage() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Button variant="outline" size="lg" className="flex flex-col h-32" onClick={handleExport}>
+                    <Button 
+                      variant="outline" 
+                      size="lg" 
+                      className="flex flex-col h-32" 
+                      onClick={() => handleExport('json')}
+                      disabled={selectedSources.length === 0}
+                    >
                       <Database className="h-8 w-8 mb-2" />
                       <span>JSON Data</span>
                       <span className="text-xs text-muted-foreground">Full data export</span>
                     </Button>
-                    <Button variant="outline" size="lg" className="flex flex-col h-32">
+                    <Button 
+                      variant="outline" 
+                      size="lg" 
+                      className="flex flex-col h-32"
+                      onClick={() => handleExport('pdf')}
+                      disabled={selectedSources.length === 0}
+                    >
                       <FileText className="h-8 w-8 mb-2" />
                       <span>PDF Report</span>
                       <span className="text-xs text-muted-foreground">Formatted document</span>
                     </Button>
-                    <Button variant="outline" size="lg" className="flex flex-col h-32">
+                    <Button 
+                      variant="outline" 
+                      size="lg" 
+                      className="flex flex-col h-32"
+                      onClick={() => handleExport('bibtex')}
+                      disabled={selectedSources.length === 0}
+                    >
                       <Quote className="h-8 w-8 mb-2" />
                       <span>BibTeX</span>
                       <span className="text-xs text-muted-foreground">For LaTeX documents</span>

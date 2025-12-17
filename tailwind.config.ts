@@ -151,6 +151,16 @@ const config = {
           "0%, 100%": { opacity: "0.8" },
           "50%": { opacity: "0.3" },
         },
+        "float": {
+          "0%, 100%": { 
+            transform: "translate(0, 0px)",
+            opacity: "0.5"
+          },
+          "50%": { 
+            transform: "translate(10px, -10px)",
+            opacity: "1"
+          },
+        },
         "delay-100": {
           "0%": { opacity: "0" },
           "100%": { opacity: "1" },
@@ -187,6 +197,7 @@ const config = {
         "shimmer": "shimmer 2s ease-in-out infinite",
         "pulse-slow": "pulse-slow 4s ease-in-out infinite",
         "pulse-slower": "pulse-slower 6s ease-in-out infinite",
+        "float": "float 6s ease-in-out infinite",
         "delay-100": "delay-100 0.5s ease-out 0.1s forwards",
         "delay-200": "delay-200 0.5s ease-out 0.2s forwards",
         "delay-300": "delay-300 0.5s ease-out 0.3s forwards",

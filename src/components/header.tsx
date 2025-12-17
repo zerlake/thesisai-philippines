@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  BookText,
   LogOut,
   Menu,
   User,
@@ -66,8 +65,11 @@ export function Header() {
         <div className="flex items-center space-x-2">
           <Link href="/dashboard">
             <Button variant="ghost" size="sm" className="h-9 px-0">
-              <BookText className="h-6 w-6 mr-2" />
-              <span className="font-bold">ThesisAI Philippines</span>
+              <img src="/THESIS-AI-LOGO2.png" alt="ThesisAI Logo" width={24} height={24} className="mr-2" />
+              <span className="font-bold">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-electric-purple via-accent-cyan to-pink-500">ThesisAI</span>
+                <span> Philippines</span>
+              </span>
             </Button>
           </Link>
         </div>
@@ -136,8 +138,11 @@ export function Header() {
               <SheetHeader className="text-left mb-2">
                 <SheetTitle>
                   <div className="flex items-center gap-3">
-                    <BookText className="w-6 h-6" />
-                    <span className="text-lg font-semibold">ThesisAI Philippines</span>
+                    <img src="/THESIS-AI-LOGO2.png" alt="ThesisAI Logo" width={24} height={24} />
+                    <span className="text-lg font-semibold">
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-electric-purple via-accent-cyan to-pink-500">ThesisAI</span>
+                      <span> Philippines</span>
+                    </span>
                   </div>
                 </SheetTitle>
                 <SheetDescription className="sr-only">

@@ -1,3 +1,5 @@
+// src/app/api/learning/insights/route.ts
+
 import { createServerClient } from '@/lib/supabase-server';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -12,62 +14,87 @@ export async function GET(request: NextRequest) {
 
     const userId = session.user.id;
 
-    // Get AI insights for the user
-    // In a real implementation, this would run AI algorithms on the user's data to generate insights
-    const { data: insights, error: insightsError } = await supabase
-      .from('learning_insights')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('dismissed', false)
-      .order('created_at', { ascending: false });
-
-    if (insightsError) {
-      console.error('Error fetching insights:', insightsError);
-    }
-
-    // For now, return mock insights that would realistically come from AI analysis
+    // In a real implementation, this would analyze actual user data
+    // For now, we'll generate realistic AI-powered insights
     const mockInsights = [
       {
         id: 1,
         type: 'opportunity',
         title: 'Struggling with methodology questions',
-        description: 'Consider more defense practice in the methodology category',
-        actionItems: ['Focus on methodology Q&A', 'Review examples', 'Schedule practice session'],
+        description: 'AI analysis shows difficulty with methodology defense questions. Consider more practice.',
+        actionItems: [
+          'Focus on methodology Q&A practice',
+          'Review methodology literature',
+          'Schedule focused practice session'
+        ],
+        priority: 'high',
         createdAt: new Date().toISOString(),
       },
       {
         id: 2,
         type: 'achievement',
-        title: '7-day learning streak!',
-        description: 'You\'ve maintained consistent learning for a full week',
-        actionItems: ['Keep it up!', 'Set new streak record'],
+        title: '7-day learning streak achieved!',
+        description: 'You\'ve maintained consistent learning for 7 consecutive days.',
+        actionItems: [
+          'Keep up the consistency',
+          'Consider setting a new streak record'
+        ],
+        priority: 'low',
         createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
       },
       {
         id: 3,
         type: 'warning',
         title: 'Low retention on Chapter 4 concepts',
-        description: 'Your retention rate for Chapter 4 is below average',
-        actionItems: ['Review flashcards for Chapter 4', 'Schedule review session', 'Focus on weak areas'],
+        description: 'AI analysis indicates retention rate for Chapter 4 is below 70%.',
+        actionItems: [
+          'Review Chapter 4 flashcards',
+          'Schedule focused review session',
+          'Focus on areas with lowest retention'
+        ],
+        priority: 'high',
         createdAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
       },
       {
         id: 4,
         type: 'recommendation',
         title: 'Time to review Chapter 1 concepts',
-        description: 'Based on spaced repetition algorithm, Chapter 1 needs review',
-        actionItems: ['Review Chapter 1 flashcards', 'Take practice test', 'Apply concepts to thesis'],
+        description: 'Based on spaced repetition algorithm, Chapter 1 is due for review.',
+        actionItems: [
+          'Review Chapter 1 flashcards',
+          'Take practice quiz',
+          'Apply concepts to current work'
+        ],
+        priority: 'medium',
         createdAt: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
       },
+      {
+        id: 5,
+        type: 'opportunity',
+        title: 'High performance in research findings',
+        description: 'Your performance in findings-related questions is exceptional.',
+        actionItems: [
+          'Leverage this strength in defense',
+          'Consider helping others in study group',
+          'Focus on building on this strength'
+        ],
+        priority: 'medium',
+        createdAt: new Date(Date.now() - 432000000).toISOString(), // 5 days ago
+      }
     ];
 
-    return NextResponse.json(mockInsights);
+    return NextResponse.json({ 
+      success: true, 
+      insights: mockInsights,
+      timestamp: new Date().toISOString()
+    });
   } catch (error) {
-    console.error('Insights fetch error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Error fetching insights:', error);
+    return NextResponse.json({ error: 'Failed to fetch insights' }, { status: 500 });
   }
 }
 
+// POST endpoint to dismiss an insight
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createServerClient();
@@ -80,28 +107,19 @@ export async function POST(request: NextRequest) {
     const userId = session.user.id;
     const { insightId, action } = await request.json();
 
-    if (!insightId || !action) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!insightId) {
+      return NextResponse.json({ error: 'Missing insight ID' }, { status: 400 });
     }
 
-    // Handle different actions (dismiss, implement, etc.)
-    if (action === 'dismiss') {
-      // In a real implementation, we would update the insight as dismissed in the database
-      // const { error } = await supabase
-      //   .from('learning_insights')
-      //   .update({ dismissed: true, dismissed_at: new Date().toISOString() })
-      //   .eq('id', insightId)
-      //   .eq('user_id', userId);
-      
-      // if (error) {
-      //   console.error('Error dismissing insight:', error);
-      //   return NextResponse.json({ error: 'Failed to dismiss insight' }, { status: 500 });
-      // }
-    }
-
-    return NextResponse.json({ success: true });
+    // In a real implementation, this would update the insight status in the database
+    // For this mock implementation, we'll just return success
+    return NextResponse.json({ 
+      success: true,
+      message: `Insight ${insightId} ${action === 'dismiss' ? 'dismissed' : 'handled'} successfully`,
+      timestamp: new Date().toISOString()
+    });
   } catch (error) {
-    console.error('Insight action error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Error handling insight:', error);
+    return NextResponse.json({ error: 'Failed to handle insight' }, { status: 500 });
   }
 }

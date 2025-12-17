@@ -1,5 +1,5 @@
 import { FilePlus2, PencilRuler, Send, Sparkles, Check } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import Link from "next/link";
 
 const steps = [
@@ -35,9 +35,9 @@ const steps = [
 
 export function HowItWorksSection() {
   return (
-    <section className="py-16 md:py-24 bg-slate-800">
+    <section className="py-4 md:py-8 bg-slate-800 -mt-[5%]">
       <div className="container">
-        <div className="mx-auto mb-16 max-w-3xl text-center">
+        <div className="mx-auto mb-6 md:mb-8 max-w-3xl text-center">
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
             Your Complete Research Journey
           </h2>

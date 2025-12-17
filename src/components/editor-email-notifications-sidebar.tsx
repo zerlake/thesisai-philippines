@@ -128,15 +128,13 @@ export function EditorEmailNotificationsSidebar({ documentId }: EditorEmailNotif
     const fetchNotifications = async () => {
       try {
         const response = await fetch(`/api/messages/get?userId=${currentUserId}`);
-        if (!response.ok) {
-          console.error('Failed to fetch notifications');
-          return;
-        }
 
-        const { data } = await response.json();
+        // Parse response regardless of status - API returns data even on errors
+        const result = await response.json();
+        const data = result?.data || [];
 
         // Convert database messages to EmailNotification format
-        const emailNotifications: EmailNotification[] = (data || []).map((msg: any) => ({
+        const emailNotifications: EmailNotification[] = data.map((msg: any) => ({
           id: msg.id,
           from: msg.sender_role === 'advisor' ? 'Advisor' : msg.sender_role === 'critic' ? 'Critic' : 'User',
           fromRole: msg.sender_role,
@@ -151,7 +149,9 @@ export function EditorEmailNotificationsSidebar({ documentId }: EditorEmailNotif
 
         setNotifications(emailNotifications);
       } catch (error) {
-        console.error('Error fetching notifications:', error);
+        // Silently handle errors - notifications are not critical
+        console.warn('Could not fetch notifications:', error);
+        setNotifications([]);
       }
     };
 

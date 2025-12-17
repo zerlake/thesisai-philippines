@@ -59,7 +59,6 @@ export function RootLayoutClient({ children }: { children: React.ReactNode }) {
             {children}
             <LandingFooter />
             <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
-            <CommandPaletteHint isVisible={isNewUser} />
           </PuterProvider>
         </MCPProvider>
       </Context7Provider>

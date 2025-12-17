@@ -1,3 +1,5 @@
+// src/app/api/learning/progress/route.ts
+
 import { createServerClient } from '@/lib/supabase-server';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -12,20 +14,9 @@ export async function GET(request: NextRequest) {
 
     const userId = session.user.id;
 
-    // Calculate overall progress metrics
-    // These would be computed from actual database values in a real implementation
-    const { data: flashcardStats, error: fcError } = await supabase
-      .from('flashcard_cards')
-      .select('*, deck:flashcard_decks(*)')
-      .eq('deck.user_id', userId)
-      .is('next_review', null);
-
-    if (fcError) {
-      console.error('Error fetching flashcard stats:', fcError);
-    }
-
-    // For now, return mock data that would realistically come from analytics calculations
-    const mockData = {
+    // In a real implementation, this would query actual progress data
+    // For now, we'll return mock data that would be realistic
+    const mockProgressData = {
       estimatedReadiness: Math.floor(Math.random() * 30) + 65, // 65-95%
       learningVelocity: parseFloat((Math.random() * 2 + 1.5).toFixed(1)), // 1.5-3.5%/week
       daysSinceStart: Math.floor(Math.random() * 30) + 10, // 10-40 days
@@ -38,9 +29,13 @@ export async function GET(request: NextRequest) {
       areasNeedingWork: Math.floor(Math.random() * 5) + 1, // 1-5 areas
     };
 
-    return NextResponse.json(mockData);
+    return NextResponse.json({ 
+      success: true, 
+      data: mockProgressData,
+      timestamp: new Date().toISOString()
+    });
   } catch (error) {
-    console.error('Progress data fetch error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Error fetching progress data:', error);
+    return NextResponse.json({ error: 'Failed to fetch progress data' }, { status: 500 });
   }
 }

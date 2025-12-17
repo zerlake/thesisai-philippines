@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from './auth-provider';
 import { Button } from './ui/button';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
@@ -33,9 +33,13 @@ export function NewDocumentList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [docToDelete, setDocToDelete] = useState<{ id: string; title: string | null } | null>(null);
-  
+
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [isMounted, setIsMounted] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
+  const fetchingRef = useRef(false);
+  const lastUserIdRef = useRef<string | null>(null);
+  const lastSearchTermRef = useRef<string>('');
 
   const isFreePlan = profile?.plan === 'free';
   const atLimit = isFreePlan && docCount >= FREE_PLAN_DOCUMENT_LIMIT;
@@ -44,21 +48,26 @@ export function NewDocumentList() {
     setIsMounted(true);
   }, []);
 
-  // Load documents
-  useEffect(() => {
-    if (!user) return;
+  // Memoized fetch function
+  const fetchDocuments = useCallback(async (userId: string, searchQuery: string) => {
+    // Prevent concurrent fetches
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
 
-    const fetchDocuments = async () => {
+    // Only show loading on initial fetch, not on search updates
+    if (!hasFetched) {
       setIsLoading(true);
+    }
 
+    try {
       let query = supabase
         .from('documents')
         .select('id, title, updated_at, created_at', { count: 'exact' })
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .order('updated_at', { ascending: false });
 
-      if (debouncedSearchTerm) {
-        query = query.ilike('title', `%${debouncedSearchTerm}%`);
+      if (searchQuery) {
+        query = query.ilike('title', `%${searchQuery}%`);
       }
 
       const { data, error, count } = await query;
@@ -70,11 +79,33 @@ export function NewDocumentList() {
         setDocuments(data || []);
         setDocCount(count || 0);
       }
+    } finally {
       setIsLoading(false);
-    };
+      setHasFetched(true);
+      fetchingRef.current = false;
+    }
+  }, [supabase, hasFetched]);
 
-    fetchDocuments();
-  }, [user, supabase, debouncedSearchTerm]);
+  // Load documents - only when user ID or search term actually changes
+  useEffect(() => {
+    if (!user?.id) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Check if we actually need to fetch (user or search changed)
+    const userChanged = lastUserIdRef.current !== user.id;
+    const searchChanged = lastSearchTermRef.current !== debouncedSearchTerm;
+
+    if (!userChanged && !searchChanged && hasFetched) {
+      return;
+    }
+
+    lastUserIdRef.current = user.id;
+    lastSearchTermRef.current = debouncedSearchTerm;
+
+    fetchDocuments(user.id, debouncedSearchTerm);
+  }, [user?.id, debouncedSearchTerm, fetchDocuments, hasFetched]);
 
   const handleDeleteDocument = async () => {
     if (!docToDelete?.id || !user) return;

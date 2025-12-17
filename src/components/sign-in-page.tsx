@@ -1,6 +1,5 @@
 "use client";
 
-import { BookText } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SignInForm } from "@/components/sign-in-form";
@@ -14,7 +13,7 @@ export function SignInPage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="flex flex-col items-center text-center">
-          <BookText className="w-10 h-10 mb-4" />
+          <img src="/THESIS-AI-LOGO2.png" alt="ThesisAI Logo" width={40} height={40} className="mb-4" />
           <h1 className="text-3xl font-bold">Welcome Back</h1>
           <p className="text-muted-foreground">
             Sign in to continue your work.

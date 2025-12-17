@@ -1,4 +1,4 @@
-import { BotMessageSquare, Mail, Github, Linkedin, Twitter, Shield, Lock, Zap, Award } from "lucide-react";
+import { Mail, Github, Linkedin, Twitter, Shield, Lock, Zap, Award } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
@@ -64,11 +64,11 @@ export function LandingFooter() {
           {/* Brand section */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-brand-academic-blue to-accent-electric-purple">
-                <BotMessageSquare className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-white">ThesisAI</span>
-              <span className="text-text-secondary">Philippines</span>
+              <img src="/THESIS-AI-LOGO2.png" alt="ThesisAI Logo" width={40} height={40} />
+              <span className="text-2xl font-bold">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-electric-purple via-accent-cyan to-pink-500">ThesisAI</span>
+                <span className="text-white"> Philippines</span>
+              </span>
             </div>
             <p className="text-text-secondary mb-6 max-w-md">
               The enterprise-grade platform empowering Filipino researchers with AI-powered academic tools.

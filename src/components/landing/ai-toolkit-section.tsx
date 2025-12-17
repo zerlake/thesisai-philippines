@@ -1,7 +1,7 @@
 "use client";
 
 import { BrainCircuitIcon, LanguagesIcon, SparklesIcon, Zap, ShieldCheck } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import Link from "next/link";
 
 const tools = [

@@ -1,9 +1,9 @@
 "use client";
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { BookOpenCheck, ShieldCheck, Users, Coins, GraduationCap, BrainCircuit, Settings2, MessageSquareMore, BarChart3, Search, HelpCircle, X } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { useState, useMemo } from "react";
 
 const faqCategories = [
@@ -240,7 +240,7 @@ export function FaqSection() {
   );
 
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-slate-800 to-slate-900">
+    <section className="py-16 md:py-24 bg-gradient-to-b from-slate-800 to-slate-900 -mt-[10%]">
       <div className="container mx-auto max-w-5xl px-4">
         {/* Header */}
         <div className="mb-12 text-center">

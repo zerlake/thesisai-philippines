@@ -19,7 +19,7 @@ export function AppFooter() {
 
   return (
     <footer className="border-t border-slate-700 bg-card/50 backdrop-blur-sm px-6 py-4 text-center text-xs text-muted-foreground">
-      <p>&copy; {new Date().getFullYear()} ThesisAI. All rights reserved.</p>
+      <p>&copy; {new Date().getFullYear()} ThesisAI Philippines. All rights reserved.</p>
       <p className="mt-1">
         <Link href={guideLink()} className="hover:underline">User Guide</Link>
         <span className="mx-2">•</span>

@@ -1,3 +1,5 @@
+// src/app/api/learning/analytics/route.ts
+
 import { createServerClient } from '@/lib/supabase-server';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -12,40 +14,19 @@ export async function GET(request: NextRequest) {
 
     const userId = session.user.id;
 
-    // This endpoint would aggregate all analytics data for the dashboard
-    // In a real implementation, this would join data from multiple tables and compute analytics
-    
-    // Get flashcard statistics
-    const { data: flashcardStats, error: fcError } = await supabase
-      .from('flashcard_decks')
-      .select('*, cards:flashcard_cards(*)')
-      .eq('user_id', userId);
-    
-    // Get defense statistics
-    const { data: defenseStats, error: defError } = await supabase
-      .from('defense_question_sets')
-      .select('*, questions:defense_questions(*)')
-      .eq('user_id', userId);
-    
-    // Get study guide statistics
-    const { data: studyGuideStats, error: sgError } = await supabase
-      .from('study_guides')
-      .select('*, sections:study_guide_sections(*)')
-      .eq('user_id', userId);
-
-    // Compute dashboard metrics
-    // For now, return mock data that represents what the real analytics would compute
-    const mockData = {
-      estimatedReadiness: Math.floor(Math.random() * 30) + 65, // 65-95%
-      learningVelocity: parseFloat((Math.random() * 2 + 1.5).toFixed(1)), // 1.5-3.5%/week
-      daysSinceStart: Math.floor(Math.random() * 30) + 10, // 10-40 days
-      totalReviews: Math.floor(Math.random() * 100) + 20, // 20-120 reviews
-      averageSuccess: Math.floor(Math.random() * 30) + 70, // 70-100%
-      consistencyScore: Math.floor(Math.random() * 30) + 70, // 70-100%
-      sessionFrequency: parseFloat((Math.random() * 2 + 1.5).toFixed(1)), // 1.5-3.5 sessions/day
-      avgSessionLength: Math.floor(Math.random() * 30) + 15, // 15-45 minutes
-      topicsMastered: Math.floor(Math.random() * 15) + 5, // 5-20 topics
-      areasNeedingWork: Math.floor(Math.random() * 5) + 1, // 1-5 areas
+    // In a real implementation, this would aggregate data from multiple sources
+    // For now, we'll return mock data representing realistic aggregated analytics
+    const mockAnalyticsData = {
+      estimatedReadiness: Math.floor(Math.random() * 30) + 65,
+      learningVelocity: parseFloat((Math.random() * 2 + 1.5).toFixed(1)),
+      daysSinceStart: Math.floor(Math.random() * 30) + 10,
+      totalReviews: Math.floor(Math.random() * 100) + 20,
+      averageSuccess: Math.floor(Math.random() * 30) + 70,
+      consistencyScore: Math.floor(Math.random() * 30) + 70,
+      sessionFrequency: parseFloat((Math.random() * 2 + 1.5).toFixed(1)),
+      avgSessionLength: Math.floor(Math.random() * 30) + 15,
+      topicsMastered: Math.floor(Math.random() * 15) + 5,
+      areasNeedingWork: Math.floor(Math.random() * 5) + 1,
       flashcardData: {
         masteryByDeck: [
           { deck: 'Chapter 1: Introduction', mastery: Math.floor(Math.random() * 25) + 75 },
@@ -131,12 +112,16 @@ export async function GET(request: NextRequest) {
           actionItems: ['Review Chapter 1 flashcards', 'Take practice test', 'Apply concepts to thesis'],
           createdAt: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
         },
-      ],
+      ]
     };
 
-    return NextResponse.json(mockData);
+    return NextResponse.json({ 
+      success: true, 
+      data: mockAnalyticsData,
+      timestamp: new Date().toISOString()
+    });
   } catch (error) {
-    console.error('Analytics dashboard data fetch error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Error fetching analytics data:', error);
+    return NextResponse.json({ error: 'Failed to fetch analytics data' }, { status: 500 });
   }
 }

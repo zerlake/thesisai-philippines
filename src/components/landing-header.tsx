@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BotMessageSquare, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserNav } from "./user-nav";
 import { useAuth } from "./auth-provider";
@@ -14,10 +14,11 @@ export function LandingHeader() {
   return (
     <header className="px-4 lg:px-8 h-16 flex items-center border-b border-slate-700/50 sticky top-0 bg-slate-900/95 backdrop-blur-md z-50 shadow-lg">
       <Link href="/" className="flex items-center justify-center mr-auto group" aria-label="ThesisAI Philippines homepage">
-        <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 group-hover:shadow-lg group-hover:shadow-purple-500/50 transition-all">
-          <BotMessageSquare className="h-5 w-5 text-white" />
-        </div>
-        <span className="ml-3 font-bold text-white text-lg hidden sm:inline">ThesisAI</span>
+        <img src="/THESIS-AI-LOGO2.png" alt="ThesisAI Logo" width={32} height={32} className="group-hover:opacity-80 transition-opacity" />
+        <span className="ml-3 font-bold text-lg hidden sm:inline">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-electric-purple via-accent-cyan to-pink-500">ThesisAI</span>
+          <span className="text-white"> Philippines</span>
+        </span>
       </Link>
       
       <nav className="hidden lg:flex gap-1 items-center ml-8">

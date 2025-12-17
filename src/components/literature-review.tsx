@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from './ui/card';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
-import { Sparkles, ArrowUpRight, FilePlus2, Search } from 'lucide-react';
+import { Sparkles, ArrowUpRight, FilePlus2, Search, Download, FileText } from 'lucide-react';
 import { useAuth } from './auth-provider';
 import { toast } from 'sonner';
 import { Skeleton } from './ui/skeleton';
@@ -90,14 +90,8 @@ export function LiteratureReview() {
     setSynthesizedText("");
 
     try {
-      const toolName = "search_papers";
-      const toolArguments = {
-        query: topic,
-        max_results: 10,
-      };
-
       await searchArxiv(
-        getSupabaseFunctionUrl('call-arxiv-mcp-server'),
+        getSupabaseFunctionUrl('search-papers'), // Fixed function name
         {
           method: "POST",
           headers: {
@@ -105,7 +99,10 @@ export function LiteratureReview() {
             Authorization: `Bearer ${session.access_token}`,
             apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
           },
-          body: JSON.stringify({ toolName, toolArguments }),
+          body: JSON.stringify({
+            query: topic,
+            max_results: 10,
+          }),
         }
       );
     } catch (error: any) {
@@ -157,7 +154,7 @@ export function LiteratureReview() {
     setIsSaving(true);
 
     let content = `<h2>Literature Review Research for: ${topic}</h2>`;
-    
+
     if (synthesizedText) {
       content += `<h3>AI-Generated Synthesis</h3><p>${synthesizedText}</p>`;
     }
@@ -184,6 +181,85 @@ export function LiteratureReview() {
       router.push(`/drafts/${newDoc.id}`);
     }
     setIsSaving(false);
+  };
+
+  // Function to export literature review as PDF
+  const exportAsPDF = () => {
+    // Create a simplified version of the literature review for export
+    let content = `Literature Review: ${topic}\n\n`;
+
+    if (synthesizedText) {
+      content += `AI-Generated Synthesis:\n${synthesizedText}\n\n`;
+    }
+
+    content += 'Sources:\n\n';
+    papers.forEach((paper, index) => {
+      content += `${index + 1}. ${paper.title}\n`;
+      content += `   Link: ${paper.link}\n`;
+      content += `   Info: ${paper.publication_info}\n`;
+      content += `   Summary: ${paper.snippet}\n\n`;
+    });
+
+    // Create a downloadable file
+    const blob = new Blob([content], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `literature-review-${topic.replace(/\s+/g, '_')}-${new Date().toISOString().split('T')[0]}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast.success('PDF export completed');
+  };
+
+  // Function to export as BibTeX
+  const exportAsBibTeX = () => {
+    let bibtexContent = '';
+
+    papers.forEach((paper, index) => {
+      // Create a basic BibTeX entry - in a real implementation, this would format based on the actual paper type
+      const cleanTitle = paper.title.replace(/[{}]/g, ''); // Remove curly braces that could cause issues
+      const cleanAuthor = paper.publication_info ? paper.publication_info.split(',')[0] : 'Unknown Author';
+
+      bibtexContent += `@article{reference${index + 1},
+  title={${cleanTitle}},
+  author={${cleanAuthor}},
+  journal={${paper.publication_info || 'Unknown Journal'}},
+  year={${new Date().getFullYear()}},
+  url={${paper.link}}
+}
+
+`;
+    });
+
+    // Create a downloadable file
+    const blob = new Blob([bibtexContent], { type: 'application/x-bibtex' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `literature-review-${topic.replace(/\s+/g, '_')}-${new Date().toISOString().split('T')[0]}.bib`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast.success('BibTeX export completed');
+  };
+
+  // Combined export function
+  const exportAs = (format: 'pdf' | 'bibtex') => {
+    if (papers.length === 0) {
+      toast.error('No papers to export');
+      return;
+    }
+
+    if (format === 'pdf') {
+      exportAsPDF();
+    } else if (format === 'bibtex') {
+      exportAsBibTeX();
+    }
   };
 
   return (
@@ -216,6 +292,14 @@ export function LiteratureReview() {
             <div className="flex items-center gap-2">
               {selectedPapers.length > 1 && <Button onClick={handleSynthesize} disabled={isSynthesizingLiterature || !session}><Sparkles className="w-4 h-4 mr-2" />{isSynthesizingLiterature ? "Synthesizing..." : `Synthesize (${selectedPapers.length})`}</Button>}
               <Button variant="outline" onClick={handleSaveAsDraft} disabled={isSaving}><FilePlus2 className="w-4 h-4 mr-2" />{isSaving ? "Saving..." : "Save as Draft"}</Button>
+              <Button variant="outline" onClick={() => exportAs('pdf')} disabled={papers.length === 0}>
+                <Download className="w-4 h-4 mr-2" />
+                PDF
+              </Button>
+              <Button variant="outline" onClick={() => exportAs('bibtex')} disabled={papers.length === 0}>
+                <FileText className="w-4 h-4 mr-2" />
+                BibTeX
+              </Button>
             </div>
           </div>
 

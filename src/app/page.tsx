@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Head from "next/head";
-import { HeroSection } from "@/components/landing/hero-section";
-import { FeaturesSection } from "@/components/landing/features-section";
+import { AsymmetricHeroSection } from "@/components/landing/asymmetric-hero-section";
+import { FeaturesSectionCarousel } from "@/components/landing/features-section-carousel";
 import { DeferredSections } from "@/components/landing/deferred-sections";
 
 // Loading skeleton for critical sections with fixed height to prevent CLS
@@ -52,11 +52,11 @@ export default function LandingPage() {
       />
 
       <main id="main-content">
-        <HeroSection />
+        <AsymmetricHeroSection />
 
         {/* Features shown immediately - critical for above-fold engagement */}
         <Suspense fallback={<SectionSkeleton />}>
-          <FeaturesSection />
+          <FeaturesSectionCarousel />
         </Suspense>
 
         {/* Below-fold sections lazy load from client component */}

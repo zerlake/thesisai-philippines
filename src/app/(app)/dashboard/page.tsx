@@ -6,19 +6,22 @@ import { AdminDashboard } from "@/components/admin-dashboard";
 import { StudentDashboardEnterprise } from "@/components/student-dashboard-enterprise";
 import { BrandedLoader } from "@/components/branded-loader";
 import { CriticDashboard } from "@/components/critic-dashboard";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function DashboardPage() {
   const { profile, isLoading } = useAuth();
+  const router = useRouter();
 
-  // Only show loader if there's no session at all
-  // If we have a session but profile is still loading, show skeleton/profile to avoid infinite loading
-  if (!profile && !isLoading) {
-    return <BrandedLoader />;
-  }
+  // Redirect to login if not authenticated and not loading
+  useEffect(() => {
+    if (!isLoading && !profile) {
+      router.replace("/login");
+    }
+  }, [isLoading, profile, router]);
 
-  // If we have no profile but loading is still ongoing, we might want to render a partial dashboard
-  if (isLoading && !profile) {
-    // Render a skeleton dashboard or fallback UI to avoid infinite loading
+  // Show loading state while checking auth
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
@@ -28,6 +31,11 @@ export default function DashboardPage() {
         </div>
       </div>
     );
+  }
+
+  // If no profile after loading complete, show minimal loading while redirect happens
+  if (!profile) {
+    return <BrandedLoader />;
   }
 
   // Add structured data based on user role
@@ -62,10 +70,6 @@ export default function DashboardPage() {
       };
     }
   };
-
-  if (!profile) {
-    return <BrandedLoader />;
-  }
 
   switch (profile.role) {
     case 'admin':
