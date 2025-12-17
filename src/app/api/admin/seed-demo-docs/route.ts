@@ -10,15 +10,26 @@ import { createClient } from '@supabase/supabase-js';
 import { DEMO_DOCUMENTS } from '@/lib/seed-demo-documents';
 import { NextRequest, NextResponse } from 'next/server';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+function getSupabaseConfig() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return { error: 'Missing Supabase environment variables', supabaseUrl: '', supabaseAnonKey: '' };
+  }
+
+  return { supabaseUrl, supabaseAnonKey, error: null };
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const { supabaseUrl, supabaseAnonKey, error: configError } = getSupabaseConfig();
+    if (configError) {
+      return NextResponse.json(
+        { error: configError, success: false },
+        { status: 500 }
+      );
+    }
     const body = await request.json();
     const { userId } = body;
 
@@ -119,6 +130,14 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
+    const { supabaseUrl, error: configError } = getSupabaseConfig();
+    if (configError) {
+      return NextResponse.json(
+        { error: configError, success: false },
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 
