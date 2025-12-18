@@ -211,7 +211,7 @@ export function StudentDashboardEnterprise() {
   const [nextAction, setNextAction] = useState<Action | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [isLoadingNextAction, setIsLoadingNextAction] = useState(true);
-  const [_isLoadingDoc, setIsLoadingDoc] = useState(true);
+  const [isLoadingDoc, setIsLoadingDoc] = useState(true);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   const widgets = { ...defaultWidgets, ...profile?.user_preferences?.dashboard_widgets };
