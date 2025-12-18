@@ -10,7 +10,7 @@
  * - Defense readiness preparation
  */
 
-import { PuterAIFacade } from '@/lib/puter-ai-facade';
+import { puterAIFacade } from '@/lib/puter-ai-facade';
 import { ResearchGap } from '@/types/researchGap';
 
 export interface AIGapAnalysis {
@@ -94,11 +94,11 @@ export interface ResearchGapAnalysisRequest {
 }
 
 export class ResearchGapAnalyzer {
-  private puterAI: PuterAIFacade;
+  private puterAI = puterAIFacade;
   private cache = new Map<string, AIGapAnalysis>();
 
   constructor() {
-    this.puterAI = new PuterAIFacade();
+    // Uses singleton puterAIFacade instance
   }
 
   /**
@@ -175,8 +175,8 @@ export class ResearchGapAnalyzer {
       Format as JSON with arrays for each category and a string for overall assessment.
     `;
 
-    const response = await this.puterAI.invoke('research-gap-swot', { prompt });
-    return this.parseSwotResponse(response);
+    const response = await this.puterAI.call('research-gap-swot', { prompt });
+    return this.parseSwotResponse(response.data);
   }
 
   /**
@@ -199,8 +199,8 @@ export class ResearchGapAnalyzer {
       Be specific and actionable. Return as JSON with array strings.
     `;
 
-    const response = await this.puterAI.invoke('gap-depth-analysis', { prompt });
-    return this.parseDepthResponse(response);
+    const response = await this.puterAI.call('gap-depth-analysis', { prompt });
+    return this.parseDepthResponse(response.data);
   }
 
   /**
@@ -224,8 +224,8 @@ export class ResearchGapAnalyzer {
       Return as JSON with structured data.
     `;
 
-    const response = await this.puterAI.invoke('impact-assessment', { prompt });
-    return this.parseImpactResponse(response);
+    const response = await this.puterAI.call('impact-assessment', { prompt });
+    return this.parseImpactResponse(response.data);
   }
 
   /**
@@ -247,8 +247,8 @@ export class ResearchGapAnalyzer {
       Make questions specific and realistic. Return as JSON.
     `;
 
-    const response = await this.puterAI.invoke('defense-preparation', { prompt });
-    return this.parseDefenseResponse(response);
+    const response = await this.puterAI.call('defense-preparation', { prompt });
+    return this.parseDefenseResponse(response.data);
   }
 
   /**
@@ -271,8 +271,8 @@ export class ResearchGapAnalyzer {
       Return as JSON.
     `;
 
-    const response = await this.puterAI.invoke('gap-recommendations', { prompt });
-    return this.parseRecommendationsResponse(response);
+    const response = await this.puterAI.call('gap-recommendations', { prompt });
+    return this.parseRecommendationsResponse(response.data);
   }
 
   /**
