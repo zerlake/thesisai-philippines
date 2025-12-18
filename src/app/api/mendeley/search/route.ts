@@ -2,11 +2,17 @@ import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Create Supabase client helper function for runtime initialization
+function createSupabaseClient() {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
+}
 
 // Define Zod schema for request validation
 const mendeleyRequestSchema = z.object({
@@ -72,9 +78,12 @@ export async function GET(request: NextRequest) {
       return Response.json({ error: 'Authorization token required' }, { status: 401 });
     }
 
+    // Initialize Supabase client
+    const supabase = createSupabaseClient();
+
     // Verify the user session
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
+
     if (authError || !user) {
       return Response.json({ error: 'Invalid session' }, { status: 401 });
     }
@@ -219,16 +228,19 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: 'Authorization token required' }, { status: 401 });
     }
 
+    // Initialize Supabase client
+    const supabase = createSupabaseClient();
+
     // Verify the user session
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
+
     if (authError || !user) {
       return Response.json({ error: 'Invalid session' }, { status: 401 });
     }
 
     // Validate request body
-    const body = await request.json();
-    const { documentIds } = body;
+    const requestBody = await request.json();
+    const { documentIds } = requestBody;
     
     if (!documentIds || !Array.isArray(documentIds) || documentIds.length === 0) {
       return Response.json({ error: 'documentIds array is required' }, { status: 400 });

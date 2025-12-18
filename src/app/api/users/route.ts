@@ -36,7 +36,17 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Create Supabase client helper function for runtime initialization
+function createSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(supabaseUrl, supabaseAnonKey);
+}
 
 // GET /api/users/me
 export async function GET(request: NextRequest) {
@@ -47,6 +57,9 @@ export async function GET(request: NextRequest) {
     if (!userId) {
       return errorResponse('Authentication required', 401, 'UNAUTHORIZED');
     }
+
+    // Initialize Supabase client
+    const supabase = createSupabaseClient();
 
     // Fetch user profile from database
     const { data: profile, error } = await supabase
@@ -124,6 +137,9 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString()
     };
 
+    // Initialize Supabase client
+    const supabase = createSupabaseClient();
+
     // Upsert user profile (insert or update if exists)
     const { data, error } = await supabase
       .from('profiles')
@@ -189,6 +205,9 @@ export async function PUT(request: NextRequest) {
     
     // Add updated_at timestamp
     dbUpdateData.updated_at = new Date().toISOString();
+
+    // Initialize Supabase client
+    const supabase = createSupabaseClient();
 
     // Update user profile
     const { data, error } = await supabase

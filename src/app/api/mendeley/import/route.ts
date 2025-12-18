@@ -2,11 +2,17 @@ import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Create Supabase client helper function for runtime initialization
+function createSupabaseClient() {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
+}
 
 // Define Zod schema for request validation
 const mendeleyImportSchema = z.object({
@@ -43,6 +49,9 @@ export async function POST(request: NextRequest) {
     }
 
     const { documentIds, importSettings } = validationResult.data;
+
+    // Initialize Supabase client
+    const supabase = createSupabaseClient();
 
     // Verify the user session
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
