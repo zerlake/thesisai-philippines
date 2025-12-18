@@ -1,3 +1,8 @@
+/**
+ * Intelligent Caching Layer
+ * Phase 5: Advanced AI Features
+ */
+
 import { LRUCache } from 'lru-cache';
 
 export interface CacheConfig {
@@ -15,6 +20,7 @@ export interface CacheMetrics {
   avgRetrievalTime: number;
   size: number;
   maxSize: number;
+  evictions: number;
 }
 
 interface CacheEntry<T> {
@@ -33,92 +39,130 @@ export class IntelligentCache {
     hitRate: 0,
     avgRetrievalTime: 0,
     size: 0,
-    maxSize: 0
+    maxSize: 0,
+    evictions: 0
   };
   private updatePromises: Map<string, Promise<any>> = new Map();
   private dependencyMap: Map<string, Set<string>> = new Map();
+  private recentHits: number[] = []; // Track recent hits for optimization
+  private recentMisses: number[] = []; // Track recent misses for optimization
 
   constructor(maxSize: number = 100) {
-    this.cache = new LRUCache({ max: maxSize });
+    this.cache = new LRUCache({ 
+      max: maxSize,
+      // Add automatic pruning when size exceeds max
+      dispose: () => {
+        this.metrics.size = this.cache.size;
+        this.metrics.evictions = (this.metrics.evictions || 0) + 1;
+      }
+    });
     this.metrics.maxSize = maxSize;
   }
 
   /**
-   * Get or fetch value with intelligent caching
+   * Get value from cache
+   */
+  get<T>(key: string): T | null {
+    const entry = this.cache.get(key);
+    const now = Date.now();
+    
+    if (entry) {
+      // Check if entry is still fresh
+      if (now < entry.expiresAt) {
+        this.metrics.hits++;
+        this.recentHits.push(now);
+        this.updateHitRate();
+        return entry.data as T;
+      }
+      
+      // Check if entry is still valid for stale-while-revalidate
+      if (entry.staleAt && now < entry.staleAt) {
+        this.metrics.hits++; // Count as hit for metrics
+        this.recentHits.push(now);
+        this.updateHitRate();
+        return entry.data as T;
+      }
+      
+      // Entry expired, remove it
+      this.cache.delete(key);
+    }
+    
+    this.metrics.misses++;
+    this.recentMisses.push(now);
+    this.updateHitRate();
+    return null;
+  }
+
+  /**
+   * Set value in cache
+   */
+  set<T>(key: string, data: T, config: CacheConfig = {}): void {
+    const now = Date.now();
+    const ttl = config.ttl || 5 * 60 * 1000; // Default 5 minutes
+    const staleWhileRevalidate = config.staleWhileRevalidate || 1 * 60 * 1000; // Default 1 minute
+
+    const entry: CacheEntry<T> = {
+      data,
+      timestamp: now,
+      expiresAt: now + ttl,
+      staleAt: now + ttl + staleWhileRevalidate,
+      source: 'api'
+    };
+
+    this.cache.set(key, entry);
+    this.metrics.size = this.cache.size;
+  }
+
+  /**
+   * Get or fetch with intelligent caching
    */
   async getOrFetch<T>(
     key: string,
     fetcher: () => Promise<T>,
     config: CacheConfig = {}
   ): Promise<T> {
-    const startTime = performance.now();
+    // Check for ongoing updates to prevent duplicate requests
+    if (this.updatePromises.has(key)) {
+      return this.updatePromises.get(key) as Promise<T>;
+    }
 
-    try {
-      // Check cache
-      const cached = this.cache.get(key);
-
-      if (cached && config.strategy !== 'network-only') {
+    const cached = this.get<T>(key);
+    if (cached && config.strategy !== 'network-only') {
+      // If stale-while-revalidate is enabled and we have stale data, revalidate in background
+      if (config.staleWhileRevalidate) {
         const now = Date.now();
-
-        // Return if fresh
-        if (now < cached.expiresAt) {
-          this.recordHit(startTime);
-          return cached.data as T;
-        }
-
-        // Handle stale-while-revalidate
-        if (
-          config.staleWhileRevalidate &&
-          cached.staleAt &&
-          now < cached.staleAt
-        ) {
-          this.recordHit(startTime);
+        const entry = this.cache.get(key);
+        
+        if (entry && entry.staleAt && now >= entry.expiresAt && now < entry.staleAt) {
           // Revalidate in background
-          this.updateInBackground(key, fetcher, config);
-          return cached.data as T;
+          const promise = fetcher().then(data => {
+            this.set(key, data, config);
+            this.updatePromises.delete(key);
+            return data;
+          }).catch(error => {
+            this.updatePromises.delete(key);
+            console.error('Background revalidation failed:', error);
+            // Return stale data even if revalidation fails
+            return cached;
+          });
+          
+          this.updatePromises.set(key, promise);
         }
       }
-
-      // Fetch new data
-      const data = await this.executeWithDedup(key, fetcher, config);
-
-      // Store in cache
-      this.setCached(key, data, config);
-
-      // Register dependencies
-      if (config.dependencies) {
-        this.registerDependencies(key, config.dependencies);
-      }
-
-      this.recordMiss(startTime);
-      return data;
-    } catch (error) {
-      // On error, return stale data if available
-      const cached = this.cache.get(key);
-      if (cached && config.strategy !== 'network-only') {
-        return cached.data as T;
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * Deduplicate concurrent requests
-   */
-  private async executeWithDedup<T>(
-    key: string,
-    fetcher: () => Promise<T>,
-    _config: CacheConfig
-  ): Promise<T> {
-    // If request already in flight, return that promise
-    const existing = this.updatePromises.get(key);
-    if (existing) {
-      return existing;
+      
+      return cached;
     }
 
-    // Create new promise
+    // Fetch new data
     const promise = fetcher()
       .then(data => {
+        this.set(key, data, config);
+        
+        // Register dependencies
+        if (config.dependencies) {
+          this.registerDependencies(key, config.dependencies);
+        }
+        
         this.updatePromises.delete(key);
         return data;
       })
@@ -132,146 +176,27 @@ export class IntelligentCache {
   }
 
   /**
-   * Revalidate cache entry in background
-   */
-  private async updateInBackground<T>(
-    key: string,
-    fetcher: () => Promise<T>,
-    config: CacheConfig
-  ): Promise<void> {
-    try {
-      const data = await fetcher();
-      this.setCached(key, data, config);
-    } catch (error) {
-      // Silently fail background updates
-      console.debug(`Background update failed for ${key}:`, error);
-    }
-  }
-
-  /**
-   * Store value in cache with TTL
-   */
-  private setCached<T>(key: string, data: T, config: CacheConfig): void {
-    const now = Date.now();
-    const ttl = config.ttl ?? 5 * 60 * 1000; // Default 5 minutes
-
-    const entry: CacheEntry<T> = {
-      data,
-      timestamp: now,
-      expiresAt: now + ttl,
-      staleAt: config.staleWhileRevalidate
-        ? now + ttl + config.staleWhileRevalidate
-        : undefined,
-      source: 'api'
-    };
-
-    this.cache.set(key, entry);
-    this.updateMetrics();
-  }
-
-  /**
-   * Invalidate cache by pattern or dependency
-   */
-  async invalidate(pattern: string | RegExp): Promise<void> {
-    const isRegex = pattern instanceof RegExp;
-
-    for (const key of this.cache.keys()) {
-      const matches = isRegex
-        ? (pattern as RegExp).test(key)
-        : key.includes(pattern as string);
-
-      if (matches) {
-        this.cache.delete(key);
-      }
-    }
-
-    this.updateMetrics();
-  }
-
-  /**
-   * Prefetch data into cache
-   */
-  async prefetch<T>(
-    key: string,
-    fetcher: () => Promise<T>,
-    config: CacheConfig = {}
-  ): Promise<void> {
-    await this.getOrFetch(key, fetcher, config);
-  }
-
-  /**
-   * Warm cache with multiple keys
-   */
-  async warmCache<T>(
-    keys: Array<{ key: string; fetcher: () => Promise<T> }>,
-    config: CacheConfig = {}
-  ): Promise<void> {
-    await Promise.all(
-      keys.map(({ key, fetcher }) =>
-        this.prefetch(key, fetcher, config).catch(() => {
-          // Ignore prefetch errors
-        })
-      )
-    );
-  }
-
-  /**
-   * Clear entire cache
-   */
-  clear(): void {
-    this.cache.clear();
-    this.updatePromises.clear();
-    this.dependencyMap.clear();
-    this.updateMetrics();
-  }
-
-  /**
-   * Register dependency relationships
+   * Register dependencies for a key
    */
   private registerDependencies(key: string, dependencies: string[]): void {
-    dependencies.forEach(dep => {
+    for (const dep of dependencies) {
       if (!this.dependencyMap.has(dep)) {
         this.dependencyMap.set(dep, new Set());
       }
-      this.dependencyMap.get(dep)!.add(key);
-    });
-  }
-
-  /**
-   * Invalidate dependent keys
-   */
-  invalidateDependents(key: string): void {
-    const dependents = this.dependencyMap.get(key);
-    if (dependents) {
-      dependents.forEach(dependent => {
-        this.cache.delete(dependent);
-      });
+      this.dependencyMap.get(dep)?.add(key);
     }
   }
 
   /**
-   * Get cache metrics
+   * Invalidate by dependency
    */
-  getMetrics(): CacheMetrics {
-    return { ...this.metrics };
-  }
-
-  /**
-   * Record cache hit
-   */
-  private recordHit(startTime: number): void {
-    this.metrics.hits++;
-    this.updateHitRate();
-    this.recordTime(startTime);
-  }
-
-  /**
-   * Record cache miss
-   */
-  private recordMiss(startTime: number): void {
-    this.metrics.misses++;
-    this.updateHitRate();
-    this.recordTime(startTime);
+  invalidateDependency(dependency: string): void {
+    const dependentKeys = this.dependencyMap.get(dependency);
+    if (dependentKeys) {
+      for (const key of dependentKeys) {
+        this.cache.delete(key);
+      }
+    }
   }
 
   /**
@@ -283,22 +208,47 @@ export class IntelligentCache {
   }
 
   /**
-   * Record retrieval time
+   * Clear all cache entries
    */
-  private recordTime(startTime: number): void {
-    const elapsed = performance.now() - startTime;
-    const total = this.metrics.hits + this.metrics.misses;
-    this.metrics.avgRetrievalTime =
-      (this.metrics.avgRetrievalTime * (total - 1) + elapsed) / total;
+  clear(): void {
+    this.cache.clear();
+    this.metrics.size = 0;
   }
 
   /**
-   * Update metrics
+   * Invalidate specific key
    */
-  private updateMetrics(): void {
+  invalidate(key: string): void {
+    this.cache.delete(key);
     this.metrics.size = this.cache.size;
+  }
+
+  /**
+   * Get cache metrics
+   */
+  getMetrics(): CacheMetrics {
+    return { ...this.metrics };
+  }
+
+  /**
+   * Auto-optimize cache parameters based on usage patterns
+   */
+  autoOptimize(): void {
+    const now = Date.now();
+    const totalAccesses = this.metrics.hits + this.metrics.misses;
+    const currentHitRate = totalAccesses > 0 ? this.metrics.hits / totalAccesses : 0;
+
+    // If hit rate is below threshold, consider adjusting cache parameters
+    if (currentHitRate < 0.85) { // Below 85% hit rate
+      console.info(`Cache hit rate is ${(currentHitRate * 100).toFixed(1)}%. Consider increasing cache size.`);
+    }
+
+    // Prune old access history to maintain efficiency
+    const fifteenMinutesAgo = now - 15 * 60 * 1000;
+    this.recentHits = this.recentHits.filter(time => time > fifteenMinutesAgo);
+    this.recentMisses = this.recentMisses.filter(time => time > fifteenMinutesAgo);
   }
 }
 
-// Singleton instance
-export const intelligentCache = new IntelligentCache(200);
+// Export singleton instance
+export const intelligentCache = new IntelligentCache(500); // Increased size for better performance
