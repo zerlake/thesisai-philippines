@@ -53,43 +53,117 @@ import { ThesisPhasesCard } from "./thesis-phases-card";
 import { DashboardRealtimeProvider } from "./dashboard/DashboardRealtimeProvider";
 import { EnterpriseAppsCard } from "./enterprise-apps-card";
 import { EnterpriseWorkflowsCard } from "./enterprise-workflows-card";
+import { ChatInterface } from "./chat-interface";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
-const topToolsForQuickAccess = [
+const quickAccessItems = [
   {
     icon: BrainCircuit,
     title: "Topic Idea Generator",
-    description: "Brainstorm your thesis topic.",
+    description: "Brainstorm your topic.",
     href: "/topic-ideas",
   },
   {
     icon: List,
     title: "Outline Generator",
-    description: "Structure your thesis effectively.",
+    description: "Structure your thesis.",
     href: "/outline",
   },
   {
     icon: FlaskConical,
     title: "Research Helper",
-    description: "Find and manage academic papers.",
+    description: "Find academic papers.",
     href: "/research",
   },
   {
     icon: ClipboardPen,
     title: "Methodology Helper",
-    description: "Design your research methodology.",
+    description: "Design your research.",
     href: "/methodology",
   },
   {
     icon: ClipboardCheck,
     title: "Results Helper",
-    description: "Present your findings clearly.",
+    description: "Present your findings.",
     href: "/results",
   },
   {
     icon: BookCheck,
     title: "Conclusion Helper",
-    description: "Summarize and conclude effectively.",
+    description: "Summarize your work.",
     href: "/conclusion",
+  },
+  {
+    icon: Presentation,
+    title: "Presentation Maker",
+    description: "Create your slide deck.",
+    href: "/presentation",
+  },
+  {
+    icon: Lightbulb,
+    title: "Flashcards",
+    description: "Study key concepts.",
+    href: "/flashcards",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Originality Check",
+    description: "Scan for plagiarism.",
+    href: "/originality-check",
+  },
+  {
+    icon: FileText,
+    title: "Reference Manager",
+    description: "Manage your citations.",
+    href: "/references",
+  },
+  {
+    icon: FileText,
+    title: "PDF & Document Analysis",
+    description: "Analyze your documents.",
+    href: "/document-analyzer",
+  },
+  {
+    icon: BookOpen,
+    title: "Research Article Analyzer",
+    description: "Analyze research articles with structured extraction.",
+    href: "/research-article-analyzer",
+  },
+  {
+    icon: Folder,
+    title: "Research Groups",
+    description: "Organize and manage research projects.",
+    href: "/research-groups",
+  },
+  {
+    icon: Users,
+    title: "Literature Review Collaboration",
+    description: "Collaborate with your team.",
+    href: "/literature-review",
+  },
+  {
+    icon: Target,
+    title: "Variable Mapping Tool",
+    description: "Map research variables.",
+    href: "/variable-mapping-tool",
+  },
+  {
+    icon: Square,
+    title: "University Format Checker",
+    description: "Check format compliance.",
+    href: "/university-format-checker",
+  },
+  {
+    icon: Lightbulb,
+    title: "Research Problem Identifier",
+    description: "Find research problems.",
+    href: "/research-problem-identifier",
+  },
+  {
+    icon: Presentation,
+    title: "Defense PPT Coach",
+    description: "Create structured defense presentations.",
+    href: "/defense-ppt-coach",
   },
 ];
 
@@ -441,7 +515,7 @@ export function StudentDashboardEnterprise() {
         {/* Quick Tools Navigation */}
         {widgets.quick_access && (
           <DashboardNavigation
-            items={topToolsForQuickAccess}
+            items={quickAccessItems}
             title="Essential Research Tools"
           />
         )}
@@ -465,6 +539,23 @@ export function StudentDashboardEnterprise() {
             {widgets.wellbeing && <WellbeingWidget />}
           </div>
         )}
+
+        {/* Chat Interface in a right sidebar position */}
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Messages & Conversations</span>
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Chat with your advisor, critic, and other collaborators
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[500px]">
+              <ChatInterface />
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Learning Resources */}
         <div className="grid gap-6 md:grid-cols-2">

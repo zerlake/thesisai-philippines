@@ -49,6 +49,7 @@ export const studentNavGroups: NavGroup[] = [
     title: "Workspace",
     items: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+      { icon: MessageCircleQuestion, label: "Messages", href: "/chat" },
       { icon: FileText, label: "Drafts", href: "/drafts" },
     ],
   },
@@ -132,6 +133,7 @@ export const advisorNavGroups: NavGroup[] = [
     title: "Advisor Workspace",
     items: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/advisor" },
+      { icon: MessageCircleQuestion, label: "Messages", href: "/advisor/chat" },
       { icon: FileText, label: "Drafts", href: "/drafts" },
       { icon: CheckSquare, label: "Competency Self-Assessment", href: "/advisor/competency" },
     ],
@@ -212,6 +214,7 @@ export const criticNavGroups: NavGroup[] = [
     title: "Critic Workspace",
     items: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/critic" },
+      { icon: MessageCircleQuestion, label: "Messages", href: "/critic/chat" },
       { icon: Users, label: "My Students", href: "/critic/students" },
       { icon: Banknote, label: "Billing", href: "/critic/billing" },
       { icon: BookOpen, label: "Resources", href: "/resources" },

@@ -76,52 +76,64 @@ export function Header() {
 
         {/* Main Navigation - Hidden on mobile */}
         <div className="hidden lg:flex items-center space-x-1">
-          {/* Thesis Phases Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="px-3">
-                Thesis Phases <ChevronDown className="ml-1 h-4 w-4" />
+          {/* Conditional rendering based on whether user is on admin, critic, or advisor pages */}
+          {!pathname.startsWith('/admin') && !pathname.startsWith('/critic') && !pathname.startsWith('/advisor') && (
+            <>
+              {/* Thesis Phases Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="px-3">
+                    Thesis Phases <ChevronDown className="ml-1 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuLabel>Thesis Chapters</DropdownMenuLabel>
+                  <DropdownMenuItem>
+                    <Link href="/thesis-phases/chapter-1">Chapter 1 - Introduction</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/thesis-phases/chapter-2">Chapter 2 - Literature Review</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/thesis-phases/chapter-3">Chapter 3 - Methodology</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/thesis-phases/chapter-4">Chapter 4 - Results & Analysis</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/thesis-phases/chapter-5">Chapter 5 - Conclusions</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          )}
+
+          {/* Show billing, referrals, groups, and analytics for users who have appropriate role or are on their pages */}
+          {(profile?.role === 'admin' || profile?.role === 'advisor' || profile?.role === 'critic') && (
+            <>
+              {/* Billing */}
+              <Button variant="ghost" className="px-3" asChild>
+                <Link href="/settings/billing">Billing</Link>
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              <DropdownMenuLabel>Thesis Chapters</DropdownMenuLabel>
-              <DropdownMenuItem>
-                <Link href="/thesis-phases/chapter-1">Chapter 1 - Introduction</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/thesis-phases/chapter-2">Chapter 2 - Literature Review</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/thesis-phases/chapter-3">Chapter 3 - Methodology</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/thesis-phases/chapter-4">Chapter 4 - Results & Analysis</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/thesis-phases/chapter-5">Chapter 5 - Conclusions</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
 
-          {/* Billing */}
-          <Button variant="ghost" className="px-3" asChild>
-            <Link href="/settings/billing">Billing</Link>
-          </Button>
+              {/* Referrals */}
+              <Button variant="ghost" className="px-3" asChild>
+                <Link href="/settings/referrals">Referrals</Link>
+              </Button>
 
-          {/* Referrals */}
-          <Button variant="ghost" className="px-3" asChild>
-            <Link href="/settings/referrals">Referrals</Link>
-          </Button>
+              {/* Manage Groups */}
+              <Button variant="ghost" className="px-3" asChild>
+                <Link href="/groups">Manage Groups</Link>
+              </Button>
 
-          {/* Manage Groups */}
-          <Button variant="ghost" className="px-3" asChild>
-            <Link href="/groups">Manage Groups</Link>
-          </Button>
-
-          {/* Usage & Analytics */}
-          <Button variant="ghost" className="px-3" asChild>
-            <Link href="/analytics">Usage & Analytics</Link>
-          </Button>
+              {/* Usage & Analytics - show for admin users */}
+              {profile?.role === 'admin' && (
+                <Button variant="ghost" className="px-3" asChild>
+                  <Link href="/analytics">Usage & Analytics</Link>
+                </Button>
+              )}
+            </>
+          )}
         </div>
 
         {/* Right side: User */}
@@ -158,6 +170,26 @@ export function Header() {
                     </Link>
                     <DropdownMenuItem disabled>ARC Generator</DropdownMenuItem>
                   </div>
+                  {!pathname.startsWith('/admin') && !pathname.startsWith('/critic') && !pathname.startsWith('/advisor') && (
+                    <div>
+                      <DropdownMenuLabel>Thesis Phases</DropdownMenuLabel>
+                      <Link href="/thesis-phases/chapter-1">
+                        <DropdownMenuItem>Chapter 1 - Introduction</DropdownMenuItem>
+                      </Link>
+                      <Link href="/thesis-phases/chapter-2">
+                        <DropdownMenuItem>Chapter 2 - Literature Review</DropdownMenuItem>
+                      </Link>
+                      <Link href="/thesis-phases/chapter-3">
+                        <DropdownMenuItem>Chapter 3 - Methodology</DropdownMenuItem>
+                      </Link>
+                      <Link href="/thesis-phases/chapter-4">
+                        <DropdownMenuItem>Chapter 4 - Results & Analysis</DropdownMenuItem>
+                      </Link>
+                      <Link href="/thesis-phases/chapter-5">
+                        <DropdownMenuItem>Chapter 5 - Conclusions</DropdownMenuItem>
+                      </Link>
+                    </div>
+                  )}
                   <div>
                     <DropdownMenuLabel>Resources</DropdownMenuLabel>
                     <Link href="/documentation">
@@ -167,18 +199,21 @@ export function Header() {
                       <DropdownMenuItem>Support</DropdownMenuItem>
                     </Link>
                   </div>
-                  <div>
-                    <DropdownMenuLabel>Admin</DropdownMenuLabel>
-                    <Link href="/settings/billing">
-                      <DropdownMenuItem>Billing</DropdownMenuItem>
-                    </Link>
-                    <Link href="/settings/referrals">
-                      <DropdownMenuItem>Referrals</DropdownMenuItem>
-                    </Link>
-                    <Link href="/groups">
-                      <DropdownMenuItem>Manage Groups</DropdownMenuItem>
-                    </Link>
-                  </div>
+                  {/* Show administrative items to users who have appropriate role */}
+                  {(profile?.role === 'admin' || profile?.role === 'advisor' || profile?.role === 'critic') && (
+                    <div>
+                      <DropdownMenuLabel>Admin</DropdownMenuLabel>
+                      <Link href="/settings/billing">
+                        <DropdownMenuItem>Billing</DropdownMenuItem>
+                      </Link>
+                      <Link href="/settings/referrals">
+                        <DropdownMenuItem>Referrals</DropdownMenuItem>
+                      </Link>
+                      <Link href="/groups">
+                        <DropdownMenuItem>Manage Groups</DropdownMenuItem>
+                      </Link>
+                    </div>
+                  )}
                 </nav>
               </ScrollArea>
             </SheetContent>

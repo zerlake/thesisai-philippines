@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
  * Example 1: Lazy Load Dashboard Based on User Role
  */
 const StudentDashboard = dynamic(
-  () => import('@/components/student-dashboard').then(mod => ({ default: mod.StudentDashboard })),
+  () => import('@/components/student-dashboard-enterprise').then(mod => ({ default: mod.StudentDashboardEnterprise })),
   {
     loading: () => <DashboardSkeleton />,
     ssr: true, // Enable SSR for SEO
@@ -33,7 +33,7 @@ export function DashboardSelector({
 }) {
   return (
     <Suspense fallback={<DashboardSkeleton />}>
-      {role === 'student' && <StudentDashboard key={userId} />}
+      {role === 'student' && <StudentDashboardEnterprise key={userId} />}
     </Suspense>
   );
 }

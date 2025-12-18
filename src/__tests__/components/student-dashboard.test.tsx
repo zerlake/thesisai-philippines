@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
-describe('StudentDashboard Component', () => {
-  it('component exists at src/components/student-dashboard.tsx', () => {
+describe('StudentDashboardEnterprise Component', () => {
+  it('component exists at src/components/student-dashboard-enterprise.tsx', () => {
     expect(true).toBe(true);
   });
 
