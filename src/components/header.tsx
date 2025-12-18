@@ -76,7 +76,7 @@ export function Header() {
 
         {/* Main Navigation - Hidden on mobile */}
         <div className="hidden lg:flex items-center space-x-1">
-          {/* Conditional rendering based on whether user is on admin, critic, or advisor pages */}
+          {/* Thesis Phases Dropdown - Show for students (not on admin/critic/advisor pages) */}
           {!pathname.startsWith('/admin') && !pathname.startsWith('/critic') && !pathname.startsWith('/advisor') && (
             <>
               {/* Thesis Phases Dropdown */}
@@ -108,32 +108,25 @@ export function Header() {
             </>
           )}
 
-          {/* Show billing, referrals, groups, and analytics for users who have appropriate role or are on their pages */}
-          {(profile?.role === 'admin' || profile?.role === 'advisor' || profile?.role === 'critic') && (
-            <>
-              {/* Billing */}
-              <Button variant="ghost" className="px-3" asChild>
-                <Link href="/settings/billing">Billing</Link>
-              </Button>
+          {/* Billing */}
+          <Button variant="ghost" className="px-3" asChild>
+            <Link href="/settings/billing">Billing</Link>
+          </Button>
 
-              {/* Referrals */}
-              <Button variant="ghost" className="px-3" asChild>
-                <Link href="/settings/referrals">Referrals</Link>
-              </Button>
+          {/* Referrals */}
+          <Button variant="ghost" className="px-3" asChild>
+            <Link href="/settings/referrals">Referrals</Link>
+          </Button>
 
-              {/* Manage Groups */}
-              <Button variant="ghost" className="px-3" asChild>
-                <Link href="/groups">Manage Groups</Link>
-              </Button>
+          {/* Manage Groups */}
+          <Button variant="ghost" className="px-3" asChild>
+            <Link href="/groups">Manage Groups</Link>
+          </Button>
 
-              {/* Usage & Analytics - show for admin users */}
-              {profile?.role === 'admin' && (
-                <Button variant="ghost" className="px-3" asChild>
-                  <Link href="/analytics">Usage & Analytics</Link>
-                </Button>
-              )}
-            </>
-          )}
+          {/* Usage & Analytics */}
+          <Button variant="ghost" className="px-3" asChild>
+            <Link href="/analytics">Usage & Analytics</Link>
+          </Button>
         </div>
 
         {/* Right side: User */}
@@ -199,21 +192,21 @@ export function Header() {
                       <DropdownMenuItem>Support</DropdownMenuItem>
                     </Link>
                   </div>
-                  {/* Show administrative items to users who have appropriate role */}
-                  {(profile?.role === 'admin' || profile?.role === 'advisor' || profile?.role === 'critic') && (
-                    <div>
-                      <DropdownMenuLabel>Admin</DropdownMenuLabel>
-                      <Link href="/settings/billing">
-                        <DropdownMenuItem>Billing</DropdownMenuItem>
-                      </Link>
-                      <Link href="/settings/referrals">
-                        <DropdownMenuItem>Referrals</DropdownMenuItem>
-                      </Link>
-                      <Link href="/groups">
-                        <DropdownMenuItem>Manage Groups</DropdownMenuItem>
-                      </Link>
-                    </div>
-                  )}
+                  <div>
+                    <DropdownMenuLabel>Account</DropdownMenuLabel>
+                    <Link href="/settings/billing">
+                      <DropdownMenuItem>Billing</DropdownMenuItem>
+                    </Link>
+                    <Link href="/settings/referrals">
+                      <DropdownMenuItem>Referrals</DropdownMenuItem>
+                    </Link>
+                    <Link href="/groups">
+                      <DropdownMenuItem>Manage Groups</DropdownMenuItem>
+                    </Link>
+                    <Link href="/analytics">
+                      <DropdownMenuItem>Usage & Analytics</DropdownMenuItem>
+                    </Link>
+                  </div>
                 </nav>
               </ScrollArea>
             </SheetContent>
