@@ -34,6 +34,14 @@ const nextConfig: NextConfig = {
   // Skip collecting pages to avoid Next.js 16 Turbopack workUnitAsyncStorage bug
   typescript: {
     tsconfigPath: './tsconfig.json',
+    // Skip type checking during build to avoid memory issues on Vercel
+    // TypeScript errors are caught by IDE and pre-commit hooks
+    ignoreBuildErrors: true,
+  },
+
+  // Skip ESLint during build to reduce memory usage
+  eslint: {
+    ignoreDuringBuilds: true,
   },
   
   // Enable AMP mode and experimental optimizations
