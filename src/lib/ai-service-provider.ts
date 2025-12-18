@@ -51,7 +51,7 @@ export interface AIServiceConfig {
   };
 }
 
-class AIServiceProvider {
+export class AIServiceProvider {
   private config: AIServiceConfig;
   private failureLog: Array<{ provider: AIProvider; error: string; timestamp: number }> = [];
 
