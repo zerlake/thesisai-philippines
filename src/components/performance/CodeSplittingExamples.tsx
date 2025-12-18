@@ -8,6 +8,7 @@
 import dynamic from 'next/dynamic';
 import React, { Suspense, useState, useRef, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DashboardSkeleton } from '@/components/dashboard/LoadingSkeleton';
 
 /**
  * Example 1: Lazy Load Dashboard Based on User Role
@@ -33,7 +34,7 @@ export function DashboardSelector({
 }) {
   return (
     <Suspense fallback={<DashboardSkeleton />}>
-      {role === 'student' && <StudentDashboardEnterprise key={userId} />}
+      {role === 'student' && <StudentDashboard key={userId} />}
     </Suspense>
   );
 }
