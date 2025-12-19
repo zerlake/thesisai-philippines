@@ -2,9 +2,11 @@
  * API Route: OpenAlex Search (Server-side to avoid CORS)
  *
  * Searches OpenAlex API, bypassing CORS issues
+ * SECURITY: Requires authentication, validates input, applies rate limiting
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { Paper } from '@/types/paper';
 import { OpenAlexWork } from '@/types/paper';
 
@@ -15,15 +17,48 @@ interface OpenAlexApiResult {
 
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Verify authentication
+    const supabase = await createServerSupabaseClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized - authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q') ?? '';
-    const maxResults = Number(searchParams.get('max') ?? '20');
+    let maxResults = Number(searchParams.get('max') ?? '20');
     const fromYear = searchParams.get('from_year') ?? '';
     const toYear = searchParams.get('to_year') ?? '';
 
-    if (!query.trim()) {
+    // SECURITY: Validate query parameter
+    if (!query.trim() || query.length > 500) {
       return NextResponse.json(
-        { error: 'Query is required' },
+        { error: 'Query is required and must be less than 500 characters' },
+        { status: 400 }
+      );
+    }
+
+    // SECURITY: Enforce upper limit on results to prevent resource exhaustion
+    const MAX_RESULTS = 100;
+    if (isNaN(maxResults) || maxResults < 1 || maxResults > MAX_RESULTS) {
+      maxResults = Math.min(20, MAX_RESULTS);
+    }
+
+    // SECURITY: Validate year parameters
+    const currentYear = new Date().getFullYear();
+    if (fromYear && (isNaN(Number(fromYear)) || Number(fromYear) < 1000 || Number(fromYear) > currentYear)) {
+      return NextResponse.json(
+        { error: 'Invalid from_year parameter' },
+        { status: 400 }
+      );
+    }
+    if (toYear && (isNaN(Number(toYear)) || Number(toYear) < 1000 || Number(toYear) > currentYear)) {
+      return NextResponse.json(
+        { error: 'Invalid to_year parameter' },
         { status: 400 }
       );
     }

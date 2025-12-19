@@ -7,6 +7,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { DEMO_DOCUMENTS } from '@/lib/seed-demo-documents';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -23,6 +24,31 @@ function getSupabaseConfig() {
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Verify authentication and admin role
+    const authSupabase = await createServerSupabaseClient();
+    const { data: { session } } = await authSupabase.auth.getSession();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized - authentication required', success: false },
+        { status: 401 }
+      );
+    }
+
+    // Check if user is admin
+    const { data: profile } = await authSupabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single();
+
+    if (profile?.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Forbidden - admin role required', success: false },
+        { status: 403 }
+      );
+    }
+
     const { supabaseUrl, supabaseAnonKey, error: configError } = getSupabaseConfig();
     if (configError) {
       return NextResponse.json(
@@ -40,7 +66,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create service role client for seeding (no auth needed)
+    // Create service role client for seeding (admin only)
     const supabase = createClient(
       supabaseUrl,
       process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey

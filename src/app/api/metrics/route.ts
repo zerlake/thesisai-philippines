@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import {
   getPerformanceReport,
   getCdnHealthStatus,
@@ -9,8 +10,19 @@ import {
 /**
  * GET /api/metrics
  * Returns comprehensive CDN performance report
+ * SECURITY: Requires authentication
  */
 export async function GET(request: NextRequest) {
+  // SECURITY: Verify authentication
+  const supabase = await createServerSupabaseClient();
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session) {
+    return NextResponse.json(
+      { error: 'Unauthorized - authentication required' },
+      { status: 401 }
+    );
+  }
   const searchParams = request.nextUrl.searchParams;
   const format = searchParams.get('format') || 'json';
 
@@ -54,15 +66,37 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/metrics
  * Record a new metric
+ * SECURITY: Requires authentication, validates input
  */
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Verify authentication
+    const supabase = await createServerSupabaseClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized - authentication required' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { region, latency, cacheHit, bytesServed, error } = body;
 
-    if (!region || latency === undefined) {
+    // SECURITY: Validate region parameter
+    const validRegions = ['us-east', 'us-west', 'eu-west', 'asia-pacific', 'unknown'];
+    if (!region || !validRegions.includes(region)) {
       return NextResponse.json(
-        { error: 'Missing required fields: region, latency' },
+        { error: 'Invalid region - must be one of: ' + validRegions.join(', ') },
+        { status: 400 }
+      );
+    }
+
+    // SECURITY: Validate latency is a positive number
+    if (latency === undefined || typeof latency !== 'number' || latency < 0 || latency > 100000) {
+      return NextResponse.json(
+        { error: 'Invalid latency - must be a number between 0 and 100000' },
         { status: 400 }
       );
     }

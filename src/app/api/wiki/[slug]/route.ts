@@ -1,5 +1,5 @@
 import { readFile } from "fs/promises";
-import { join } from "path";
+import { join, resolve } from "path";
 import { NextResponse } from "next/server";
 
 const WIKI_DIR = join(process.cwd(), "docs", "wiki");
@@ -11,8 +11,9 @@ export async function GET(
   try {
     const { slug } = await params;
 
-    // Sanitize slug to prevent directory traversal
-    if (!slug || slug.includes("..") || slug.includes("/")) {
+    // SECURITY: Sanitize slug more strictly to prevent path traversal
+    // Only allow alphanumeric, hyphens, and underscores
+    if (!slug || !/^[a-zA-Z0-9_-]+$/.test(slug)) {
       return NextResponse.json(
         { error: "Invalid wiki page slug" },
         { status: 400 }
@@ -21,6 +22,17 @@ export async function GET(
 
     // Construct file path with .md extension
     const filePath = join(WIKI_DIR, `${slug}.md`);
+    
+    // SECURITY: Verify the resolved path is still within WIKI_DIR
+    const resolvedPath = resolve(filePath);
+    const resolvedWikiDir = resolve(WIKI_DIR);
+    
+    if (!resolvedPath.startsWith(resolvedWikiDir)) {
+      return NextResponse.json(
+        { error: "Invalid wiki page slug" },
+        { status: 400 }
+      );
+    }
 
     // Read the markdown file
     const content = await readFile(filePath, "utf-8");

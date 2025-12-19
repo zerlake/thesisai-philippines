@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -50,13 +51,16 @@ export async function POST(
 ) {
   const params = context.params as { toolId: string }; // Cast inside the function
   try {
-    // Extract user ID from auth middleware
-    const userId = request.headers.get('x-user-id');
-    const toolId = params.toolId;
+    // SECURITY: Verify authentication using session
+    const authSupabase = await createServerSupabaseClient();
+    const { data: { session } } = await authSupabase.auth.getSession();
 
-    if (!userId) {
+    if (!session) {
       return createErrorResponse('Authentication required', 401, 'UNAUTHORIZED');
     }
+
+    const userId = session.user.id;
+    const toolId = params.toolId;
 
     if (!toolId) {
       return createErrorResponse('Tool ID is required', 400, 'MISSING_TOOL_ID');
@@ -80,9 +84,17 @@ export async function POST(
       return createErrorResponse('AI tool not found or inactive', 404, 'TOOL_NOT_FOUND');
     }
 
-    // Verify user has permission to use this tool
-    // In a real implementation, we'd check user's plan/subscriptions
-    // For now, we'll assume all authenticated users can use public tools
+    // SECURITY: Verify user has permission to use this tool based on their plan
+    const { data: userProfile } = await authSupabase
+      .from('profiles')
+      .select('plan, role')
+      .eq('id', userId)
+      .single();
+
+    // Check if tool is premium and user has appropriate plan
+    if (tool.is_premium && userProfile?.plan === 'free') {
+      return createErrorResponse('Premium plan required to use this tool', 403, 'PREMIUM_REQUIRED');
+    }
 
     // Check if user has access to the specified project/document if provided
     if (validatedData.context?.projectId) {

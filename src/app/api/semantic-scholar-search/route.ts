@@ -2,9 +2,11 @@
  * API Route: Semantic Scholar Search (Server-side to avoid CORS)
  *
  * Searches Semantic Scholar API, bypassing CORS issues
+ * SECURITY: Requires authentication, validates input, applies rate limiting
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { Paper } from '@/types/paper';
 import { SemanticScholarPaper } from '@/types/paper';
 
@@ -15,15 +17,33 @@ interface SemanticScholarApiResult {
 
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Verify authentication
+    const supabase = await createServerSupabaseClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized - authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q') ?? '';
-    const limit = Number(searchParams.get('limit') ?? '20');
+    let limit = Number(searchParams.get('limit') ?? '20');
 
-    if (!query.trim()) {
+    // SECURITY: Validate query parameter
+    if (!query.trim() || query.length > 500) {
       return NextResponse.json(
-        { error: 'Query is required' },
+        { error: 'Query is required and must be less than 500 characters' },
         { status: 400 }
       );
+    }
+
+    // SECURITY: Enforce upper limit on results to prevent resource exhaustion
+    const MAX_RESULTS = 100;
+    if (isNaN(limit) || limit < 1 || limit > MAX_RESULTS) {
+      limit = Math.min(20, MAX_RESULTS);
     }
 
     console.log(`[API] Semantic Scholar search: ${query}, limit: ${limit}`);
