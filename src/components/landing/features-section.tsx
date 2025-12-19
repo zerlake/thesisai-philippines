@@ -61,7 +61,7 @@ const allFeatures = [
     color: "from-purple-500 to-purple-600",
     title: "Research Article Analyzer",
     description: "Extract methodology, findings, conclusions with annotation tools and literature matrices",
-    badge: "Advanced",
+    badge: "Professional",
     link: "/documentation/article-analyzer",
   },
   {
@@ -91,7 +91,7 @@ const allFeatures = [
     color: "from-purple-500 to-purple-600",
     title: "Methodology & Data Tools",
     description: "Design studies with interactive advisors, run statistical tests, generate charts",
-    badge: "Advanced",
+    badge: "Professional",
     link: "/documentation/methodology-tools",
   },
   {
@@ -171,7 +171,7 @@ const allFeatures = [
     color: "from-orange-500 to-orange-600",
     title: "Defense Preparation Suite",
     description: "Generate slides, practice with AI Q&A simulator, study with flashcards",
-    badge: "Advanced",
+    badge: "Professional",
     link: "/documentation/defense-preparation",
   },
 ];
@@ -181,7 +181,7 @@ const getBadgeColor = (badge: string) => {
   switch(badge) {
     case "AI": return "bg-blue-500/20 text-blue-300 border border-blue-500/30";
     case "Pro": return "bg-purple-500/20 text-purple-300 border border-purple-500/30";
-    case "Advanced": return "bg-pink-500/20 text-pink-300 border border-pink-500/30";
+    case "Professional": return "bg-pink-500/20 text-pink-300 border border-pink-500/30";
     case "Team": return "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
     case "Secure": return "bg-green-500/20 text-green-300 border border-green-500/30";
     case "Essential": return "bg-orange-500/20 text-orange-300 border border-orange-500/30";

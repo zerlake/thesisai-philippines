@@ -19,7 +19,7 @@ const tools = [
   },
   {
     icon: <LanguagesIcon className="h-8 w-8" />,
-    title: "Advanced Paraphrasing",
+    title: "Powerful Paraphrasing",
     description: "Rewrite sentences to improve clarity, vary your language, and ensure your work is original, all while maintaining an academic tone.",
     benefits: ["Clarity Improvement", "Language Variation", "Originality Check"]
   },

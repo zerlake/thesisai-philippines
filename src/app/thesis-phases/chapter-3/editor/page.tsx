@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowLeft, Shield } from 'lucide-react';
-import { NovelEditorEnhanced } from '@/components/novel-editor-enhanced';
+import { ThesisEditor } from '@/components/thesis-editor';
 import { PhaseEditorSidebar } from '@/components/phase-editor-sidebar';
 
 export default function Chapter3EditorPage() {
@@ -37,7 +37,7 @@ export default function Chapter3EditorPage() {
               Design and document your research methodology with confidence. Detail your approach, instrumentation, and statistical methods.
             </p>
           </div>
-          <NovelEditorEnhanced documentId={documentId} phase="write" />
+          <ThesisEditor documentId={documentId} phase="write" />
         </div>
 
         {/* Sidebar Info - Hidden on mobile, shown on desktop */}

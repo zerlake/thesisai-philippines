@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowLeft, BookOpen } from 'lucide-react';
-import { NovelEditorEnhanced } from '@/components/novel-editor-enhanced';
+import { ThesisEditor } from '@/components/thesis-editor';
 import { PhaseEditorSidebar } from '@/components/phase-editor-sidebar';
 
 export default function Chapter2EditorPage() {
@@ -37,7 +37,7 @@ export default function Chapter2EditorPage() {
               Review, synthesize, and critically analyze literature relevant to your study. Document foreign and local literature, studies, and synthesis.
             </p>
           </div>
-          <NovelEditorEnhanced documentId={documentId} phase="research" />
+          <ThesisEditor documentId={documentId} phase="research" />
         </div>
 
         {/* Sidebar Info - Hidden on mobile, shown on desktop */}

@@ -19,7 +19,7 @@ export default function DefensePreparationDoc() {
             Back to Documentation
           </Link>
           <div className="flex items-center gap-3 mb-4">
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-pink-500/20 text-pink-300 border border-pink-500/30">Advanced</span>
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-pink-500/20 text-pink-300 border border-pink-500/30">Professional</span>
           </div>
           <h1 className="text-4xl font-bold text-white">Defense Preparation Suite</h1>
           <p className="mt-4 text-lg text-slate-300">

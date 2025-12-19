@@ -66,7 +66,7 @@ export default function EssayEditorDoc() {
                 <div className="flex items-start gap-4">
                   <Edit3 className="h-6 w-6 text-cyan-400 mt-1" />
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Advanced Editing Tools</h3>
+                    <h3 className="text-xl font-semibold text-white mb-2">Powerful Editing Tools</h3>
                     <p className="text-slate-300">
                       Includes sophisticated text manipulation tools such as paragraph restructuring, 
                       sentence optimization, and automated citation insertion. Features for tracking 

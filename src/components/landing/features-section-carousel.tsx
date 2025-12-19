@@ -66,7 +66,7 @@ const phases = [
         icon: <BookOpen className="h-8 w-8" />,
         title: "Research Article Analyzer",
         description: "Extract methodology, findings, conclusions with annotation tools and literature matrices",
-        badge: "Advanced",
+        badge: "Professional",
         link: "/documentation/article-analyzer",
       },
       {
@@ -90,7 +90,7 @@ const phases = [
         icon: <FlaskConical className="h-8 w-8" />,
         title: "Methodology & Data Tools",
         description: "Design studies with interactive advisors, run statistical tests, generate charts",
-        badge: "Advanced",
+        badge: "Professional",
         link: "/documentation/methodology-tools",
       },
     ],
@@ -168,7 +168,7 @@ const phases = [
         icon: <Presentation className="h-8 w-8" />,
         title: "Defense Preparation Suite",
         description: "Generate slides, practice with AI Q&A simulator, study with flashcards",
-        badge: "Advanced",
+        badge: "Professional",
         link: "/documentation/defense-preparation",
       },
     ],
@@ -181,7 +181,7 @@ const getBadgeColor = (badge: string) => {
       return "bg-blue-500/20 text-blue-300 border border-blue-500/30";
     case "Pro":
       return "bg-purple-500/20 text-purple-300 border border-purple-500/30";
-    case "Advanced":
+    case "Professional":
       return "bg-pink-500/20 text-pink-300 border border-pink-500/30";
     case "Team":
       return "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";

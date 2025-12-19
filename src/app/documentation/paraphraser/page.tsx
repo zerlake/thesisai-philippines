@@ -21,7 +21,7 @@ export default function ParaphraserDoc() {
           </Link>
           <h1 className="text-4xl font-bold text-white">Paraphraser & Content Rewriter</h1>
           <p className="mt-4 text-lg text-slate-300">
-            Advanced tool for rewriting content while preserving meaning and enhancing academic integrity
+            Tool for rewriting content while preserving meaning and enhancing academic integrity
           </p>
         </div>
       </div>
@@ -51,7 +51,7 @@ export default function ParaphraserDoc() {
                 <div className="flex items-start gap-4">
                   <Edit3 className="h-6 w-6 text-blue-400 mt-1" />
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Advanced Paraphrasing</h3>
+                    <h3 className="text-xl font-semibold text-white mb-2">Powerful Paraphrasing</h3>
                     <p className="text-slate-300">
                       Understands context and meaning to provide accurate rewording that preserves 
                       the original message while using different sentence structures, synonyms, and expressions.
@@ -364,7 +364,7 @@ export default function ParaphraserDoc() {
           </section>
 
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-white mb-4">Advanced Features</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">Key Features</h2>
             
             <h3 className="text-xl font-semibold text-cyan-400 mb-3">Batch Processing</h3>
             <p className="text-slate-300 mb-4">

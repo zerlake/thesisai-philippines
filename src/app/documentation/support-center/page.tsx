@@ -121,7 +121,7 @@ export default function SupportCenterDoc() {
                 </p>
                 <ul className="list-disc pl-6 space-y-1 text-slate-300 text-sm">
                   <li>Getting started guides</li>
-                  <li>Advanced feature tutorials</li>
+                  <li>Detailed feature tutorials</li>
                   <li>University-specific guides</li>
                   <li>AI tool usage best practices</li>
                   <li>Troubleshooting guides</li>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowLeft, BookOpen } from 'lucide-react';
-import { NovelEditorEnhanced } from '@/components/novel-editor-enhanced';
+import { ThesisEditor } from '@/components/thesis-editor';
 import { PhaseEditorSidebar } from '@/components/phase-editor-sidebar';
 
 export default function Chapter1EditorPage() {
@@ -37,7 +37,7 @@ export default function Chapter1EditorPage() {
               Define your research problem, establish background context, and develop your theoretical/conceptual framework. This chapter sets the foundation for your entire thesis.
             </p>
           </div>
-          <NovelEditorEnhanced documentId={documentId} phase="conceptualize" />
+          <ThesisEditor documentId={documentId} phase="conceptualize" />
         </div>
 
         {/* Sidebar Info - Hidden on mobile, shown on desktop */}

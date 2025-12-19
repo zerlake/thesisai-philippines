@@ -109,7 +109,7 @@ const guideSections = [
   },
   {
     value: "section-9",
-    title: "5. Advanced Communication and Conflict Resolution",
+    title: "5. Professional Communication and Conflict Resolution",
     icon: ShieldAlert,
     content: [
       {

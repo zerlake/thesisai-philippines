@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowLeft, FileText } from 'lucide-react';
-import { NovelEditorEnhanced } from '@/components/novel-editor-enhanced';
+import { ThesisEditor } from '@/components/thesis-editor';
 import { PhaseEditorSidebar } from '@/components/phase-editor-sidebar';
 
 export default function Chapter5EditorPage() {
@@ -37,7 +37,7 @@ export default function Chapter5EditorPage() {
               Synthesize your research findings, draw meaningful conclusions, and provide recommendations for future research and practice.
             </p>
           </div>
-          <NovelEditorEnhanced documentId={documentId} phase="write" />
+          <ThesisEditor documentId={documentId} phase="write" />
         </div>
 
         {/* Sidebar Info - Hidden on mobile, shown on desktop */}

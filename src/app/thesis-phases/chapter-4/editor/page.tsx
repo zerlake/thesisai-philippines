@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowLeft, BarChart3 } from 'lucide-react';
-import { NovelEditorEnhanced } from '@/components/novel-editor-enhanced';
+import { ThesisEditor } from '@/components/thesis-editor';
 import { PhaseEditorSidebar } from '@/components/phase-editor-sidebar';
 
 export default function Chapter4EditorPage() {
@@ -37,7 +37,7 @@ export default function Chapter4EditorPage() {
               Present your research findings with appropriate statistical treatments and meaningful interpretations. Document your data analysis and results.
             </p>
           </div>
-          <NovelEditorEnhanced documentId={documentId} phase="write" />
+          <ThesisEditor documentId={documentId} phase="write" />
         </div>
 
         {/* Sidebar Info - Hidden on mobile, shown on desktop */}

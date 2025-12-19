@@ -292,7 +292,7 @@ export default function TopicGeneratorDoc() {
           </section>
 
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-white mb-4">Advanced Features</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">Key Features</h2>
             
             <h3 className="text-xl font-semibold text-yellow-400 mb-3">Comparative Analysis</h3>
             <p className="text-slate-300 mb-4">

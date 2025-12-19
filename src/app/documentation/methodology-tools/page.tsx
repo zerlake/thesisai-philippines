@@ -19,7 +19,7 @@ export default function MethodologyToolsDoc() {
             Back to Documentation
           </Link>
           <div className="flex items-center gap-3 mb-4">
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-pink-500/20 text-pink-300 border border-pink-500/30">Advanced</span>
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-pink-500/20 text-pink-300 border border-pink-500/30">Professional</span>
           </div>
           <h1 className="text-4xl font-bold text-white">Methodology & Data Tools</h1>
           <p className="mt-4 text-lg text-slate-300">
@@ -174,7 +174,7 @@ export default function MethodologyToolsDoc() {
                 </ul>
               </div>
               <div className="p-4 rounded-lg bg-purple-900/20 border border-purple-800/30">
-                <h3 className="text-lg font-semibold text-purple-400 mb-2">Advanced</h3>
+                <h3 className="text-lg font-semibold text-purple-400 mb-2">Professional</h3>
                 <ul className="text-sm text-slate-300 space-y-1">
                   <li>Factor analysis</li>
                   <li>Structural equation modeling</li>

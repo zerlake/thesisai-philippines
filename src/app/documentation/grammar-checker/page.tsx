@@ -21,7 +21,7 @@ export default function GrammarCheckerDoc() {
           </Link>
           <h1 className="text-4xl font-bold text-white">Grammar Checker & Writing Assistant</h1>
           <p className="mt-4 text-lg text-slate-300">
-            Advanced tool for improving your academic writing quality and clarity
+            Powerful tool for improving your academic writing quality and clarity
           </p>
         </div>
       </div>
@@ -50,7 +50,7 @@ export default function GrammarCheckerDoc() {
                 <div className="flex items-start gap-4">
                   <SpellCheck className="h-6 w-6 text-blue-400 mt-1" />
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Advanced Grammar Detection</h3>
+                    <h3 className="text-xl font-semibold text-white mb-2">Sophisticated Grammar Detection</h3>
                     <p className="text-slate-300">
                       Identifies complex grammatical structures and provides corrections for subject-verb agreement, 
                       tense consistency, pronoun usage, and more sophisticated grammatical constructs specific to 

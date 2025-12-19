@@ -4,7 +4,7 @@ import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Mail, MailOpen } from 'lucide-react';
 import Link from 'next/link';
-import { NovelEditorEnhanced } from '@/components/novel-editor-enhanced';
+import { ThesisEditor } from '@/components/thesis-editor';
 import { EditorEmailNotificationsSidebar } from '@/components/editor-email-notifications-sidebar';
 import { EmailNotificationIntro } from '@/components/email-notification-intro';
 import { supabase } from '@/integrations/supabase/client';
@@ -172,7 +172,7 @@ export default function EditorPage({ params }: { params: Promise<{ id: string }>
           {/* Main Editor Area */}
           <div className={`${showEmailNotifications ? 'lg:w-3/4' : 'w-full'}`}>
             <div className="bg-card rounded-lg border border-border shadow-lg overflow-hidden">
-              <NovelEditorEnhanced
+              <ThesisEditor
                 documentId={documentId}
                 title={metadata.title}
                 phase={getPhaseFromThesisPhase(metadata.thesis_phase)}
