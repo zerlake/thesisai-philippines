@@ -1,9 +1,10 @@
 /**
- * Simple endpoint to seed demo documents
- * Uses authenticated session to insert documents (RLS-safe)
+ * Endpoint to seed demo documents
+ * SECURITY: Requires authentication - users can only seed for themselves
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { DEMO_DOCUMENTS } from '@/lib/seed-demo-documents';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -16,18 +17,38 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Get authenticated session
+    const authSupabase = await createServerSupabaseClient();
+    const { data: { session } } = await authSupabase.auth.getSession();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized - authentication required', success: false },
+        { status: 401 }
+      );
+    }
+
     // Use service role for seeding
     const supabase = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey);
 
-    // Get user ID from request body
+    // Get user ID from request body (for optionally seeding another user - admin only)
     const body = await request.json();
-    const userId = body.userId;
+    let userId = body.userId || session.user.id;
     
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'userId is required', success: false },
-        { status: 400 }
-      );
+    // SECURITY: Allow users to only seed for themselves unless they're admin
+    if (userId !== session.user.id) {
+      const { data: profile } = await authSupabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile?.role !== 'admin') {
+        return NextResponse.json(
+          { error: 'Forbidden - you can only seed documents for yourself', success: false },
+          { status: 403 }
+        );
+      }
     }
 
     // Check if documents already exist

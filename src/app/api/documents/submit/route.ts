@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   notifyAdvisorOfSubmission,
@@ -7,17 +7,16 @@ import {
 
 export async function POST(request: NextRequest) {
   try {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    // Get the authenticated session
+    const supabase = await createServerSupabaseClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
       return NextResponse.json(
-        { error: 'Supabase not configured' },
-        { status: 500 }
+        { error: 'Unauthorized - authentication required' },
+        { status: 401 }
       );
     }
-
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
 
     const { documentId, userId } = await request.json();
 
@@ -28,16 +27,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch the document
+    // SECURITY: Verify that the authenticated user matches the userId or is an admin
+    if (session.user.id !== userId) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile?.role !== 'admin') {
+        return NextResponse.json(
+          { error: 'Forbidden - you can only submit your own documents' },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Fetch the document and verify ownership
     const { data: doc, error: docError } = await supabase
       .from('documents')
       .select('id, title, user_id')
       .eq('id', documentId)
+      .eq('user_id', userId)
       .single();
 
     if (docError || !doc) {
       return NextResponse.json(
-        { error: 'Document not found' },
+        { error: 'Document not found or access denied' },
         { status: 404 }
       );
     }

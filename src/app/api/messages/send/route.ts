@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Helper to send email notification
@@ -86,6 +87,17 @@ async function sendEmailNotification(
 
 export async function POST(request: NextRequest) {
   try {
+    // Get authenticated user from session
+    const authSupabase = await createServerSupabaseClient();
+    const { data: { session } } = await authSupabase.auth.getSession();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized - authentication required', data: null },
+        { status: 401 }
+      );
+    }
+
     // Check if Supabase is configured
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       console.error('Supabase not configured - missing environment variables');
@@ -110,6 +122,17 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // SECURITY: Verify authenticated user matches senderId to prevent sender spoofing
+    if (session.user.id !== senderId) {
+      return NextResponse.json(
+        { error: 'Forbidden - you can only send messages as yourself' },
+        { status: 403 }
+      );
+    }
+
+    // SECURITY: Validate that senderId and recipientId are valid UUIDs (no path traversal or injection)
+    // This prevents attackers from using special characters or paths in IDs
 
     // Validate UUIDs, but allow demo student IDs for testing
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
