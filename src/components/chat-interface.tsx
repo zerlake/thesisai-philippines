@@ -100,80 +100,47 @@ export function ChatInterface({
         )
       );
 
-      // If no relationships found, try to get messages directly involving this user
+      // If no relationships found, try to get messages via API route
       if (relatedUserIds.length === 0) {
         let directMessages: any[] = [];
-        let dmError: any = null;
 
         try {
-           const { data, error } = await supabase
-             .from('advisor_student_messages')
-             .select(`
-               id,
-               sender_id,
-               recipient_id,
-               message,
-               created_at,
-               is_read,
-               read_status,
-               sender_role,
-               sender_name,
-               sender_avatar_url
-             `)
-             .or(`sender_id.eq.${session.user.id},recipient_id.eq.${session.user.id}`)
-             .order('created_at', { ascending: true });
-           
-           console.log('Direct messages query result:', { 
-             dataCount: data?.length || 0, 
-             error: error?.message || error,
-             userId: session.user.id,
-             data: data
-           });
+          const response = await fetch(`/api/messages/get?userId=${session.user.id}`);
 
-          if (error) {
-            // If the advisor_student_messages table doesn't exist, try a generic messages table
-            const errorCode = error?.code;
-            const errorMessage = error?.message || String(error);
-            if (errorCode === '42P01' || errorMessage.toLowerCase().includes('does not exist')) {
-              // Try alternative table name
-              const { data: altData, error: altError } = await supabase
-                .from('messages')
-                .select(`
-                  id,
-                  sender_id,
-                  recipient_id,
-                  message,
-                  created_at,
-                  read_status,
-                  sender_role,
-                  sender_name,
-                  sender_avatar_url
-                `)
-                .or(`sender_id.eq.${session.user.id},recipient_id.eq.${session.user.id}`)
-                .order('created_at', { ascending: true });
-
-              if (altError) {
-                // If no messages table exists, continue with empty array
-                console.warn('Messages table not available, continuing without chat functionality:', altError);
-                directMessages = [];
-              } else {
-                directMessages = altData || [];
-              }
-            } else {
-              throw error; // Throw other errors
-            }
-          } else {
-            directMessages = data || [];
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Error loading messages via API:', errorData);
+            throw new Error(errorData.error || 'Failed to fetch messages');
           }
+
+          const { data } = await response.json();
+
+          console.log('Direct messages API result:', {
+            dataCount: data?.length || 0,
+            userId: session.user.id,
+            data: data
+          });
+
+          directMessages = data || [];
+
+          // Transform the API response to match our expected structure
+          directMessages = directMessages.map((msg: any) => ({
+            id: msg.id,
+            sender_id: msg.sender_id,
+            recipient_id: msg.recipient_id,
+            message: msg.message,
+            created_at: msg.created_at,
+            read_status: msg.read_status || msg.is_read || false,
+            sender_role: msg.sender_role,
+            sender_name: msg.sender_name || 'Unknown User'
+          }));
         } catch (error: any) {
-          const errorMsg = typeof error === 'string' 
-            ? error 
+          const errorMsg = typeof error === 'string'
+            ? error
             : error?.message || String(error) || 'Unknown error';
-          const errorCode = error?.code || 'NO_CODE';
-          const errorDetails = error?.details ? JSON.stringify(error.details) : 'none';
-          
+
           console.error(
-            `Error loading direct messages - Message: ${errorMsg}, Code: ${errorCode}, Details: ${errorDetails}`,
+            `Error loading direct messages via API - Message: ${errorMsg}`,
             error
           );
           directMessages = []; // Continue with empty messages
@@ -240,85 +207,102 @@ export function ChatInterface({
           }
         }
       } else {
-        // If relationships exist, get messages with those specific users
-        const { data: messages, error: msgError } = await supabase
-          .from('advisor_student_messages')
-          .select(`
-            id,
-            sender_id,
-            recipient_id,
-            message,
-            created_at,
-            read_status,
-            sender_role,
-            sender_name,
-            sender_avatar_url
-          `)
-          .in('sender_id', [...relatedUserIds, session.user.id])
-          .in('recipient_id', [...relatedUserIds, session.user.id])
-          .order('created_at', { ascending: true });
+        // If relationships exist, get messages with those specific users via API
+        try {
+          const response = await fetch(`/api/messages/get?userId=${session.user.id}`);
 
-        if (msgError) {
-          console.error('Error loading messages:', msgError);
-          setLoading(false);
-          return;
-        }
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Error loading relationship messages via API:', errorData);
+            throw new Error(errorData.error || 'Failed to fetch relationship messages');
+          }
 
-        if (messages && messages.length > 0) {
-          // Group messages by conversation
-          const conversationMap: Record<string, Conversation> = {};
+          const { data } = await response.json();
+          const messages = data || [];
 
-          for (const msg of messages) {
-            const otherUserId = msg.sender_id === session.user.id 
-              ? msg.recipient_id 
-              : msg.sender_id;
+          console.log('Relationship messages API result:', {
+            dataCount: messages?.length || 0,
+            userId: session.user.id,
+            messages: messages
+          });
 
-            const convId = [session.user.id, otherUserId].sort().join('-');
+          // Transform the API response to match our expected structure
+          const transformedMessages = messages.map((msg: any) => ({
+            id: msg.id,
+            sender_id: msg.sender_id,
+            recipient_id: msg.recipient_id,
+            message: msg.message,
+            created_at: msg.created_at,
+            read_status: msg.read_status || msg.is_read || false,
+            sender_role: msg.sender_role,
+            sender_name: msg.sender_name || 'Unknown User'
+          }));
 
-            if (!conversationMap[convId]) {
-              conversationMap[convId] = {
-                id: convId,
-                participants: [
-                  {
-                    id: session.user.id,
-                    name: `${profile?.first_name || 'User'} ${profile?.last_name || ''}`,
-                    role: profile?.role || 'user',
-                    avatar_url: profile?.avatar_url
-                  },
-                  {
-                    id: otherUserId,
-                    name: msg.sender_name || 'Unknown User',
-                    role: msg.sender_role || 'user',
-                    avatar_url: msg.sender_avatar_url
-                  }
-                ],
-                messages: []
-              };
-            }
+          if (transformedMessages && transformedMessages.length > 0) {
+            // Group messages by conversation
+            const conversationMap: Record<string, Conversation> = {};
 
-            conversationMap[convId].messages.push({
-              id: msg.id,
-              sender_id: msg.sender_id,
-              recipient_id: msg.recipient_id,
-              message: msg.message,
-              created_at: msg.created_at,
-              read_status: msg.read_status || msg.is_read || false,
-              sender_role: msg.sender_role,
-              sender_name: msg.sender_name || 'Unknown User'
-            });
+            for (const msg of transformedMessages) {
+              const otherUserId = msg.sender_id === session.user.id
+                ? msg.recipient_id
+                : msg.sender_id;
+
+              const convId = [session.user.id, otherUserId].sort().join('-');
+
+              if (!conversationMap[convId]) {
+                conversationMap[convId] = {
+                  id: convId,
+                  participants: [
+                    {
+                      id: session.user.id,
+                      name: `${profile?.first_name || 'User'} ${profile?.last_name || ''}`,
+                      role: profile?.role || 'user',
+                      avatar_url: profile?.avatar_url
+                    },
+                    {
+                      id: otherUserId,
+                      name: msg.sender_name || 'Unknown User',
+                      role: msg.sender_role || 'user',
+                      avatar_url: msg.sender_avatar_url
+                    }
+                  ],
+                  messages: []
+                };
+              }
+
+              conversationMap[convId].messages.push({
+                id: msg.id,
+                sender_id: msg.sender_id,
+                recipient_id: msg.recipient_id,
+                message: msg.message,
+                created_at: msg.created_at,
+                read_status: msg.read_status || msg.is_read || false,
+                sender_role: msg.sender_role,
+                sender_name: msg.sender_name || 'Unknown User'
+              });
             }
 
             const conversationList = Object.values(conversationMap);
             setConversations(conversationList);
 
             if (initialConversationId) {
-            const initialConv = conversationList.find(c => c.id === initialConversationId);
-            if (initialConv) {
-              setActiveConversation(initialConv);
-            }
+              const initialConv = conversationList.find(c => c.id === initialConversationId);
+              if (initialConv) {
+                setActiveConversation(initialConv);
+              }
             } else if (conversationList.length > 0) {
-            setActiveConversation(conversationList[0]);
+              setActiveConversation(conversationList[0]);
             }
+          }
+        } catch (error: any) {
+          const errorMsg = typeof error === 'string'
+            ? error
+            : error?.message || String(error) || 'Unknown error';
+
+          console.error(
+            `Error loading relationship messages via API - Message: ${errorMsg}`,
+            error
+          );
         }
       }
 
@@ -431,23 +415,31 @@ export function ChatInterface({
 
     if (!otherParticipant) return;
 
-    const messageData = {
-      sender_id: session.user.id,
-      recipient_id: otherParticipant.id,
-      message: newMessage.trim(),
-      sender_role: profile?.role || 'user',
-      read_status: false,
-      created_at: new Date().toISOString()
-    };
+    try {
+      const response = await fetch('/api/messages/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          senderId: session.user.id,
+          senderRole: profile?.role || 'user',
+          recipientId: otherParticipant.id,
+          message: newMessage.trim(),
+        }),
+      });
 
-    const { error } = await supabase
-      .from('advisor_student_messages')
-      .insert([messageData]);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error sending message:', errorData);
+        throw new Error(errorData.error || 'Failed to send message');
+      }
 
-    if (error) {
-      console.error('Error sending message:', error);
-    } else {
+      const result = await response.json();
+      console.log('Message sent successfully:', result);
       setNewMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
     }
   };
 
