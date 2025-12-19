@@ -3,6 +3,17 @@ import { createServerSupabaseClient } from '@/integrations/supabase/server-clien
 
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Verify authentication
+    const supabase = createServerSupabaseClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized - authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { logs } = await request.json();
 
     if (!Array.isArray(logs)) {
@@ -39,7 +50,17 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Verify authentication
     const supabase = createServerSupabaseClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized - authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
 
     const level = searchParams.get('level');
@@ -72,7 +93,31 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    // SECURITY: Verify authentication and admin role for log deletion
     const supabase = createServerSupabaseClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized - authentication required' },
+        { status: 401 }
+      );
+    }
+
+    // Only admins can delete logs
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single();
+
+    if (profile?.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Forbidden - only admins can delete logs' },
+        { status: 403 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
 
     const before = searchParams.get('before');

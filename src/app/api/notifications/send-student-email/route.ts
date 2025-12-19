@@ -19,15 +19,14 @@ import { sendStudentNotificationEmail, SendStudentNotificationEmailProps } from 
  * }
  */
 export async function POST(request: NextRequest) {
-  // TODO: Re-enable API key verification in production
-  // For now, skipping to allow testing
-  // const apiKey = request.headers.get('x-api-key');
-  // if (apiKey !== process.env.INTERNAL_API_KEY) {
-  //   return NextResponse.json(
-  //     { error: 'Unauthorized' },
-  //     { status: 401 }
-  //   );
-  // }
+  // SECURITY: Verify API key - required for all notification requests
+  const apiKey = request.headers.get('x-api-key');
+  if (!apiKey || apiKey !== process.env.INTERNAL_API_KEY) {
+    return NextResponse.json(
+      { error: 'Unauthorized - valid API key required' },
+      { status: 401 }
+    );
+  }
 
   try {
     const body = await request.json() as SendStudentNotificationEmailProps;

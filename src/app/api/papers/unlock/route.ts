@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 const SCI_HUB_MIRRORS = [
   'https://sci-hub.se',
@@ -75,11 +76,33 @@ function extractPDFUrl(html: string, baseUrl: string): string | null {
  */
 export async function POST(request: NextRequest) {
   try {
+    // SECURITY: Require authentication to prevent SSRF attacks
+    const supabase = await createServerSupabaseClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized - authentication required', success: false },
+        { status: 401 }
+      );
+    }
+
     const { doi } = await request.json();
 
     if (!doi) {
       return NextResponse.json(
         { error: 'DOI is required', success: false },
+        { status: 400 }
+      );
+    }
+
+    // SECURITY: Validate DOI format to prevent injection attacks
+    const doiRegex = /^10\.\d{4,}\/[^\s]+$/;
+    const cleanDoi = String(doi).trim();
+    
+    if (!doiRegex.test(cleanDoi)) {
+      return NextResponse.json(
+        { error: 'Invalid DOI format', success: false },
         { status: 400 }
       );
     }
