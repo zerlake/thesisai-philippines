@@ -35,7 +35,7 @@ export default function ResearchConceptualizationDoc() {
             <h2 className="text-2xl font-bold text-white mb-4">Overview</h2>
             <p className="text-slate-300 mb-4">
               Our Research Conceptualization Tools are designed to help you develop a solid
-              foundation for your research project. These tools combine advanced AI analysis
+              foundation for your research project. These tools combine sophisticated AI analysis
               with Philippine-specific data to help you identify meaningful research problems
               and map the variables in your study.
             </p>

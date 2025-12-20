@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useAuth } from "./auth-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { toast } from "sonner";
@@ -22,8 +22,8 @@ type SerpApiStatus = {
 export function SerpApiStatusCard() {
   const { session } = useAuth();
   const [status, setStatus] = useState<SerpApiStatus | null>(null);
-  // const [isLoading, setIsLoading] = useState(true); // Replaced by useApiCall's loading state
-  // const [error, setError] = useState<string | null>(null); // Replaced by useApiCall's error state
+
+  const serpApiUrl = useMemo(() => getSupabaseFunctionUrl("get-serpapi-status"), []);
 
   const { execute: fetchSerpApiStatus, loading: isFetchingStatus, error: fetchError } = useApiCall<SerpApiStatus>({
     onSuccess: (data) => {
@@ -36,30 +36,29 @@ export function SerpApiStatusCard() {
     autoErrorToast: false, // We handle toast explicitly
   });
 
+  // Effect to fetch status when component mounts and session is available
   useEffect(() => {
-    if (!session) return;
+    if (!session) return; // Only proceed if session exists
 
-    const callFetchStatus = async () => {
-        try {
-            await fetchSerpApiStatus(
-                getSupabaseFunctionUrl("get-serpapi-status"),
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${session.access_token}`,
-                        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-                    },
-                }
-            );
-        } catch (error) {
-            // Errors are handled by useApiCall's onError
-            console.error("Local error before API call in fetchStatus:", error);
-        }
-    }
+    const fetchStatus = async () => {
+      try {
+        await fetchSerpApiStatus(serpApiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          },
+        });
+      } catch (error) {
+        // Errors are handled by useApiCall's onError
+        console.error("Local error before API call in fetchStatus:", error);
+      }
+    };
 
-    callFetchStatus();
-  }, [session, fetchSerpApiStatus]);
+    // Call immediately when session becomes available
+    fetchStatus();
+  }, [session?.access_token, fetchSerpApiStatus, serpApiUrl]); // Include serpApiUrl in dependencies
 
   const usagePercentage = status ? (status.this_month_usage / status.searches_per_month) * 100 : 0;
 

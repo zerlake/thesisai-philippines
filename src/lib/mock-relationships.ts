@@ -342,21 +342,21 @@ export function updateReviewStatus(documentId: string, reviewerType: 'advisor' |
 // Function to establish relationships between demo accounts
 // This simulates what happens when demo accounts are created
 export function setupDemoAccountRelationships() {
-  // The demo accounts from the application are:
-  // student@demo.thesisai.local
-  // advisor@demo.thesisai.local
-  // critic@demo.thesisai.local
-  // admin@demo.thesisai.local
+  // The demo accounts from the database with their actual UUIDs:
+  // demo-student@thesis.ai - 6e4c887c-6d11-4c8a-bf7b-eb94f562b9b7
+  // demo-advisor@thesis.ai - ff79d401-5614-4de8-9f17-bc920f360dcf
+  // demo-critic@thesis.ai  - 14a7ff7d-c6d2-4b27-ace1-32237ac28e02
+  // demo-admin@thesis.ai   - 7f22dff0-b8a9-4e08-835f-2a79dba9e6f7
 
-  // We'll map these to our mock users by assigning IDs that match the demo login pattern
-  const demoStudentId = 'demo-student-1'; // Matches student@demo.thesisai.local
-  const demoAdvisorId = 'demo-advisor-1'; // Matches advisor@demo.thesisai.local
-  const demoCriticId = 'demo-critic-1'; // Matches critic@demo.thesisai.local
+  // Use actual UUIDs from the database
+  const demoStudentId = '6e4c887c-6d11-4c8a-bf7b-eb94f562b9b7';
+  const demoAdvisorId = 'ff79d401-5614-4de8-9f17-bc920f360dcf';
+  const demoCriticId = '14a7ff7d-c6d2-4b27-ace1-32237ac28e02';
 
   // Update the mock data to include demo users
   mockUsers.students.push({
     id: demoStudentId,
-    email: 'student@demo.thesisai.local',
+    email: 'demo-student@thesis.ai',
     first_name: 'Demo',
     last_name: 'Student',
     role: 'user',
@@ -370,7 +370,7 @@ export function setupDemoAccountRelationships() {
 
   mockUsers.advisors.push({
     id: demoAdvisorId,
-    email: 'advisor@demo.thesisai.local',
+    email: 'demo-advisor@thesis.ai',
     first_name: 'Demo',
     last_name: 'Advisor',
     role: 'advisor',
@@ -383,7 +383,7 @@ export function setupDemoAccountRelationships() {
 
   mockUsers.critics.push({
     id: demoCriticId,
-    email: 'critic@demo.thesisai.local',
+    email: 'demo-critic@thesis.ai',
     first_name: 'Demo',
     last_name: 'Critic',
     role: 'critic',

@@ -17,16 +17,25 @@ export function FeedbackTurnaroundCard() {
 
     const fetchAnalytics = async () => {
       setIsLoading(true);
-      const { data, error } = await supabase.rpc('get_advisor_dashboard_analytics', {
-        p_advisor_id: session.user.id
-      });
 
-      if (error) {
+      try {
+        const { data, error } = await supabase.rpc('get_advisor_dashboard_analytics', {
+          p_advisor_id: session.user.id
+        });
+
+        if (error) {
+          console.warn("Advisor dashboard analytics function not available:", error);
+          // Set a default value when the function is not available
+          setAvgDays(null);
+        } else {
+          setAvgDays(data?.avg_feedback_days || null);
+        }
+      } catch (error) {
+        console.error("Error fetching analytics:", error);
         toast.error("Failed to load analytics data.");
-        console.error(error);
-      } else {
-        setAvgDays(data.avg_feedback_days);
+        setAvgDays(null);
       }
+
       setIsLoading(false);
     };
 

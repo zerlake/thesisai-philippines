@@ -76,8 +76,60 @@ export function Header() {
 
         {/* Main Navigation - Hidden on mobile */}
         <div className="hidden lg:flex items-center space-x-1">
-          {/* Thesis Phases Dropdown - Show for students (not on admin/critic/advisor pages) */}
-          {!pathname.startsWith('/admin') && !pathname.startsWith('/critic') && !pathname.startsWith('/advisor') && (
+          {/* Critic Navigation */}
+          {profile?.role === 'critic' && (
+            <>
+              {/* Review Tools Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="px-3">
+                    Review Tools <ChevronDown className="ml-1 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuLabel>Manuscript Review</DropdownMenuLabel>
+                  <DropdownMenuItem>
+                    <Link href="/critic/manuscript-analyzer">Manuscript Analyzer</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/critic/grammar-checker">Grammar & Style Checker</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/critic/plagiarism-check">Plagiarism Detector</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/critic/citation-auditor">Citation Auditor</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Feedback</DropdownMenuLabel>
+                  <DropdownMenuItem>
+                    <Link href="/critic/feedback-templates">Feedback Templates</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/critic/certification-checklist">Certification Checklist</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Earnings */}
+              <Button variant="ghost" className="px-3" asChild>
+                <Link href="/critic/billing">Earnings</Link>
+              </Button>
+
+              {/* My Reviews */}
+              <Button variant="ghost" className="px-3" asChild>
+                <Link href="/critic/review-history">My Reviews</Link>
+              </Button>
+
+              {/* Analytics */}
+              <Button variant="ghost" className="px-3" asChild>
+                <Link href="/critic/statistics">Analytics</Link>
+              </Button>
+            </>
+          )}
+
+          {/* Student/Advisor Navigation - Thesis Phases */}
+          {!pathname.startsWith('/admin') && !pathname.startsWith('/critic') && profile?.role !== 'critic' && (
             <>
               {/* Thesis Phases Dropdown */}
               <DropdownMenu>
@@ -105,28 +157,28 @@ export function Header() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {/* Billing */}
+              <Button variant="ghost" className="px-3" asChild>
+                <Link href="/settings/billing">Billing</Link>
+              </Button>
+
+              {/* Referrals */}
+              <Button variant="ghost" className="px-3" asChild>
+                <Link href="/settings/referrals">Referrals</Link>
+              </Button>
+
+              {/* Manage Groups */}
+              <Button variant="ghost" className="px-3" asChild>
+                <Link href="/groups">Manage Groups</Link>
+              </Button>
+
+              {/* Usage & Analytics */}
+              <Button variant="ghost" className="px-3" asChild>
+                <Link href="/analytics">Usage & Analytics</Link>
+              </Button>
             </>
           )}
-
-          {/* Billing */}
-          <Button variant="ghost" className="px-3" asChild>
-            <Link href="/settings/billing">Billing</Link>
-          </Button>
-
-          {/* Referrals */}
-          <Button variant="ghost" className="px-3" asChild>
-            <Link href="/settings/referrals">Referrals</Link>
-          </Button>
-
-          {/* Manage Groups */}
-          <Button variant="ghost" className="px-3" asChild>
-            <Link href="/groups">Manage Groups</Link>
-          </Button>
-
-          {/* Usage & Analytics */}
-          <Button variant="ghost" className="px-3" asChild>
-            <Link href="/analytics">Usage & Analytics</Link>
-          </Button>
         </div>
 
         {/* Right side: User */}
@@ -156,57 +208,128 @@ export function Header() {
               </SheetHeader>
               <ScrollArea className="-mx-4 flex-1">
                 <nav className="space-y-2 px-4">
-                  <div>
-                    <DropdownMenuLabel>Products</DropdownMenuLabel>
-                    <Link href="/thesis">
-                      <DropdownMenuItem>ThesisAI</DropdownMenuItem>
-                    </Link>
-                    <DropdownMenuItem disabled>ARC Generator</DropdownMenuItem>
-                  </div>
-                  {!pathname.startsWith('/admin') && !pathname.startsWith('/critic') && !pathname.startsWith('/advisor') && (
-                    <div>
-                      <DropdownMenuLabel>Thesis Phases</DropdownMenuLabel>
-                      <Link href="/thesis-phases/chapter-1">
-                        <DropdownMenuItem>Chapter 1 - Introduction</DropdownMenuItem>
-                      </Link>
-                      <Link href="/thesis-phases/chapter-2">
-                        <DropdownMenuItem>Chapter 2 - Literature Review</DropdownMenuItem>
-                      </Link>
-                      <Link href="/thesis-phases/chapter-3">
-                        <DropdownMenuItem>Chapter 3 - Methodology</DropdownMenuItem>
-                      </Link>
-                      <Link href="/thesis-phases/chapter-4">
-                        <DropdownMenuItem>Chapter 4 - Results & Analysis</DropdownMenuItem>
-                      </Link>
-                      <Link href="/thesis-phases/chapter-5">
-                        <DropdownMenuItem>Chapter 5 - Conclusions</DropdownMenuItem>
-                      </Link>
-                    </div>
+                  {/* Critic Mobile Navigation */}
+                  {profile?.role === 'critic' && (
+                    <>
+                      <div>
+                        <DropdownMenuLabel>Workspace</DropdownMenuLabel>
+                        <Link href="/critic">
+                          <DropdownMenuItem>Dashboard</DropdownMenuItem>
+                        </Link>
+                        <Link href="/critic/review-queue">
+                          <DropdownMenuItem>Review Queue</DropdownMenuItem>
+                        </Link>
+                        <Link href="/critic/students">
+                          <DropdownMenuItem>My Students</DropdownMenuItem>
+                        </Link>
+                        <Link href="/critic/chat">
+                          <DropdownMenuItem>Messages</DropdownMenuItem>
+                        </Link>
+                      </div>
+                      <div>
+                        <DropdownMenuLabel>Review Tools</DropdownMenuLabel>
+                        <Link href="/critic/manuscript-analyzer">
+                          <DropdownMenuItem>Manuscript Analyzer</DropdownMenuItem>
+                        </Link>
+                        <Link href="/critic/grammar-checker">
+                          <DropdownMenuItem>Grammar Checker</DropdownMenuItem>
+                        </Link>
+                        <Link href="/critic/plagiarism-check">
+                          <DropdownMenuItem>Plagiarism Detector</DropdownMenuItem>
+                        </Link>
+                        <Link href="/critic/citation-auditor">
+                          <DropdownMenuItem>Citation Auditor</DropdownMenuItem>
+                        </Link>
+                      </div>
+                      <div>
+                        <DropdownMenuLabel>Feedback</DropdownMenuLabel>
+                        <Link href="/critic/feedback-templates">
+                          <DropdownMenuItem>Feedback Templates</DropdownMenuItem>
+                        </Link>
+                        <Link href="/critic/certification-checklist">
+                          <DropdownMenuItem>Certification Checklist</DropdownMenuItem>
+                        </Link>
+                        <Link href="/critic/issue-certificate">
+                          <DropdownMenuItem>Issue Certificate</DropdownMenuItem>
+                        </Link>
+                      </div>
+                      <div>
+                        <DropdownMenuLabel>Analytics</DropdownMenuLabel>
+                        <Link href="/critic/statistics">
+                          <DropdownMenuItem>Review Statistics</DropdownMenuItem>
+                        </Link>
+                        <Link href="/critic/billing">
+                          <DropdownMenuItem>Earnings Report</DropdownMenuItem>
+                        </Link>
+                      </div>
+                      <div>
+                        <DropdownMenuLabel>Resources</DropdownMenuLabel>
+                        <Link href="/critic-guide">
+                          <DropdownMenuItem>Critic Guide</DropdownMenuItem>
+                        </Link>
+                        <Link href="/critic/rubrics">
+                          <DropdownMenuItem>Evaluation Rubrics</DropdownMenuItem>
+                        </Link>
+                      </div>
+                    </>
                   )}
-                  <div>
-                    <DropdownMenuLabel>Resources</DropdownMenuLabel>
-                    <Link href="/documentation">
-                      <DropdownMenuItem>Documentation</DropdownMenuItem>
-                    </Link>
-                    <Link href="/support">
-                      <DropdownMenuItem>Support</DropdownMenuItem>
-                    </Link>
-                  </div>
-                  <div>
-                    <DropdownMenuLabel>Account</DropdownMenuLabel>
-                    <Link href="/settings/billing">
-                      <DropdownMenuItem>Billing</DropdownMenuItem>
-                    </Link>
-                    <Link href="/settings/referrals">
-                      <DropdownMenuItem>Referrals</DropdownMenuItem>
-                    </Link>
-                    <Link href="/groups">
-                      <DropdownMenuItem>Manage Groups</DropdownMenuItem>
-                    </Link>
-                    <Link href="/analytics">
-                      <DropdownMenuItem>Usage & Analytics</DropdownMenuItem>
-                    </Link>
-                  </div>
+
+                  {/* Non-critic Navigation */}
+                  {profile?.role !== 'critic' && (
+                    <>
+                      <div>
+                        <DropdownMenuLabel>Products</DropdownMenuLabel>
+                        <Link href="/thesis">
+                          <DropdownMenuItem>ThesisAI</DropdownMenuItem>
+                        </Link>
+                        <DropdownMenuItem disabled>ARC Generator</DropdownMenuItem>
+                      </div>
+                      {!pathname.startsWith('/admin') && !pathname.startsWith('/advisor') && (
+                        <div>
+                          <DropdownMenuLabel>Thesis Phases</DropdownMenuLabel>
+                          <Link href="/thesis-phases/chapter-1">
+                            <DropdownMenuItem>Chapter 1 - Introduction</DropdownMenuItem>
+                          </Link>
+                          <Link href="/thesis-phases/chapter-2">
+                            <DropdownMenuItem>Chapter 2 - Literature Review</DropdownMenuItem>
+                          </Link>
+                          <Link href="/thesis-phases/chapter-3">
+                            <DropdownMenuItem>Chapter 3 - Methodology</DropdownMenuItem>
+                          </Link>
+                          <Link href="/thesis-phases/chapter-4">
+                            <DropdownMenuItem>Chapter 4 - Results & Analysis</DropdownMenuItem>
+                          </Link>
+                          <Link href="/thesis-phases/chapter-5">
+                            <DropdownMenuItem>Chapter 5 - Conclusions</DropdownMenuItem>
+                          </Link>
+                        </div>
+                      )}
+                      <div>
+                        <DropdownMenuLabel>Resources</DropdownMenuLabel>
+                        <Link href="/documentation">
+                          <DropdownMenuItem>Documentation</DropdownMenuItem>
+                        </Link>
+                        <Link href="/support">
+                          <DropdownMenuItem>Support</DropdownMenuItem>
+                        </Link>
+                      </div>
+                      <div>
+                        <DropdownMenuLabel>Account</DropdownMenuLabel>
+                        <Link href="/settings/billing">
+                          <DropdownMenuItem>Billing</DropdownMenuItem>
+                        </Link>
+                        <Link href="/settings/referrals">
+                          <DropdownMenuItem>Referrals</DropdownMenuItem>
+                        </Link>
+                        <Link href="/groups">
+                          <DropdownMenuItem>Manage Groups</DropdownMenuItem>
+                        </Link>
+                        <Link href="/analytics">
+                          <DropdownMenuItem>Usage & Analytics</DropdownMenuItem>
+                        </Link>
+                      </div>
+                    </>
+                  )}
                 </nav>
               </ScrollArea>
             </SheetContent>

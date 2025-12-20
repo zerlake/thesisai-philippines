@@ -5,21 +5,35 @@
 
 import { createClient } from '@supabase/supabase-js';
 
+// Demo user accounts with actual UUIDs in the database:
+// Student: 6e4c887c-6d11-4c8a-bf7b-eb94f562b9b7 - demo-student@thesis.ai
+// Advisor: ff79d401-5614-4de8-9f17-bc920f360dcf - demo-advisor@thesis.ai
+// Critic:  14a7ff7d-c6d2-4b27-ace1-32237ac28e02 - demo-critic@thesis.ai
+// Admin:   7f22dff0-b8a9-4e08-835f-2a79dba9e6f7 - demo-admin@thesis.ai
 export const SAMPLE_USERS = {
   student: {
-    email: 'student@demo.thesisai.local',
+    email: 'demo-student@thesis.ai',
     password: 'demo123456',
     role: 'student',
+    id: '6e4c887c-6d11-4c8a-bf7b-eb94f562b9b7',
   },
   advisor: {
-    email: 'advisor@demo.thesisai.local',
+    email: 'demo-advisor@thesis.ai',
     password: 'demo123456',
     role: 'advisor',
+    id: 'ff79d401-5614-4de8-9f17-bc920f360dcf',
   },
   critic: {
-    email: 'critic@demo.thesisai.local',
+    email: 'demo-critic@thesis.ai',
     password: 'demo123456',
     role: 'critic',
+    id: '14a7ff7d-c6d2-4b27-ace1-32237ac28e02',
+  },
+  admin: {
+    email: 'demo-admin@thesis.ai',
+    password: 'demo123456',
+    role: 'admin',
+    id: '7f22dff0-b8a9-4e08-835f-2a79dba9e6f7',
   },
 };
 

@@ -39,11 +39,6 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
 
-  // Skip ESLint during build to reduce memory usage
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  
   // Enable AMP mode and experimental optimizations
   experimental: {
     optimizePackageImports: [
@@ -57,6 +52,10 @@ const nextConfig: NextConfig = {
     optimizeCss: true, // Optimize CSS loading
     // Disable client trace metadata to avoid workUnitAsyncStorage issues
     clientTraceMetadata: [],
+
+    // Additional memory optimization settings
+    workerThreads: false, // Disable worker threads to reduce memory overhead during build
+    cpus: 1, // Limit to single CPU during build to reduce memory pressure
   },
 
   // Optimize image handling for CDN
@@ -77,9 +76,6 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     // Configure image sizes for optimization
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    // The warning about quality can be addressed by ensuring we have valid quality values
-    // But Next.js uses a default quality of 75, and we can't explicitly configure multiple quality values
-    // So we'll just remove the invalid property
   },
 
   // Headers for AMP cache and CDN optimization

@@ -1,275 +1,273 @@
-﻿
-> next-template@0.1.0 build C:\Users\Projects\thesis-ai-fresh
-> next build
 
-node.exe : [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline 
-data, please update: `npm i baseline-browser-mapping@latest -D`
-At C:\nvm4w\nodejs\pnpm.ps1:16 char:5
-+     & "$basedir/node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.cjs"  ...
-+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: ([baseline-brows...ping@latest -D`:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
-   Γû▓ Next.js 16.0.5 (Turbopack)
+> next-template@0.1.0 build C:\Users\Projects\thesis-ai-fresh
+> node --max-old-space-size=14336 ./node_modules/next/dist/bin/next build
+
+   ▲ Next.js 16.0.10 (Turbopack)
    - Environments: .env.local
    - Experiments (use with caution):
-     ┬╖ clientTraceMetadata
-     Γ£ô optimizeCss
-     ┬╖ optimizePackageImports
+     · clientTraceMetadata
+     · cpus: 1
+     ✓ optimizeCss
+     · optimizePackageImports
 
- ΓÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: 
-https://nextjs.org/docs/messages/middleware-to-proxy
    Creating an optimized production build ...
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please 
-update: `npm i baseline-browser-mapping@latest -D`
-Turbopack build encountered 3 warnings:
-./node_modules/.pnpm/@opentelemetry+instrumentat_6afa3aa63a1ee1e91372360a2d45582d/node_modules/@opentelemetry/instrume
-ntation/build/esm/platform/node
-Package import-in-the-middle can't be external
-The request import-in-the-middle matches serverExternalPackages (or the default list).
-The request could not be resolved by Node.js from the project directory.
-Packages that should be external need to be installed in the project directory, so they can be resolved from the 
-output files.
-Try to install it into the project directory by running npm install import-in-the-middle from the project directory.
-
-
-./node_modules/.pnpm/@sentry+node-core@10.27.0_@_62248f89c2d022bbab885c4a52bb757f/node_modules/@sentry/node-core/build
-/cjs/sdk
-Package import-in-the-middle can't be external
-The request import-in-the-middle matches serverExternalPackages (or the default list).
-The request could not be resolved by Node.js from the project directory.
-Packages that should be external need to be installed in the project directory, so they can be resolved from the 
-output files.
-Try to install it into the project directory by running npm install import-in-the-middle from the project directory.
-
-
-./node_modules/.pnpm/@opentelemetry+instrumentat_6afa3aa63a1ee1e91372360a2d45582d/node_modules/@opentelemetry/instrume
-ntation/build/esm/platform/node
-Package require-in-the-middle can't be external
-The request require-in-the-middle matches serverExternalPackages (or the default list).
-The request could not be resolved by Node.js from the project directory.
-Packages that should be external need to be installed in the project directory, so they can be resolved from the 
-output files.
-Try to install it into the project directory by running npm install require-in-the-middle from the project directory.
-
-
- Γ£ô Compiled successfully in 2.5min
+ ✓ Compiled successfully in 58s
    Running next.config.js provided runAfterProductionCompile ...
- Γ£ô Completed runAfterProductionCompile in 7028ms
-   Running TypeScript ...
-   Collecting page data using 3 workers ...
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please 
-update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please 
-update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please 
-update: `npm i baseline-browser-mapping@latest -D`
-   Generating static pages using 3 workers (0/55) ...
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please 
-update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please 
-update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please 
-update: `npm i baseline-browser-mapping@latest -D`
-   Generating static pages using 3 workers (13/55) 
-   Generating static pages using 3 workers (27/55) 
-   Generating static pages using 3 workers (41/55) 
- Γ£ô Generating static pages using 3 workers (55/55) in 3.3s
+ ✓ Completed runAfterProductionCompile in 1353ms
+   Skipping validation of types
+   Collecting page data using 1 worker ...
+   Generating static pages using 1 worker (0/75) ...
+   Generating static pages using 1 worker (18/75) 
+   Generating static pages using 1 worker (37/75) 
+   Generating static pages using 1 worker (56/75) 
+ ✓ Generating static pages using 1 worker (75/75) in 1795.1ms
    Finalizing page optimization ...
 
 Route (app)
-Γöî ╞Æ /
-Γö£ ╞Æ /_not-found
-Γö£ ╞Æ /(app/)/advisor/suggestion-engine
-Γö£ ╞Æ /(app/)/dashboard
-Γö£ ╞Æ /(app/)/test-advisor-notifications
-Γö£ ╞Æ /about
-Γö£ ╞Æ /admin
-Γö£ ╞Æ /admin/institutions
-Γö£ ╞Æ /admin/mcp-servers
-Γö£ ╞Æ /admin/payouts
-Γö£ ╞Æ /admin/puter-auth
-Γö£ ╞Æ /admin/testimonials
-Γö£ ╞Æ /admin/users
-Γö£ ╞Æ /admin/wiki
-Γö£ ╞Æ /advisor
-Γö£ ╞Æ /advisor-guide
-Γö£ ╞Æ /advisor/competency
-Γö£ ╞Æ /advisor/sample-data
-Γö£ ╞Æ /advisor/students/[studentId]
-Γö£ ╞Æ /ai-tools
-Γö£ ╞Æ /analytics
-Γö£ ╞Æ /api/admin/seed-demo-docs
-Γö£ ╞Æ /api/analyze-research-gaps
-Γö£ ╞Æ /api/arxiv-search
-Γö£ ╞Æ /api/auth/demo-login
-Γö£ ╞Æ /api/composio-mcp
-Γö£ ╞Æ /api/dashboard
-Γö£ ╞Æ /api/dashboard/layouts
-Γö£ ╞Æ /api/dashboard/layouts/[id]
-Γö£ ╞Æ /api/dashboard/widgets/[widgetId]
-Γö£ ╞Æ /api/dashboard/widgets/batch
-Γö£ ╞Æ /api/documents/save
-Γö£ ╞Æ /api/documents/submit
-Γö£ ╞Æ /api/documents/versions/checkpoint
-Γö£ ╞Æ /api/documents/versions/list
-Γö£ ╞Æ /api/documents/versions/restore
-Γö£ ╞Æ /api/instruments/defense-responses
-Γö£ ╞Æ /api/instruments/practice-session
-Γö£ ╞Æ /api/instruments/validate
-Γö£ ╞Æ /api/logs
-Γö£ ╞Æ /api/mcp/serena-connect
-Γö£ ╞Æ /api/mcp/serena-status
-Γö£ ╞Æ /api/mendeley/import
-Γö£ ╞Æ /api/mendeley/search
-Γö£ ╞Æ /api/messages/get
-Γö£ ╞Æ /api/messages/send
-Γö£ ╞Æ /api/metrics
-Γö£ ╞Æ /api/metrics/health
-Γö£ ╞Æ /api/notifications/dashboard-notification
-Γö£ ╞Æ /api/notifications/send-advisor-email
-Γö£ ╞Æ /api/notifications/send-critic-email
-Γö£ ╞Æ /api/notifications/send-email
-Γö£ ╞Æ /api/notifications/send-student-email
-Γö£ ╞Æ /api/notifications/test
-Γö£ ╞Æ /api/openalex-search
-Γö£ ╞Æ /api/papers
-Γö£ ╞Æ /api/papers/search
-Γö£ ╞Æ /api/papers/unlock
-Γö£ ╞Æ /api/paraphrase
-Γö£ ╞Æ /api/personalization/dashboard
-Γö£ ╞Æ /api/personalization/devices
-Γö£ ╞Æ /api/personalization/notifications
-Γö£ ╞Æ /api/personalization/preferences
-Γö£ ╞Æ /api/personalization/preferences/[section]
-Γö£ ╞Æ /api/personalization/sync
-Γö£ ╞Æ /api/pubmed-search
-Γö£ ╞Æ /api/realtime
-Γö£ ╞Æ /api/seed-documents
-Γö£ ╞Æ /api/semantic-scholar-search
-Γö£ ╞Æ /api/sentry-example-api
-Γö£ ╞Æ /api/user/notification-preferences
-Γö£ ╞Æ /api/wiki
-Γö£ ╞Æ /api/wiki/[slug]
-Γö£ ╞Æ /api/wiki/debug
-Γö£ ╞Æ /api/zotero/import
-Γö£ ╞Æ /api/zotero/verify
-Γö£ ╞Æ /apps
-Γö£ ╞Æ /apps/[id]
-Γö£ ╞Æ /bibliography
-Γö£ ╞Æ /blog
-Γö£ ╞Æ /citations
-Γö£ ╞Æ /conclusion
-Γö£ ╞Æ /contact
-Γö£ ╞Æ /context7
-Γö£ ╞Æ /critic
-Γö£ ╞Æ /critic-guide
-Γö£ ╞Æ /critic/billing
-Γö£ ╞Æ /critic/sample-data
-Γö£ ╞Æ /critic/students
-Γö£ ╞Æ /dashboard
-Γö£ ╞Æ /data-management
-Γö£ ╞Æ /defense-ppt-coach
-Γö£ ╞Æ /defense-ppt-coach/samples
-Γö£ ╞Æ /defense-qa-framework-trainer
-Γö£ ╞Æ /document-analyzer
-Γö£ ╞Æ /documentation
-Γö£ ╞Æ /documentation/academic-integrity
-Γö£ ╞Æ /documentation/account-setup
-Γö£ ╞Æ /documentation/citation-manager
-Γö£ ╞Æ /documentation/dashboard-overview
-Γö£ ╞Æ /documentation/essay-editor
-Γö£ ╞Æ /documentation/faq
-Γö£ ╞Æ /documentation/first-steps
-Γö£ ╞Æ /documentation/grammar-checker
-Γö£ ╞Æ /documentation/hero-section
-Γö£ ╞Æ /documentation/introduction
-Γö£ ╞Æ /documentation/navigation
-Γö£ ╞Æ /documentation/paraphraser
-Γö£ ╞Æ /documentation/privacy-policy
-Γö£ ╞Æ /documentation/research-gap-identifier
-Γö£ ╞Æ /documentation/support-center
-Γö£ ╞Æ /documentation/terms-of-service
-Γö£ ╞Æ /documentation/topic-generator
-Γö£ ╞Æ /documentation/university-guides
-Γö£ ╞Æ /drafts
-Γö£ ╞Æ /drafts/[documentId]
-Γö£ ╞Æ /editor/[id]
-Γö£ ╞Æ /email-confirmation
-Γö£ ╞Æ /explore
-Γö£ ╞Æ /faq
-Γö£ ╞Æ /features
-Γö£ ╞Æ /flashcards
-Γö£ ╞Æ /for-advisors
-Γö£ ╞Æ /for-critics
-Γö£ ╞Æ /forgot-password
-Γö£ ╞Æ /general-qa-framework-trainer
-Γö£ ╞Æ /grammar-check
-Γö£ ╞Æ /groups
-Γö£ ╞Æ /groups/[groupId]
-Γö£ ╞Æ /landing/referrals
-Γö£ ╞Æ /literature-review
-Γö£ ╞Æ /login
-Γö£ ╞Æ /mcp-demo
-Γö£ ╞Æ /mcp-demo-debug
-Γö£ ╞Æ /methodology
-Γö£ ╞Æ /originality-check
-Γö£ ╞Æ /outline
-Γö£ ╞Æ /papers
-Γö£ ╞Æ /paraphraser
-Γö£ ╞Æ /presentation
-Γö£ ╞Æ /pricing
-Γö£ ╞Æ /privacy-policy
-Γö£ ╞Æ /proposal-qa-framework-trainer
-Γö£ ╞Æ /qa-simulator
-Γö£ ╞Æ /references
-Γö£ ╞Æ /referrals
-Γö£ ╞Æ /register
-Γö£ ╞Æ /research
-Γö£ ╞Æ /research-article-analyzer
-Γö£ ╞Æ /research-gap
-Γö£ ╞Æ /research-groups
-Γö£ ╞Æ /research-integration
-Γö£ ╞Æ /research-problem-identifier
-Γö£ ╞Æ /reset-password
-Γö£ ╞Æ /resources
-Γö£ ╞Æ /results
-Γö£ ╞Æ /sentry-example-page
-Γö£ ╞Æ /settings
-Γö£ ╞Æ /settings/billing
-Γö£ ╞Æ /settings/referrals
-Γö£ ╞Æ /share/[documentId]
-Γö£ ╞Æ /statistical-analysis
-Γö£ ╞Æ /terms-of-service
-Γö£ ╞Æ /test-sample-data
-Γö£ ╞Æ /thesis-phases
-Γö£ ╞Æ /thesis-phases/[phaseId]
-Γö£ ╞Æ /thesis-phases/chapter-1
-Γö£ ╞Æ /thesis-phases/chapter-1/editor
-Γö£ ╞Æ /thesis-phases/chapter-2
-Γö£ ╞Æ /thesis-phases/chapter-2/editor
-Γö£ ╞Æ /thesis-phases/chapter-3
-Γö£ ╞Æ /thesis-phases/chapter-3/editor
-Γö£ ╞Æ /thesis-phases/chapter-3/validity-defender
-Γö£ ╞Æ /thesis-phases/chapter-4
-Γö£ ╞Æ /thesis-phases/chapter-4/editor
-Γö£ ╞Æ /thesis-phases/chapter-5
-Γö£ ╞Æ /thesis-phases/chapter-5/editor
-Γö£ ╞Æ /title-generator
-Γö£ ╞Æ /title-page
-Γö£ ╞Æ /topic-ideas
-Γö£ ╞Æ /topic-ideas-pro
-Γö£ ╞Æ /topic-ideation
-Γö£ ╞Æ /university-format-checker
-Γö£ ╞Æ /university-guides
-Γö£ ╞Æ /university-guides/[slug]
-Γö£ ╞Æ /user-guide
-Γö£ ╞Æ /variable-mapping-tool
-Γö£ ╞Æ /workflows
-Γöö ╞Æ /workflows/[id]
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /(app/)/advisor/suggestion-engine
+├ ƒ /(app/)/dashboard
+├ ƒ /(app/)/test-advisor-notifications
+├ ƒ /about
+├ ƒ /admin
+├ ƒ /admin/ai
+├ ƒ /admin/institutions
+├ ƒ /admin/mcp-servers
+├ ƒ /admin/payouts
+├ ƒ /admin/testimonials
+├ ƒ /admin/user-onboarding
+├ ƒ /admin/users
+├ ƒ /admin/wiki
+├ ƒ /advisor
+├ ƒ /advisor-guide
+├ ƒ /advisor/chat
+├ ƒ /advisor/competency
+├ ƒ /advisor/sample-data
+├ ƒ /advisor/students/[studentId]
+├ ƒ /ai-tools
+├ ƒ /analytics
+├ ƒ /api/admin/cleanup-users
+├ ƒ /api/admin/seed-demo-docs
+├ ƒ /api/ai-tools
+├ ƒ /api/ai-tools/[toolId]
+├ ƒ /api/analyze-research-gaps
+├ ƒ /api/arxiv-search
+├ ƒ /api/auth/demo-login
+├ ƒ /api/composio-mcp
+├ ƒ /api/dashboard
+├ ƒ /api/dashboard/layouts
+├ ƒ /api/dashboard/layouts/[id]
+├ ƒ /api/dashboard/widgets/[widgetId]
+├ ƒ /api/dashboard/widgets/batch
+├ ƒ /api/defense/sets
+├ ƒ /api/documents
+├ ƒ /api/documents/[id]
+├ ƒ /api/documents/save
+├ ƒ /api/documents/submit
+├ ƒ /api/documents/versions/checkpoint
+├ ƒ /api/documents/versions/list
+├ ƒ /api/documents/versions/restore
+├ ƒ /api/flashcards/[deckId]/cards
+├ ƒ /api/flashcards/decks
+├ ƒ /api/generate-presentation-pdf
+├ ƒ /api/instruments/defense-responses
+├ ƒ /api/instruments/practice-session
+├ ƒ /api/instruments/validate
+├ ƒ /api/learning/analytics
+├ ƒ /api/learning/completion-predictions
+├ ƒ /api/learning/defense
+├ ƒ /api/learning/flashcards
+├ ƒ /api/learning/insights
+├ ƒ /api/learning/progress
+├ ƒ /api/learning/recommendations
+├ ƒ /api/learning/study-guides
+├ ƒ /api/logs
+├ ƒ /api/mcp/serena-connect
+├ ƒ /api/mcp/serena-status
+├ ƒ /api/mendeley/import
+├ ƒ /api/mendeley/search
+├ ƒ /api/messages/get
+├ ƒ /api/messages/send
+├ ƒ /api/metrics
+├ ƒ /api/metrics/health
+├ ƒ /api/notifications/dashboard-notification
+├ ƒ /api/notifications/send-advisor-email
+├ ƒ /api/notifications/send-critic-email
+├ ƒ /api/notifications/send-email
+├ ƒ /api/notifications/send-student-email
+├ ƒ /api/notifications/test
+├ ƒ /api/openalex-search
+├ ƒ /api/papers
+├ ƒ /api/papers/search
+├ ƒ /api/papers/unlock
+├ ƒ /api/paraphrase
+├ ƒ /api/personalization/dashboard
+├ ƒ /api/personalization/devices
+├ ƒ /api/personalization/notifications
+├ ƒ /api/personalization/preferences
+├ ƒ /api/personalization/preferences/[section]
+├ ƒ /api/personalization/sync
+├ ƒ /api/projects
+├ ƒ /api/projects/[id]
+├ ƒ /api/pubmed-search
+├ ƒ /api/realtime
+├ ƒ /api/research-gaps/analyze
+├ ƒ /api/seed-documents
+├ ƒ /api/semantic-scholar-search
+├ ƒ /api/sentry-example-api
+├ ƒ /api/study-guides
+├ ƒ /api/thesis-feedback
+├ ƒ /api/user/notification-preferences
+├ ƒ /api/users
+├ ƒ /api/wiki
+├ ƒ /api/wiki/[slug]
+├ ƒ /api/wiki/debug
+├ ƒ /api/workflows
+├ ƒ /api/zotero/import
+├ ƒ /api/zotero/verify
+├ ƒ /apps
+├ ƒ /apps/[id]
+├ ƒ /apps/citation-formatter
+├ ƒ /apps/collaboration-hub
+├ ƒ /apps/goal-setter
+├ ƒ /apps/literature-review-assistant
+├ ƒ /apps/progress-dashboard
+├ ƒ /apps/research-gap-analyzer
+├ ƒ /apps/thesis-calculator
+├ ƒ /apps/writing-tools
+├ ƒ /bibliography
+├ ƒ /blog
+├ ƒ /chat
+├ ƒ /citations
+├ ƒ /conclusion
+├ ƒ /contact
+├ ƒ /context7
+├ ƒ /critic
+├ ƒ /critic-guide
+├ ƒ /critic/billing
+├ ƒ /critic/chat
+├ ƒ /critic/sample-data
+├ ƒ /critic/students
+├ ƒ /dashboard
+├ ƒ /data-management
+├ ƒ /defense-ppt-coach
+├ ƒ /defense-ppt-coach/samples
+├ ƒ /defense-qa-framework-trainer
+├ ƒ /document-analyzer
+├ ƒ /documentation
+├ ƒ /documentation/academic-integrity
+├ ƒ /documentation/account-setup
+├ ƒ /documentation/advisor-collaboration
+├ ƒ /documentation/ai-idea-generation
+├ ƒ /documentation/ai-writing-suite
+├ ƒ /documentation/article-analyzer
+├ ƒ /documentation/citation-hub
+├ ƒ /documentation/citation-manager
+├ ƒ /documentation/collaborative-literature-review
+├ ƒ /documentation/dashboard-overview
+├ ƒ /documentation/defense-preparation
+├ ƒ /documentation/essay-editor
+├ ƒ /documentation/faq
+├ ƒ /documentation/first-steps
+├ ƒ /documentation/format-checker
+├ ƒ /documentation/grammar-checker
+├ ƒ /documentation/hero-section
+├ ƒ /documentation/introduction
+├ ƒ /documentation/methodology-tools
+├ ƒ /documentation/navigation
+├ ƒ /documentation/paraphraser
+├ ƒ /documentation/pdf-analysis
+├ ƒ /documentation/privacy-policy
+├ ƒ /documentation/research-conceptualization
+├ ƒ /documentation/research-gap-identifier
+├ ƒ /documentation/support-center
+├ ƒ /documentation/synthesis-paraphrasing
+├ ƒ /documentation/team-collaboration
+├ ƒ /documentation/terms-of-service
+├ ƒ /documentation/topic-generator
+├ ƒ /documentation/university-formatting
+├ ƒ /documentation/university-guides
+├ ƒ /documentation/workflow-management
+├ ƒ /drafts
+├ ƒ /drafts/[documentId]
+├ ƒ /editor/[id]
+├ ƒ /email-confirmation
+├ ƒ /explore
+├ ƒ /faq
+├ ƒ /features
+├ ƒ /flashcards
+├ ƒ /for-advisors
+├ ƒ /for-critics
+├ ƒ /forgot-password
+├ ƒ /general-qa-framework-trainer
+├ ƒ /grammar-check
+├ ƒ /groups
+├ ƒ /groups/[groupId]
+├ ƒ /landing/referrals
+├ ƒ /literature-review
+├ ƒ /login
+├ ƒ /mcp-demo
+├ ƒ /mcp-demo-debug
+├ ƒ /methodology
+├ ƒ /originality-check
+├ ƒ /outline
+├ ƒ /papers
+├ ƒ /paraphraser
+├ ƒ /presentation
+├ ƒ /pricing
+├ ƒ /privacy-policy
+├ ƒ /proposal-qa-framework-trainer
+├ ƒ /qa-simulator
+├ ƒ /references
+├ ƒ /referrals
+├ ƒ /register
+├ ƒ /research
+├ ƒ /research-article-analyzer
+├ ƒ /research-gap
+├ ƒ /research-groups
+├ ƒ /research-integration
+├ ƒ /research-problem-identifier
+├ ƒ /reset-password
+├ ƒ /resources
+├ ƒ /results
+├ ƒ /sentry-example-page
+├ ƒ /settings
+├ ƒ /settings/billing
+├ ƒ /settings/referrals
+├ ƒ /share/[documentId]
+├ ƒ /statistical-analysis
+├ ƒ /terms-of-service
+├ ƒ /test-sample-data
+├ ƒ /thesis-phases
+├ ƒ /thesis-phases/[phaseId]
+├ ƒ /thesis-phases/chapter-1
+├ ƒ /thesis-phases/chapter-1/editor
+├ ƒ /thesis-phases/chapter-2
+├ ƒ /thesis-phases/chapter-2/editor
+├ ƒ /thesis-phases/chapter-3
+├ ƒ /thesis-phases/chapter-3/editor
+├ ƒ /thesis-phases/chapter-3/validity-defender
+├ ƒ /thesis-phases/chapter-4
+├ ƒ /thesis-phases/chapter-4/editor
+├ ƒ /thesis-phases/chapter-5
+├ ƒ /thesis-phases/chapter-5/editor
+├ ƒ /thesis-phases/dashboard/analytics
+├ ƒ /title-generator
+├ ƒ /title-page
+├ ƒ /topic-ideas
+├ ƒ /topic-ideas-pro
+├ ƒ /topic-ideation
+├ ƒ /university-format-checker
+├ ƒ /university-guides
+├ ƒ /university-guides/[slug]
+├ ƒ /user-guide
+├ ƒ /variable-mapping-tool
+├ ƒ /workflows
+└ ƒ /workflows/[id]
 
 
-╞Æ Proxy (Middleware)
+ƒ Proxy (Middleware)
 
-╞Æ  (Dynamic)  server-rendered on demand
+ƒ  (Dynamic)  server-rendered on demand
 

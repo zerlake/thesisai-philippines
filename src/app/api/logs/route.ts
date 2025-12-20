@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid logs format' }, { status: 400 });
     }
 
-    const supabase = createServerSupabaseClient();
+    const supabaseForInsert = createServerSupabaseClient();
 
     const formattedLogs = logs.map(log => ({
       id: log.id,
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       user_agent: log.userAgent || null,
     }));
 
-    const { error } = await supabase.from('logs').insert(formattedLogs);
+    const { error } = await supabaseForInsert.from('logs').insert(formattedLogs);
 
     if (error) {
       console.error('[Logs API] Failed to insert logs:', error);

@@ -39,16 +39,98 @@ export function CriticStudentList() {
 
     const fetchStudents = async () => {
       setIsLoading(true);
-      const { data, error } = await supabase.rpc('get_critic_students_details', {
-        p_critic_id: session.user.id
-      });
 
-      if (error) {
+      try {
+        const { data, error } = await supabase.rpc('get_critic_students_details', {
+          p_critic_id: session.user.id
+        });
+
+        if (error) {
+          console.warn("Critic students details function not available:", error);
+          // Fallback to direct table query if the RPC function doesn't exist
+          try {
+            // First try to query critic_student_relationships directly without join
+            const relationshipsResult = await supabase
+              .from('critic_student_relationships')
+              .select('student_id')
+              .eq('critic_id', session.user.id);
+
+            if (relationshipsResult.error) {
+              console.warn("Could not fetch student relationships:", relationshipsResult.error);
+
+              // If that also fails, try a more basic approach with profiles
+              const basicResult = await supabase
+                .from('profiles')
+                .select('id as student_id')
+                .eq('role', 'user'); // This is just a fallback, might need adjustment
+
+              if (basicResult.error) {
+                console.error("Both relationship and basic profile queries failed:", basicResult.error);
+                toast.error("Failed to fetch assigned students.");
+                setStudents([]);
+              } else {
+                // Return empty array since we don't have the proper relationship data
+                setStudents([]);
+              }
+            } else {
+              // If we got relationships successfully, try to get student details for each
+              if (relationshipsResult.data && relationshipsResult.data.length > 0) {
+                const studentIds = relationshipsResult.data.map(rel => rel.student_id);
+
+                // Get student details
+                const profilesResult = await supabase
+                  .from('profiles')
+                  .select('id, first_name, last_name, avatar_url')
+                  .in('id', studentIds);
+
+                if (profilesResult.error) {
+                  console.error("Could not fetch student profiles:", profilesResult.error);
+                  // Still set the basic relationship data without profile details
+                  const basicData = relationshipsResult.data.map(rel => ({
+                    student_id: rel.student_id,
+                    first_name: null,
+                    last_name: null,
+                    avatar_url: null,
+                    document_count: 0,
+                    latest_document_status: null,
+                    latest_document_updated_at: null
+                  }));
+                  setStudents(basicData);
+                } else {
+                  // Combine relationship data with profile data
+                  const combinedData = relationshipsResult.data.map(rel => {
+                    const profile = profilesResult.data?.find(p => p.id === rel.student_id);
+                    return {
+                      student_id: rel.student_id,
+                      first_name: profile?.first_name || null,
+                      last_name: profile?.last_name || null,
+                      avatar_url: profile?.avatar_url || null,
+                      document_count: 0,
+                      latest_document_status: null,
+                      latest_document_updated_at: null
+                    };
+                  });
+                  setStudents(combinedData);
+                }
+              } else {
+                // No relationships found
+                setStudents([]);
+              }
+            }
+          } catch (fallbackError) {
+            console.error("Fallback query failed:", fallbackError);
+            toast.error("Failed to fetch assigned students.");
+            setStudents([]);
+          }
+        } else {
+          setStudents(data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching students:", error);
         toast.error("Failed to fetch assigned students.");
-        console.error(error);
-      } else {
-        setStudents(data || []);
+        setStudents([]);
       }
+
       setIsLoading(false);
     };
 

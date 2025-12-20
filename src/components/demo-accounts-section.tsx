@@ -33,31 +33,36 @@ export function DemoAccountsSection() {
     checkDemoService();
   }, []);
 
+  // Demo user accounts with actual UUIDs in the database:
+  // Student: 6e4c887c-6d11-4c8a-bf7b-eb94f562b9b7
+  // Critic:  14a7ff7d-c6d2-4b27-ace1-32237ac28e02
+  // Advisor: ff79d401-5614-4de8-9f17-bc920f360dcf
+  // Admin:   7f22dff0-b8a9-4e08-835f-2a79dba9e6f7
   const demoAccounts = [
     {
       name: "Student",
-      email: "student@demo.thesisai.local",
+      email: "demo-student@thesis.ai",
       password: "demo123456",
       icon: BookOpen,
       description: "View student dashboard & features",
     },
     {
       name: "Advisor",
-      email: "advisor@demo.thesisai.local",
+      email: "demo-advisor@thesis.ai",
       password: "demo123456",
       icon: Users,
       description: "Manage students & guidance",
     },
     {
       name: "Critic",
-      email: "critic@demo.thesisai.local",
+      email: "demo-critic@thesis.ai",
       password: "demo123456",
       icon: CheckCircle2,
       description: "Review & provide feedback",
     },
     {
       name: "Admin",
-      email: "admin@demo.thesisai.local",
+      email: "demo-admin@thesis.ai",
       password: "demo123456",
       icon: Shield,
       description: "Full platform administration",
@@ -77,32 +82,53 @@ export function DemoAccountsSection() {
 
       // Read the response text once and use it for both success and error cases
       const responseText = await response.text();
-      // Only log minimal information in production
-      console.log("Demo login completed, status:", response.status);
+      // Log response info for debugging
+      console.log("Demo login response:", {
+        status: response.status,
+        statusText: response.statusText,
+        hasBody: !!responseText,
+        bodyLength: responseText?.length || 0,
+        body: responseText.substring(0, 500) // Log first 500 chars of body
+      });
 
       if (!response.ok) {
         // Handle error case
-        try {
-          // Try to parse the error response
-          let errorData;
-          if (responseText && responseText.trim() !== '') {
-            try {
-              errorData = JSON.parse(responseText);
-            } catch (parseError) {
-              console.error("Could not parse error response as JSON:", parseError);
-              // If JSON parsing fails, return the raw text as the error
-              errorData = { error: `Server error: ${responseText}`, status: response.status };
-            }
-          } else {
-            errorData = { error: "Empty response from server", status: response.status };
-          }
+        let errorMessage = `Demo login failed (HTTP ${response.status})`;
 
-          console.error("Demo login API error:", errorData);
-          throw new Error(errorData.error || errorData.message || "Demo login failed. Demo functionality may not be properly configured.");
-        } catch (parseError) {
-          console.error("Could not process error response:", parseError);
-          throw new Error(`Server error (${response.status}), could not process error response`);
+        console.error("Demo login failed with status:", response.status);
+        console.error("Response text:", responseText);
+
+        if (responseText && responseText.trim() !== '') {
+          try {
+            const errorData = JSON.parse(responseText);
+            console.error("Parsed error data:", errorData);
+            
+            // Check if errorData is empty object {} or doesn't have error fields
+            if (errorData && typeof errorData === 'object') {
+              if (Object.keys(errorData).length === 0) {
+                console.error("Demo login API returned empty error object");
+                errorMessage = `Demo login server error with empty response (HTTP ${response.status}). Please check server logs.`;
+              } else {
+                // Extract error message from various possible fields
+                errorMessage = errorData.error || errorData.message || errorData.details || `Server error (HTTP ${response.status})`;
+                console.error("Demo login API error:", errorData);
+              }
+            } else {
+              console.error("Demo login API error response is not an object:", errorData);
+              errorMessage = `Server returned unexpected response (HTTP ${response.status})`;
+            }
+          } catch (parseError) {
+            // If JSON parsing fails, use the raw text
+            console.error("Failed to parse response as JSON:", parseError);
+            errorMessage = responseText.substring(0, 200) || `Failed to parse error response (HTTP ${response.status})`;
+            console.error("Demo login error (raw):", responseText);
+          }
+        } else {
+          console.error("Demo login failed with empty response body");
+          errorMessage = `Demo login server error with no response (HTTP ${response.status}). Please check server logs.`;
         }
+
+        throw new Error(errorMessage);
       }
 
       // Success case - parse the response
@@ -137,9 +163,9 @@ export function DemoAccountsSection() {
 
       console.log("Session set successfully, waiting for auth state change...");
       
-      console.log("Session set successfully, redirecting to dashboard...");
-      // Redirect directly after session is set instead of waiting for auth state change
-      window.location.href = "/dashboard";
+      console.log("Session set successfully, letting AuthProvider handle role-based routing...");
+      // Let the AuthProvider handle the redirect based on user role
+      // The AuthProvider will redirect to /admin for admin users, /advisor for advisors, etc.
     } catch (err) {
       console.error("Demo login error:", err);
       setError(err instanceof Error ? err.message : "Login failed. Demo functionality may not be properly configured.");

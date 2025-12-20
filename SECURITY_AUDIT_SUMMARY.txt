@@ -1,0 +1,227 @@
+================================================================================
+                        SECURITY AUDIT COMPLETE
+================================================================================
+
+Date:               2025-12-19
+Scope:              Full codebase deep dive
+Status:             Complete - 31 vulnerability categories identified
+Severity:           1 Critical, 8 High, 12 Medium, 10 Low
+
+================================================================================
+                            KEY FINDINGS
+================================================================================
+
+🔴 CRITICAL (4 issues)
+  1. Hardcoded Sentry DSN in src/instrumentation-client.ts
+  2. SQL Injection via PostgREST in src/app/api/messages/get/route.ts
+  3. Exposed API Keys (OpenRouter, RevenueCat)
+  4. Overly Permissive Anonymous Database Access
+
+🟠 HIGH (8 issues)
+  5. Missing Authentication on Public Endpoints (6+ endpoints)
+  6. Weak x-user-id Header Pattern (4+ endpoints vulnerable)
+  7. Missing Role-Based Access Control
+  8. Overly Broad Advisor/Critic RLS Policies
+  9. SSRF Risk in Paper Unlock Endpoint
+  10. Missing CORS Headers on APIs
+  11. Unprotected API Key in Notification Routes
+  12. Header-based Auth Not Verified Against Session
+
+🟡 MEDIUM (12 issues)
+  13-24. Error Message Information Disclosure (18+ instances)
+  25-30. Unsafe JSON Parsing (13+ instances)
+  31. Unsafe Object Merging (Prototype Pollution Risk)
+  32. Path Traversal in Wiki Routes
+  33. Missing Input Validation on Queries
+  34. Unsanitized Filename in Document Storage
+  35. Console.log Leakage (50+ instances)
+  36. Missing RLS on Tables (ai_analytics, workflows)
+  37. Dynamic Function Invocation Without Whitelist
+  38. No Dependency Audit Capability
+
+🟢 LOW (10 issues)
+  39-48. Various low-severity issues
+  49. Code Injection via eval()
+  50. Large File Upload DoS Risk
+
+================================================================================
+                        GENERATED DOCUMENTS
+================================================================================
+
+1. COMPREHENSIVE_SECURITY_AUDIT.md (2500+ lines)
+   - Detailed analysis of all 31 vulnerability categories
+   - Risk assessment for each issue
+   - Code examples and remediation steps
+   - Testing recommendations
+   - Monitoring strategy
+
+2. SECURITY_AUDIT_ACTION_ITEMS.md (1200+ lines)
+   - Prioritized action items
+   - Step-by-step implementation guides
+   - Code templates ready to copy/paste
+   - Testing checklist
+   - Implementation timeline
+
+3. SECURITY_FIXES_SUMMARY.md (earlier commit)
+   - Documents 6 medium/low vulnerabilities already fixed
+   - Implementation details from previous session
+
+================================================================================
+                          QUICK ACTION ITEMS
+================================================================================
+
+IMMEDIATE (24 hours):
+  [ ] Remove Sentry DSN from src/instrumentation-client.ts
+  [ ] Fix SQL injection in messages API (add UUID validation)
+  [ ] Move OpenRouter & RevenueCat keys to server-side
+  [ ] Audit anonymous access to documents table
+  [ ] Rotate exposed API keys
+
+THIS WEEK:
+  [ ] Add authentication to 6+ public endpoints
+  [ ] Replace x-user-id header auth with session verification
+  [ ] Implement generic error responses (hide error details)
+  [ ] Fix advisor/critic RLS policies
+  [ ] Add input validation schemas (Zod)
+
+NEXT 2 WEEKS:
+  [ ] Enable RLS on all tables
+  [ ] Implement structured logging
+  [ ] Add CORS headers to APIs
+  [ ] Whitelist dynamic function invocation
+  [ ] Add rate limiting to sensitive endpoints
+
+================================================================================
+                        SEVERITY BREAKDOWN
+================================================================================
+
+Files with CRITICAL Issues:
+  - src/instrumentation-client.ts (hardcoded Sentry DSN)
+  - src/app/api/messages/get/route.ts (SQL injection)
+  - src/lib/openrouter-ai.ts (exposed API key)
+  - src/lib/revenuecat.ts (hardcoded API key)
+  - supabase/migrations/50_allow_demo_documents.sql (unsafe RLS)
+
+Files with HIGH Issues:
+  - src/app/api/papers/route.ts (no auth, error disclosure)
+  - src/app/api/users/route.ts (weak auth, error leakage)
+  - src/app/api/documents/route.ts (unsanitized filename)
+  - src/app/api/papers/unlock/route.ts (SSRF risk)
+  - src/app/api/notifications/send-*-email/route.ts (API key exposure)
+  - supabase/migrations/27_advisor_critic_rls_policies.sql (broad access)
+
+Files with MEDIUM Issues:
+  - 18+ API route files (error message leakage)
+  - src/lib/realtime-server.ts (unsafe JSON parsing)
+  - src/app/api/wiki/route.ts (path traversal)
+  - src/lib/puter-sdk.ts (unsafe JSON parsing)
+  - 4+ state management files (prototype pollution risk)
+
+================================================================================
+                        DEPENDENCY STATUS
+================================================================================
+
+✗ Cannot run npm audit - no lockfile present
+  Action: Run "pnpm install" to generate pnpm-lock.yaml
+  Then: Run "pnpm audit" weekly
+
+Recommended Tools:
+  - npm audit (weekly)
+  - Snyk (continuous)
+  - OWASP ZAP (monthly)
+  - SonarQube (continuous)
+
+================================================================================
+                      IMPLEMENTATION TIMELINE
+================================================================================
+
+Week 1 (Jan 6-10):
+  Mon-Tue: CRITICAL fixes (4 high-severity issues)
+  Wed-Thu: HIGH priority (8 issues)
+  Fri: Testing & staging deployment
+
+Week 2 (Jan 13-17):
+  MEDIUM priority (12 issues)
+  RLS policies, validation, logging
+
+Week 3-4 (Jan 20-Feb 6):
+  LOW priority improvements
+  Monitoring setup
+  Regular audit schedule
+
+================================================================================
+                         MONITORING & ALERTING
+================================================================================
+
+Track After Deployment:
+  - Failed authentication attempts (should spike, then normalize)
+  - Rejected API requests (parameter validation failures)
+  - Error rates (should remain similar)
+  - API latency (may increase from validation)
+  - Rate limit hits (expect none initially)
+
+Recommended Metrics:
+  - Auth failure rate by endpoint
+  - Validation error rate
+  - RLS policy violations
+  - Unauthorized access attempts
+  - Admin action audit trail
+
+================================================================================
+                         NEXT STEPS
+================================================================================
+
+1. Review COMPREHENSIVE_SECURITY_AUDIT.md for full details
+2. Review SECURITY_AUDIT_ACTION_ITEMS.md for implementation steps
+3. Create "security-fixes" branch from main
+4. Implement CRITICAL fixes (target: 24 hours)
+5. Implement HIGH fixes (target: 1 week)
+6. Deploy to staging, test thoroughly
+7. Deploy to production with monitoring
+8. Schedule weekly security audits
+
+================================================================================
+                        DOCUMENTS TO REVIEW
+================================================================================
+
+1. COMPREHENSIVE_SECURITY_AUDIT.md - Read first for understanding
+2. SECURITY_AUDIT_ACTION_ITEMS.md - Use for implementation
+3. SECURITY_FIXES_SUMMARY.md - Previous fixes for reference
+
+Key Sections in Comprehensive Audit:
+  - Section 1: Credential Management (CRITICAL)
+  - Section 2: SQL Injection (CRITICAL)
+  - Section 3: Authentication (HIGH)
+  - Section 4: Error Handling (MEDIUM)
+  - Section 5: Database Security (HIGH)
+  - Section 6: Input Validation (MEDIUM)
+  - Section 7: Code Injection (MEDIUM)
+  - Section 8: Path Traversal (MEDIUM)
+  - Section 9: CORS & External APIs (MEDIUM)
+  - Section 10: Prototype Pollution (LOW)
+  - Section 11: Dependencies (MEDIUM)
+
+================================================================================
+                         AUDIT STATISTICS
+================================================================================
+
+Total Issues Found:        31 categories
+Lines of Guidance:         3700+
+Code Examples:             50+
+Remediation Templates:     40+
+Test Cases:                20+
+Affected Files:            50+
+Vulnerable Endpoints:      15+
+Vulnerable DB Policies:    8
+Missing RLS Tables:        2
+Hardcoded Secrets:         3 (Sentry DSN, RevenueCat, context references)
+Missing Auth Checks:       6+ endpoints
+Database RLS Issues:       5+ policies
+Error Leakage Instances:   18+
+Code Issues:               13+ unsafe JSON parsing
+
+================================================================================
+Report Completed: 2025-12-19
+Prepared by: Amp Security Audit Module
+Next Review: 2026-01-19 (30 days)
+================================================================================

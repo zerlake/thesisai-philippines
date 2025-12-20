@@ -1,19 +1,20 @@
 
-> next-template@0.1.0 dev C:\Users\Projects\thesis-ai
+> next-template@0.1.0 dev C:\Users\Projects\thesis-ai-fresh
 > next dev
 
- ⚠ Port 3000 is in use by process 2380, using available port 3001 instead.
-   ▲ Next.js 16.0.3 (Turbopack)
+ ⚠ Port 3000 is in use by process 18104, using available port 3001 instead.
+   ▲ Next.js 16.0.10 (Turbopack)
    - Local:         http://localhost:3001
    - Network:       http://192.168.56.1:3001
-   - Environments: .env.local, .env
+   - Environments: .env.local
    - Experiments (use with caution):
      · clientTraceMetadata
+     · cpus: 1
      ✓ optimizeCss
      · optimizePackageImports
 
  ✓ Starting...
- ⨯ Unable to acquire lock at C:\Users\Projects\thesis-ai\.next\dev\lock, is another instance of next dev running?
+ ⨯ Unable to acquire lock at C:\Users\Projects\thesis-ai-fresh\.next\dev\lock, is another instance of next dev running?
    Suggestion: If you intended to restart next dev, terminate the other process, and then try again.
 [?25h
  ELIFECYCLE  Command failed with exit code 1.

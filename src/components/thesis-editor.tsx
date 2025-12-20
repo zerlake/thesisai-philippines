@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useDocumentSave } from '@/hooks/use-document-save';
-import { NovelEditor } from './novel-editor';
+import { UnifiedNovelEditor } from './unified-novel-editor';
 import { Button } from '@/components/ui/button';
 import { createBrowserClient } from '@/lib/supabase';
 import { ChevronDown, BookMarked, RotateCcw } from 'lucide-react';
@@ -550,16 +550,16 @@ export function ThesisEditor({
 
       {/* Editor */}
       {content && (
-        <NovelEditor
+        <UnifiedNovelEditor
           key={documentId}
           documentId={documentId}
           initialContent={content}
           onContentChange={handleContentChange}
           onSave={handleSave}
           isReadOnly={isReadOnly}
-          phase={phase}
           showAITools={!isReadOnly}
           onCreateCheckpoint={handleCreateCheckpoint}
+          mode="student"
         />
       )}
     </div>

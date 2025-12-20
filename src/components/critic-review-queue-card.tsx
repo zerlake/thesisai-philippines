@@ -35,16 +35,71 @@ export function CriticReviewQueueCard() {
 
     const fetchQueue = async () => {
       setIsLoading(true);
-      const { data, error } = await supabase.rpc('get_students_for_critic_review', {
-        p_critic_id: session.user.id
-      });
 
-      if (error) {
-        toast.error("Failed to load review queue.");
-        console.error(error);
-      } else {
-        setQueue(data || []);
+      try {
+        // Try RPC function first
+        const { data, error } = await supabase.rpc('get_students_for_critic_review', {
+          p_critic_id: session.user.id
+        });
+
+        if (error) {
+          console.warn("Critic review queue RPC not available, using documents table");
+
+          // Fallback to documents table
+          const { data: docsData, error: docsError } = await supabase
+            .from('documents')
+            .select('id, title, created_at, user_id, status')
+            .in('status', ['approved', 'submitted', 'pending_review'])
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+          if (docsError) {
+            console.warn("Documents query failed:", docsError.message);
+            setQueue([]);
+          } else if (docsData && docsData.length > 0) {
+            // Fetch student profiles for each document
+            const queueItems: ReviewQueueItem[] = [];
+
+            for (const doc of docsData) {
+              let firstName = 'Unknown';
+              let lastName = 'Student';
+
+              if (doc.user_id) {
+                const { data: profileData } = await supabase
+                  .from('profiles')
+                  .select('first_name, last_name')
+                  .eq('id', doc.user_id)
+                  .single();
+
+                if (profileData) {
+                  firstName = profileData.first_name || 'Unknown';
+                  lastName = profileData.last_name || 'Student';
+                }
+              }
+
+              queueItems.push({
+                student_id: doc.user_id || 'unknown',
+                first_name: firstName,
+                last_name: lastName,
+                document_id: doc.id,
+                document_title: doc.title || 'Untitled Document',
+                approved_at: doc.created_at
+              });
+            }
+
+            setQueue(queueItems);
+          } else {
+            // No documents found, set empty queue
+            setQueue([]);
+          }
+        } else {
+          setQueue(data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching review queue:", error);
+        setQueue([]);
       }
+
       setIsLoading(false);
     };
 

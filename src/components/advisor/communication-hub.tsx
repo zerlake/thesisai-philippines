@@ -25,7 +25,8 @@ import {
   Video as VideoIcon,
   Trash2,
   Reply,
-  Forward
+  Forward,
+  ArrowLeft
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -136,6 +137,7 @@ const mockConversations: Conversation[] = [
 ];
 
 const mockMessages: Message[] = [
+  // Thesis Group Discussion (conv1) - between Maria, Ana, and advisor
   {
     id: 'msg1',
     sender_id: 'student1',
@@ -158,13 +160,44 @@ const mockMessages: Message[] = [
   },
   {
     id: 'msg3',
-    sender_id: 'student1',
-    sender_name: 'Maria Santos',
+    sender_id: 'student3',
+    sender_name: 'Ana Reyes',
     recipient_id: 'advisor1',
     recipient_name: 'Dr. Smith',
-    content: 'It\'s about the data collection methods. I\'m not sure if survey or interview would be better for my study.',
+    content: 'I agree, we need to clarify the methodology for our group research project.',
     timestamp: '2024-12-15T10:35:00Z',
     read: false
+  },
+  // Individual Consultation (conv2) - between Juan and advisor
+  {
+    id: 'msg4',
+    sender_id: 'student2',
+    sender_name: 'Juan Dela Cruz',
+    recipient_id: 'advisor1',
+    recipient_name: 'Dr. Smith',
+    content: 'Hi Dr. Smith, thank you for the feedback on my draft!',
+    timestamp: '2024-12-14T14:00:00Z',
+    read: true
+  },
+  {
+    id: 'msg5',
+    sender_id: 'advisor1',
+    sender_name: 'Dr. Smith',
+    recipient_id: 'student2',
+    recipient_name: 'Juan Dela Cruz',
+    content: 'You\'re welcome Juan! Please review Chapter 2 when you have time.',
+    timestamp: '2024-12-14T14:30:00Z',
+    read: true
+  },
+  {
+    id: 'msg6',
+    sender_id: 'student2',
+    sender_name: 'Juan Dela Cruz',
+    recipient_id: 'advisor1',
+    recipient_name: 'Dr. Smith',
+    content: 'Will do. I should have the revisions ready by next week.',
+    timestamp: '2024-12-14T15:45:00Z',
+    read: true
   }
 ];
 
@@ -235,6 +268,44 @@ export function AdvisorCommunicationHub() {
     alert('Announcement sent to selected students!');
   };
 
+  const handleCreateGroup = () => {
+    // TODO: Implement group creation modal/form
+    alert('Create group feature coming soon');
+  };
+
+  const getGroupMessages = (conversationId: string): Message[] => {
+    // Filter messages based on conversation participants
+    const conversation = conversations.find(c => c.id === conversationId);
+    if (!conversation) return [];
+    
+    // For demo purposes, show different messages based on conversation ID
+    if (conversationId === 'conv1') {
+      // Thesis Group Discussion - messages from Maria (student1) and Ana (student3)
+      return messages.slice(0, 3);
+    } else if (conversationId === 'conv2') {
+      // Individual Consultation - messages from Juan (student2) only
+      return messages.slice(3, 6);
+    }
+    return messages;
+  };
+
+  const handleViewGroup = (conversationId: string) => {
+    const conversation = conversations.find(c => c.id === conversationId);
+    if (conversation) {
+      setSelectedConversation(conversation);
+    }
+  };
+
+  const handleStartCall = (type: 'video' | 'voice') => {
+    if (selectedStudent) {
+      toast.success(`Starting ${type} call with ${selectedStudent.first_name} ${selectedStudent.last_name}...`);
+      // TODO: Implement actual call functionality
+    } else if (selectedConversation) {
+      toast.success(`Starting ${type} call with group "${selectedConversation.subject}"...`);
+      // TODO: Implement actual group call functionality
+    }
+  };
+
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.first_name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           student.last_name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -257,11 +328,11 @@ export function AdvisorCommunicationHub() {
             <CardDescription>Message, schedule, and communicate with your students</CardDescription>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => handleStartCall('video')}>
               <VideoIcon className="h-4 w-4 mr-1" />
               Video Call
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => handleStartCall('voice')}>
               <Phone className="h-4 w-4 mr-1" />
               Call
             </Button>
@@ -392,10 +463,10 @@ export function AdvisorCommunicationHub() {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => handleStartCall('voice')} title="Start voice call">
                           <Phone className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => handleStartCall('video')} title="Start video call">
                           <VideoIcon className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="sm">
@@ -406,29 +477,29 @@ export function AdvisorCommunicationHub() {
                     
                     <ScrollArea className="flex-1 p-4">
                       <div className="space-y-4">
-                        {messages.map((message) => (
-                          <div
-                            key={message.id}
-                            className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}
-                          >
-                            <div
-                              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                                message.sender_id === user?.id
-                                  ? 'bg-primary text-primary-foreground'
-                                  : 'bg-secondary'
-                              }`}
-                            >
-                              <p>{message.content}</p>
-                              <p className={`text-xs mt-1 ${
-                                message.sender_id === user?.id
-                                  ? 'text-primary-foreground/70'
-                                  : 'text-muted-foreground'
-                              }`}>
-                                {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
+                        {getGroupMessages(selectedConversation.id).map((message) => (
+                           <div
+                             key={message.id}
+                             className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}
+                           >
+                             <div
+                               className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                                 message.sender_id === user?.id
+                                   ? 'bg-primary text-primary-foreground'
+                                   : 'bg-secondary'
+                               }`}
+                             >
+                               <p>{message.content}</p>
+                               <p className={`text-xs mt-1 ${
+                                 message.sender_id === user?.id
+                                   ? 'text-primary-foreground/70'
+                                   : 'text-muted-foreground'
+                               }`}>
+                                 {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                               </p>
+                             </div>
+                           </div>
+                         ))}
                         <div ref={messagesEndRef} />
                       </div>
                     </ScrollArea>
@@ -585,56 +656,168 @@ export function AdvisorCommunicationHub() {
           </TabsContent>
           
           <TabsContent value="groups" className="flex-1 flex flex-col p-0 m-0">
-            <div className="p-4 border-b">
-              <div className="flex justify-between items-center">
-                <h3 className="font-semibold">Student Groups</h3>
-                <Button variant="outline" size="sm">
-                  + Create Group
-                </Button>
-              </div>
-            </div>
-            
-            <ScrollArea className="flex-1 p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {conversations.map((conversation) => (
-                  <Card key={conversation.id}>
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="text-lg">{conversation.subject}</CardTitle>
-                          <div className="flex items-center gap-2 mt-1">
-                            {conversation.participants.map((student, index) => (
-                              <div key={student.id} className="flex items-center gap-1">
-                                <Avatar className="w-6 h-6">
-                                  <AvatarImage src={student.avatar_url} />
-                                  <AvatarFallback>
-                                    {student.first_name.charAt(0)}
-                                    {student.last_name.charAt(0)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                {index < conversation.participants.length - 1 && (
-                                  <span className="text-muted-foreground">,</span>
-                                )}
-                              </div>
-                            ))}
+            {selectedConversation ? (
+              <>
+                <div className="border-b p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setSelectedConversation(null)}
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Back to Groups
+                    </Button>
+                  </div>
+                  <div>
+                    <p className="font-semibold">{selectedConversation.subject}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedConversation.participants.length} member{selectedConversation.participants.length !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => handleStartCall('voice')} title="Start voice call">
+                      <Phone className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleStartCall('video')} title="Start video call">
+                      <VideoIcon className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <ScrollArea className="flex-1 p-4">
+                  <div className="space-y-4">
+                    <div className="mb-6 p-4 bg-secondary rounded-lg">
+                      <p className="font-semibold mb-3">Group Members:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedConversation.participants.map((student) => (
+                          <div key={student.id} className="flex items-center gap-2 bg-background p-2 rounded">
+                            <Avatar className="w-6 h-6">
+                              <AvatarImage src={student.avatar_url} />
+                              <AvatarFallback>
+                                {student.first_name.charAt(0)}
+                                {student.last_name.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="text-sm">{student.first_name} {student.last_name}</span>
                           </div>
+                        ))}
+                      </div>
+                    </div>
+                    {messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                            message.sender_id === user?.id
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-secondary'
+                          }`}
+                        >
+                          <p>{message.content}</p>
+                          <p className={`text-xs mt-1 ${
+                            message.sender_id === user?.id
+                              ? 'text-primary-foreground/70'
+                              : 'text-muted-foreground'
+                          }`}>
+                            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
                         </div>
-                        {conversation.unread_count > 0 && (
-                          <Badge variant="default">{conversation.unread_count}</Badge>
-                        )}
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground mb-3">{conversation.last_message}</p>
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Last message: {new Date(conversation.last_message_time).toLocaleString()}</span>
-                        <Button size="sm">View Group</Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </ScrollArea>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </ScrollArea>
+
+                <div className="border-t p-4">
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="icon">
+                      <Paperclip className="h-4 w-4" />
+                    </Button>
+                    <div className="flex-1 relative">
+                      <Textarea
+                        placeholder="Type your message to the group..."
+                        value={messageText}
+                        onChange={(e) => setMessageText(e.target.value)}
+                        className="resize-none min-h-[60px] pr-10"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSendMessage();
+                          }
+                        }}
+                      />
+                      <Button
+                        size="sm"
+                        className="absolute bottom-2 right-2"
+                        onClick={handleSendMessage}
+                        disabled={!messageText.trim()}
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="p-4 border-b">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-semibold">Student Groups</h3>
+                    <Button variant="outline" size="sm" onClick={handleCreateGroup}>
+                      + Create Group
+                    </Button>
+                  </div>
+                </div>
+                
+                <ScrollArea className="flex-1 p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {conversations.map((conversation) => (
+                      <Card key={conversation.id}>
+                        <CardHeader>
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <CardTitle className="text-lg">{conversation.subject}</CardTitle>
+                              <div className="flex items-center gap-2 mt-1">
+                                {conversation.participants.map((student, index) => (
+                                  <div key={student.id} className="flex items-center gap-1">
+                                    <Avatar className="w-6 h-6">
+                                      <AvatarImage src={student.avatar_url} />
+                                      <AvatarFallback>
+                                        {student.first_name.charAt(0)}
+                                        {student.last_name.charAt(0)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    {index < conversation.participants.length - 1 && (
+                                      <span className="text-muted-foreground">,</span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            {conversation.unread_count > 0 && (
+                              <Badge variant="default">{conversation.unread_count}</Badge>
+                            )}
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-muted-foreground mb-3">{conversation.last_message}</p>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Last message: {new Date(conversation.last_message_time).toLocaleString()}</span>
+                            <Button size="sm" onClick={() => handleViewGroup(conversation.id)}>View Group</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </>
+            )}
           </TabsContent>
         </Tabs>
       </CardContent>

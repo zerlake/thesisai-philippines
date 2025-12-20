@@ -71,12 +71,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      // Step 1: Fetch the main profile data
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+      // Step 1: Fetch the main profile data with retry logic for demo accounts
+      // Demo accounts may have profile upsert in flight, so retry up to 3 times
+      let profileData = null;
+      let profileError = null;
+      const maxRetries = 3;
+      
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        const result = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+        
+        profileData = result.data;
+        profileError = result.error;
+        
+        // If we got the profile or a different error (not "not found"), break
+        if (profileData || (profileError && profileError.code !== 'PGRST116')) {
+          break;
+        }
+        
+        // If profile not found and we have retries left, wait and retry
+        if (profileError?.code === 'PGRST116' && attempt < maxRetries - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
 
       if (profileError) {
         // Handle network errors gracefully
@@ -150,9 +170,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .single();
 
           if (newProfile) {
-            setProfile(newProfile);
-          }
-          return;
+              console.log("[Auth] Created new profile with role:", newProfile.role);
+              setProfile(newProfile);
+            }
+            return;
         }
         // For other errors, log them but continue with minimal profile
          console.error("Profile fetch error:", profileError);
@@ -177,6 +198,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (profileData) {
+        console.log("[Auth] Profile fetched successfully with role:", profileData.role);
         setProfile(profileData);
         }
         } catch (e: any) {
@@ -448,8 +470,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
       const userHomePage = roleHomePages[profile.role] || '/dashboard';
 
-      // Redirect from auth pages when authenticated
-      if (pathname === "/login" || pathname === "/register" || pathname === "/") {
+      // Redirect from auth pages when authenticated (but not from landing page "/")
+      // Users should be able to view the landing page even when logged in
+      if (pathname === "/login" || pathname === "/register") {
         router.replace(userHomePage);
         return;
       }
@@ -480,8 +503,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (error?.message?.includes("Failed to fetch") || error?.message?.includes("NetworkError")) {
           toast.error("Unable to refresh profile. Please check your internet connection.");
         } else {
-          toast.error("Error refreshing profile. Please try logging in again.");
-          await supabase.auth.signOut();
+          toast.error("Error refreshing profile. Data may be temporarily unavailable.");
+          // NOTE: Not signing out user anymore - just show error message
+          // Only sign out for authentication-related errors
+          // await supabase.auth.signOut();
         }
       }
     }

@@ -6,7 +6,14 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const DEMO_STUDENT_EMAIL = 'student@demo.thesisai.local';
+// Demo user accounts - actual emails from database
+const DEMO_STUDENT_EMAIL = 'demo-student@thesis.ai';
+const DEMO_EMAILS = [
+  'demo-student@thesis.ai',
+  'demo-advisor@thesis.ai',
+  'demo-critic@thesis.ai',
+  'demo-admin@thesis.ai',
+];
 
 // Sample documents with full content that matches mock-relationships.ts
 export const DEMO_DOCUMENTS = [
@@ -113,5 +120,5 @@ export function getSampleDocumentByTitle(title: string) {
  */
 export function isDemoAccount(email?: string): boolean {
   if (!email) return false;
-  return email === DEMO_STUDENT_EMAIL || email.includes('@demo.thesisai.local');
+  return DEMO_EMAILS.includes(email) || email.endsWith('@thesis.ai');
 }

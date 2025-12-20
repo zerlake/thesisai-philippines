@@ -361,7 +361,7 @@ export default function ThesisCalculatorPage() {
                     <div className="border rounded-lg p-4">
                       <div className="text-center">
                         <Brain className="h-8 w-8 mx-auto text-green-500 mb-2" />
-                        <div className="text-2xl font-bold">Advanced</div>
+                        <div className="text-2xl font-bold">Professional</div>
                         <div className="text-xs text-muted-foreground">Academic Level</div>
                       </div>
                     </div>
@@ -384,7 +384,7 @@ export default function ThesisCalculatorPage() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Vocabulary Difficulty</span>
-                        <Badge variant="secondary">Advanced</Badge>
+                        <Badge variant="secondary">Professional</Badge>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Concept Density</span>

@@ -22,27 +22,50 @@ export function CriticDashboard() {
 
     const fetchAnalytics = async () => {
       setIsLoading(true);
-      
-      const analyticsPromise = supabase.rpc('get_critic_dashboard_analytics', {
-        p_critic_id: session.user.id
+
+      // Try to call the analytics function, but handle gracefully if it doesn't exist
+      let avg_turnaround_days = null;
+      let student_count = 0;
+
+      try {
+        const analyticsResult = await supabase.rpc('get_critic_dashboard_analytics', {
+          p_critic_id: session.user.id
+        });
+
+        if (analyticsResult.error) {
+          console.warn("Analytics function not available:", analyticsResult.error);
+          // Set a default value or skip this metric
+          avg_turnaround_days = null;
+        } else {
+          avg_turnaround_days = analyticsResult.data?.avg_turnaround_days || null;
+        }
+      } catch (error) {
+        console.warn("Analytics function call failed:", error);
+        avg_turnaround_days = null;
+      }
+
+      try {
+        const studentCountResult = await supabase
+          .from('critic_student_relationships')
+          .select('*', { count: 'exact', head: true })
+          .eq('critic_id', session.user.id);
+
+        if (studentCountResult.error) {
+          console.error("Failed to fetch student count:", studentCountResult.error);
+          toast.error("Failed to load student count analytics.");
+        } else {
+          student_count = studentCountResult.count || 0;
+        }
+      } catch (error) {
+        console.error("Failed to fetch student count:", error);
+        toast.error("Failed to load student count analytics.");
+      }
+
+      setAnalytics({
+        avg_turnaround_days,
+        student_count,
       });
 
-      const studentCountPromise = supabase
-        .from('critic_student_relationships')
-        .select('*', { count: 'exact', head: true })
-        .eq('critic_id', session.user.id);
-
-      const [analyticsResult, studentCountResult] = await Promise.all([analyticsPromise, studentCountPromise]);
-
-      if (analyticsResult.error || studentCountResult.error) {
-        toast.error("Failed to load dashboard analytics.");
-        console.error(analyticsResult.error || studentCountResult.error);
-      } else {
-        setAnalytics({
-          avg_turnaround_days: analyticsResult.data.avg_turnaround_days,
-          student_count: studentCountResult.count || 0,
-        });
-      }
       setIsLoading(false);
     };
 

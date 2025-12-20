@@ -19,7 +19,7 @@ const blogPosts: BlogPost[] = [
     id: '1',
     title: 'Master Academic Writing with AI-Powered Grammar Checking',
     excerpt:
-      'Learn how our advanced grammar checking system helps you improve essay quality and academic writing standards.',
+      'Learn how our robust grammar checking system helps you improve essay quality and academic writing standards.',
     author: 'Dr. Sarah Johnson',
     date: 'November 20, 2025',
     category: 'Writing Tips',

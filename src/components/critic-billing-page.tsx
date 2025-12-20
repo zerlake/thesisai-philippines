@@ -34,22 +34,91 @@ export function CriticBillingPage() {
 
   useEffect(() => {
     if (!session) return;
+
     const fetchBillingData = async () => {
       setIsLoading(true);
-      const { data, error } = await supabase
-        .from("critic_reviews")
-        .select("*, documents(title), student:student_id(first_name, last_name)")
-        .eq("critic_id", session.user.id)
-        .order("created_at", { ascending: false });
 
-      if (error) {
+      try {
+        // Try the original query first
+        const { data: directData, error: directError } = await supabase
+          .from("critic_reviews")
+          .select("*, documents(title), student:student_id(first_name, last_name)")
+          .eq("critic_id", session.user.id)
+          .order("created_at", { ascending: false });
+
+        if (directError) {
+          console.warn("Direct critic_reviews query failed, trying simpler approach:", directError);
+
+          // Fallback: Query critic_reviews without joins first
+          const { data: reviewsData, error: reviewsError } = await supabase
+            .from("critic_reviews")
+            .select("*")
+            .eq("critic_id", session.user.id)
+            .order("created_at", { ascending: false });
+
+          if (reviewsError) {
+            console.error("Could not access critic_reviews table:", reviewsError);
+            toast.error("Failed to load billing information due to database access issues.");
+            setReviews([]);
+          } else {
+            // If we got basic reviews data, try to fetch related documents and students separately
+            if (reviewsData && reviewsData.length > 0) {
+              const enhancedReviews = [];
+
+              for (const review of reviewsData) {
+                // Fetch document info
+                let documentInfo = null;
+                if (review.document_id) { // Assuming there's a document_id field
+                  const { data: docData, error: docError } = await supabase
+                    .from("thesis_documents")
+                    .select("title")
+                    .eq("id", review.document_id)
+                    .single();
+
+                  if (!docError) {
+                    documentInfo = docData;
+                  }
+                }
+
+                // Fetch student info
+                let studentInfo = null;
+                if (review.student_id) {
+                  const { data: studentData, error: studentError } = await supabase
+                    .from("profiles")
+                    .select("first_name, last_name")
+                    .eq("id", review.student_id)
+                    .single();
+
+                  if (!studentError) {
+                    studentInfo = studentData;
+                  }
+                }
+
+                enhancedReviews.push({
+                  ...review,
+                  documents: documentInfo,
+                  student: studentInfo
+                });
+              }
+
+              setReviews(enhancedReviews as CriticReview[]);
+            } else {
+              setReviews([]);
+            }
+          }
+        } else {
+          // If the original query worked, use the data
+          setReviews(directData as CriticReview[]);
+        }
+      } catch (error: any) {
+        console.error("Unexpected error in billing data fetch:", error);
         toast.error("Failed to load billing information.");
-        console.error(error);
-      } else {
-        setReviews(data as CriticReview[]);
+        setReviews([]);
       }
+
       setIsLoading(false);
     };
+
     fetchBillingData();
   }, [session, supabase]);
 

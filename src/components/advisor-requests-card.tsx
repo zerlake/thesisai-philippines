@@ -31,17 +31,65 @@ export function AdvisorRequestsCard() {
 
     const fetchRequests = async () => {
       setIsLoading(true);
-      const { data, error } = await supabase
-        .from("advisor_requests")
-        .select("id, status, profiles:student_id(id, first_name, last_name)")
-        .eq("advisor_email", user.email)
-        .eq("status", "pending");
+      try {
+        console.log("Fetching requests for advisor email:", user.email);
+        
+        const { data: requests, error: requestsError } = await supabase
+          .from("advisor_requests")
+          .select("id, status, student_id")
+          .eq("advisor_email", user.email)
+          .eq("status", "pending");
 
-      if (error) {
+        if (requestsError) {
+          console.error("Fetch requests error:", requestsError);
+          // Don't show error toast if the table is just empty
+          if (requestsError.code !== 'PGRST116') {
+            toast.error("Failed to fetch student requests.");
+          }
+          setRequests([]);
+          setIsLoading(false);
+          return;
+        }
+
+        console.log("Requests fetched:", requests);
+
+        // Fetch student profiles for each request
+        if (requests && requests.length > 0) {
+          const studentIds = requests.map((r: any) => r.student_id);
+          const { data: profiles, error: profilesError } = await supabase
+            .from("profiles")
+            .select("id, first_name, last_name")
+            .in("id", studentIds);
+
+          if (profilesError) {
+            console.error("Fetch profiles error:", profilesError);
+            toast.error("Failed to fetch student profiles.");
+            setIsLoading(false);
+            return;
+          }
+
+          // Merge requests with profiles
+          const profileMap = (profiles || []).reduce((acc: any, profile: any) => {
+            acc[profile.id] = profile;
+            return acc;
+          }, {});
+
+          const enrichedRequests = requests.map((req: any) => ({
+            id: req.id,
+            status: req.status,
+            student_id: req.student_id,
+            profiles: profileMap[req.student_id] || { id: req.student_id, first_name: "Unknown", last_name: "User" }
+          }));
+
+          // @ts-ignore
+          setRequests(enrichedRequests);
+        } else {
+          console.log("No pending requests found");
+          setRequests([]);
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
         toast.error("Failed to fetch student requests.");
-      } else {
-        // @ts-ignore
-        setRequests(data || []);
       }
       setIsLoading(false);
     };

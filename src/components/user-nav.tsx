@@ -32,8 +32,15 @@ export function UserNav() {
   const user = session.user; // Use user from session
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
+    try {
+      await supabase.auth.signOut();
+      // Use window.location to force a full page reload, clearing all state
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Force redirect anyway to clear state
+      window.location.href = "/login";
+    }
   };
 
   const getInitials = () => {

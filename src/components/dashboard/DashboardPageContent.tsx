@@ -26,7 +26,7 @@ export function DashboardPageContent() {
       'collaboration',
       'calendar',
     ]);
-  }, [store]);
+  }, []);
 
   if (isLoadingAllWidgets) {
     return <DashboardSkeleton />;
