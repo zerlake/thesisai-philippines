@@ -1,58 +1,295 @@
 
-> next-template@0.1.0 build C:\Users\Projects\thesis-ai
-> next build
+> next-template@0.1.0 build C:\Users\Projects\thesis-ai-fresh
+> node --max-old-space-size=14336 ./node_modules/next/dist/bin/next build
 
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-   ▲ Next.js 16.0.5 (Turbopack)
-   - Environments: .env.local, .env
+   ▲ Next.js 16.0.10 (Turbopack)
+   - Environments: .env.local
    - Experiments (use with caution):
      · clientTraceMetadata
+     · cpus: 1
      ✓ optimizeCss
      · optimizePackageImports
 
- ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
    Creating an optimized production build ...
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-Turbopack build encountered 3 warnings:
-./node_modules/.pnpm/@opentelemetry+instrumentat_6afa3aa63a1ee1e91372360a2d45582d/node_modules/@opentelemetry/instrumentation/build/esm/platform/node
-Package import-in-the-middle can't be external
-The request import-in-the-middle matches serverExternalPackages (or the default list).
-The request could not be resolved by Node.js from the project directory.
-Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.
-Try to install it into the project directory by running npm install import-in-the-middle from the project directory.
-
-
-./node_modules/.pnpm/@sentry+node-core@10.27.0_@_62248f89c2d022bbab885c4a52bb757f/node_modules/@sentry/node-core/build/cjs/sdk
-Package import-in-the-middle can't be external
-The request import-in-the-middle matches serverExternalPackages (or the default list).
-The request could not be resolved by Node.js from the project directory.
-Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.
-Try to install it into the project directory by running npm install import-in-the-middle from the project directory.
-
-
-./node_modules/.pnpm/@opentelemetry+instrumentat_6afa3aa63a1ee1e91372360a2d45582d/node_modules/@opentelemetry/instrumentation/build/esm/platform/node
-Package require-in-the-middle can't be external
-The request require-in-the-middle matches serverExternalPackages (or the default list).
-The request could not be resolved by Node.js from the project directory.
-Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.
-Try to install it into the project directory by running npm install require-in-the-middle from the project directory.
-
-
- ✓ Compiled successfully in 64s
+ ✓ Compiled successfully in 63s
    Running next.config.js provided runAfterProductionCompile ...
- ✓ Completed runAfterProductionCompile in 1332ms
-   Running TypeScript ...
-Failed to compile.
+ ✓ Completed runAfterProductionCompile in 1308ms
+   Skipping validation of types
+   Collecting page data using 1 worker ...
+   Generating static pages using 1 worker (0/75) ...
+   Generating static pages using 1 worker (18/75) 
+   Generating static pages using 1 worker (37/75) 
+   Generating static pages using 1 worker (56/75) 
+ ✓ Generating static pages using 1 worker (75/75) in 1895.6ms
+   Finalizing page optimization ...
 
-./src/lib/puter-ai-search.ts:84:9
-Type error: Object literal may only specify known properties, and 'filters' does not exist in type '{ maxResults?: number | undefined; timeout?: number | undefined; sourcesOnly?: string[] | undefined; }'.
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /about
+├ ƒ /admin
+├ ƒ /admin/ai
+├ ƒ /admin/institutions
+├ ƒ /admin/mcp-servers
+├ ƒ /admin/payouts
+├ ƒ /admin/testimonials
+├ ƒ /admin/user-onboarding
+├ ƒ /admin/users
+├ ƒ /admin/wiki
+├ ƒ /advisor
+├ ƒ /advisor-guide
+├ ƒ /advisor/chat
+├ ƒ /advisor/competency
+├ ƒ /advisor/sample-data
+├ ƒ /advisor/students
+├ ƒ /advisor/students/[studentId]
+├ ƒ /ai-tools
+├ ƒ /analytics
+├ ƒ /api/admin/cleanup-users
+├ ƒ /api/admin/seed-demo-docs
+├ ƒ /api/ai-tools
+├ ƒ /api/ai-tools/[toolId]
+├ ƒ /api/analyze-research-gaps
+├ ƒ /api/arxiv-search
+├ ƒ /api/auth/demo-login
+├ ƒ /api/composio-mcp
+├ ƒ /api/dashboard
+├ ƒ /api/dashboard/layouts
+├ ƒ /api/dashboard/layouts/[id]
+├ ƒ /api/dashboard/widgets/[widgetId]
+├ ƒ /api/dashboard/widgets/batch
+├ ƒ /api/defense/sets
+├ ƒ /api/documents
+├ ƒ /api/documents/[id]
+├ ƒ /api/documents/save
+├ ƒ /api/documents/submit
+├ ƒ /api/documents/versions/checkpoint
+├ ƒ /api/documents/versions/list
+├ ƒ /api/documents/versions/restore
+├ ƒ /api/flashcards/[deckId]/cards
+├ ƒ /api/flashcards/decks
+├ ƒ /api/generate-presentation-pdf
+├ ƒ /api/instruments/defense-responses
+├ ƒ /api/instruments/practice-session
+├ ƒ /api/instruments/validate
+├ ƒ /api/learning/analytics
+├ ƒ /api/learning/completion-predictions
+├ ƒ /api/learning/defense
+├ ƒ /api/learning/flashcards
+├ ƒ /api/learning/insights
+├ ƒ /api/learning/progress
+├ ƒ /api/learning/recommendations
+├ ƒ /api/learning/study-guides
+├ ƒ /api/logs
+├ ƒ /api/mcp/serena-connect
+├ ƒ /api/mcp/serena-status
+├ ƒ /api/mendeley/import
+├ ƒ /api/mendeley/search
+├ ƒ /api/messages/get
+├ ƒ /api/messages/send
+├ ƒ /api/metrics
+├ ƒ /api/metrics/health
+├ ƒ /api/notifications/dashboard-notification
+├ ƒ /api/notifications/send-advisor-email
+├ ƒ /api/notifications/send-critic-email
+├ ƒ /api/notifications/send-email
+├ ƒ /api/notifications/send-student-email
+├ ƒ /api/notifications/test
+├ ƒ /api/openalex-search
+├ ƒ /api/papers
+├ ƒ /api/papers/search
+├ ƒ /api/papers/unlock
+├ ƒ /api/paraphrase
+├ ƒ /api/personalization/dashboard
+├ ƒ /api/personalization/devices
+├ ƒ /api/personalization/notifications
+├ ƒ /api/personalization/preferences
+├ ƒ /api/personalization/preferences/[section]
+├ ƒ /api/personalization/sync
+├ ƒ /api/projects
+├ ƒ /api/projects/[id]
+├ ƒ /api/pubmed-search
+├ ƒ /api/realtime
+├ ƒ /api/research-gaps/analyze
+├ ƒ /api/seed-documents
+├ ƒ /api/semantic-scholar-search
+├ ƒ /api/sentry-example-api
+├ ƒ /api/study-guides
+├ ƒ /api/thesis-feedback
+├ ƒ /api/user/notification-preferences
+├ ƒ /api/users
+├ ƒ /api/wiki
+├ ƒ /api/wiki/[slug]
+├ ƒ /api/wiki/debug
+├ ƒ /api/workflows
+├ ƒ /api/zotero/import
+├ ƒ /api/zotero/verify
+├ ƒ /apps
+├ ƒ /apps/[id]
+├ ƒ /apps/citation-formatter
+├ ƒ /apps/collaboration-hub
+├ ƒ /apps/goal-setter
+├ ƒ /apps/literature-review-assistant
+├ ƒ /apps/progress-dashboard
+├ ƒ /apps/research-gap-analyzer
+├ ƒ /apps/thesis-calculator
+├ ƒ /apps/writing-tools
+├ ƒ /bibliography
+├ ƒ /blog
+├ ƒ /chat
+├ ƒ /citations
+├ ƒ /conclusion
+├ ƒ /contact
+├ ƒ /context7
+├ ƒ /critic
+├ ƒ /critic-guide
+├ ƒ /critic/batch-review
+├ ƒ /critic/best-practices
+├ ƒ /critic/billing
+├ ƒ /critic/certification-checklist
+├ ƒ /critic/chat
+├ ƒ /critic/citation-auditor
+├ ƒ /critic/citation-editor
+├ ƒ /critic/comm-templates
+├ ƒ /critic/common-issues
+├ ƒ /critic/deadlines
+├ ƒ /critic/feedback-templates
+├ ƒ /critic/format-checker
+├ ƒ /critic/format-specs
+├ ƒ /critic/grammar-checker
+├ ƒ /critic/integrity-check
+├ ƒ /critic/issue-certificate
+├ ƒ /critic/manuscript-analyzer
+├ ƒ /critic/peer-comparison
+├ ƒ /critic/plagiarism-check
+├ ƒ /critic/review-history
+├ ƒ /critic/review-queue
+├ ƒ /critic/revision-tracker
+├ ƒ /critic/rubrics
+├ ƒ /critic/sample-data
+├ ƒ /critic/statistics
+├ ƒ /critic/student-performance
+├ ƒ /critic/students
+├ ƒ /critic/turnaround
+├ ƒ /dashboard
+├ ƒ /data-management
+├ ƒ /defense-ppt-coach
+├ ƒ /defense-ppt-coach/samples
+├ ƒ /defense-qa-framework-trainer
+├ ƒ /document-analyzer
+├ ƒ /documentation
+├ ƒ /documentation/academic-integrity
+├ ƒ /documentation/account-setup
+├ ƒ /documentation/advisor-collaboration
+├ ƒ /documentation/ai-idea-generation
+├ ƒ /documentation/ai-writing-suite
+├ ƒ /documentation/article-analyzer
+├ ƒ /documentation/citation-hub
+├ ƒ /documentation/citation-manager
+├ ƒ /documentation/collaborative-literature-review
+├ ƒ /documentation/dashboard-overview
+├ ƒ /documentation/defense-preparation
+├ ƒ /documentation/essay-editor
+├ ƒ /documentation/faq
+├ ƒ /documentation/first-steps
+├ ƒ /documentation/format-checker
+├ ƒ /documentation/grammar-checker
+├ ƒ /documentation/hero-section
+├ ƒ /documentation/introduction
+├ ƒ /documentation/methodology-tools
+├ ƒ /documentation/navigation
+├ ƒ /documentation/paraphraser
+├ ƒ /documentation/pdf-analysis
+├ ƒ /documentation/privacy-policy
+├ ƒ /documentation/research-conceptualization
+├ ƒ /documentation/research-gap-identifier
+├ ƒ /documentation/support-center
+├ ƒ /documentation/synthesis-paraphrasing
+├ ƒ /documentation/team-collaboration
+├ ƒ /documentation/terms-of-service
+├ ƒ /documentation/topic-generator
+├ ƒ /documentation/university-formatting
+├ ƒ /documentation/university-guides
+├ ƒ /documentation/workflow-management
+├ ƒ /drafts
+├ ƒ /drafts/[documentId]
+├ ƒ /editor/[id]
+├ ƒ /email-confirmation
+├ ƒ /explore
+├ ƒ /faq
+├ ƒ /features
+├ ƒ /flashcards
+├ ƒ /for-advisors
+├ ƒ /for-critics
+├ ƒ /forgot-password
+├ ƒ /general-qa-framework-trainer
+├ ƒ /grammar-check
+├ ƒ /groups
+├ ƒ /groups/[groupId]
+├ ƒ /landing/referrals
+├ ƒ /literature-review
+├ ƒ /login
+├ ƒ /mcp-demo
+├ ƒ /mcp-demo-debug
+├ ƒ /methodology
+├ ƒ /originality-check
+├ ƒ /outline
+├ ƒ /papers
+├ ƒ /paraphraser
+├ ƒ /presentation
+├ ƒ /pricing
+├ ƒ /privacy-policy
+├ ƒ /proposal-qa-framework-trainer
+├ ƒ /qa-simulator
+├ ƒ /references
+├ ƒ /referrals
+├ ƒ /register
+├ ƒ /research
+├ ƒ /research-article-analyzer
+├ ƒ /research-gap
+├ ƒ /research-groups
+├ ƒ /research-integration
+├ ƒ /research-problem-identifier
+├ ƒ /reset-password
+├ ƒ /resources
+├ ƒ /results
+├ ƒ /sentry-example-page
+├ ƒ /settings
+├ ƒ /settings/billing
+├ ƒ /settings/referrals
+├ ƒ /share/[documentId]
+├ ƒ /statistical-analysis
+├ ƒ /terms-of-service
+├ ƒ /test-sample-data
+├ ƒ /thesis-phases
+├ ƒ /thesis-phases/[phaseId]
+├ ƒ /thesis-phases/chapter-1
+├ ƒ /thesis-phases/chapter-1/editor
+├ ƒ /thesis-phases/chapter-2
+├ ƒ /thesis-phases/chapter-2/editor
+├ ƒ /thesis-phases/chapter-3
+├ ƒ /thesis-phases/chapter-3/editor
+├ ƒ /thesis-phases/chapter-3/validity-defender
+├ ƒ /thesis-phases/chapter-4
+├ ƒ /thesis-phases/chapter-4/editor
+├ ƒ /thesis-phases/chapter-5
+├ ƒ /thesis-phases/chapter-5/editor
+├ ƒ /thesis-phases/dashboard/analytics
+├ ƒ /title-generator
+├ ƒ /title-page
+├ ƒ /topic-ideas
+├ ƒ /topic-ideas-pro
+├ ƒ /topic-ideation
+├ ƒ /university-format-checker
+├ ƒ /university-guides
+├ ƒ /university-guides/[slug]
+├ ƒ /user-guide
+├ ƒ /variable-mapping-tool
+├ ƒ /workflows
+└ ƒ /workflows/[id]
 
-[0m [90m 82 |[39m         timeout[33m:[39m [35m30000[39m[33m,[39m
- [90m 83 |[39m         sourcesOnly[33m:[39m testMode [33m?[39m [[32m'crossref'[39m] [33m:[39m [][33m,[39m
-[31m[1m>[22m[39m[90m 84 |[39m         filters[33m,[39m
- [90m    |[39m         [31m[1m^[22m[39m
- [90m 85 |[39m       })[33m;[39m
- [90m 86 |[39m
- [90m 87 |[39m       console[33m.[39mlog([32m`[PuterAI] Search completed. Found ${result.papers.length} papers`[39m)[33m;[39m[0m
-Next.js build worker exited with code: 1 and signal: null
- ELIFECYCLE  Command failed with exit code 1.
+
+ƒ Proxy (Middleware)
+
+ƒ  (Dynamic)  server-rendered on demand
+

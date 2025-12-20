@@ -1,334 +1,397 @@
-# Security Audit - Quick Reference Guide
+# Security Implementation: Quick Reference Card
 
-**Companion to:** COMPREHENSIVE_SECURITY_AUDIT.md  
-**For Implementation:** See SECURITY_AUDIT_ACTION_ITEMS.md
+**Print This** - Keep open during implementation
 
 ---
 
-## 🔴 Critical Issues (Fix Today)
+## CRITICAL VULNERABILITIES (Fix Today)
 
-| Issue | File | Impact | Status |
-|-------|------|--------|--------|
-| Hardcoded Sentry DSN | `src/instrumentation-client.ts:12` | Monitoring credentials exposed | **UNFIXED** |
-| SQL Injection | `src/app/api/messages/get/route.ts:53-55` | Attacker can access any user's messages | **UNFIXED** |
-| Exposed API Keys | `src/lib/openrouter-ai.ts`, `src/lib/revenuecat.ts` | API compromise, billing fraud | **UNFIXED** |
-| Anonymous DB Access | `supabase/migrations/50_allow_demo_documents.sql` | Anyone can delete/modify documents | **UNFIXED** |
-
-**Quick Fix Commands:**
+### 1. Auth RLS Disabled
 ```bash
-# 1. Rotate secrets
-# - Regenerate Sentry DSN in Sentry dashboard
-# - Regenerate OpenRouter API key
-# - Regenerate RevenueCat API key
+# CHECK
+grep "DISABLE ROW LEVEL SECURITY" supabase/migrations/20251219152120*
 
-# 2. Remove from code
-git rm --cached src/instrumentation-client.ts
-echo "*.config.ts" >> .gitignore
+# FIX
+rm supabase/migrations/20251219152120_disable_rls_on_auth_users.sql
+# OR create corrective migration that enables it
+supabase migration up
 
-# 3. Fix SQL injection
-# Add UUID validation to messages API route
-
-# 4. Remove anonymous access
-# Create migration to drop demo RLS policies
+# VERIFY
+SELECT rowsecurity FROM pg_tables WHERE tablename = 'users';
+-- Should show: true
 ```
 
----
-
-## 🟠 High Priority Issues (Fix This Week)
-
-| # | Category | Count | Files | Action |
-|---|----------|-------|-------|--------|
-| 5 | Missing Auth | 6+ | `papers/`, `arxiv-search/`, `wiki/` | Add session check |
-| 6 | Weak Auth Header | 4+ | `users/`, `projects/`, `documents/` | Verify against session |
-| 7 | No RBAC | 3+ | Admin endpoints | Add role checks |
-| 8 | Broad RLS | 2 | Advisor/critic requests | Narrow access |
-| 9 | SSRF Risk | 1 | `papers/unlock/` | Validate DOI/URL |
-| 10 | Missing CORS | 6+ | Paper/wiki APIs | Add headers |
-| 11 | Exposed API Key | 1 | `notifications/send-*` | Use session auth |
-| 12 | Header Spoofing | 4+ | Various | Replace with session |
-
-**Template Fix:**
-```typescript
-// Before
-const userId = request.headers.get('x-user-id');
-
-// After
-const supabase = await createServerSupabaseClient();
-const { data: { session } } = await supabase.auth.getSession();
-if (!session) return 401;
-const userId = session.user.id;
-```
-
----
-
-## 🟡 Medium Priority (Fix in 2 Weeks)
-
-| Category | Count | Impact | Effort |
-|----------|-------|--------|--------|
-| Error Leakage | 18+ | Info disclosure | 2 hours |
-| Unsafe JSON | 13+ | Crashes, logic errors | 3 hours |
-| Input Validation | 6+ | Type confusion | 4 hours |
-| Missing RLS | 2 tables | Cross-user access | 2 hours |
-| Path Traversal | 2 | File access | 2 hours |
-| Console Logging | 50+ | Log exposure | 3 hours |
-| Dynamic Functions | 4+ | Unauth invocation | 2 hours |
-
----
-
-## File Priority List
-
-### 🔴 CRITICAL - Fix First
-```
-src/instrumentation-client.ts                  Hardcoded DSN
-src/app/api/messages/get/route.ts             SQL injection
-src/lib/openrouter-ai.ts                       Exposed API key
-src/lib/revenuecat.ts                         Hardcoded key
-supabase/migrations/50_allow_demo_documents.sql Unsafe RLS
-```
-
-### 🟠 HIGH - Fix Second
-```
-src/app/api/papers/route.ts                   No auth
-src/app/api/users/route.ts                    Weak auth
-src/app/api/documents/route.ts                Unsanitized filename
-src/app/api/papers/unlock/route.ts            SSRF risk
-src/app/api/arxiv-search/route.ts             No auth
-src/app/api/wiki/[slug]/route.ts              Path traversal
-src/app/api/wiki/route.ts                     No auth
-supabase/migrations/27_advisor_critic_rls_policies.sql  Broad access
-```
-
-### 🟡 MEDIUM - Fix Third
-```
-src/app/api/papers/search/route.ts            Error leakage
-src/app/api/notifications/send-*-email/route.ts  API key, error leakage
-src/app/api/study-guides/route.ts             Error leakage
-src/lib/realtime-server.ts                    Unsafe JSON
-src/lib/puter-sdk.ts                         Unsafe JSON
-src/lib/dashboard/realtime-state.ts           Prototype pollution
-src/lib/ai/research-gap-analyzer.ts           Unsafe JSON
-src/app/api/zotero/import/route.ts            Error leakage
-```
-
----
-
-## Implementation Checklist
-
-### Day 1: Critical Fixes
-- [ ] Remove Sentry DSN from code
-- [ ] Move API keys to env variables
-- [ ] Fix SQL injection with UUID validation
-- [ ] Audit anonymous document access
-- [ ] Rotate all exposed keys
-
-### Day 2-3: High Priority Auth
-- [ ] Add auth to `/api/papers`
-- [ ] Add auth to `/api/papers/search`
-- [ ] Add auth to `/api/arxiv-search`
-- [ ] Add auth to `/api/wiki/*`
-- [ ] Replace x-user-id with session verification in 4+ routes
-- [ ] Add role checks to admin endpoints
-
-### Day 4-5: Error Handling & Validation
-- [ ] Implement generic error responses (hide details)
-- [ ] Create input validation schemas
-- [ ] Fix SSRF in paper unlock
-- [ ] Fix path traversal in wiki
-- [ ] Add CORS headers
-
-### Week 2: Database & Logging
-- [ ] Enable RLS on ai_analytics table
-- [ ] Enable RLS on workflows table
-- [ ] Fix advisor/critic RLS policies
-- [ ] Implement structured logging
-- [ ] Remove 50+ console.log calls
-
-### Week 3: Polish
-- [ ] Whitelist dynamic function invocation
-- [ ] Audit all external API calls
-- [ ] Add rate limiting
-- [ ] Setup security monitoring
-- [ ] Run full test suite
-
----
-
-## Testing Commands
-
+### 2. Exposed API Key (19 files)
 ```bash
-# Test unauthenticated access (should fail)
-curl http://localhost:3000/api/papers
-# Expected: 401 Unauthorized
+# FIND
+grep -r "NEXT_PUBLIC_INTERNAL_API_KEY" src/
 
-# Test SQL injection (should fail)
-curl "http://localhost:3000/api/messages/get?userId=test,sender_id.eq.*"
-# Expected: 400 Bad Request
+# FILES TO UPDATE
+src/hooks/useNotificationEmail.ts
+src/hooks/useStudentNotificationEmail.ts
+src/hooks/useAdvisorNotificationEmail.ts
+src/hooks/useCriticNotificationEmail.ts
+src/components/notification-bell.tsx
+# +14 more
 
-# Test error handling (should be generic)
-curl -X POST http://localhost:3000/api/papers \
-  -H "Content-Type: application/json" \
-  -d '{"invalid":"data"}'
-# Expected: Generic error, no DB details
+# BEFORE
+const apiKey = process.env.NEXT_PUBLIC_INTERNAL_API_KEY;
+fetch('/api/notifications/send-email', {
+  headers: { 'Authorization': `Bearer ${apiKey}` }
+});
 
-# Test authentication with session
-curl -H "Cookie: auth_token=VALID_JWT" http://localhost:3000/api/papers
-# Expected: 200 OK with data
+# AFTER
+fetch('/api/notifications/send-email', {
+  method: 'POST',
+  body: JSON.stringify({ recipients })
+});
 
-# Test path traversal (should fail)
-curl http://localhost:3000/api/wiki/../../etc/passwd
-# Expected: 400 Bad Request
+# REMOVE FROM .env.local
+# NEXT_PUBLIC_INTERNAL_API_KEY=xxx  ← Delete this line
+```
+
+### 3. Dashboard Tables Missing RLS
+```sql
+-- CHECK
+SELECT tablename FROM pg_tables 
+WHERE tablename LIKE 'dashboard_%' OR tablename LIKE 'widget_%';
+
+SELECT * FROM pg_policies 
+WHERE tablename IN ('dashboard_layouts', 'widget_data_cache', 'widget_settings', 'user_dashboard_preferences', 'dashboard_activity_log');
+
+-- Should show multiple policies per table
+-- If empty, apply migration below
+
+-- FIX: Create migration 20251220_add_rls_dashboard_tables.sql
+ALTER TABLE dashboard_layouts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "dashboard_layouts_users_select" ON dashboard_layouts
+  FOR SELECT TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY "dashboard_layouts_users_insert" ON dashboard_layouts
+  FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "dashboard_layouts_users_update" ON dashboard_layouts
+  FOR UPDATE TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY "dashboard_layouts_users_delete" ON dashboard_layouts
+  FOR DELETE TO authenticated USING (auth.uid() = user_id);
+
+-- Repeat for: widget_data_cache, widget_settings, user_dashboard_preferences, dashboard_activity_log
 ```
 
 ---
 
-## Quick Grep Commands
+## PHASE 1 FILES (Week 1)
 
-Find issues in your code:
+### Create These:
+1. **`supabase/migrations/20251220_add_rls_dashboard_tables.sql`**
+   - Enable RLS on 5 tables
+   - Add SELECT, INSERT, UPDATE, DELETE policies
 
-```bash
-# Find hardcoded secrets
-grep -r "api.key\|API_KEY" src/ --exclude-dir=node_modules
-grep -r "password\|PASSWORD" src/ --exclude-dir=node_modules
-grep -r "token\|TOKEN" src/ --include="*.ts" | grep -v process.env
+### Modify These:
+1. **19 hook/component files** - Remove `NEXT_PUBLIC_INTERNAL_API_KEY`
+2. **`.env.local`** - Remove INTERNAL_API_KEY line
+3. **API routes** - Add input validation
 
-# Find error message exposures
-grep -r "error.message\|error.code" src/app/api/
-grep -r "console.error\|console.log" src/app/api/
-
-# Find missing auth checks
-grep -r "export async function GET\|export async function POST" src/app/api/ | \
-  grep -v "session\|getAuthenticatedUser\|requireRole"
-
-# Find unsafe JSON parsing
-grep -r "JSON.parse" src/ | grep -v "try"
-grep -r "JSON.parse" src/lib/
-
-# Find SQL/query operations
-grep -r "\.or\(\|\.raw\(" src/app/api/
-grep -r "INSERT INTO\|UPDATE\|DELETE" src/
-```
+### Delete This:
+1. **`supabase/migrations/20251219152120_disable_rls_on_auth_users.sql`** (or convert)
 
 ---
 
-## Key Security Functions
+## PHASE 2 FILES (Week 2)
 
-### Create in `src/lib/auth-utils.ts`
-```typescript
-export async function getAuthenticatedUserId(request: NextRequest) {
-  const supabase = await createServerSupabaseClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  return session?.user?.id || null;
-}
-
-export async function requireRole(request: NextRequest, role: string) {
-  const userId = await getAuthenticatedUserId(request);
-  if (!userId) return null;
-  
-  const supabase = await createServerSupabaseClient();
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', userId)
-    .single();
-  
-  return profile?.role === role ? userId : null;
-}
-```
-
-### Create in `src/lib/validation-schemas.ts`
+### Create These:
+1. **`src/lib/input-validator.ts`**
 ```typescript
 import { z } from 'zod';
 
-export const uuidSchema = z.string().uuid();
-export const paperSearchSchema = z.object({
-  q: z.string().min(1).max(500),
-  limit: z.number().int().min(1).max(100).optional(),
+export const searchQuerySchema = z.object({
+  query: z.string()
+    .min(1, 'Required')
+    .max(500, 'Too long')
+    .regex(/^[a-zA-Z0-9\s\-\.\,\(\)\"\']+$/, 'Invalid chars'),
+  limit: z.number().min(1).max(100).default(10),
+  offset: z.number().min(0).default(0),
 });
-export const metricsSchema = z.object({
-  region: z.enum(['us-east', 'us-west', 'eu-west', 'asia-pacific']),
-  latency: z.number().min(0).max(100000),
-});
+
+export function sanitizeInput(input: string): string {
+  return input.trim().replace(/[<>]/g, '').replace(/--/g, '');
+}
+```
+
+2. **`src/lib/rate-limiter.ts`**
+```typescript
+// In-memory rate limiter
+const store = new Map<string, { count: number; resetAt: number }>();
+
+export async function rateLimit(
+  key: string,
+  maxRequests: number = 60,
+  windowMs: number = 60000
+): Promise<boolean> {
+  const now = Date.now();
+  const entry = store.get(key);
+  
+  if (!entry || now > entry.resetAt) {
+    store.set(key, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+  
+  if (entry.count >= maxRequests) return false;
+  entry.count++;
+  return true;
+}
+```
+
+3. **`src/lib/auth-middleware.ts`**
+```typescript
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+
+export async function verifyAuth(req: Request) {
+  const supabase = createServerComponentClient({ 
+    cookies: () => cookies() 
+  });
+  
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session) {
+    return { error: 'Unauthorized', status: 401 };
+  }
+  
+  return { session, userId: session.user.id };
+}
+```
+
+### Modify These:
+1. **5+ API routes** - Apply input validation
+```typescript
+import { searchQuerySchema } from '@/lib/input-validator';
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const validated = searchQuerySchema.parse(body);
+    // Use validated...
+  } catch (error) {
+    return Response.json({ error: 'Invalid input' }, { status: 400 });
+  }
+}
+```
+
+2. **All API routes** - Apply rate limiting
+```typescript
+import { rateLimit } from '@/lib/rate-limiter';
+
+if (!await rateLimit(userId, 60)) {
+  return Response.json({ error: 'Too many requests' }, { status: 429 });
+}
+```
+
+3. **All API routes** - Apply JWT validation
+```typescript
+import { verifyAuth } from '@/lib/auth-middleware';
+
+const auth = await verifyAuth(req);
+if (auth.error) {
+  return Response.json({ error: auth.error }, { status: auth.status });
+}
 ```
 
 ---
 
-## Monitoring Queries
+## PHASE 3 FILES (Week 3)
 
-### Check for SQL injection attempts
+### Create:
+1. **`supabase/migrations/20251221_add_pgcrypto_encryption.sql`**
+2. **`supabase/migrations/20251221_add_audit_logging.sql`**
+
+---
+
+## PHASE 4 FILES (Week 4)
+
+### Create:
+1. **`src/lib/security-monitoring.ts`**
+2. **`src/middleware.ts`** (CSRF protection)
+
+---
+
+## TESTING COMMANDS
+
+### Check RLS Status
+```bash
+# Enable on table
+SELECT tablename, rowsecurity FROM pg_tables 
+WHERE tablename IN ('dashboard_layouts', 'widget_data_cache', 'users');
+
+# Count policies
+SELECT tablename, COUNT(*) as policy_count 
+FROM pg_policies 
+GROUP BY tablename 
+ORDER BY tablename;
+```
+
+### Check API Key Exposure
+```bash
+grep -r "NEXT_PUBLIC_INTERNAL_API_KEY" src/ --include="*.ts" --include="*.tsx"
+# Should return 0 results after fix
+
+grep "NEXT_PUBLIC_INTERNAL_API_KEY" .env.local
+# Should return 0 or not found
+```
+
+### Test Input Validation
+```bash
+# SQL injection attempt - should be rejected
+curl -X POST http://localhost:3000/api/papers/search \
+  -H "Content-Type: application/json" \
+  -d '{"query":"test; DROP TABLE users;--"}'
+# Expected: 400 Bad Request
+
+# Normal request - should work
+curl -X POST http://localhost:3000/api/papers/search \
+  -H "Content-Type: application/json" \
+  -d '{"query":"machine learning"}'
+# Expected: 200 OK
+```
+
+### Test Rate Limiting
+```bash
+# Spam 70 requests
+for i in {1..70}; do
+  curl http://localhost:3000/api/papers/search?q=test
+done
+# Last 10 should return 429 Too Many Requests
+```
+
+### Test RLS (Cross-User Access)
 ```sql
--- Monitor messages API for unusual patterns
+-- As User A logged in
+SELECT * FROM dashboard_layouts;
+-- Should only return User A's layouts
+
+-- Try to access User B's layout directly
+SELECT * FROM dashboard_layouts WHERE user_id = 'user-b-id';
+-- Should return 0 rows (RLS blocks it)
+```
+
+### Test Auth Requirement
+```bash
+# Without session
+curl http://localhost:3000/api/admin/audit-logs
+# Expected: 401 Unauthorized
+
+# With session
+curl -H "Cookie: auth=valid_session_token" \
+  http://localhost:3000/api/admin/audit-logs
+# Expected: 200 OK (if admin) or 403 Forbidden (if not)
+```
+
+---
+
+## GIT WORKFLOW
+
+```bash
+# Create feature branch
+git checkout -b security/phase-1-critical
+
+# Commit each fix
+git add supabase/migrations/20251220_add_rls_dashboard_tables.sql
+git commit -m "security: enable RLS on dashboard tables"
+
+git add src/hooks/
+git commit -m "security: remove exposed API key, use session auth"
+
+# Push when ready
+git push origin security/phase-1-critical
+
+# Create PR for review before merging to main
+```
+
+---
+
+## DEPLOYMENT CHECKLIST
+
+```bash
+# 1. Pre-deployment
+[ ] pnpm lint
+[ ] pnpm build
+[ ] pnpm test
+
+# 2. Database
+[ ] supabase migration up
+[ ] Verify RLS enabled: SELECT rowsecurity FROM pg_tables;
+[ ] Verify policies: SELECT * FROM pg_policies;
+
+# 3. Environment
+[ ] SUPABASE_SERVICE_ROLE_KEY set in Vercel secrets
+[ ] Remove NEXT_PUBLIC_INTERNAL_API_KEY from secrets
+[ ] Verify no secrets in .env.local committed
+
+# 4. Testing
+[ ] Cross-user access test passed
+[ ] Rate limiting test passed
+[ ] Input validation test passed
+[ ] API key not in browser (DevTools check)
+
+# 5. Deploy
+git merge --no-ff security/phase-1-critical
+# Trigger CI/CD pipeline
+```
+
+---
+
+## EMERGENCY: SECURITY INCIDENT
+
+If hacked before fixes:
+
+```bash
+# 1. IMMEDIATE: Rotate all secrets
+NEXT_PUBLIC_SUPABASE_ANON_KEY    # Rotate in Supabase dashboard
+SUPABASE_SERVICE_ROLE_KEY        # Rotate in Supabase
+INTERNAL_API_KEY                 # Disable this endpoint
+OPENROUTER_API_KEY               # Rotate
+RESEND_API_KEY                   # Rotate
+
+# 2. Check audit logs
 SELECT * FROM audit_logs 
-WHERE endpoint = '/api/messages/get' 
-AND user_agent LIKE '%curl%' 
-AND timestamp > NOW() - INTERVAL 1 HOUR;
-```
+WHERE created_at > NOW() - INTERVAL '24 hours'
+ORDER BY created_at DESC;
 
-### Check for auth failures
-```sql
--- Monitor failed auth attempts
-SELECT user_id, COUNT(*) as failures, MAX(timestamp) as last_attempt
-FROM audit_logs
-WHERE event_type = 'auth_failure'
-AND timestamp > NOW() - INTERVAL 1 HOUR
-GROUP BY user_id
-HAVING COUNT(*) > 5;
-```
+# 3. Disable affected account
+UPDATE auth.users SET email_confirmed_at = NULL 
+WHERE email = 'hacked@example.com';
 
-### Check for document access anomalies
-```sql
--- Monitor for bulk document access
-SELECT user_id, COUNT(*) as access_count, MAX(timestamp)
-FROM audit_logs
-WHERE endpoint LIKE '/api/documents%'
-AND timestamp > NOW() - INTERVAL 1 HOUR
-GROUP BY user_id
-HAVING COUNT(*) > 50;
+# 4. Notify users
+Send security advisory to all users
+
+# 5. Enable all fixes immediately
+Apply all Phase 1-4 migrations
 ```
 
 ---
 
-## Resources
+## QUESTIONS DURING IMPLEMENTATION?
 
-**OWASP Top 10 2021:**
-- A01: Broken Access Control
-- A02: Cryptographic Failures  
-- A03: Injection
-- A04: Insecure Design
-- A05: Security Misconfiguration
-- A06: Vulnerable Components
-- A07: Authentication Failures
-- A08: Data Integrity Failures
-- A09: Logging & Monitoring
-- A10: SSRF
-
-**Common Weakness Enumeration (CWE):**
-- CWE-639: Authentication Bypass
-- CWE-306: Missing Auth Check
-- CWE-89: SQL Injection
-- CWE-22: Path Traversal
-- CWE-400: Uncontrolled Resource Consumption
-- CWE-20: Improper Input Validation
-
-**Standards:**
-- https://owasp.org/www-project-top-ten/
-- https://cwe.mitre.org/top25/
-- https://cheatsheetseries.owasp.org/
+| Q | A |
+|---|---|
+| Do I need to migrate existing data? | No, RLS is prospective |
+| Will this break existing users? | No, only enforces what should be |
+| Can I test locally first? | Yes, create test users in dev DB |
+| How do I rollback? | `supabase migration down` or restore from backup |
+| Do I need to modify frontend? | Only remove API key usage, otherwise compatible |
 
 ---
 
-## Summary
+## NEXT STEPS
 
-**Documents Generated:**
-1. ✅ COMPREHENSIVE_SECURITY_AUDIT.md (2500+ lines, all details)
-2. ✅ SECURITY_AUDIT_ACTION_ITEMS.md (1200+ lines, step-by-step)
-3. ✅ SECURITY_FIXES_SUMMARY.md (existing, 6 items fixed)
-4. ✅ SECURITY_AUDIT_SUMMARY.txt (quick overview)
-5. ✅ SECURITY_QUICK_REFERENCE.md (this file)
+1. **Right Now**: Read SECURITY_EXECUTIVE_SUMMARY.md
+2. **Next 15 min**: Fix auth.users RLS (fastest win)
+3. **Next 2-3 hrs**: Remove exposed API key
+4. **Next 1 hr**: Add RLS to dashboard tables
+5. **Next week**: Validation, rate limiting, JWT
+6. **Deploy when**: All 9 issues resolved
 
-**What to Do:**
-1. Read COMPREHENSIVE_SECURITY_AUDIT.md to understand issues
-2. Use SECURITY_AUDIT_ACTION_ITEMS.md for implementation
-3. Follow implementation timeline
-4. Run tests and deploy to staging first
-5. Monitor carefully after production deployment
+**Estimated Timeline**: 13-17 hours over 4 weeks
+**Status**: Ready to start whenever you say go
 
-**Next Step:** Create security-fixes branch and start with CRITICAL items
+---
+
+*Full guides: SECURITY_IMPLEMENTATION_PLAN.md (technical), SECURITY_DUPLICATE_AUDIT.md (conflicts)*

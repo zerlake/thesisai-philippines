@@ -5,10 +5,11 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { BrandedLoader } from '@/components/branded-loader';
 import { Users, MessageSquare, FileText, ArrowRight } from 'lucide-react';
+import { DashboardPuterStatus } from '@/components/dashboard-puter-status';
 
 export default function AdvisorPage() {
   const authContext = useAuth();
-  
+
   if (!authContext) {
     return <BrandedLoader />;
   }
@@ -27,13 +28,18 @@ export default function AdvisorPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 py-12 px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            Advisor Dashboard
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400">
-            Welcome, {profile?.first_name || profile?.full_name || 'Advisor'}!
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-12">
+          <div className="text-center sm:text-left">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+              Advisor Dashboard
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-400">
+              Welcome, {profile?.first_name || profile?.full_name || 'Advisor'}!
+            </p>
+          </div>
+          <div className="flex justify-center sm:justify-end">
+            <DashboardPuterStatus />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

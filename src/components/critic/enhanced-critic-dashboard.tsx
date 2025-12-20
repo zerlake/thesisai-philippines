@@ -29,6 +29,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { DashboardPuterStatus } from "@/components/dashboard-puter-status";
 
 type ReviewQueueItem = {
   student_id: string;
@@ -232,7 +233,8 @@ export function EnhancedCriticDashboard() {
             Welcome back, {profile?.first_name || 'Critic'}. You have {stats.pending_reviews} manuscripts awaiting review.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <DashboardPuterStatus />
           <Link href="/critic/review-queue">
             <Button>
               <Inbox className="mr-2 h-4 w-4" />

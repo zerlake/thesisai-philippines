@@ -4,8 +4,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { paperSearchService } from '@/lib/mcp/paper-search';
 import { PaperSearchQuery } from '@/types/paper';
+import { checkRateLimit, getRemainingRequests } from '@/lib/rate-limiter';
 
 // Mock MCP tool implementations for demonstration
 const mockTools = {
@@ -27,19 +29,61 @@ const mockTools = {
   },
 };
 
+// Validation schema
+const searchQuerySchema = z.object({
+  query: z.string()
+    .min(1, 'Query required')
+    .max(500, 'Query too long')
+    .trim(),
+  maxResults: z.number().int().min(1).max(100).optional().default(20),
+  filters: z.object({
+    minYear: z.number().int().optional(),
+    maxYear: z.number().int().optional(),
+    minCitations: z.number().int().optional(),
+    isOpenAccessOnly: z.boolean().optional(),
+  }).optional(),
+});
+
+// Get user ID from request (from session/auth context)
+function getUserId(request: NextRequest): string {
+  // In production, extract from session/JWT token
+  // For now, use a placeholder based on IP
+  return request.ip || 'anonymous';
+}
+
 export async function POST(request: NextRequest) {
   try {
+    const userId = getUserId(request);
+    
+    // Rate limiting: 100 searches per minute per user
+    if (!checkRateLimit(userId, 100, 60000)) {
+      const { remaining, resetAt } = getRemainingRequests(userId, 100, 60000);
+      return NextResponse.json(
+        {
+          error: 'Too many requests',
+          remaining,
+          resetAt: new Date(resetAt).toISOString(),
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json() as PaperSearchQuery;
 
-    if (!body.query || typeof body.query !== 'string') {
+    // Validate input
+    const validation = searchQuerySchema.safeParse(body);
+    if (!validation.success) {
+      const errors = validation.error.flatten().fieldErrors;
       return NextResponse.json(
-        { error: 'Query parameter is required' },
+        { error: 'Validation failed', details: errors },
         { status: 400 }
       );
     }
 
+    const validatedBody = validation.data as PaperSearchQuery;
+
     // Execute search through paper search service
-    const result = await paperSearchService.search(body, mockTools);
+    const result = await paperSearchService.search(validatedBody, mockTools);
 
     return NextResponse.json(result, {
       headers: {
@@ -59,6 +103,21 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    const userId = getUserId(request);
+    
+    // Rate limiting: 100 searches per minute per user
+    if (!checkRateLimit(userId, 100, 60000)) {
+      const { remaining, resetAt } = getRemainingRequests(userId, 100, 60000);
+      return NextResponse.json(
+        {
+          error: 'Too many requests',
+          remaining,
+          resetAt: new Date(resetAt).toISOString(),
+        },
+        { status: 429 }
+      );
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get('q');
 

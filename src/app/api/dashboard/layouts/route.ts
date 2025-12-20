@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/integrations/supabase/server-client';
-import { getAuthenticatedUser, AuthenticationError } from '@/lib/server-auth'; // Add this import
-import { dashboardErrorHandler } from '@/lib/dashboard/api-error-handler';
+import { createServerClient } from '@/lib/supabase-server';
+import { withAuth } from '@/lib/jwt-validator';
+import { logAuditEvent, AuditAction, AuditSeverity } from '@/lib/audit-logger';
 import { z } from 'zod';
-
-const toError = (error: unknown): Error => {
-  if (error instanceof Error) return error;
-  return new Error(String(error));
-};
 
 // Layout schema for validation
 const DashboardLayoutSchema = z.object({
@@ -46,10 +41,27 @@ type DashboardLayout = z.infer<typeof DashboardLayoutSchema>;
  */
 export async function GET(request: NextRequest) {
   try {
-    const user = await getAuthenticatedUser(); // Add this line
-    const supabase = createServerSupabaseClient(); // Add this line to create supabase client for data operations
+    // 1. Authenticate request
+    const auth = await withAuth(request);
+    if (!auth) {
+      await logAuditEvent(AuditAction.AUTH_FAILED, {
+        severity: AuditSeverity.WARNING,
+        resourceType: 'dashboard_layout',
+        resourceId: 'unknown',
+        ipAddress: request.ip,
+        details: { endpoint: 'GET /api/dashboard/layouts', reason: 'Missing auth token' },
+      });
+      return NextResponse.json(
+        { error: 'Unauthorized', code: 'AUTH_REQUIRED' },
+        { status: 401 }
+      );
+    }
 
-    const userId = user.id; // Replace session.user.id with user.id
+    const userId = auth.userId;
+
+    // 2. Initialize Supabase client
+    const supabase = await createServerClient();
+
     const searchParams = request.nextUrl.searchParams;
     const defaultOnly = searchParams.get('default') === 'true';
     const templatesOnly = searchParams.get('templates') === 'true';
@@ -73,12 +85,28 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching layouts:', error);
-      const message = dashboardErrorHandler.handleError(500, toError(error as unknown));
+      await logAuditEvent(AuditAction.API_ERROR, {
+        userId,
+        severity: AuditSeverity.ERROR,
+        resourceType: 'dashboard_layout',
+        ipAddress: request.ip,
+        details: { endpoint: 'GET /api/dashboard/layouts', reason: 'Database error' },
+      });
       return NextResponse.json(
-        { error: message.message },
+        { error: 'Database error', code: 'DB_ERROR' },
         { status: 500 }
       );
     }
+
+    // 3. Log successful access
+    await logAuditEvent(AuditAction.DOCUMENT_ACCESSED, {
+      userId,
+      severity: AuditSeverity.INFO,
+      resourceType: 'dashboard_layout',
+      ipAddress: request.ip,
+      statusCode: 200,
+      details: { count: layouts?.length || 0 },
+    });
 
     const defaultLayout = layouts?.find((l) => l.is_default) || null;
 
@@ -91,15 +119,17 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching layouts:', error);
-    if (error instanceof AuthenticationError) { // Add this block
-        return NextResponse.json(
-            { error: error.message },
-            { status: 401 }
-        );
-    }
-    const message = dashboardErrorHandler.handleError(500, toError(error));
+    await logAuditEvent(AuditAction.API_ERROR, {
+      severity: AuditSeverity.ERROR,
+      resourceType: 'dashboard_layout',
+      ipAddress: request.ip,
+      details: {
+        endpoint: 'GET /api/dashboard/layouts',
+        error: error instanceof Error ? error.message : String(error),
+      },
+    });
     return NextResponse.json(
-      { error: message.message },
+      { error: 'Internal server error', code: 'INTERNAL_ERROR' },
       { status: 500 }
     );
   }
@@ -111,52 +141,92 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const user = await getAuthenticatedUser(); // Add this line
-    const supabase = createServerSupabaseClient(); // Add this line
-
-    const userId = user.id; // Replace session.user.id with user.id
-    const body = await request.json();
-
-    // Validate request body
-    try {
-      DashboardLayoutSchema.parse(body);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return NextResponse.json(
-          {
-            error: 'Invalid layout format',
-            details: error.errors,
-          },
-          { status: 400 }
-        );
-      }
-      throw error;
+    // 1. Authenticate request
+    const auth = await withAuth(request);
+    if (!auth) {
+      await logAuditEvent(AuditAction.AUTH_FAILED, {
+        severity: AuditSeverity.WARNING,
+        resourceType: 'dashboard_layout',
+        resourceId: 'unknown',
+        ipAddress: request.ip,
+        details: { endpoint: 'POST /api/dashboard/layouts', reason: 'Missing auth token' },
+      });
+      return NextResponse.json(
+        { error: 'Unauthorized', code: 'AUTH_REQUIRED' },
+        { status: 401 }
+      );
     }
 
+    const userId = auth.userId;
+
+    // 2. Parse and validate request body
+    const body = await request.json();
+    let validatedData: z.infer<typeof DashboardLayoutSchema>;
+
+    try {
+      validatedData = DashboardLayoutSchema.parse(body);
+    } catch (error) {
+      await logAuditEvent(AuditAction.SECURITY_VALIDATION_FAILED, {
+        userId,
+        severity: AuditSeverity.WARNING,
+        resourceType: 'dashboard_layout',
+        ipAddress: request.ip,
+        details: {
+          endpoint: 'POST /api/dashboard/layouts',
+          reason: 'Validation error',
+          errors: error instanceof z.ZodError ? error.errors : undefined,
+        },
+      });
+      return NextResponse.json(
+        {
+          error: 'Validation error',
+          code: 'VALIDATION_ERROR',
+          details: error instanceof z.ZodError ? error.errors : undefined,
+        },
+        { status: 400 }
+      );
+    }
+
+    // 3. Initialize Supabase client
+    const supabase = await createServerClient();
+
     // Generate layout ID if not provided
-    const layoutId = body.id || `layout-${Date.now()}`;
+    const layoutId = validatedData.id || `layout-${Date.now()}`;
     const now = new Date().toISOString();
 
     // If this is set as default, unset other defaults
-    if (body.isDefault) {
-      await supabase
+    if (validatedData.isDefault) {
+      const { error: unsetError } = await supabase
         .from('dashboard_layouts')
         .update({ is_default: false })
         .eq('user_id', userId)
         .eq('is_default', true);
+
+      if (unsetError) {
+        console.error('Error updating default layouts:', unsetError);
+        await logAuditEvent(AuditAction.API_ERROR, {
+          userId,
+          severity: AuditSeverity.ERROR,
+          resourceType: 'dashboard_layout',
+          resourceId: layoutId,
+          ipAddress: request.ip,
+          details: { endpoint: 'POST /api/dashboard/layouts', reason: 'Failed to unset defaults' },
+        });
+        return NextResponse.json({ error: 'Database error', code: 'DB_ERROR' }, { status: 500 });
+      }
     }
 
-    // Create the layout
+    // 4. Create the layout
     const { data: layout, error } = await supabase
       .from('dashboard_layouts')
       .insert({
         id: layoutId,
         user_id: userId,
-        name: body.name,
-        description: body.description || null,
-        widgets: body.widgets,
-        is_default: body.isDefault || false,
-        is_template: body.isTemplate || false,
+        name: validatedData.name,
+        description: validatedData.description || null,
+        widgets: validatedData.widgets,
+        is_default: validatedData.isDefault || false,
+        is_template: validatedData.isTemplate || false,
         created_at: now,
         updated_at: now,
       })
@@ -165,12 +235,26 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error creating layout:', error);
-      const message = dashboardErrorHandler.handleError(500, toError(error as unknown));
-      return NextResponse.json(
-        { error: message.message },
-        { status: 500 }
-      );
+      await logAuditEvent(AuditAction.API_ERROR, {
+        userId,
+        severity: AuditSeverity.ERROR,
+        resourceType: 'dashboard_layout',
+        resourceId: layoutId,
+        ipAddress: request.ip,
+        details: { endpoint: 'POST /api/dashboard/layouts', reason: 'Failed to create layout' },
+      });
+      return NextResponse.json({ error: 'Database error', code: 'DB_ERROR' }, { status: 500 });
     }
+
+    // 5. Log successful creation
+    await logAuditEvent(AuditAction.DOCUMENT_UPDATED, {
+      userId,
+      severity: AuditSeverity.INFO,
+      resourceType: 'dashboard_layout',
+      resourceId: layoutId,
+      statusCode: 201,
+      details: { name: validatedData.name, isDefault: validatedData.isDefault, widgetCount: validatedData.widgets.length },
+    });
 
     return NextResponse.json(
       {
@@ -182,21 +266,17 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error('Error creating layout:', error);
-    if (error instanceof AuthenticationError) { // Add this block
-        return NextResponse.json(
-            { error: error.message },
-            { status: 401 }
-        );
-    }
-    if (error instanceof SyntaxError) {
-      return NextResponse.json(
-        { error: 'Invalid JSON in request body' },
-        { status: 400 }
-      );
-    }
-    const message = dashboardErrorHandler.handleError(500, toError(error));
+    await logAuditEvent(AuditAction.API_ERROR, {
+      severity: AuditSeverity.ERROR,
+      resourceType: 'dashboard_layout',
+      ipAddress: request.ip,
+      details: {
+        endpoint: 'POST /api/dashboard/layouts',
+        error: error instanceof Error ? error.message : String(error),
+      },
+    });
     return NextResponse.json(
-      { error: message.message },
+      { error: 'Internal server error', code: 'INTERNAL_ERROR' },
       { status: 500 }
     );
   }
@@ -208,39 +288,118 @@ export async function POST(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
-    const user = await getAuthenticatedUser(); // Add this line
-    const supabase = createServerSupabaseClient(); // Add this line
+    // 1. Authenticate request
+    const auth = await withAuth(request);
+    if (!auth) {
+      await logAuditEvent(AuditAction.AUTH_FAILED, {
+        severity: AuditSeverity.WARNING,
+        resourceType: 'dashboard_layout',
+        resourceId: 'unknown',
+        ipAddress: request.ip,
+        details: { endpoint: 'PUT /api/dashboard/layouts', reason: 'Missing auth token' },
+      });
+      return NextResponse.json(
+        { error: 'Unauthorized', code: 'AUTH_REQUIRED' },
+        { status: 401 }
+      );
+    }
 
-    const userId = user.id; // Replace session.user.id with user.id
+    const userId = auth.userId;
+
+    // 2. Parse and validate request body
     const body = await request.json();
-    const { layoutId, setDefault } = body;
+    const { layoutId, setDefault, name, description, widgets } = body;
 
     if (!layoutId) {
+      await logAuditEvent(AuditAction.SECURITY_VALIDATION_FAILED, {
+        userId,
+        severity: AuditSeverity.WARNING,
+        resourceType: 'dashboard_layout',
+        ipAddress: request.ip,
+        details: { endpoint: 'PUT /api/dashboard/layouts', reason: 'Missing layoutId' },
+      });
       return NextResponse.json(
-        { error: 'layoutId is required' },
+        { error: 'Validation error', code: 'VALIDATION_ERROR', details: { layoutId: 'required' } },
         { status: 400 }
+      );
+    }
+
+    // 3. Initialize Supabase client
+    const supabase = await createServerClient();
+
+    // 4. Verify user owns this layout
+    const { data: existingLayout, error: fetchError } = await supabase
+      .from('dashboard_layouts')
+      .select('user_id')
+      .eq('id', layoutId)
+      .single();
+
+    if (fetchError || !existingLayout) {
+      await logAuditEvent(AuditAction.SECURITY_RLS_VIOLATION, {
+        userId,
+        severity: AuditSeverity.CRITICAL,
+        resourceType: 'dashboard_layout',
+        resourceId: layoutId,
+        ipAddress: request.ip,
+        details: { endpoint: 'PUT /api/dashboard/layouts', reason: 'Layout not found' },
+      });
+      return NextResponse.json(
+        { error: 'Not found', code: 'NOT_FOUND' },
+        { status: 404 }
+      );
+    }
+
+    if (existingLayout.user_id !== userId) {
+      await logAuditEvent(AuditAction.SECURITY_RLS_VIOLATION, {
+        userId,
+        severity: AuditSeverity.CRITICAL,
+        resourceType: 'dashboard_layout',
+        resourceId: layoutId,
+        ipAddress: request.ip,
+        details: {
+          endpoint: 'PUT /api/dashboard/layouts',
+          reason: 'User attempted to update layout owned by another user',
+          ownerUserId: existingLayout.user_id,
+        },
+      });
+      return NextResponse.json(
+        { error: 'Access denied', code: 'FORBIDDEN' },
+        { status: 403 }
       );
     }
 
     // If setting as default, unset others
     if (setDefault) {
-      await supabase
+      const { error: unsetError } = await supabase
         .from('dashboard_layouts')
         .update({ is_default: false })
         .eq('user_id', userId)
         .eq('is_default', true);
+
+      if (unsetError) {
+        console.error('Error updating default layouts:', unsetError);
+        await logAuditEvent(AuditAction.API_ERROR, {
+          userId,
+          severity: AuditSeverity.ERROR,
+          resourceType: 'dashboard_layout',
+          resourceId: layoutId,
+          ipAddress: request.ip,
+          details: { endpoint: 'PUT /api/dashboard/layouts', reason: 'Failed to unset defaults' },
+        });
+        return NextResponse.json({ error: 'Database error', code: 'DB_ERROR' }, { status: 500 });
+      }
     }
 
-    // Update the layout
+    // 5. Update the layout
     const updateData: any = { updated_at: new Date().toISOString() };
     if (setDefault !== undefined) {
       updateData.is_default = setDefault;
     }
 
     // Include other fields if provided
-    if (body.name) updateData.name = body.name;
-    if (body.description !== undefined) updateData.description = body.description;
-    if (body.widgets) updateData.widgets = body.widgets;
+    if (name) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (widgets) updateData.widgets = widgets;
 
     const { data: layout, error } = await supabase
       .from('dashboard_layouts')
@@ -252,12 +411,26 @@ export async function PUT(request: NextRequest) {
 
     if (error) {
       console.error('Error updating layout:', error);
-      const message = dashboardErrorHandler.handleError(500, toError(error as unknown));
-      return NextResponse.json(
-        { error: message.message },
-        { status: 500 }
-      );
+      await logAuditEvent(AuditAction.API_ERROR, {
+        userId,
+        severity: AuditSeverity.ERROR,
+        resourceType: 'dashboard_layout',
+        resourceId: layoutId,
+        ipAddress: request.ip,
+        details: { endpoint: 'PUT /api/dashboard/layouts', reason: 'Failed to update layout' },
+      });
+      return NextResponse.json({ error: 'Database error', code: 'DB_ERROR' }, { status: 500 });
     }
+
+    // 6. Log successful update
+    await logAuditEvent(AuditAction.DOCUMENT_UPDATED, {
+      userId,
+      severity: AuditSeverity.INFO,
+      resourceType: 'dashboard_layout',
+      resourceId: layoutId,
+      statusCode: 200,
+      details: { name, setDefault },
+    });
 
     return NextResponse.json({
       success: true,
@@ -266,15 +439,17 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error updating layout:', error);
-    if (error instanceof AuthenticationError) { // Add this block
-        return NextResponse.json(
-            { error: error.message },
-            { status: 401 }
-        );
-    }
-    const message = dashboardErrorHandler.handleError(500, toError(error));
+    await logAuditEvent(AuditAction.API_ERROR, {
+      severity: AuditSeverity.ERROR,
+      resourceType: 'dashboard_layout',
+      ipAddress: request.ip,
+      details: {
+        endpoint: 'PUT /api/dashboard/layouts',
+        error: error instanceof Error ? error.message : String(error),
+      },
+    });
     return NextResponse.json(
-      { error: message.message },
+      { error: 'Internal server error', code: 'INTERNAL_ERROR' },
       { status: 500 }
     );
   }

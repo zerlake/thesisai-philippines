@@ -26,7 +26,6 @@ export function useStudentNotificationEmail() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': process.env.NEXT_PUBLIC_INTERNAL_API_KEY || '',
         },
         body: JSON.stringify(params),
       });

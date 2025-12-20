@@ -59,9 +59,9 @@ BEGIN
       ''
     );
 
-    INSERT INTO public.profiles (id, email, role, first_name, last_name, plan, isDemoAccount)
+    INSERT INTO public.profiles (id, email, role, first_name, last_name, plan, is_demo_account)
     VALUES (student_id, 'demo-student@thesis.ai', 'student', 'Student', 'Demo User', 'demo', true)
-    ON CONFLICT (id) DO UPDATE SET role = 'student', first_name = 'Student', last_name = 'Demo User', isDemoAccount = true;
+    ON CONFLICT (id) DO UPDATE SET role = 'student', first_name = 'Student', last_name = 'Demo User', is_demo_account = true;
 
     INSERT INTO auth.identities (id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at)
     VALUES (
@@ -116,9 +116,9 @@ BEGIN
       ''
     );
 
-    INSERT INTO public.profiles (id, email, role, first_name, last_name, plan, isDemoAccount)
+    INSERT INTO public.profiles (id, email, role, first_name, last_name, plan, is_demo_account)
     VALUES (advisor_id, 'demo-advisor@thesis.ai', 'advisor', 'Advisor', 'Demo User', 'demo', true)
-    ON CONFLICT (id) DO UPDATE SET role = 'advisor', first_name = 'Advisor', last_name = 'Demo User', isDemoAccount = true;
+    ON CONFLICT (id) DO UPDATE SET role = 'advisor', first_name = 'Advisor', last_name = 'Demo User', is_demo_account = true;
 
     INSERT INTO auth.identities (id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at)
     VALUES (
@@ -173,9 +173,9 @@ BEGIN
       ''
     );
 
-    INSERT INTO public.profiles (id, email, role, first_name, last_name, plan, isDemoAccount)
+    INSERT INTO public.profiles (id, email, role, first_name, last_name, plan, is_demo_account)
     VALUES (critic_id, 'demo-critic@thesis.ai', 'critic', 'Critic', 'Demo User', 'demo', true)
-    ON CONFLICT (id) DO UPDATE SET role = 'critic', first_name = 'Critic', last_name = 'Demo User', isDemoAccount = true;
+    ON CONFLICT (id) DO UPDATE SET role = 'critic', first_name = 'Critic', last_name = 'Demo User', is_demo_account = true;
 
     INSERT INTO auth.identities (id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at)
     VALUES (
@@ -230,9 +230,9 @@ BEGIN
       ''
     );
 
-    INSERT INTO public.profiles (id, email, role, first_name, last_name, plan, isDemoAccount)
+    INSERT INTO public.profiles (id, email, role, first_name, last_name, plan, is_demo_account)
     VALUES (admin_id, 'demo-admin@thesis.ai', 'admin', 'Admin', 'Demo User', 'demo', true)
-    ON CONFLICT (id) DO UPDATE SET role = 'admin', first_name = 'Admin', last_name = 'Demo User', isDemoAccount = true;
+    ON CONFLICT (id) DO UPDATE SET role = 'admin', first_name = 'Admin', last_name = 'Demo User', is_demo_account = true;
 
     INSERT INTO auth.identities (id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at)
     VALUES (

@@ -1,5 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { withAuth } from '@/lib/jwt-validator';
+import { logAuditEvent, AuditAction, AuditSeverity } from '@/lib/audit-logger';
 
 // List of UUIDs to KEEP
 const USERS_TO_KEEP = [
@@ -12,30 +14,78 @@ const USERS_TO_KEEP = [
   'a39d0467-bb04-4b2c-96af-4e4a35197715',  // elezerlake@gmail.com
 ];
 
-// Security: Only allow this endpoint to be called with a secret key
-const CLEANUP_SECRET = process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(-10); // Use last 10 chars as simple secret
-
 export async function POST(request: NextRequest) {
   try {
-    // Verify the secret key
-    const { secret } = await request.json();
-
-    if (secret !== CLEANUP_SECRET) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // 1. Authenticate request (admin endpoint requires JWT)
+    const auth = await withAuth(request);
+    if (!auth) {
+      await logAuditEvent(AuditAction.AUTH_FAILED, {
+        severity: AuditSeverity.CRITICAL,
+        resourceType: 'admin_action',
+        resourceId: 'cleanup_users',
+        ipAddress: request.ip,
+        details: { endpoint: 'POST /api/admin/cleanup-users', reason: 'Missing auth token' },
+      });
+      return NextResponse.json({ error: "Unauthorized", code: 'AUTH_REQUIRED' }, { status: 401 });
     }
 
+    const userId = auth.userId;
+
+    // 2. Verify admin role (check profile role)
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !serviceRoleKey) {
-      return NextResponse.json({ error: "Missing Supabase configuration" }, { status: 500 });
+      await logAuditEvent(AuditAction.API_ERROR, {
+        userId,
+        severity: AuditSeverity.ERROR,
+        resourceType: 'admin_action',
+        resourceId: 'cleanup_users',
+        ipAddress: request.ip,
+        details: { endpoint: 'POST /api/admin/cleanup-users', reason: 'Missing Supabase configuration' },
+      });
+      return NextResponse.json({ error: "Missing Supabase configuration", code: 'CONFIG_ERROR' }, { status: 500 });
     }
 
+    // Create admin client
     const adminClient = createClient(supabaseUrl, serviceRoleKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
       },
+    });
+
+    // Check if user is admin
+    const { data: userProfile } = await adminClient
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single();
+
+    if (userProfile?.role !== 'admin') {
+      await logAuditEvent(AuditAction.SECURITY_RLS_VIOLATION, {
+        userId,
+        severity: AuditSeverity.CRITICAL,
+        resourceType: 'admin_action',
+        resourceId: 'cleanup_users',
+        ipAddress: request.ip,
+        details: {
+          endpoint: 'POST /api/admin/cleanup-users',
+          reason: 'Non-admin user attempted to execute cleanup',
+          userRole: userProfile?.role || 'unknown',
+        },
+      });
+      return NextResponse.json({ error: "Forbidden - admin access required", code: 'FORBIDDEN' }, { status: 403 });
+    }
+
+    // 3. Log the admin action (CRITICAL severity)
+    await logAuditEvent(AuditAction.API_CALL, {
+      userId,
+      severity: AuditSeverity.CRITICAL,
+      resourceType: 'admin_action',
+      resourceId: 'cleanup_users',
+      ipAddress: request.ip,
+      details: { endpoint: 'POST /api/admin/cleanup-users', action: 'user_cleanup_initiated' },
     });
 
     const results: string[] = [];
@@ -146,6 +196,24 @@ export async function POST(request: NextRequest) {
     }
     results.push(`Deleted ${deletedCount}/${usersToDelete.length} users from auth.users`);
 
+    // 4. Log completion (CRITICAL - admin action completed)
+    const severity = errors.length > 0 ? AuditSeverity.WARNING : AuditSeverity.CRITICAL;
+    await logAuditEvent(AuditAction.API_CALL, {
+      userId,
+      severity,
+      resourceType: 'admin_action',
+      resourceId: 'cleanup_users',
+      statusCode: 200,
+      ipAddress: request.ip,
+      details: {
+        endpoint: 'POST /api/admin/cleanup-users',
+        action: 'user_cleanup_completed',
+        deletedCount,
+        totalToDelete: usersToDelete.length,
+        errorsOccurred: errors.length > 0,
+      },
+    });
+
     return NextResponse.json({
       success: errors.length === 0,
       message: `Cleanup completed. Deleted ${deletedCount} users.`,
@@ -157,21 +225,55 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error("Cleanup error:", error);
+    await logAuditEvent(AuditAction.API_ERROR, {
+      severity: AuditSeverity.CRITICAL,
+      resourceType: 'admin_action',
+      resourceId: 'cleanup_users',
+      ipAddress: request?.ip,
+      details: {
+        endpoint: 'POST /api/admin/cleanup-users',
+        error: error instanceof Error ? error.message : String(error),
+      },
+    });
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: error instanceof Error ? error.message : "Unknown error", code: 'INTERNAL_ERROR' },
       { status: 500 }
     );
   }
 }
 
-// GET endpoint to preview what will be deleted
+// GET endpoint to preview what will be deleted (admin only)
 export async function GET(request: NextRequest) {
   try {
+    // 1. Authenticate request
+    const auth = await withAuth(request);
+    if (!auth) {
+      await logAuditEvent(AuditAction.AUTH_FAILED, {
+        severity: AuditSeverity.WARNING,
+        resourceType: 'admin_action',
+        resourceId: 'cleanup_users_preview',
+        ipAddress: request.ip,
+        details: { endpoint: 'GET /api/admin/cleanup-users', reason: 'Missing auth token' },
+      });
+      return NextResponse.json({ error: "Unauthorized", code: 'AUTH_REQUIRED' }, { status: 401 });
+    }
+
+    const userId = auth.userId;
+
+    // 2. Verify admin role
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !serviceRoleKey) {
-      return NextResponse.json({ error: "Missing Supabase configuration" }, { status: 500 });
+      await logAuditEvent(AuditAction.API_ERROR, {
+        userId,
+        severity: AuditSeverity.ERROR,
+        resourceType: 'admin_action',
+        resourceId: 'cleanup_users_preview',
+        ipAddress: request.ip,
+        details: { endpoint: 'GET /api/admin/cleanup-users', reason: 'Missing Supabase configuration' },
+      });
+      return NextResponse.json({ error: "Missing Supabase configuration", code: 'CONFIG_ERROR' }, { status: 500 });
     }
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey, {
@@ -181,30 +283,87 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // Check if user is admin
+    const { data: userProfile } = await adminClient
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single();
+
+    if (userProfile?.role !== 'admin') {
+      await logAuditEvent(AuditAction.SECURITY_RLS_VIOLATION, {
+        userId,
+        severity: AuditSeverity.WARNING,
+        resourceType: 'admin_action',
+        resourceId: 'cleanup_users_preview',
+        ipAddress: request.ip,
+        details: {
+          endpoint: 'GET /api/admin/cleanup-users',
+          reason: 'Non-admin user attempted to preview cleanup',
+          userRole: userProfile?.role || 'unknown',
+        },
+      });
+      return NextResponse.json({ error: "Forbidden - admin access required", code: 'FORBIDDEN' }, { status: 403 });
+    }
+
+    // 3. Get preview data
     const { data: allUsers, error: listError } = await adminClient.auth.admin.listUsers({
       page: 1,
       perPage: 1000
     });
 
     if (listError) {
-      return NextResponse.json({ error: `Failed to list users: ${listError.message}` }, { status: 500 });
+      await logAuditEvent(AuditAction.API_ERROR, {
+        userId,
+        severity: AuditSeverity.ERROR,
+        resourceType: 'admin_action',
+        resourceId: 'cleanup_users_preview',
+        ipAddress: request.ip,
+        details: { endpoint: 'GET /api/admin/cleanup-users', reason: `Failed to list users: ${listError.message}` },
+      });
+      return NextResponse.json({ error: `Failed to list users: ${listError.message}`, code: 'DATABASE_ERROR' }, { status: 500 });
     }
 
     const usersToDelete = allUsers?.users?.filter(u => !USERS_TO_KEEP.includes(u.id)) || [];
     const usersToKeep = allUsers?.users?.filter(u => USERS_TO_KEEP.includes(u.id)) || [];
+
+    // Log preview access
+    await logAuditEvent(AuditAction.DOCUMENT_ACCESSED, {
+      userId,
+      severity: AuditSeverity.INFO,
+      resourceType: 'admin_action',
+      resourceId: 'cleanup_users_preview',
+      statusCode: 200,
+      ipAddress: request.ip,
+      details: {
+        endpoint: 'GET /api/admin/cleanup-users',
+        usersToDeleteCount: usersToDelete.length,
+        usersToKeepCount: usersToKeep.length,
+      },
+    });
 
     return NextResponse.json({
       preview: true,
       usersToDelete: usersToDelete.map(u => ({ id: u.id, email: u.email, created_at: u.created_at })),
       usersToKeep: usersToKeep.map(u => ({ id: u.id, email: u.email, created_at: u.created_at })),
       totalUsers: allUsers?.users?.length || 0,
-      hint: "POST to this endpoint with { secret: '<last 10 chars of service role key>' } to execute cleanup"
+      hint: "POST to this endpoint to execute cleanup"
     });
 
   } catch (error) {
     console.error("Preview error:", error);
+    await logAuditEvent(AuditAction.API_ERROR, {
+      severity: AuditSeverity.ERROR,
+      resourceType: 'admin_action',
+      resourceId: 'cleanup_users_preview',
+      ipAddress: request?.ip,
+      details: {
+        endpoint: 'GET /api/admin/cleanup-users',
+        error: error instanceof Error ? error.message : String(error),
+      },
+    });
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: error instanceof Error ? error.message : "Unknown error", code: 'INTERNAL_ERROR' },
       { status: 500 }
     );
   }

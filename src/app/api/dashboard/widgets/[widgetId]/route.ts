@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/integrations/supabase/server-client';
-import { getAuthenticatedUser, AuthenticationError } from '@/lib/server-auth'; // Add this import
-import { dashboardErrorHandler } from '@/lib/dashboard/api-error-handler';
+import { createServerClient } from '@/lib/supabase-server';
+import { withAuth } from '@/lib/jwt-validator';
+import { logAuditEvent, AuditAction, AuditSeverity } from '@/lib/audit-logger';
 import { dataSourceManager } from '@/lib/dashboard/data-source-manager';
 import { widgetSchemas, validateWidgetData } from '@/lib/dashboard/widget-schemas';
-
-const toError = (error: unknown): Error => {
-  if (error instanceof Error) return error;
-  return new Error(String(error));
-};
 
 /**
  * GET /api/dashboard/widgets/[widgetId]
@@ -19,24 +14,48 @@ export async function GET(
   { params }: { params: Promise<{ widgetId: string }> }
 ) {
   try {
-    const user = await getAuthenticatedUser(); // Add this line
-    const supabase = createServerSupabaseClient(); // Add this line to create supabase client for data operations
+    // 1. Authenticate request
+    const auth = await withAuth(request);
+    if (!auth) {
+      await logAuditEvent(AuditAction.AUTH_FAILED, {
+        severity: AuditSeverity.WARNING,
+        resourceType: 'dashboard_widget',
+        resourceId: 'unknown',
+        ipAddress: request.ip,
+        details: { endpoint: 'GET /api/dashboard/widgets/[widgetId]', reason: 'Missing auth token' },
+      });
+      return NextResponse.json(
+        { error: 'Unauthorized', code: 'AUTH_REQUIRED' },
+        { status: 401 }
+      );
+    }
 
-    const userId = user.id; // Replace session.user.id with user.id
+    const userId = auth.userId;
     const { widgetId } = await params;
+
+    // 2. Initialize Supabase client
+    const supabase = await createServerClient();
+
     const searchParams = request.nextUrl.searchParams;
     const forceRefresh = searchParams.get('refresh') === 'true';
 
-    // Check if widget schema exists
+    // 3. Check if widget schema exists
     if (!widgetSchemas[widgetId as keyof typeof widgetSchemas]) {
-      const message = dashboardErrorHandler.handleError(400, new Error(`Unknown widget: ${widgetId}`));
+      await logAuditEvent(AuditAction.SECURITY_VALIDATION_FAILED, {
+        userId,
+        severity: AuditSeverity.WARNING,
+        resourceType: 'dashboard_widget',
+        resourceId: widgetId,
+        ipAddress: request.ip,
+        details: { endpoint: 'GET /api/dashboard/widgets/[widgetId]', reason: 'Unknown widget' },
+      });
       return NextResponse.json(
-        { error: `Unknown widget: ${widgetId}` },
+        { error: 'Validation error', code: 'VALIDATION_ERROR', details: { widget: 'unknown' } },
         { status: 400 }
       );
     }
 
-    // Try to get cached data first (unless force refresh)
+    // 4. Try to get cached data first (unless force refresh)
     if (!forceRefresh) {
       const { data: cached, error: cacheError } = await supabase
         .from('widget_data_cache')
@@ -48,6 +67,14 @@ export async function GET(
       if (!cacheError && cached) {
         // Check if cache is still valid
         if (!cached.expires_at || new Date(cached.expires_at) > new Date()) {
+          await logAuditEvent(AuditAction.DOCUMENT_ACCESSED, {
+            userId,
+            severity: AuditSeverity.INFO,
+            resourceType: 'dashboard_widget',
+            resourceId: widgetId,
+            statusCode: 200,
+            details: { cached: true },
+          });
           return NextResponse.json({
             success: true,
             data: cached.data,
@@ -58,13 +85,13 @@ export async function GET(
       }
     }
 
-    // Fetch fresh widget data from data source manager
+    // 5. Fetch fresh widget data from data source manager
     const widgetData = await dataSourceManager.fetchWidgetData(
       widgetId,
       { userId } as any
     );
 
-    // Validate the data against widget schema
+    // 6. Validate the data against widget schema
     const validation = validateWidgetData(
       widgetId as keyof typeof widgetSchemas,
       widgetData
@@ -78,7 +105,7 @@ export async function GET(
       // Continue with unvalidated data but log warning
     }
 
-    // Cache the widget data (1 hour TTL)
+    // 7. Cache the widget data (1 hour TTL)
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 1);
 
@@ -96,6 +123,16 @@ export async function GET(
       );
     // Intentionally not awaiting - fire and forget for cache
 
+    // 8. Log successful access
+    await logAuditEvent(AuditAction.DOCUMENT_ACCESSED, {
+      userId,
+      severity: AuditSeverity.INFO,
+      resourceType: 'dashboard_widget',
+      resourceId: widgetId,
+      statusCode: 200,
+      details: { cached: false, valid: validation.valid },
+    });
+
     return NextResponse.json({
       success: true,
       widgetId,
@@ -107,15 +144,17 @@ export async function GET(
     });
   } catch (error) {
     console.error(`Error fetching widget data:`, error);
-    if (error instanceof AuthenticationError) { // Add this block
-        return NextResponse.json(
-            { error: error.message },
-            { status: 401 }
-        );
-    }
-    const message = dashboardErrorHandler.handleError(500, toError(error));
+    await logAuditEvent(AuditAction.API_ERROR, {
+      severity: AuditSeverity.ERROR,
+      resourceType: 'dashboard_widget',
+      ipAddress: request.ip,
+      details: {
+        endpoint: 'GET /api/dashboard/widgets/[widgetId]',
+        error: error instanceof Error ? error.message : String(error),
+      },
+    });
     return NextResponse.json(
-      { error: message.message },
+      { error: 'Internal server error', code: 'INTERNAL_ERROR' },
       { status: 500 }
     );
   }
@@ -130,24 +169,49 @@ export async function POST(
   { params }: { params: Promise<{ widgetId: string }> }
 ) {
   try {
-    const user = await getAuthenticatedUser(); // Add this line
-    const supabase = createServerSupabaseClient(); // Add this line
-
-    const userId = user.id; // Replace session.user.id with user.id
-    const { widgetId } = await params;
-    const body = await request.json();
-
-    // Check if widget schema exists
-    if (!widgetSchemas[widgetId as keyof typeof widgetSchemas]) {
+    // 1. Authenticate request
+    const auth = await withAuth(request);
+    if (!auth) {
+      await logAuditEvent(AuditAction.AUTH_FAILED, {
+        severity: AuditSeverity.WARNING,
+        resourceType: 'dashboard_widget',
+        resourceId: 'unknown',
+        ipAddress: request.ip,
+        details: { endpoint: 'POST /api/dashboard/widgets/[widgetId]', reason: 'Missing auth token' },
+      });
       return NextResponse.json(
-        { error: `Unknown widget: ${widgetId}` },
+        { error: 'Unauthorized', code: 'AUTH_REQUIRED' },
+        { status: 401 }
+      );
+    }
+
+    const userId = auth.userId;
+    const { widgetId } = await params;
+
+    // 2. Initialize Supabase client
+    const supabase = await createServerClient();
+
+    // 3. Parse and validate request body
+    const body = await request.json();
+    const { data, settings } = body;
+
+    // 4. Check if widget schema exists
+    if (!widgetSchemas[widgetId as keyof typeof widgetSchemas]) {
+      await logAuditEvent(AuditAction.SECURITY_VALIDATION_FAILED, {
+        userId,
+        severity: AuditSeverity.WARNING,
+        resourceType: 'dashboard_widget',
+        resourceId: widgetId,
+        ipAddress: request.ip,
+        details: { endpoint: 'POST /api/dashboard/widgets/[widgetId]', reason: 'Unknown widget' },
+      });
+      return NextResponse.json(
+        { error: 'Validation error', code: 'VALIDATION_ERROR', details: { widget: 'unknown' } },
         { status: 400 }
       );
     }
 
-    const { data, settings } = body;
-
-    // Validate the data if provided
+    // 5. Validate the data if provided
     if (data) {
       const validation = validateWidgetData(
         widgetId as keyof typeof widgetSchemas,
@@ -155,9 +219,18 @@ export async function POST(
       );
 
       if (!validation.valid) {
+        await logAuditEvent(AuditAction.SECURITY_VALIDATION_FAILED, {
+          userId,
+          severity: AuditSeverity.WARNING,
+          resourceType: 'dashboard_widget',
+          resourceId: widgetId,
+          ipAddress: request.ip,
+          details: { endpoint: 'POST /api/dashboard/widgets/[widgetId]', reason: 'Data validation failed', errors: validation.errors },
+        });
         return NextResponse.json(
           {
-            error: 'Invalid widget data',
+            error: 'Validation error',
+            code: 'VALIDATION_ERROR',
             errors: validation.errors,
           },
           { status: 400 }
@@ -165,7 +238,7 @@ export async function POST(
       }
     }
 
-    // Store widget settings if provided
+    // 6. Store widget settings if provided
     if (settings) {
       const { data: updated, error } = await supabase
         .from('widget_settings')
@@ -183,15 +256,22 @@ export async function POST(
 
       if (error) {
         console.error(`Error updating widget settings for ${widgetId}:`, error);
-        const message = dashboardErrorHandler.handleError(500, error);
+        await logAuditEvent(AuditAction.API_ERROR, {
+          userId,
+          severity: AuditSeverity.ERROR,
+          resourceType: 'dashboard_widget',
+          resourceId: widgetId,
+          ipAddress: request.ip,
+          details: { endpoint: 'POST /api/dashboard/widgets/[widgetId]', reason: 'Failed to update settings' },
+        });
         return NextResponse.json(
-          { error: message.message },
+          { error: 'Database error', code: 'DB_ERROR' },
           { status: 500 }
         );
       }
     }
 
-    // Cache the data if provided
+    // 7. Cache the data if provided
     if (data) {
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 1);
@@ -211,6 +291,16 @@ export async function POST(
       // Intentionally not awaiting - fire and forget for cache
     }
 
+    // 8. Log successful update
+    await logAuditEvent(AuditAction.DOCUMENT_UPDATED, {
+      userId,
+      severity: AuditSeverity.INFO,
+      resourceType: 'dashboard_widget',
+      resourceId: widgetId,
+      statusCode: 200,
+      details: { hasData: !!data, hasSettings: !!settings },
+    });
+
     return NextResponse.json({
       success: true,
       widgetId,
@@ -220,15 +310,17 @@ export async function POST(
     });
   } catch (error) {
     console.error(`Error updating widget:`, error);
-    if (error instanceof AuthenticationError) { // Add this block
-        return NextResponse.json(
-            { error: error.message },
-            { status: 401 }
-        );
-    }
-    const message = dashboardErrorHandler.handleError(500, toError(error));
+    await logAuditEvent(AuditAction.API_ERROR, {
+      severity: AuditSeverity.ERROR,
+      resourceType: 'dashboard_widget',
+      ipAddress: request.ip,
+      details: {
+        endpoint: 'POST /api/dashboard/widgets/[widgetId]',
+        error: error instanceof Error ? error.message : String(error),
+      },
+    });
     return NextResponse.json(
-      { error: message.message },
+      { error: 'Internal server error', code: 'INTERNAL_ERROR' },
       { status: 500 }
     );
   }
@@ -243,13 +335,29 @@ export async function DELETE(
   { params }: { params: Promise<{ widgetId: string }> }
 ) {
   try {
-    const user = await getAuthenticatedUser(); // Add this line
-    const supabase = createServerSupabaseClient(); // Add this line
+    // 1. Authenticate request
+    const auth = await withAuth(request);
+    if (!auth) {
+      await logAuditEvent(AuditAction.AUTH_FAILED, {
+        severity: AuditSeverity.WARNING,
+        resourceType: 'dashboard_widget',
+        resourceId: 'unknown',
+        ipAddress: request.ip,
+        details: { endpoint: 'DELETE /api/dashboard/widgets/[widgetId]', reason: 'Missing auth token' },
+      });
+      return NextResponse.json(
+        { error: 'Unauthorized', code: 'AUTH_REQUIRED' },
+        { status: 401 }
+      );
+    }
 
-    const userId = user.id; // Replace session.user.id with user.id
+    const userId = auth.userId;
     const { widgetId } = await params;
 
-    // Delete cache entry
+    // 2. Initialize Supabase client
+    const supabase = await createServerClient();
+
+    // 3. Delete cache entry
     const { error } = await supabase
       .from('widget_data_cache')
       .delete()
@@ -257,31 +365,50 @@ export async function DELETE(
       .eq('user_id', userId);
 
     if (error) {
-     console.error(`Error clearing cache for widget ${widgetId}:`, error);
-     const message = dashboardErrorHandler.handleError(500, toError(error as unknown));
-     return NextResponse.json(
-       { error: message.message },
-       { status: 500 }
-     );
+      console.error(`Error clearing cache for widget ${widgetId}:`, error);
+      await logAuditEvent(AuditAction.API_ERROR, {
+        userId,
+        severity: AuditSeverity.ERROR,
+        resourceType: 'dashboard_widget',
+        resourceId: widgetId,
+        ipAddress: request.ip,
+        details: { endpoint: 'DELETE /api/dashboard/widgets/[widgetId]', reason: 'Failed to clear cache' },
+      });
+      return NextResponse.json(
+        { error: 'Database error', code: 'DB_ERROR' },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({
-     success: true,
-     widgetId,
-     cleared: true,
-     timestamp: new Date().toISOString(),
+    // 4. Log successful deletion
+    await logAuditEvent(AuditAction.DOCUMENT_UPDATED, {
+      userId,
+      severity: AuditSeverity.INFO,
+      resourceType: 'dashboard_widget',
+      resourceId: widgetId,
+      statusCode: 200,
+      details: { action: 'cache_cleared' },
     });
-    } catch (error) {
+
+    return NextResponse.json({
+      success: true,
+      widgetId,
+      cleared: true,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
     console.error(`Error deleting widget:`, error);
-    if (error instanceof AuthenticationError) { // Add this block
-        return NextResponse.json(
-            { error: error.message },
-            { status: 401 }
-        );
-    }
-    const message = dashboardErrorHandler.handleError(500, toError(error));
+    await logAuditEvent(AuditAction.API_ERROR, {
+      severity: AuditSeverity.ERROR,
+      resourceType: 'dashboard_widget',
+      ipAddress: request.ip,
+      details: {
+        endpoint: 'DELETE /api/dashboard/widgets/[widgetId]',
+        error: error instanceof Error ? error.message : String(error),
+      },
+    });
     return NextResponse.json(
-      { error: message.message },
+      { error: 'Internal server error', code: 'INTERNAL_ERROR' },
       { status: 500 }
     );
   }
