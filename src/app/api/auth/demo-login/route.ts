@@ -294,7 +294,7 @@ export async function POST(request: NextRequest) {
           plan: 'demo',
           avatar_url: null,
           updated_at: new Date().toISOString(),
-          isDemoAccount: true
+          is_demo_account: true
         }, { onConflict: 'id' });
 
       if (profileError) {
