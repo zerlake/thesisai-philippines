@@ -102,10 +102,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Handle network errors gracefully
         if (profileError.message && profileError.message.includes("Failed to fetch")) {
           console.warn("Network error fetching profile, using minimal profile:", profileError.message);
+          // Determine role based on email pattern for demo accounts
+          // Order matters - check more specific patterns first
+          const email = user.email;
+          let role = "user"; // default role
+
+          if (email && email.includes('demo-admin')) {
+            role = "admin";
+          } else if (email && (email.includes('admin') || email.includes('admin@thesisai'))) {
+            role = "admin";
+          } else if (email && (email.includes('advisor') || email.includes('demo-advisor'))) {
+            role = "advisor";
+          } else if (email && email.includes('critic')) {
+            role = "critic";
+          }
+
+          console.log(`[Auth] Network error, setting role based on email pattern: ${role} for ${email}`);
+
           setProfile({
             id: user.id,
             email: user.email,
-            role: "user",
+            role: role,
             created_at: null,
             updated_at: null,
             last_login_at: new Date().toISOString(),
@@ -123,12 +140,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (profileError.code === 'PGRST116') {
+          // Determine role based on email pattern for demo accounts when profile doesn't exist
+          // Order matters - check more specific patterns first
+          const email = user.email;
+          let role = "user"; // default role
+
+          if (email && email.includes('demo-admin')) {
+            role = "admin";
+          } else if (email && (email.includes('admin') || email.includes('admin@thesisai'))) {
+            role = "admin";
+          } else if (email && (email.includes('advisor') || email.includes('demo-advisor'))) {
+            role = "advisor";
+          } else if (email && email.includes('critic')) {
+            role = "critic";
+          }
+
+          console.log(`[Auth] Profile not found, creating with role based on email: ${role} for ${email}`);
+
           // Create a default profile for the user
           const { error: createError } = await supabase
             .from("profiles")
             .insert({
               id: user.id,
-              role: "user",
+              role: role,
               email: user.email || undefined,
               plan: "free"
             });
@@ -145,7 +179,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setProfile({
               id: user.id,
               email: user.email,
-              role: "user",
+              role: role, // Use determined role instead of default
               created_at: null,
               updated_at: null,
               last_login_at: new Date().toISOString(),
@@ -177,10 +211,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         // For other errors, log them but continue with minimal profile
          console.error("Profile fetch error:", profileError);
+
+         // Determine role based on email pattern for other errors
+         // Order matters - check more specific patterns first
+         const email = user.email;
+         let role = "user"; // default role
+
+         if (email && email.includes('demo-admin')) {
+           role = "admin";
+         } else if (email && (email.includes('admin') || email.includes('admin@thesisai'))) {
+           role = "admin";
+         } else if (email && (email.includes('advisor') || email.includes('demo-advisor'))) {
+           role = "advisor";
+         } else if (email && email.includes('critic')) {
+           role = "critic";
+         }
+
+         console.log(`[Auth] Error fetching profile, setting role based on email: ${role} for ${email}`);
+
          setProfile({
            id: user.id,
            email: user.email,
-           role: "user",
+           role: role, // Use determined role instead of default
            created_at: null,
            updated_at: null,
            last_login_at: new Date().toISOString(),
@@ -211,10 +263,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           toast.error("Could not fetch user profile.");
         }
         // Set a minimal profile anyway to allow the user to continue using the app
+        // Determine role based on email pattern for error cases
+        // Order matters - check more specific patterns first
+        const email = user.email;
+        let role = "user"; // default role
+
+        if (email && email.includes('demo-admin')) {
+          role = "admin";
+        } else if (email && (email.includes('admin') || email.includes('admin@thesisai'))) {
+          role = "admin";
+        } else if (email && (email.includes('advisor') || email.includes('demo-advisor'))) {
+          role = "advisor";
+        } else if (email && email.includes('critic')) {
+          role = "critic";
+        }
+
+        console.log(`[Auth] Error in fetchProfile, setting role based on email: ${role} for ${email}`);
+
         setProfile({
           id: user.id,
           email: user.email,
-          role: "user",
+          role: role, // Use determined role instead of default
           created_at: null,
           updated_at: null,
           last_login_at: new Date().toISOString(),
@@ -241,6 +310,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session);
       if (session?.user) {
         try {
+          // Determine role from email pattern for timeout fallback
+          const email = session.user?.email;
+          let role = "user"; // default role
+
+          if (email && email.includes('demo-admin')) {
+            role = "admin";
+          } else if (email && (email.includes('admin') || email.includes('admin@thesisai'))) {
+            role = "admin";
+          } else if (email && (email.includes('advisor') || email.includes('demo-advisor'))) {
+            role = "advisor";
+          } else if (email && email.includes('critic')) {
+            role = "critic";
+          }
+
+          console.log(`[Auth] Pre-timeout: determined role from email: ${role} for ${email}`);
+
           // Add a timeout to prevent indefinite loading
           const timeoutPromise = new Promise((resolve) => {
             setTimeout(() => {
@@ -249,7 +334,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               resolve({
                 id: session.user?.id,
                 email: session.user?.email,
-                role: "user", // default role
+                role: role, // Use determined role from email pattern
                 created_at: null,
                 updated_at: null,
                 last_login_at: new Date().toISOString(),
@@ -264,7 +349,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 full_name: session.user?.email?.split('@')[0] || 'User',
                 user_preferences: null
               });
-            }, 10000); // Reduced to 10 seconds to provide faster fallback
+            }, 3000); // 3 second timeout - don't block UI
           });
 
           const fetchPromise = fetchProfile(session.user);
@@ -279,10 +364,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             localStorage.setItem("lastProfileLoad", new Date().toISOString());
           } else {
             // If result is an error, set minimal profile to unblock user
+            // Determine role based on email pattern
+            // Order matters - check more specific patterns first
+            const email = session.user?.email;
+            let role = "user"; // default role
+
+            if (email && email.includes('demo-admin')) {
+              role = "admin";
+            } else if (email && (email.includes('admin') || email.includes('admin@thesisai'))) {
+              role = "admin";
+            } else if (email && (email.includes('advisor') || email.includes('demo-advisor'))) {
+              role = "advisor";
+            } else if (email && email.includes('critic')) {
+              role = "critic";
+            }
+
+            console.log(`[Auth] Profile load timeout/result error, setting role based on email: ${role} for ${email}`);
+
             setProfile({
               id: session.user?.id,
               email: session.user?.email,
-              role: "user",
+              role: role, // Use determined role instead of default
               created_at: null,
               updated_at: null,
               last_login_at: new Date().toISOString(),
@@ -300,10 +402,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch (error) {
           console.error("[Auth] Error loading profile:", error);
           // Set a minimal profile to avoid blocking the user
+          // Determine role based on email pattern
+          // Order matters - check more specific patterns first
+          const email = session.user?.email;
+          let role = "user"; // default role
+
+          if (email && email.includes('demo-admin')) {
+            role = "admin";
+          } else if (email && (email.includes('admin') || email.includes('admin@thesisai'))) {
+            role = "admin";
+          } else if (email && (email.includes('advisor') || email.includes('demo-advisor'))) {
+            role = "advisor";
+          } else if (email && email.includes('critic')) {
+            role = "critic";
+          }
+
+          console.log(`[Auth] Error loading profile, setting role based on email: ${role} for ${email}`);
+
           setProfile({
             id: session.user?.id,
             email: session.user?.email,
-            role: "user",
+            role: role, // Use determined role instead of default
             created_at: null,
             updated_at: null,
             last_login_at: new Date().toISOString(),
@@ -429,7 +548,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('[Auth] Initialization timeout, stopping loading state');
         setIsLoading(false);
       }
-    }, 10000); // Reduced timeout to 10 seconds
+    }, 3000); // 3 second timeout - don't block UI
 
     initializeAuth();
 
@@ -441,12 +560,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchProfile]);  // Remove router from dependencies to prevent potential loops
 
   // Effect to handle redirects after auth state is loaded
-  // Track both auth state and pathname changes separately to prevent infinite loops
-  const prevAuthState = useRef({
-    session: null as any,
-    profile: null as any,
-    pathname: ""
-  });
+  // Track previous state to prevent infinite redirect loops
+  const hasRedirected = useRef(false);
+  const lastRedirectPath = useRef("");
 
   useEffect(() => {
     if (isLoading) return;
@@ -454,8 +570,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const authStatus = session && profile ? 'authenticated' : 'unauthenticated';
     const isPublic = isPublicPage(pathname);
 
+    // Prevent redirect loops - if we just redirected to this path, don't redirect again
+    if (hasRedirected.current && lastRedirectPath.current === pathname) {
+      hasRedirected.current = false;
+      return;
+    }
+
     // Handle unauthenticated users on non-public pages
     if (authStatus === 'unauthenticated' && !isPublic && pathname !== "/login") {
+      hasRedirected.current = true;
+      lastRedirectPath.current = "/login";
       router.replace("/login");
       return;
     }
@@ -471,28 +595,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userHomePage = roleHomePages[profile.role] || '/dashboard';
 
       // Redirect from auth pages when authenticated (but not from landing page "/")
-      // Users should be able to view the landing page even when logged in
       if (pathname === "/login" || pathname === "/register") {
+        hasRedirected.current = true;
+        lastRedirectPath.current = userHomePage;
         router.replace(userHomePage);
         return;
       }
+
+      // Check if user is admin - admins have access to ALL dashboards
+      const isAdmin = profile.role === "admin";
 
       // Role-based access control
-      if (((pathname.startsWith("/admin") && profile.role !== "admin") ||
+      if (!isAdmin) {
+        const isAccessingWrongRole =
+          (pathname.startsWith("/admin") && profile.role !== "admin") ||
           (pathname.startsWith("/advisor") && profile.role !== "advisor") ||
-          (pathname.startsWith("/critic") && profile.role !== "critic")) &&
-          pathname !== userHomePage) {
-        router.replace(userHomePage);
-        return;
-      }
+          (pathname.startsWith("/critic") && profile.role !== "critic");
 
-      // Role-based dashboard access
-      if (pathname.startsWith("/dashboard") && profile.role !== "user" && pathname !== userHomePage) {
-        router.replace(userHomePage);
-        return;
+        if (isAccessingWrongRole) {
+          hasRedirected.current = true;
+          lastRedirectPath.current = userHomePage;
+          router.replace(userHomePage);
+          return;
+        }
       }
     }
-  }, [isLoading, session, profile, pathname]);
+  }, [isLoading, session, profile, pathname, router]);
 
   const refreshProfile = useCallback(async () => {
     if (session?.user) {
@@ -508,17 +636,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Only sign out for authentication-related errors
           // await supabase.auth.signOut();
         }
+
+        // Update profile with role based on email in case of error
+        // Order matters - check more specific patterns first
+        const email = session.user.email;
+        let role = "user"; // default role
+
+        if (email && email.includes('demo-admin')) {
+          role = "admin";
+        } else if (email && (email.includes('admin') || email.includes('admin@thesisai'))) {
+          role = "admin";
+        } else if (email && (email.includes('advisor') || email.includes('demo-advisor'))) {
+          role = "advisor";
+        } else if (email && email.includes('critic')) {
+          role = "critic";
+        }
+
+        setProfile({
+          id: session.user.id,
+          email: session.user.email,
+          role: role, // Use determined role instead of default
+          created_at: null,
+          updated_at: null,
+          last_login_at: new Date().toISOString(),
+          first_name: '',
+          last_name: '',
+          institution: '',
+          department: '',
+          is_onboarded: false,
+          preferences: {},
+          avatar_url: null,
+          full_name: session.user.email?.split('@')[0] || 'User',
+          user_preferences: null
+        });
       }
     }
   }, [session, fetchProfile]);  // Remove router from dependencies to prevent potential loops
 
-  // Show loader only for public pages if needed; for private pages, let content render to avoid infinite loading
-  if (isLoading && isPublicPage(pathname)) {
-    return <BrandedLoader />;
-  }
-  // For private pages, we render the content regardless of loading state to prevent infinite loading
-  // The individual components will handle their own loading states
-
+  // Don't block rendering - always render children
+  // Public pages (login, register, landing) should never be blocked
+  // Private pages handle their own loading states
   return (
     <AuthContext.Provider value={{ supabase, session, profile, refreshProfile, isLoading }}>
       {children}

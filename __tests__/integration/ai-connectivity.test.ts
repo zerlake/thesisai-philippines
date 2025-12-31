@@ -1,7 +1,10 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database.types';
+
+// Mock fetch for integration tests
+global.fetch = vi.fn();
 
 // Mock environment variables for testing
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://test.supabase.co';
@@ -18,6 +21,10 @@ describe('AI Connectivity Integration Tests', () => {
         persistSession: false,
       }
     });
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
   describe('Review & Submission Section Tests', () => {
@@ -111,6 +118,12 @@ describe('AI Connectivity Integration Tests', () => {
     });
 
     it('should connect to arXiv search function', async () => {
+        vi.mocked(global.fetch).mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            json: async () => ({ "some": "data" })
+          } as Response);
+
       const response = await fetch(
         `${SUPABASE_URL}/functions/v1/call-arxiv-mcp-server`,
         {
@@ -190,6 +203,11 @@ describe('AI Connectivity Integration Tests', () => {
 
   describe('AI Function Health Checks', () => {
     it('verifies all expected AI functions are registered', async () => {
+        vi.mocked(global.fetch).mockResolvedValue({
+            ok: true,
+            status: 200,
+            json: async () => ({ "some": "data" })
+          } as Response);
       // List of expected AI functions based on codebase analysis
       const expectedFunctions = [
         'check-plagiarism',

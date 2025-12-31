@@ -27,6 +27,7 @@ import { useEffect, useState, useCallback } from "react";
 import { differenceInDays } from "date-fns";
 import { Skeleton } from "./ui/skeleton";
 import { toast } from "sonner";
+import { getMockDataEnabled, setGlobalMockDataEnabled } from "@/lib/mock-referral-data";
 import { RecentActivityChart } from "./recent-activity-chart";
 import { SmartSessionGoalCard } from "./SmartSessionGoalCard";
 import { ThesisChecklist } from "./thesis-checklist";
@@ -441,6 +442,29 @@ export function StudentDashboardEnterprise() {
     }
   };
 
+  const [useMockData, setUseMockData] = useState(getMockDataEnabled());
+
+  // Handle mock data toggle
+  const handleToggleMockData = () => {
+    const newValue = !useMockData;
+    setUseMockData(newValue);
+    setGlobalMockDataEnabled(newValue);
+
+    // Dispatch custom event for other components
+    window.dispatchEvent(new CustomEvent('mock-data-toggle'));
+
+    // Show toast notification
+    if (newValue) {
+      toast('Mock Data Enabled', {
+        description: 'Using sample data for development and testing'
+      });
+    } else {
+      toast('Mock Data Disabled', {
+        description: 'Using real data from production database'
+      });
+    }
+  };
+
   return (
     <DashboardRealtimeProvider
       autoConnect={true}
@@ -449,8 +473,8 @@ export function StudentDashboardEnterprise() {
     >
       <div className="min-h-screen space-y-8 bg-background">
         <WelcomeModal open={showWelcomeModal} onOpenChange={handleModalClose} name={displayName} />
-        
-        {/* Dashboard Header with Email Notifications */}
+
+        {/* Dashboard Header with Email Notifications and Mock Data Toggle */}
         <div className="flex items-start justify-between border-b bg-gradient-to-b from-background to-background/50 pb-8 space-y-6 px-1">
           <div className="flex-1">
             <DashboardHeader
@@ -459,8 +483,25 @@ export function StudentDashboardEnterprise() {
               projectProgress={65}
             />
           </div>
-          <div className="pt-8">
+          <div className="flex gap-2 pt-8">
             <DashboardNotificationSettings userRole="student" />
+            {/* Mock Data Toggle Button */}
+            <button
+              onClick={handleToggleMockData}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-medium transition-colors ${useMockData ? 'bg-amber-100 border-amber-500 text-amber-800 hover:bg-amber-200' : 'bg-green-100 border-green-500 text-green-800 hover:bg-green-200'}`}
+              title={useMockData ? 'Disable mock data' : 'Enable mock data'}
+            >
+              <svg className={`w-5 h-5 ${useMockData ? 'text-amber-600' : 'text-green-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                {useMockData ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                )}
+              </svg>
+              <span className="text-sm font-semibold">
+                {useMockData ? 'Mock Data' : 'Live Data'}
+              </span>
+            </button>
           </div>
         </div>
 

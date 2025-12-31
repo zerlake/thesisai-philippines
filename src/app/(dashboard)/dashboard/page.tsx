@@ -2,23 +2,14 @@
 
 import { useAuth } from "@/components/auth-provider";
 import { AdvisorDashboard } from "@/components/advisor-dashboard";
-import { AdminDashboard } from "@/components/admin-dashboard";
 import { StudentDashboardEnterprise } from "@/components/student-dashboard-enterprise";
 import { BrandedLoader } from "@/components/branded-loader";
 import { CriticDashboard } from "@/components/critic-dashboard";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 export default function DashboardPage() {
   const { profile, isLoading } = useAuth();
-  const router = useRouter();
 
-  // Redirect to login if not authenticated and not loading
-  useEffect(() => {
-    if (!isLoading && !profile) {
-      router.replace("/login");
-    }
-  }, [isLoading, profile, router]);
+  // Note: Auth-based redirects (login, role-based routing) are handled by AuthProvider
 
   // Show loading state while checking auth
   if (isLoading) {
@@ -40,14 +31,7 @@ export default function DashboardPage() {
 
   // Add structured data based on user role
   const getStructuredData = () => {
-    if (profile?.role === 'admin') {
-      return {
-        "@context": "https://schema.org",
-        "@type": "WebPage",
-        "name": "Admin Dashboard",
-        "description": "Administrative interface for managing users, institutions, and testimonials."
-      };
-    } else if (profile?.role === 'advisor') {
+    if (profile?.role === 'advisor') {
       return {
         "@context": "https://schema.org",
         "@type": "WebPage",
@@ -73,15 +57,21 @@ export default function DashboardPage() {
 
   switch (profile.role) {
     case 'admin':
+      // Admin users can view the student dashboard (they have access to all dashboards)
       return (
         <>
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{
-              __html: JSON.stringify(getStructuredData())
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "WebPage",
+                "name": "Student Dashboard (Admin View)",
+                "description": "Admin viewing the student dashboard interface."
+              })
             }}
           />
-          <AdminDashboard />
+          <StudentDashboardEnterprise />
         </>
       );
     case 'advisor':

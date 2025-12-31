@@ -41,12 +41,29 @@ export function AdvisorRequestsCard() {
           .eq("status", "pending");
 
         if (requestsError) {
-          console.error("Fetch requests error:", requestsError);
-          // Don't show error toast if the table is just empty
-          if (requestsError.code !== 'PGRST116') {
+          // Check if this is an empty error object (common with RLS policies blocking access)
+          const isEmptyError = !requestsError.code && !requestsError.message;
+
+          // Handle RLS blocking access (expected for non-advisors) - fail silently
+          if (isEmptyError) {
+            setRequests([]);
+            setIsLoading(false);
+            return;
+          }
+
+          // Handle specific error codes
+          if (requestsError.code === 'PGRST116') {
+            // No rows found - this is fine, just empty
+            setRequests([]);
+          } else if (requestsError.code === '42501' || (requestsError.message &&
+              (requestsError.message.includes('permission') || requestsError.message.includes('denied')))) {
+            // Permission denied - user doesn't have advisor access
+            setRequests([]);
+          } else {
+            // Actual error - log and show toast
+            console.error("Fetch requests error:", requestsError);
             toast.error("Failed to fetch student requests.");
           }
-          setRequests([]);
           setIsLoading(false);
           return;
         }

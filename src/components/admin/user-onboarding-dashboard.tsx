@@ -5,13 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  BookOpen, 
-  FileText, 
-  MessageCircle, 
-  BarChart3, 
-  PlusCircle, 
-  Search, 
+import {
+  BookOpen,
+  FileText,
+  MessageCircle,
+  BarChart3,
+  PlusCircle,
+  Search,
   Filter,
   Eye,
   Edit,
@@ -20,6 +20,8 @@ import {
   CheckCircle,
   Clock
 } from "lucide-react";
+import { toast } from "sonner";
+import { useAuth } from "@/components/auth-provider";
 import { DataTable } from "@/components/data-table";
 import { DocumentationMetricsChart } from "./documentation-metrics-chart";
 
@@ -235,6 +237,7 @@ const mockMetrics: AnalyticsMetrics = {
 };
 
 export function UserOnboardingDashboard() {
+  const { session } = useAuth();
   const [metrics, setMetrics] = useState<AnalyticsMetrics>(mockMetrics);
   const [docs, setDocs] = useState<DocumentationItem[]>(mockDocumentationData);
   const [faqs, setFaqs] = useState<FAQItem[]>(mockFAQData);
@@ -244,19 +247,57 @@ export function UserOnboardingDashboard() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
-  // In a real implementation, this would fetch from your API
+  // Fetch actual data from API
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setMetrics(mockMetrics);
+        // Fetch documentation data
+        const docsResponse = await fetch('/api/admin/onboarding/documentation');
+        if (docsResponse.ok) {
+          const docsData = await docsResponse.json();
+          setDocs(docsData.items || []);
+        } else {
+          console.error('Failed to fetch documentation data');
+          setDocs(mockDocumentationData); // fallback to mock data
+        }
+
+        // Fetch FAQ data
+        const faqsResponse = await fetch('/api/admin/onboarding/faqs');
+        if (faqsResponse.ok) {
+          const faqsData = await faqsResponse.json();
+          setFaqs(faqsData.items || []);
+        } else {
+          console.error('Failed to fetch FAQ data');
+          setFaqs(mockFAQData); // fallback to mock data
+        }
+
+        // Fetch guides data
+        const guidesResponse = await fetch('/api/admin/onboarding/guides');
+        if (guidesResponse.ok) {
+          const guidesData = await guidesResponse.json();
+          setGuides(guidesData.items || []);
+        } else {
+          console.error('Failed to fetch guides data');
+          setGuides(mockUserGuideData); // fallback to mock data
+        }
+
+        // Fetch metrics
+        const metricsResponse = await fetch('/api/admin/onboarding/metrics');
+        if (metricsResponse.ok) {
+          const metricsData = await metricsResponse.json();
+          setMetrics(metricsData);
+        } else {
+          console.error('Failed to fetch metrics data');
+          setMetrics(mockMetrics); // fallback to mock data
+        }
+      } catch (error) {
+        console.error("Error loading onboarding data:", error);
+        // Set fallback data in case of error
         setDocs(mockDocumentationData);
         setFaqs(mockFAQData);
         setGuides(mockUserGuideData);
-      } catch (error) {
-        console.error("Error loading onboarding data:", error);
+        setMetrics(mockMetrics);
       } finally {
         setLoading(false);
       }
@@ -271,15 +312,93 @@ export function UserOnboardingDashboard() {
     return statusMatch && categoryMatch;
   });
 
-  const refreshData = () => {
+  const refreshData = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setMetrics(mockMetrics);
+    try {
+      // Fetch documentation data
+      const docsResponse = await fetch('/api/admin/onboarding/documentation');
+      if (docsResponse.ok) {
+        const docsData = await docsResponse.json();
+        setDocs(docsData.items || []);
+      } else {
+        console.error('Failed to fetch documentation data');
+        setDocs(mockDocumentationData); // fallback to mock data
+      }
+
+      // Fetch FAQ data
+      const faqsResponse = await fetch('/api/admin/onboarding/faqs');
+      if (faqsResponse.ok) {
+        const faqsData = await faqsResponse.json();
+        setFaqs(faqsData.items || []);
+      } else {
+        console.error('Failed to fetch FAQ data');
+        setFaqs(mockFAQData); // fallback to mock data
+      }
+
+      // Fetch guides data
+      const guidesResponse = await fetch('/api/admin/onboarding/guides');
+      if (guidesResponse.ok) {
+        const guidesData = await guidesResponse.json();
+        setGuides(guidesData.items || []);
+      } else {
+        console.error('Failed to fetch guides data');
+        setGuides(mockUserGuideData); // fallback to mock data
+      }
+
+      // Fetch metrics
+      const metricsResponse = await fetch('/api/admin/onboarding/metrics');
+      if (metricsResponse.ok) {
+        const metricsData = await metricsResponse.json();
+        setMetrics(metricsData);
+      } else {
+        console.error('Failed to fetch metrics data');
+        setMetrics(mockMetrics); // fallback to mock data
+      }
+    } catch (error) {
+      console.error("Error refreshing onboarding data:", error);
+      // Set fallback data in case of error
       setDocs(mockDocumentationData);
       setFaqs(mockFAQData);
       setGuides(mockUserGuideData);
+      setMetrics(mockMetrics);
+    } finally {
       setLoading(false);
-    }, 500);
+    }
+  };
+
+  // Function to manage onboarding content using Supabase function
+  const manageOnboardingContent = async (action: string, data: any) => {
+    try {
+      // Get the session token from the auth context
+      const token = session?.access_token;
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch('/api/functions/manage-onboarding-content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action, data }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to manage onboarding content');
+      }
+
+      const result = await response.json();
+      toast.success(result.message);
+      refreshData(); // Refresh the data after successful operation
+      return result;
+    } catch (error: any) {
+      console.error('Error managing onboarding content:', error);
+      toast.error(error.message || 'Failed to manage onboarding content');
+      return null;
+    }
   };
 
   return (

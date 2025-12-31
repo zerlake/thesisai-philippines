@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { EnterpriseCard, EnterpriseCardContent } from "./enterprise-card";
 import { Skeleton } from "./ui/skeleton";
+import { getMockDataEnabled } from "@/lib/mock-referral-data";
 
 interface MetricsGridProps {
   docCount: number;
@@ -71,7 +72,26 @@ export function DashboardMetrics({
   recentWordCount,
   isLoading,
 }: MetricsGridProps) {
-  if (isLoading) {
+  // Use mock data if enabled
+  const useMockData = getMockDataEnabled();
+
+  // Mock data for development/testing
+  const mockMetrics = {
+    docCount: 12,
+    wordCount: 15420,
+    avgWordCount: 1285,
+    recentWordCount: 2450
+  };
+
+  // Use mock data if enabled, otherwise use real data
+  const displayMetrics = useMockData ? mockMetrics : {
+    docCount,
+    wordCount,
+    avgWordCount,
+    recentWordCount
+  };
+
+  if (isLoading && !useMockData) {
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
@@ -81,43 +101,46 @@ export function DashboardMetrics({
     );
   }
 
-  const wordCountTrend = recentWordCount > 0 ? Math.round((recentWordCount / (wordCount / 52)) * 100) : 0;
+  const wordCountTrend = displayMetrics.recentWordCount > 0 ? Math.round((displayMetrics.recentWordCount / (displayMetrics.wordCount / 52)) * 100) : 0;
 
   return (
     <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-semibold text-foreground">Project Metrics</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Overview of your thesis writing progress
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Project Metrics</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Overview of your thesis writing progress
+            {useMockData && <span className="ml-2 text-xs text-amber-600">(using mock data)</span>}
+          </p>
+        </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricItem
           icon={<FileText className="h-5 w-5" />}
           label="Total Documents"
-          value={docCount}
-          subtext={docCount === 1 ? "1 document" : `${docCount} documents`}
+          value={displayMetrics.docCount}
+          subtext={displayMetrics.docCount === 1 ? "1 document" : `${displayMetrics.docCount} documents`}
           color="blue"
         />
         <MetricItem
           icon={<BookOpenCheck className="h-5 w-5" />}
           label="Total Words"
-          value={wordCount.toLocaleString()}
-          subtext={`+${recentWordCount.toLocaleString()} last 7 days`}
+          value={displayMetrics.wordCount.toLocaleString()}
+          subtext={`+${displayMetrics.recentWordCount.toLocaleString()} last 7 days`}
           trend={wordCountTrend}
           color="green"
         />
         <MetricItem
           icon={<Baseline className="h-5 w-5" />}
           label="Avg. Words/Doc"
-          value={avgWordCount.toLocaleString()}
+          value={displayMetrics.avgWordCount.toLocaleString()}
           subtext="Per document average"
           color="purple"
         />
         <MetricItem
           icon={<Clock className="h-5 w-5" />}
           label="Recent Activity"
-          value={recentWordCount.toLocaleString()}
+          value={displayMetrics.recentWordCount.toLocaleString()}
           subtext="Words in last 7 days"
           color="orange"
         />

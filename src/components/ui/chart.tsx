@@ -69,12 +69,23 @@ const ChartContainer = React.forwardRef<
 ChartContainer.displayName = "Chart"
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const colorConfig = Object.entries(config).filter(
     ([, config]) => config.theme || config.color
   )
 
   if (!colorConfig.length) {
     return null
+  }
+
+  // Only render styles on client to avoid hydration mismatch
+  if (!mounted) {
+    return <style dangerouslySetInnerHTML={{ __html: "" }} />
   }
 
   return (

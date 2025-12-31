@@ -246,9 +246,9 @@ export default function AccessibilitySettings() {
       <div className="bg-slate-50 dark:bg-slate-700/30 p-4 rounded-lg">
         <h4 className="font-semibold text-slate-900 dark:text-white mb-2">Learn More</h4>
         <ul className="space-y-1 text-sm text-slate-600 dark:text-slate-400">
-          <li>• <a href="#" className="text-blue-600 hover:underline">Accessibility Guide</a></li>
-          <li>• <a href="#" className="text-blue-600 hover:underline">Keyboard Shortcuts Reference</a></li>
-          <li>• <a href="#" className="text-blue-600 hover:underline">Accessibility Statement</a></li>
+          <li>• <a href="/user-guide" className="text-blue-600 hover:underline">Accessibility Guide</a></li>
+          <li>• <a href="/user-guide#keyboard-shortcuts" className="text-blue-600 hover:underline">Keyboard Shortcuts Reference</a></li>
+          <li>• <a href="/about#accessibility" className="text-blue-600 hover:underline">Accessibility Statement</a></li>
         </ul>
       </div>
     </div>

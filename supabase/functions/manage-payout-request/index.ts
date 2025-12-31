@@ -21,6 +21,7 @@ const getCorsHeaders = (req: Request) => {
 interface RequestBody {
   request_id: string;
   action: 'approve' | 'decline';
+  rejection_reason?: string;
 }
 
 serve(async (req: Request) => {
@@ -89,6 +90,43 @@ serve(async (req: Request) => {
       .update({ status: newStatus, reviewed_at: new Date().toISOString() })
       .eq('id', request_id)
     if (updateError) throw updateError
+
+    // 4. Get user profile to send notification
+    const { data: userProfile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('email, first_name, last_name')
+      .eq('id', request.user_id)
+      .single();
+
+    if (profileError || !userProfile) {
+      console.error('Could not fetch user profile for notification:', profileError);
+    } else {
+      // 5. Create notification for the user
+      const notificationTitle = action === 'approve'
+        ? 'Payout Request Approved'
+        : 'Payout Request Rejected';
+
+      const notificationMessage = action === 'approve'
+        ? `Your payout request for ₱${request.amount} has been approved and will be processed within 3-5 business days.`
+        : `Your payout request for ₱${request.amount} has been rejected. Reason: ${reqBody.rejection_reason || 'General review'}. You may contact support or contest this decision.`;
+
+      const { error: notificationError } = await supabaseAdmin
+        .from('notifications')
+        .insert({
+          user_id: request.user_id,
+          title: notificationTitle,
+          message: notificationMessage,
+          type: action === 'approve' ? 'success' : 'error',
+          created_at: new Date().toISOString()
+        });
+
+      if (notificationError) {
+        console.error('Error creating notification:', notificationError);
+      }
+    }
+
+    // TODO: In a full implementation, log this action to the audit trail
+    // For now, audit logging happens in the client-side code
 
     return new Response(JSON.stringify({ message: `Request ${newStatus}` }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

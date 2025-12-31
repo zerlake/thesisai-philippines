@@ -28,7 +28,10 @@ const fontSerif = Lora({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://thesisai-philippines.vercel.app"),
-  title: "ThesisAI Philippines - AI-Powered Academic Writing Assistant",
+  title: {
+    default: "ThesisAI Philippines - AI-Powered Academic Writing Assistant",
+    template: "%s | ThesisAI Philippines"
+  },
   description: "Streamline your thesis writing process with our AI-powered platform. Generate outlines, check originality, format citations, and connect with advisors—all in one workspace designed for Philippine universities.",
   keywords: [
     "AI thesis writer",
@@ -39,11 +42,26 @@ export const metadata: Metadata = {
     "online thesis help",
     "manuscript editing service",
     "academic writing software",
-    "student research tools"
+    "student research tools",
+    "thesis outline generator",
+    "plagiarism checker",
+    "citation formatter",
+    "academic writing",
+    "thesis advisor",
+    "research tools",
+    "thesis defense",
+    "academic success",
+    "student productivity",
+    "thesis completion"
   ],
   authors: [{ name: "ThesisAI Philippines", url: "https://thesisai-philippines.vercel.app" }],
   creator: "ThesisAI Philippines",
   publisher: "ThesisAI Philippines",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   openGraph: {
     title: "ThesisAI Philippines - AI-Powered Academic Writing Assistant",
     description: "Streamline your thesis writing process with our AI-powered platform. Generate outlines, check originality, format citations, and connect with advisors—all in one workspace designed for Philippine universities.",
@@ -65,6 +83,7 @@ export const metadata: Metadata = {
     title: "ThesisAI Philippines - AI-Powered Academic Writing Assistant",
     description: "Streamline your thesis writing process with our AI-powered platform. Generate outlines, check originality, format citations, and connect with advisors—all in one workspace.",
     images: ["/twitter-image.png"],
+    creator: "@thesisai_ph",
   },
   robots: {
     index: true,
@@ -72,15 +91,29 @@ export const metadata: Metadata = {
     nocache: false,
     googleBot: {
       index: true,
-      follow: false,
+      follow: true,
       noimageindex: false,
       'max-video-preview': -1,
       'max-image-preview': 'large',
       'max-snippet': -1,
     }
   },
+  verification: {
+    google: 'google-site-verification-code',
+    yahoo: 'yahoo-verification-code',
+    other: {
+      'msvalidate.01': 'bing-verification-code',
+    },
+  },
   alternates: {
     canonical: "https://thesisai-philippines.vercel.app",
+  },
+  category: "education",
+  classification: "academic software",
+  appleWebApp: {
+    title: "ThesisAI Philippines",
+    statusBarStyle: "default",
+    capable: true,
   },
 };
 

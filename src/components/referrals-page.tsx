@@ -13,6 +13,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Badge } from "./ui/badge";
+import { getMockDataEnabled, setGlobalMockDataEnabled } from "@/lib/mock-referral-data";
 
 type Earning = {
   id: string;
@@ -41,14 +42,36 @@ type PayoutRequest = {
 
 export function ReferralsPage() {
   const { profile, supabase, session, refreshProfile } = useAuth();
+  const [useMockData, setUseMockData] = useState(getMockDataEnabled());
   const [earnings, setEarnings] = useState<Earning[]>([]);
   const [transfers, setTransfers] = useState<Transfer[]>([]);
   const [payouts, setPayouts] = useState<PayoutRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const [transferEmail, setTransferEmail] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
   const [isTransferring, setIsTransferring] = useState(false);
+
+  // Handle mock data toggle
+  const handleToggleMockData = () => {
+    const newValue = !useMockData;
+    setUseMockData(newValue);
+    setGlobalMockDataEnabled(newValue);
+
+    // Dispatch custom event for other components
+    window.dispatchEvent(new CustomEvent('mock-data-toggle'));
+
+    // Show toast notification
+    if (newValue) {
+      toast('Mock Data Enabled', {
+        description: 'Using sample data for referral program development and testing'
+      });
+    } else {
+      toast('Mock Data Disabled', {
+        description: 'Using real data from production database'
+      });
+    }
+  };
 
   const [payoutAmount, setPayoutAmount] = useState("");
   const [payoutMethod, setPayoutMethod] = useState("GCash");
@@ -173,23 +196,86 @@ export function ReferralsPage() {
     }
   };
 
+  const [contestModalOpen, setContestModalOpen] = useState(false);
+  const [contestPayoutId, setContestPayoutId] = useState<string | null>(null);
+  const [contestReason, setContestReason] = useState('');
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending': return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
       case 'processed': return <Badge className="bg-green-100 text-green-800">Processed</Badge>;
-      case 'declined': return <Badge variant="destructive">Declined</Badge>;
+      case 'declined':
+        return (
+          <div className="flex flex-col items-start gap-1">
+            <Badge variant="destructive">Declined</Badge>
+          </div>
+        );
       default: return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  const submitContest = async () => {
+    if (!contestPayoutId || !contestReason.trim()) {
+      toast.error('Please provide a reason for contesting.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/payout-contest', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
+        },
+        body: JSON.stringify({
+          payout_request_id: contestPayoutId,
+          reason: contestReason
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success(result.message);
+        setContestModalOpen(false);
+        setContestReason('');
+        setContestPayoutId(null);
+      } else {
+        toast.error(result.error || 'Failed to submit contest');
+      }
+    } catch (error) {
+      console.error('Error submitting contest:', error);
+      toast.error('Failed to submit contest');
     }
   };
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Referrals & Credits</CardTitle>
-          <CardDescription>Share your code, earn credits, and cash out your earnings.</CardDescription>
-        </CardHeader>
-      </Card>
+      <div className="flex justify-between items-center">
+        <Card className="flex-1">
+          <CardHeader>
+            <CardTitle>Referrals & Credits</CardTitle>
+            <CardDescription>Share your code, earn credits, and cash out your earnings.</CardDescription>
+          </CardHeader>
+        </Card>
+        {/* Mock Data Toggle Button */}
+        <button
+          onClick={handleToggleMockData}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-medium transition-colors ${useMockData ? 'bg-amber-100 border-amber-500 text-amber-800 hover:bg-amber-200' : 'bg-green-100 border-green-500 text-green-800 hover:bg-green-200'}`}
+          title={useMockData ? 'Disable mock data' : 'Enable mock data'}
+        >
+          <svg className={`w-5 h-5 ${useMockData ? 'text-amber-600' : 'text-green-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            {useMockData ? (
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            )}
+          </svg>
+          <span className="text-sm font-semibold">
+            {useMockData ? 'Mock Data' : 'Live Data'}
+          </span>
+        </button>
+      </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
@@ -258,9 +344,44 @@ export function ReferralsPage() {
         </Card>
         <Card>
           <CardHeader><CardTitle>Payout History</CardTitle></CardHeader>
-          <CardContent><Table><TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Amount</TableHead><TableHead className="text-right">Status</TableHead></TableRow></TableHeader><TableBody>{isLoading ? <TableRow><TableCell colSpan={3}><Skeleton className="h-10 w-full" /></TableCell></TableRow> : payouts.length > 0 ? payouts.map(p => (<TableRow key={p.id}><TableCell>{isMounted && format(new Date(p.created_at), 'MMM d, yyyy')}</TableCell><TableCell className="font-medium">₱{Number(p.amount).toFixed(2)}</TableCell><TableCell className="text-right">{getStatusBadge(p.status)}</TableCell></TableRow>)) : <TableRow><TableCell colSpan={3} className="text-center h-24">No payout requests yet.</TableCell></TableRow>}</TableBody></Table></CardContent>
+          <CardContent><Table><TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Amount</TableHead><TableHead className="text-right">Status</TableHead></TableRow></TableHeader><TableBody>{isLoading ? <TableRow><TableCell colSpan={3}><Skeleton className="h-10 w-full" /></TableCell></TableRow> : payouts.length > 0 ? payouts.map(p => (<TableRow key={p.id}><TableCell>{isMounted && format(new Date(p.created_at), 'MMM d, yyyy')}</TableCell><TableCell className="font-medium">₱{Number(p.amount).toFixed(2)}</TableCell><TableCell className="text-right">{p.status === 'declined' ? (<div className="flex flex-col items-start gap-1"><Badge variant="destructive">Declined</Badge><Button variant="link" size="sm" className="h-auto p-0 text-xs text-destructive hover:text-destructive-foreground" onClick={() => {setContestPayoutId(p.id);setContestModalOpen(true);}}>Contest Decision</Button></div>) : (p.status === 'pending' ? <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge> : <Badge className="bg-green-100 text-green-800">Processed</Badge>)}</TableCell></TableRow>)) : <TableRow><TableCell colSpan={3} className="text-center h-24">No payout requests yet.</TableCell></TableRow>}</TableBody></Table></CardContent>
         </Card>
       </div>
+
+      {/* Contest Modal */}
+      {contestPayoutId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="font-semibold text-lg mb-2">Contest Payout Decision</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Your payout request has been rejected. Provide your reason for contesting the decision.
+            </p>
+            <textarea
+              value={contestReason}
+              onChange={(e) => setContestReason(e.target.value)}
+              placeholder="Explain why you believe this decision should be reconsidered..."
+              className="w-full h-32 p-3 border rounded-md resize-none"
+            />
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => {
+                  setContestModalOpen(false);
+                  setContestReason('');
+                }}
+                className="px-4 py-2 text-sm border rounded-md hover:bg-muted"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitContest}
+                className="px-4 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Submit Contest
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

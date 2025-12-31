@@ -46,6 +46,12 @@ import {
   Inbox,
   Star,
   Settings,
+  Calendar,
+  GraduationCap,
+  MessageCircle,
+  FolderOpen,
+  Activity,
+  Zap,
 } from "lucide-react";
 
 export type NavItem = {
@@ -64,8 +70,10 @@ export const studentNavGroups: NavGroup[] = [
     title: "Workspace",
     items: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+      { icon: FolderOpen, label: "My Projects", href: "/projects" },
       { icon: MessageCircleQuestion, label: "Messages", href: "/chat" },
       { icon: FileText, label: "Drafts", href: "/drafts" },
+      { icon: Activity, label: "AI Usage", href: "/ai-usage" },
     ],
   },
   {
@@ -143,83 +151,99 @@ export const adminNavItems: NavItem[] = [
   { icon: Network, label: "MCP Servers", href: "/admin/mcp-servers" },
 ];
 
+export const adminNavGroups: NavGroup[] = [
+  {
+    title: "Admin Workspace",
+    items: [
+      { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
+      { icon: Users, label: "User Management", href: "/admin/users" },
+      { icon: TrendingUp, label: "System Analytics", href: "/admin/analytics" },
+      { icon: Settings, label: "System Settings", href: "/admin/settings" },
+    ],
+  },
+  {
+    title: "Content Management",
+    items: [
+      { icon: University, label: "Institutions", href: "/admin/institutions" },
+      { icon: MessageCircleQuestion, label: "Testimonials", href: "/admin/testimonials" },
+      { icon: BookOpen, label: "User Onboarding", href: "/admin/user-onboarding" },
+      { icon: FileText, label: "Documentation", href: "/admin/wiki" },
+    ],
+  },
+  {
+    title: "Financial Management",
+    items: [
+      { icon: Banknote, label: "Payout Requests", href: "/admin/payouts" },
+      { icon: CreditCard, label: "Subscriptions", href: "/admin/subscriptions" },
+      { icon: Gift, label: "Referral Program", href: "/admin/referrals" },
+    ],
+  },
+  {
+    title: "AI & System",
+    items: [
+      { icon: Network, label: "MCP Servers", href: "/admin/mcp-servers" },
+      { icon: BrainCircuit, label: "AI Pipeline", href: "/admin/ai" },
+      { icon: FlaskConical, label: "Paper Search", href: "/admin/paper-search" },
+      { icon: Shield, label: "Security Logs", href: "/admin/security" },
+    ],
+  },
+];
+
 export const advisorNavGroups: NavGroup[] = [
   {
     title: "Advisor Workspace",
     items: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/advisor" },
-      { icon: MessageCircleQuestion, label: "Messages", href: "/advisor/chat" },
-      { icon: FileText, label: "Drafts", href: "/drafts" },
+      { icon: MessageCircleQuestion, label: "Messages", href: "/advisor/messages" },
+      { icon: FileText, label: "Drafts", href: "/advisor/drafts" },
       { icon: CheckSquare, label: "Competency Self-Assessment", href: "/advisor/competency" },
-    ],
-  },
-  {
-    title: "01. Conceptualize - Research Planning",
-    items: [
-      { icon: BrainCircuit, label: "Topic Ideas", href: "/topic-ideas" },
-      { icon: Target, label: "Research Gap Identifier", href: "/research-gap" },
-      { icon: Lightbulb, label: "Research Problem Identifier", href: "/research-problem-identifier" },
-      { icon: FlaskConical, label: "Research Assistant", href: "/research" },
-      { icon: LayoutTemplate, label: "University Format Checker", href: "/university-format-checker" },
-    ],
-  },
-  {
-    title: "02. Research - Literature & Analysis",
-    items: [
-      { icon: Network, label: "Literature Review", href: "/literature-review" },
-      { icon: BookOpen, label: "Find Papers", href: "/papers" },
-      { icon: BookCopy, label: "Reference Manager", href: "/references" },
-      { icon: FlaskConical, label: "Methodology Builder", href: "/methodology" },
-      { icon: BookOpen, label: "Research Article Analyzer", href: "/research-article-analyzer" },
-      { icon: Target, label: "Variable Mapping", href: "/variable-mapping-tool" },
-    ],
-  },
-  {
-    title: "03. Write & Refine - Content Creation",
-    items: [
-      { icon: TitleIdeaIcon, label: "Title Generator", href: "/title-generator" },
-      { icon: List, label: "Outline Builder", href: "/outline" },
-      { icon: Baseline, label: "Grammar Check", href: "/grammar-check" },
-      { icon: Languages, label: "Paraphraser", href: "/paraphraser" },
-      { icon: ShieldCheck, label: "Originality Check", href: "/originality-check" },
-      { icon: FileText, label: "PDF Document Analysis", href: "/document-analyzer" },
-    ],
-  },
-  {
-    title: "04. Submit & Present - Finalization & Defense",
-    items: [
-      { icon: BookCheck, label: "Conclusion Writer", href: "/conclusion" },
-      { icon: FileText, label: "Title Page", href: "/title-page" },
-      { icon: BarChart, label: "Statistical Analysis", href: "/statistical-analysis" },
-      { icon: ClipboardCheck, label: "Results Analyzer", href: "/results" },
     ],
   },
   {
     title: "Student Management",
     items: [
-      { icon: FolderLock, label: "Data Management", href: "/data-management" },
+      { icon: Users, label: "My Students", href: "/advisor/students" },
+      { icon: BookOpen, label: "Student Progress", href: "/advisor/students/analytics" },
+      { icon: FileText, label: "Document Reviews", href: "/advisor/students/documents" },
+      { icon: MessageCircleQuestion, label: "Communication Hub", href: "/advisor/students/communication" },
+      { icon: Target, label: "Milestone Tracking", href: "/advisor/students/milestones" },
     ],
   },
   {
-    title: "Submission Prep",
+    title: "Advisory Tools",
     items: [
-      { icon: Shield, label: "Validity Defender", href: "/thesis-phases/chapter-3/validity-defender" },
-      { icon: Presentation, label: "Defense PPT Coach", href: "/defense-ppt-coach" },
-      { icon: Presentation, label: "Presentation Builder", href: "/presentation" },
-      { icon: MessageCircleQuestion, label: "Q&A Simulator", href: "/qa-simulator" },
-      { icon: MessageCircleQuestion, label: "General Q&A Trainer", href: "/general-qa-framework-trainer" },
-      { icon: MessageCircleQuestion, label: "Proposal Q&A Trainer", href: "/proposal-qa-framework-trainer" },
-      { icon: MessageCircleQuestion, label: "Defense Q&A Trainer", href: "/defense-qa-framework-trainer" },
-      { icon: Lightbulb, label: "Flashcards", href: "/flashcards" },
-      { icon: BarChart, label: "Writing Analytics", href: "/analytics" },
+      { icon: ClipboardCheck, label: "Feedback Templates", href: "/advisor/feedback/templates" },
+      { icon: FilePenLine, label: "Rubric Builder", href: "/advisor/feedback/rubrics" },
+      { icon: ShieldCheck, label: "Quality Assurance", href: "/advisor/feedback/quality" },
+      { icon: AlertTriangle, label: "At-Risk Students", href: "/advisor/students/at-risk" },
+      { icon: Calendar, label: "Appointment Scheduler", href: "/advisor/meetings" },
+    ],
+  },
+  {
+    title: "Analytics & Reporting",
+    items: [
+      { icon: BarChart, label: "Performance Analytics", href: "/advisor/analytics" },
+      { icon: FileText, label: "Progress Reports", href: "/advisor/reports" },
+      { icon: TrendingUp, label: "Trend Analysis", href: "/advisor/analytics/trends" },
+      { icon: Clock, label: "Timeline Tracking", href: "/advisor/analytics/timeline" },
+    ],
+  },
+  {
+    title: "Institutional Management",
+    items: [
+      { icon: Settings, label: "Department Settings", href: "/advisor/institutional" },
+      { icon: Users, label: "Student Assignments", href: "/advisor/institutional/students" },
+      { icon: BookOpen, label: "Thesis Guidelines", href: "/advisor/institutional/guidelines" },
+      { icon: FileCheck, label: "Compliance Check", href: "/advisor/institutional/compliance" },
     ],
   },
   {
     title: "Resources",
     items: [
-      { icon: BookOpen, label: "Resources", href: "/resources" },
-      { icon: University, label: "University Guides", href: "/university-guides" },
-      { icon: BookUser, label: "Advisor Guide", href: "/advisor-guide" },
+      { icon: BookUser, label: "Advisor Guide", href: "/advisor/resources/guide" },
+      { icon: GraduationCap, label: "Training Materials", href: "/advisor/resources/training" },
+      { icon: FileText, label: "Documentation", href: "/advisor/resources/docs" },
+      { icon: MessageCircle, label: "Support", href: "/advisor/resources/support" },
     ],
   },
 ];

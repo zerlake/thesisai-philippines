@@ -14,8 +14,8 @@ export default function CriticPage() {
 
   const { session, profile, isLoading } = authContext;
 
-  // Redirect if not authenticated or not a critic
-  if (!isLoading && (!session || profile?.role !== 'critic')) {
+  // Redirect if not authenticated or not authorized (critic or admin can access)
+  if (!isLoading && (!session || (profile?.role !== 'critic' && profile?.role !== 'admin'))) {
     redirect('/login');
   }
 

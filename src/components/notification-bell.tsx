@@ -408,20 +408,26 @@ export function NotificationBell() {
                 </div>
               )}
 
-              {notifications.map((notification) => (
-                <Link 
-                  key={notification.id}
-                  href={notification.link || "#"}
-                  className={`block px-4 py-3 hover:bg-accent border-b last:border-b-0 ${
-                    !notification.is_read ? "bg-accent/50" : ""
-                  }`}
-                >
-                  <div className="text-sm">{notification.message}</div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                  </div>
-                </Link>
-              ))}
+              {notifications.map((notification) => {
+                const hasLink = notification.link && notification.link !== "#";
+                const Component = hasLink ? Link : 'div';
+                const props = hasLink ? { href: notification.link } : {};
+
+                return (
+                  <Component
+                    key={notification.id}
+                    {...props}
+                    className={`block px-4 py-3 hover:bg-accent border-b last:border-b-0 ${
+                      !notification.is_read ? "bg-accent/50" : ""
+                    } ${hasLink ? 'cursor-pointer' : 'cursor-default'}`}
+                  >
+                    <div className="text-sm">{notification.message}</div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                    </div>
+                  </Component>
+                );
+              })}
 
               {notifications.length === 0 && chatMessages.length === 0 && (
                 <div className="p-8 text-center text-muted-foreground">

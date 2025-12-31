@@ -15,6 +15,7 @@ import {
   UserCheck,
   ClipboardCheck,
   ChevronDown,
+  Shield,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -33,7 +34,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { cn } from "../lib/utils";
 import { AuthenticatedNotificationBell } from "./authenticated-notification-bell";
-import { studentNavGroups, adminNavItems, advisorNavGroups, criticNavGroups, type NavItem, type NavGroup } from "../lib/navigation";
+import { studentNavGroups, adminNavGroups, advisorNavGroups, criticNavGroups, type NavItem, type NavGroup } from "../lib/navigation";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 
@@ -76,6 +77,85 @@ export function Header() {
 
         {/* Main Navigation - Hidden on mobile */}
         <div className="hidden lg:flex items-center space-x-1">
+          {/* Admin Navigation */}
+          {profile?.role === 'admin' && (
+            <>
+              {/* Dashboard Switcher for Admin - Access all dashboards */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="px-3">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Dashboards <ChevronDown className="ml-1 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuLabel>Switch Dashboard</DropdownMenuLabel>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin" className="flex items-center gap-2">
+                      <Shield className="h-4 w-4" />
+                      Admin Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/advisor" className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      Advisor Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/critic" className="flex items-center gap-2">
+                      <ClipboardCheck className="h-4 w-4" />
+                      Critic Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard" className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Student Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Admin Tools Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="px-3">
+                    Management <ChevronDown className="ml-1 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuLabel>User Management</DropdownMenuLabel>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/users">User Management</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/institutions">Institutions</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/testimonials">Testimonials</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Financial</DropdownMenuLabel>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/payouts">Payout Requests</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>System</DropdownMenuLabel>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/ai">AI Pipeline</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/mcp-servers">MCP Servers</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/wiki">Documentation</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          )}
+
           {/* Critic Navigation */}
           {profile?.role === 'critic' && (
             <>
@@ -211,121 +291,181 @@ export function Header() {
                   {/* Critic Mobile Navigation */}
                   {profile?.role === 'critic' && (
                     <>
-                      <div>
-                        <DropdownMenuLabel>Workspace</DropdownMenuLabel>
-                        <Link href="/critic">
-                          <DropdownMenuItem>Dashboard</DropdownMenuItem>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground px-3 py-2">Workspace</p>
+                        <Link href="/critic" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Dashboard</Button>
                         </Link>
-                        <Link href="/critic/review-queue">
-                          <DropdownMenuItem>Review Queue</DropdownMenuItem>
+                        <Link href="/critic/review-queue" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Review Queue</Button>
                         </Link>
-                        <Link href="/critic/students">
-                          <DropdownMenuItem>My Students</DropdownMenuItem>
+                        <Link href="/critic/students" className="block">
+                          <Button variant="ghost" className="w-full justify-start">My Students</Button>
                         </Link>
-                        <Link href="/critic/chat">
-                          <DropdownMenuItem>Messages</DropdownMenuItem>
-                        </Link>
-                      </div>
-                      <div>
-                        <DropdownMenuLabel>Review Tools</DropdownMenuLabel>
-                        <Link href="/critic/manuscript-analyzer">
-                          <DropdownMenuItem>Manuscript Analyzer</DropdownMenuItem>
-                        </Link>
-                        <Link href="/critic/grammar-checker">
-                          <DropdownMenuItem>Grammar Checker</DropdownMenuItem>
-                        </Link>
-                        <Link href="/critic/plagiarism-check">
-                          <DropdownMenuItem>Plagiarism Detector</DropdownMenuItem>
-                        </Link>
-                        <Link href="/critic/citation-auditor">
-                          <DropdownMenuItem>Citation Auditor</DropdownMenuItem>
+                        <Link href="/critic/chat" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Messages</Button>
                         </Link>
                       </div>
-                      <div>
-                        <DropdownMenuLabel>Feedback</DropdownMenuLabel>
-                        <Link href="/critic/feedback-templates">
-                          <DropdownMenuItem>Feedback Templates</DropdownMenuItem>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground px-3 py-2">Review Tools</p>
+                        <Link href="/critic/manuscript-analyzer" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Manuscript Analyzer</Button>
                         </Link>
-                        <Link href="/critic/certification-checklist">
-                          <DropdownMenuItem>Certification Checklist</DropdownMenuItem>
+                        <Link href="/critic/grammar-checker" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Grammar Checker</Button>
                         </Link>
-                        <Link href="/critic/issue-certificate">
-                          <DropdownMenuItem>Issue Certificate</DropdownMenuItem>
+                        <Link href="/critic/plagiarism-check" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Plagiarism Detector</Button>
                         </Link>
-                      </div>
-                      <div>
-                        <DropdownMenuLabel>Analytics</DropdownMenuLabel>
-                        <Link href="/critic/statistics">
-                          <DropdownMenuItem>Review Statistics</DropdownMenuItem>
-                        </Link>
-                        <Link href="/critic/billing">
-                          <DropdownMenuItem>Earnings Report</DropdownMenuItem>
+                        <Link href="/critic/citation-auditor" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Citation Auditor</Button>
                         </Link>
                       </div>
-                      <div>
-                        <DropdownMenuLabel>Resources</DropdownMenuLabel>
-                        <Link href="/critic-guide">
-                          <DropdownMenuItem>Critic Guide</DropdownMenuItem>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground px-3 py-2">Feedback</p>
+                        <Link href="/critic/feedback-templates" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Feedback Templates</Button>
                         </Link>
-                        <Link href="/critic/rubrics">
-                          <DropdownMenuItem>Evaluation Rubrics</DropdownMenuItem>
+                        <Link href="/critic/certification-checklist" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Certification Checklist</Button>
+                        </Link>
+                        <Link href="/critic/issue-certificate" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Issue Certificate</Button>
+                        </Link>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground px-3 py-2">Analytics</p>
+                        <Link href="/critic/statistics" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Review Statistics</Button>
+                        </Link>
+                        <Link href="/critic/billing" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Earnings Report</Button>
+                        </Link>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground px-3 py-2">Resources</p>
+                        <Link href="/critic-guide" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Critic Guide</Button>
+                        </Link>
+                        <Link href="/critic/rubrics" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Evaluation Rubrics</Button>
                         </Link>
                       </div>
                     </>
                   )}
 
-                  {/* Non-critic Navigation */}
-                  {profile?.role !== 'critic' && (
+                  {/* Advisor Mobile Navigation */}
+                  {profile?.role === 'advisor' && (
                     <>
-                      <div>
-                        <DropdownMenuLabel>Products</DropdownMenuLabel>
-                        <Link href="/thesis">
-                          <DropdownMenuItem>ThesisAI</DropdownMenuItem>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground px-3 py-2">Advisor Workspace</p>
+                        <Link href="/advisor" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Dashboard</Button>
                         </Link>
-                        <DropdownMenuItem disabled>ARC Generator</DropdownMenuItem>
+                        <Link href="/advisor/messages" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Messages</Button>
+                        </Link>
+                        <Link href="/advisor/drafts" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Drafts</Button>
+                        </Link>
+                        <Link href="/advisor/competency-assessment" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Competency Assessment</Button>
+                        </Link>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground px-3 py-2">Thesis Phases</p>
+                        <Link href="/advisor/01-conceptualize" className="block">
+                          <Button variant="ghost" className="w-full justify-start">01. Conceptualize</Button>
+                        </Link>
+                        <Link href="/advisor/02-research" className="block">
+                          <Button variant="ghost" className="w-full justify-start">02. Research</Button>
+                        </Link>
+                        <Link href="/advisor/03-write-refine" className="block">
+                          <Button variant="ghost" className="w-full justify-start">03. Write & Refine</Button>
+                        </Link>
+                        <Link href="/advisor/04-submit-present" className="block">
+                          <Button variant="ghost" className="w-full justify-start">04. Submit & Present</Button>
+                        </Link>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground px-3 py-2">Student Management</p>
+                        <Link href="/advisor/students/overview" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Overview</Button>
+                        </Link>
+                        <Link href="/advisor/students/communication" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Communication Hub</Button>
+                        </Link>
+                        <Link href="/advisor/students/documents" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Document Review Tools</Button>
+                        </Link>
+                        <Link href="/advisor/students/analytics" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Analytics</Button>
+                        </Link>
+                        <Link href="/advisor/students/management" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Management</Button>
+                        </Link>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground px-3 py-2">Resources</p>
+                        <Link href="/advisor-guide" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Advisor Guide</Button>
+                        </Link>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Student/General Navigation */}
+                  {profile?.role !== 'critic' && profile?.role !== 'advisor' && (
+                    <>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground px-3 py-2">Products</p>
+                        <Link href="/thesis" className="block">
+                          <Button variant="ghost" className="w-full justify-start">ThesisAI</Button>
+                        </Link>
+                        <Button variant="ghost" className="w-full justify-start" disabled>ARC Generator</Button>
                       </div>
                       {!pathname.startsWith('/admin') && !pathname.startsWith('/advisor') && (
-                        <div>
-                          <DropdownMenuLabel>Thesis Phases</DropdownMenuLabel>
-                          <Link href="/thesis-phases/chapter-1">
-                            <DropdownMenuItem>Chapter 1 - Introduction</DropdownMenuItem>
+                        <div className="space-y-1">
+                          <p className="text-xs font-medium text-muted-foreground px-3 py-2">Thesis Phases</p>
+                          <Link href="/thesis-phases/chapter-1" className="block">
+                            <Button variant="ghost" className="w-full justify-start">Chapter 1 - Introduction</Button>
                           </Link>
-                          <Link href="/thesis-phases/chapter-2">
-                            <DropdownMenuItem>Chapter 2 - Literature Review</DropdownMenuItem>
+                          <Link href="/thesis-phases/chapter-2" className="block">
+                            <Button variant="ghost" className="w-full justify-start">Chapter 2 - Literature Review</Button>
                           </Link>
-                          <Link href="/thesis-phases/chapter-3">
-                            <DropdownMenuItem>Chapter 3 - Methodology</DropdownMenuItem>
+                          <Link href="/thesis-phases/chapter-3" className="block">
+                            <Button variant="ghost" className="w-full justify-start">Chapter 3 - Methodology</Button>
                           </Link>
-                          <Link href="/thesis-phases/chapter-4">
-                            <DropdownMenuItem>Chapter 4 - Results & Analysis</DropdownMenuItem>
-                          </Link>
-                          <Link href="/thesis-phases/chapter-5">
-                            <DropdownMenuItem>Chapter 5 - Conclusions</DropdownMenuItem>
+                          <Link href="/thesis-phases/chapter-4" className="block">
+                            <Button variant="ghost" className="w-full justify-start">Chapter 4 - Results & Analysis</Button>
+                        </Link>
+                          <Link href="/thesis-phases/chapter-5" className="block">
+                            <Button variant="ghost" className="w-full justify-start">Chapter 5 - Conclusions</Button>
                           </Link>
                         </div>
                       )}
-                      <div>
-                        <DropdownMenuLabel>Resources</DropdownMenuLabel>
-                        <Link href="/documentation">
-                          <DropdownMenuItem>Documentation</DropdownMenuItem>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground px-3 py-2">Resources</p>
+                        <Link href="/documentation" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Documentation</Button>
                         </Link>
-                        <Link href="/support">
-                          <DropdownMenuItem>Support</DropdownMenuItem>
+                        <Link href="/support" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Support</Button>
                         </Link>
                       </div>
-                      <div>
-                        <DropdownMenuLabel>Account</DropdownMenuLabel>
-                        <Link href="/settings/billing">
-                          <DropdownMenuItem>Billing</DropdownMenuItem>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground px-3 py-2">Account</p>
+                        <Link href="/settings/billing" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Billing</Button>
                         </Link>
-                        <Link href="/settings/referrals">
-                          <DropdownMenuItem>Referrals</DropdownMenuItem>
+                        <Link href="/settings/referrals" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Referrals</Button>
                         </Link>
-                        <Link href="/groups">
-                          <DropdownMenuItem>Manage Groups</DropdownMenuItem>
+                        <Link href="/groups" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Manage Groups</Button>
                         </Link>
-                        <Link href="/analytics">
-                          <DropdownMenuItem>Usage & Analytics</DropdownMenuItem>
+                        <Link href="/analytics" className="block">
+                          <Button variant="ghost" className="w-full justify-start">Usage & Analytics</Button>
                         </Link>
                       </div>
                     </>

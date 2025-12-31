@@ -42,6 +42,13 @@ export enum AuditAction {
   // Data events
   DATA_EXPORTED = 'data_exported',
   DATA_IMPORTED = 'data_imported',
+
+  // Payout events
+  PAYOUT_REQUESTED = 'payout_requested',
+  PAYOUT_APPROVED = 'payout_approved',
+  PAYOUT_REJECTED = 'payout_rejected',
+  PAYOUT_PROCESSED = 'payout_processed',
+  PAYOUT_CANCELLED = 'payout_cancelled',
 }
 
 export enum AuditSeverity {
@@ -120,8 +127,97 @@ export async function logAuditEvent(
     auditLogStore.shift();
   }
 
-  // TODO: In production, write to Supabase
-  // await writeToSupabaseAuditLog(event);
+  // In production, write to Supabase
+  await writeToSupabaseAuditLog(event);
+}
+
+/**
+ * Write audit event to Supabase database
+ */
+async function writeToSupabaseAuditLog(event: AuditEvent): Promise<void> {
+  try {
+    // Dynamically import Supabase client to avoid SSR issues
+    const { createClient } = await import('@supabase/supabase-js');
+
+    // Get Supabase URL and service role key from environment
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      console.warn('Supabase environment variables not set, skipping database audit log');
+      return;
+    }
+
+    // Create client with service role to bypass RLS
+    const supabase = createClient(supabaseUrl, serviceRoleKey, {
+      auth: {
+        persistSession: false,
+      }
+    });
+
+    // Determine if this is a financial audit event
+    const isFinancialAudit = [
+      'payout_requested',
+      'payout_approved',
+      'payout_rejected',
+      'payout_processed',
+      'payout_cancelled',
+      'referral_flagged',
+      'user_role_changed',
+      'fraud_confirmed'
+    ].includes(event.action);
+
+    if (isFinancialAudit) {
+      // Insert into financial_audit_trail table
+      const { error } = await supabase
+        .from('financial_audit_trail')
+        .insert({
+          action: event.action,
+          user_id: event.userId,
+          target_user_id: event.details?.target_user_id || event.userId,
+          resource_type: event.resourceType,
+          resource_id: event.resourceId,
+          severity: event.severity,
+          details: event.details,
+          ip_address: event.ipAddress,
+          user_agent: event.userAgent,
+          created_at: event.timestamp.toISOString()
+        });
+
+      if (error) {
+        console.error('Error writing financial audit log to Supabase:', error);
+      }
+    } else {
+      // Insert into general audit_logs table
+      const { error } = await supabase
+        .from('audit_logs')
+        .insert({
+          table_name: 'general',
+          record_id: crypto.randomUUID ? crypto.randomUUID() : 'general-audit',
+          action: event.action,
+          old_values: null,
+          new_values: {
+            userId: event.userId,
+            resourceType: event.resourceType,
+            resourceId: event.resourceId,
+            severity: event.severity,
+            details: event.details,
+            ipAddress: event.ipAddress,
+            userAgent: event.userAgent
+          },
+          changed_by: event.userId,
+          ip_address: event.ipAddress,
+          user_agent: event.userAgent,
+          created_at: event.timestamp.toISOString()
+        });
+
+      if (error) {
+        console.error('Error writing general audit log to Supabase:', error);
+      }
+    }
+  } catch (error) {
+    console.error('Error in writeToSupabaseAuditLog:', error);
+  }
 }
 
 /**

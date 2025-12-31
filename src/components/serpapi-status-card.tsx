@@ -9,7 +9,7 @@ import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
 import { Globe } from "lucide-react";
 import { getSupabaseFunctionUrl } from "@/integrations/supabase/client";
-import { useApiCall } from "@/hooks/use-api-call";
+import { apiCall } from "@/lib/api-client";
 
 type SerpApiStatus = {
   account_email: string;
@@ -22,27 +22,23 @@ type SerpApiStatus = {
 export function SerpApiStatusCard() {
   const { session } = useAuth();
   const [status, setStatus] = useState<SerpApiStatus | null>(null);
+  const [isFetchingStatus, setIsFetchingStatus] = useState(false);
+  const [fetchError, setFetchError] = useState<Error | null>(null);
+  const hasFetchedRef = useRef(false);
 
   const serpApiUrl = useMemo(() => getSupabaseFunctionUrl("get-serpapi-status"), []);
 
-  const { execute: fetchSerpApiStatus, loading: isFetchingStatus, error: fetchError } = useApiCall<SerpApiStatus>({
-    onSuccess: (data) => {
-      setStatus(data);
-    },
-    onError: (error) => {
-      toast.error(error.message);
-      console.error(error);
-    },
-    autoErrorToast: false, // We handle toast explicitly
-  });
-
   // Effect to fetch status when component mounts and session is available
   useEffect(() => {
-    if (!session) return; // Only proceed if session exists
+    if (!session?.access_token || hasFetchedRef.current) return;
 
     const fetchStatus = async () => {
+      setIsFetchingStatus(true);
+      setFetchError(null);
+      hasFetchedRef.current = true;
+
       try {
-        await fetchSerpApiStatus(serpApiUrl, {
+        const response = await apiCall<SerpApiStatus>(serpApiUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -50,15 +46,19 @@ export function SerpApiStatusCard() {
             apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
           },
         });
+        setStatus(response.data);
       } catch (error) {
-        // Errors are handled by useApiCall's onError
-        console.error("Local error before API call in fetchStatus:", error);
+        const err = error instanceof Error ? error : new Error(String(error));
+        setFetchError(err);
+        toast.error(err.message);
+        console.error("Error fetching SerpApi status:", error);
+      } finally {
+        setIsFetchingStatus(false);
       }
     };
 
-    // Call immediately when session becomes available
     fetchStatus();
-  }, [session?.access_token, fetchSerpApiStatus, serpApiUrl]); // Include serpApiUrl in dependencies
+  }, [session?.access_token, serpApiUrl]);
 
   const usagePercentage = status ? (status.this_month_usage / status.searches_per_month) * 100 : 0;
 

@@ -58,6 +58,42 @@ serve(async (req: Request) => {
 
     if (error) throw error;
 
+    // Log the payout request event
+    try {
+      // Get user info to include in audit log
+      const { data: { user } } = await supabase.auth.getUser(jwt);
+
+      // Send audit log request to our API endpoint
+      const auditLogResponse = await fetch(`${Deno.env.get('NEXT_PUBLIC_APP_BASE_URL')}/api/admin/audit-log`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` // Use service role
+        },
+        body: JSON.stringify({
+          action: 'payout_requested',
+          userId: user?.id,
+          resourceType: 'payout_request',
+          resourceId: data?.request_id || 'unknown', // Assuming the RPC returns a request ID
+          severity: 'info',
+          details: {
+            amount: amount,
+            payout_method: method,
+            payout_details: details,
+            target_user_id: user?.id
+          },
+          ipAddress: req.headers.get('X-Forwarded-For') || req.headers.get('X-Real-IP') || 'unknown',
+          userAgent: req.headers.get('User-Agent') || 'unknown'
+        })
+      });
+
+      if (!auditLogResponse.ok) {
+        console.error('Failed to log audit event:', await auditLogResponse.text());
+      }
+    } catch (auditError) {
+      console.error('Error logging audit event:', auditError);
+    }
+
     return new Response(JSON.stringify({ message: data }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,

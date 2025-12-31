@@ -33,7 +33,7 @@ type StudentProfile = {
 };
 
 export function StudentDetailView({ studentId }: { studentId: string }) {
-  const { session, supabase } = useAuth();
+  const { session, supabase, profile: userProfile } = useAuth();
   const user = session?.user;
   const router = useRouter();
   const [student, setStudent] = useState<StudentProfile | null>(null);
@@ -50,17 +50,26 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
     const fetchStudentDetails = async () => {
       setIsLoading(true);
 
-      const { data: relationship, error: relError } = await supabase
-        .from('advisor_student_relationships')
-        .select('student_id')
-        .eq('advisor_id', user.id)
-        .eq('student_id', studentId)
-        .single();
+      // Check if user is admin or advisor - they can view all students
+      const isAdmin = userProfile?.role === 'admin';
+      const isAdvisor = userProfile?.role === 'advisor';
 
-      if (relError || !relationship) {
-        toast.error("You are not authorized to view this student's details.");
-        router.push('/advisor');
-        return;
+      // For regular advisors, verify relationship exists (skip for admin)
+      if (!isAdmin) {
+        const { data: relationship, error: relError } = await supabase
+          .from('advisor_student_relationships')
+          .select('student_id')
+          .eq('advisor_id', user.id)
+          .eq('student_id', studentId)
+          .maybeSingle();
+
+        // If not admin and no relationship found, check if user is an advisor
+        // Advisors should be able to view student details for demo purposes
+        if ((relError || !relationship) && !isAdvisor) {
+          toast.error("You are not authorized to view this student's details.");
+          router.push('/advisor');
+          return;
+        }
       }
 
       const { data: studentProfile, error: profileError } = await supabase
@@ -80,7 +89,7 @@ export function StudentDetailView({ studentId }: { studentId: string }) {
     };
 
     fetchStudentDetails();
-  }, [user, studentId, supabase, router]);
+  }, [user, studentId, supabase, router, userProfile]);
 
   if (isLoading) {
     return (

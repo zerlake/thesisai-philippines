@@ -8,6 +8,7 @@ import { DashboardCustomization } from "@/components/dashboard-customization";
 import { NotificationSettings } from "@/components/notification-settings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CriticManagement } from "@/components/critic-management";
+import { DashboardSettingsPage } from "@/components/dashboard-settings-page";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -77,8 +78,9 @@ function SettingsPageContent() {
     <div className="max-w-4xl mx-auto space-y-8">
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <div className="flex justify-center">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
+          <TabsList className="grid w-full max-w-lg grid-cols-4">
             <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="advisor">Manage Advisor</TabsTrigger>
             <TabsTrigger value="critic">Manage Critic</TabsTrigger>
           </TabsList>
@@ -86,6 +88,12 @@ function SettingsPageContent() {
 
         <TabsContent value="profile">
           {profileContent}
+        </TabsContent>
+
+        <TabsContent value="dashboard">
+          <div className="mt-8">
+            <DashboardSettingsPage />
+          </div>
         </TabsContent>
 
         <TabsContent value="advisor">

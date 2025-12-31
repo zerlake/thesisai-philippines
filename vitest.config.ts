@@ -9,7 +9,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
-    exclude: [
+exclude: [
       '**/node_modules/**',
       '**/dist/**',
       // Exclude integration tests if Supabase env vars not set
