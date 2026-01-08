@@ -79,14 +79,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Create a notification for admins about the new contest
+    // Note: In a real implementation, this should be sent to admin user IDs
     const { error: notificationError } = await supabase
       .from('notifications')
       .insert({
         user_id: user.id, // This will be updated to admin user IDs in a real implementation
         title: 'Payout Contest Filed',
         message: `A user has contested a rejected payout request (ID: ${payout_request_id}). Please review.`,
-        type: 'warning',
-        created_at: new Date().toISOString()
+        notification_type: 'alert',
+        priority: 2,
+        channels: ['in_app']
       });
 
     if (notificationError) {

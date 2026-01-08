@@ -16,6 +16,8 @@ import {
   ClipboardCheck,
   ChevronDown,
   Shield,
+  Bell,
+  Activity,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -37,6 +39,7 @@ import { AuthenticatedNotificationBell } from "./authenticated-notification-bell
 import { studentNavGroups, adminNavGroups, advisorNavGroups, criticNavGroups, type NavItem, type NavGroup } from "../lib/navigation";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
+import { NotificationPreferencesDialog } from "./notification-preferences-dialog";
 
 export function Header() {
   const { supabase, session, profile } = useAuth();
@@ -234,6 +237,16 @@ export function Header() {
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Link href="/thesis-phases/chapter-5">Chapter 5 - Conclusions</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Finalization Tools</DropdownMenuLabel>
+                  <DropdownMenuItem>
+                    <Link href="/thesis-phases/finalizer">
+                      <div className="flex items-center justify-between w-full">
+                        <span>Thesis Finalizer Pro</span>
+                        <span className="text-xs bg-purple-500/10 text-purple-500 px-2 py-1 rounded">Pro+Advisor+</span>
+                      </div>
+                    </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -442,6 +455,14 @@ export function Header() {
                           <Link href="/thesis-phases/chapter-5" className="block">
                             <Button variant="ghost" className="w-full justify-start">Chapter 5 - Conclusions</Button>
                           </Link>
+                          <Link href="/thesis-phases/finalizer" className="block">
+                            <Button variant="ghost" className="w-full justify-start">
+                              <div className="flex items-center justify-between w-full">
+                                <span>Thesis Finalizer Pro</span>
+                                <span className="text-xs bg-purple-500/10 text-purple-500 px-2 py-1 rounded">Pro+Advisor+</span>
+                              </div>
+                            </Button>
+                          </Link>
                         </div>
                       )}
                       <div className="space-y-1">
@@ -502,8 +523,26 @@ export function Header() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <Link href="/settings">Profile</Link>
+                <Link href="/settings" className="flex items-center w-full">
+                  <User className="w-4 h-4 mr-2" />
+                  Profile
+                </Link>
               </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href="/ai-usage" className="flex items-center w-full">
+                  <Activity className="w-4 h-4 mr-2" />
+                  AI Usage
+                </Link>
+              </DropdownMenuItem>
+              <NotificationPreferencesDialog
+                userRole={(profile?.role as any) || 'student'}
+                trigger={
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                    <Bell className="w-4 h-4 mr-2" />
+                    Notifications
+                  </DropdownMenuItem>
+                }
+              />
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>
@@ -513,3 +552,5 @@ export function Header() {
     </header>
   );
 }
+
+export { Header };

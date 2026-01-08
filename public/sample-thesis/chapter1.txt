@@ -1,0 +1,7 @@
+# Chapter 1: Introduction
+
+## 1.1 Background of the Study
+The rise of artificial intelligence (AI) has led to significant advancements in various fields, including academic research. This study explores the impact of AI-powered tools on the thesis writing process for undergraduate students.
+
+## 1.2 Statement of the Problem
+Many students struggle with the complexities of academic writing, including literature reviews, data analysis, and citation management. This research investigates whether AI tools can effectively alleviate these challenges.

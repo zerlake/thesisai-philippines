@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -108,6 +109,7 @@ const courses = [
 ];
 
 export default function TrainingMaterialsPage() {
+  const router = useRouter();
   const [expandedCourse, setExpandedCourse] = useState<number | null>(null);
 
   const getCourseIcon = (id: number) => {
@@ -195,9 +197,15 @@ export default function TrainingMaterialsPage() {
                   <Button
                     size="sm"
                     variant={course.status === "completed" ? "outline" : "default"}
-                    onClick={() => setExpandedCourse(expandedCourse === course.id ? null : course.id)}
+                    onClick={() => {
+                      if (course.id <= 3) {
+                        router.push(`/advisor/resources/training/course-${course.id}`);
+                      } else {
+                        setExpandedCourse(expandedCourse === course.id ? null : course.id);
+                      }
+                    }}
                   >
-                    {expandedCourse === course.id ? (
+                    {expandedCourse === course.id && course.id > 3 ? (
                       <>View Less</>
                     ) : (
                       <>

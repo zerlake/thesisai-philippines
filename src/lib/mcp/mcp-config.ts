@@ -102,6 +102,26 @@ export const mcpConfig: MCPConfig = {
       retries: 3,
     },
 
+    // Excalidraw MCP Server
+    excalidraw: {
+      id: 'excalidraw',
+      name: 'Excalidraw Diagram Generator',
+      description: 'AI-powered diagram generation with Excalidraw',
+      endpoint: process.env.EXCALIDRAW_MCP_ENDPOINT || 'http://localhost:3001',
+      transport: 'remote',
+      enabled: true,
+      tools: [
+        'generate_diagram_from_prompt',
+        'create_elements',
+        'update_elements',
+        'delete_elements',
+        'batch_create_elements',
+        'query_elements'
+      ],
+      timeout: 30000,
+      retries: 3,
+    },
+
     // Local MCP Server (if running locally)
     local: {
       id: 'local',

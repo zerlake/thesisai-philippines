@@ -21,12 +21,47 @@ type Profile = {
     notification_preferences: { [key: string]: boolean };
   } | null;
   [key: string]: any;
-} | null;
+};
+
+const determineRoleFromEmail = (email?: string | null): string => {
+  if (!email) return "user";
+  if (email.includes("demo-admin")) return "admin";
+  if (email.includes("admin") || email.includes("admin@thesisai")) return "admin";
+  if (email.includes("advisor") || email.includes("demo-advisor")) return "advisor";
+  if (email.includes("critic")) return "critic";
+  return "user";
+};
+
+const buildMinimalProfile = (params: {
+  id: string;
+  email?: string | null;
+  role?: string;
+}): Profile => {
+  const role = params.role ?? determineRoleFromEmail(params.email);
+
+  return {
+    id: params.id,
+    email: params.email,
+    role,
+    created_at: null,
+    updated_at: null,
+    last_login_at: new Date().toISOString(),
+    first_name: '',
+    last_name: '',
+    institution: '',
+    department: '',
+    is_onboarded: false,
+    preferences: {},
+    avatar_url: null,
+    full_name: params.email?.split('@')[0] || 'User',
+    user_preferences: null
+  };
+};
 
 type AuthContextType = {
   supabase: SupabaseClient;
   session: Session | null;
-  profile: Profile;
+  profile: Profile | null;
   refreshProfile: () => Promise<void>;
   isLoading: boolean;
 };
@@ -40,34 +75,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const fetchProfile = useCallback(async (user: User | undefined) => {
-    if (!user) {
-      setProfile(null);
-      setSession(null);
-      return;
-    }
-
+  const fetchProfileInternal = useCallback(async (user: User): Promise<Profile> => {
     // Check if Supabase is properly configured before making API calls
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       console.warn("Supabase not configured, using minimal profile");
-      setProfile({
-        id: user.id,
-        email: user.email,
-        role: "user",
-        created_at: null,
-        updated_at: null,
-        last_login_at: new Date().toISOString(),
-        first_name: '',
-        last_name: '',
-        institution: '',
-        department: '',
-        is_onboarded: false,
-        preferences: {},
-        avatar_url: null,
-        full_name: user.email?.split('@')[0] || 'User',
-        user_preferences: null
-      });
-      return;
+      return buildMinimalProfile({ id: user.id, email: user.email, role: "user" });
     }
 
     try {
@@ -76,22 +88,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       let profileData = null;
       let profileError = null;
       const maxRetries = 3;
-      
+
       for (let attempt = 0; attempt < maxRetries; attempt++) {
         const result = await supabase
           .from("profiles")
           .select("*")
           .eq("id", user.id)
           .single();
-        
+
         profileData = result.data;
         profileError = result.error;
-        
+
         // If we got the profile or a different error (not "not found"), break
         if (profileData || (profileError && profileError.code !== 'PGRST116')) {
           break;
         }
-        
+
         // If profile not found and we have retries left, wait and retry
         if (profileError?.code === 'PGRST116' && attempt < maxRetries - 1) {
           await new Promise(resolve => setTimeout(resolve, 500));
@@ -102,62 +114,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Handle network errors gracefully
         if (profileError.message && profileError.message.includes("Failed to fetch")) {
           console.warn("Network error fetching profile, using minimal profile:", profileError.message);
-          // Determine role based on email pattern for demo accounts
-          // Order matters - check more specific patterns first
-          const email = user.email;
-          let role = "user"; // default role
-
-          if (email && email.includes('demo-admin')) {
-            role = "admin";
-          } else if (email && (email.includes('admin') || email.includes('admin@thesisai'))) {
-            role = "admin";
-          } else if (email && (email.includes('advisor') || email.includes('demo-advisor'))) {
-            role = "advisor";
-          } else if (email && email.includes('critic')) {
-            role = "critic";
-          }
-
-          console.log(`[Auth] Network error, setting role based on email pattern: ${role} for ${email}`);
-
-          setProfile({
-            id: user.id,
-            email: user.email,
-            role: role,
-            created_at: null,
-            updated_at: null,
-            last_login_at: new Date().toISOString(),
-            first_name: '',
-            last_name: '',
-            institution: '',
-            department: '',
-            is_onboarded: false,
-            preferences: {},
-            avatar_url: null,
-            full_name: user.email?.split('@')[0] || 'User',
-            user_preferences: null
-          });
-          return;
+          return buildMinimalProfile({ id: user.id, email: user.email });
         }
 
         if (profileError.code === 'PGRST116') {
-          // Determine role based on email pattern for demo accounts when profile doesn't exist
-          // Order matters - check more specific patterns first
-          const email = user.email;
-          let role = "user"; // default role
+          const role = determineRoleFromEmail(user.email);
+          console.log(`[Auth] Profile not found, creating with role based on email: ${role} for ${user.email}`);
 
-          if (email && email.includes('demo-admin')) {
-            role = "admin";
-          } else if (email && (email.includes('admin') || email.includes('admin@thesisai'))) {
-            role = "admin";
-          } else if (email && (email.includes('advisor') || email.includes('demo-advisor'))) {
-            role = "advisor";
-          } else if (email && email.includes('critic')) {
-            role = "critic";
-          }
-
-          console.log(`[Auth] Profile not found, creating with role based on email: ${role} for ${email}`);
-
-          // Create a default profile for the user
           const { error: createError } = await supabase
             .from("profiles")
             .insert({
@@ -169,34 +132,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           if (createError) {
             console.error("Failed to create profile:", createError);
-            // Check if it's a network error
             if (createError.message && createError.message.includes("Failed to fetch")) {
               toast.error("Unable to create user profile. Please check your internet connection.");
             } else {
               toast.error("Could not create user profile.");
             }
-            // Set a minimal profile anyway to allow user access
-            setProfile({
-              id: user.id,
-              email: user.email,
-              role: role, // Use determined role instead of default
-              created_at: null,
-              updated_at: null,
-              last_login_at: new Date().toISOString(),
-              first_name: '',
-              last_name: '',
-              institution: '',
-              department: '',
-              is_onboarded: false,
-              preferences: {},
-              avatar_url: null,
-              full_name: user.email?.split('@')[0] || 'User',
-              user_preferences: null
-            });
-            return;
+            return buildMinimalProfile({ id: user.id, email: user.email, role });
           }
 
-          // Fetch the newly created profile
           const { data: newProfile } = await supabase
             .from("profiles")
             .select("*")
@@ -204,101 +147,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .single();
 
           if (newProfile) {
-              console.log("[Auth] Created new profile with role:", newProfile.role);
-              setProfile(newProfile);
-            }
-            return;
-        }
-        // For other errors, log them but continue with minimal profile
-         console.error("Profile fetch error:", profileError);
-
-         // Determine role based on email pattern for other errors
-         // Order matters - check more specific patterns first
-         const email = user.email;
-         let role = "user"; // default role
-
-         if (email && email.includes('demo-admin')) {
-           role = "admin";
-         } else if (email && (email.includes('admin') || email.includes('admin@thesisai'))) {
-           role = "admin";
-         } else if (email && (email.includes('advisor') || email.includes('demo-advisor'))) {
-           role = "advisor";
-         } else if (email && email.includes('critic')) {
-           role = "critic";
-         }
-
-         console.log(`[Auth] Error fetching profile, setting role based on email: ${role} for ${email}`);
-
-         setProfile({
-           id: user.id,
-           email: user.email,
-           role: role, // Use determined role instead of default
-           created_at: null,
-           updated_at: null,
-           last_login_at: new Date().toISOString(),
-           first_name: '',
-           last_name: '',
-           institution: '',
-           department: '',
-           is_onboarded: false,
-           preferences: {},
-           avatar_url: null,
-           full_name: user.email?.split('@')[0] || 'User',
-           user_preferences: null
-         });
-         return;
+            console.log("[Auth] Created new profile with role:", newProfile.role);
+            return newProfile;
+          }
         }
 
-        if (profileData) {
+        console.error("Profile fetch error:", profileError);
+        return buildMinimalProfile({ id: user.id, email: user.email });
+      }
+
+      if (profileData) {
         console.log("[Auth] Profile fetched successfully with role:", profileData.role);
-        setProfile(profileData);
-        }
-        } catch (e: any) {
-        console.error("Error in fetchProfile:", e);
-        // Check if it's a network error
-        if (e?.message?.includes("Failed to fetch") || e?.message?.includes("NetworkError")) {
-          toast.error("Unable to fetch user profile. Please check your internet connection.");
-        } else {
-          const normalized = normalizeError(e, 'fetchProfile');
-          toast.error("Could not fetch user profile.");
-        }
-        // Set a minimal profile anyway to allow the user to continue using the app
-        // Determine role based on email pattern for error cases
-        // Order matters - check more specific patterns first
-        const email = user.email;
-        let role = "user"; // default role
+        return profileData;
+      }
+    } catch (e: any) {
+      console.error("Error in fetchProfile:", e);
+      if (e?.message?.includes("Failed to fetch") || e?.message?.includes("NetworkError")) {
+        toast.error("Unable to fetch user profile. Please check your internet connection.");
+      } else {
+        const normalized = normalizeError(e, 'fetchProfile');
+        toast.error("Could not fetch user profile.");
+      }
+      return buildMinimalProfile({ id: user.id, email: user.email });
+    }
 
-        if (email && email.includes('demo-admin')) {
-          role = "admin";
-        } else if (email && (email.includes('admin') || email.includes('admin@thesisai'))) {
-          role = "admin";
-        } else if (email && (email.includes('advisor') || email.includes('demo-advisor'))) {
-          role = "advisor";
-        } else if (email && email.includes('critic')) {
-          role = "critic";
-        }
-
-        console.log(`[Auth] Error in fetchProfile, setting role based on email: ${role} for ${email}`);
-
-        setProfile({
-          id: user.id,
-          email: user.email,
-          role: role, // Use determined role instead of default
-          created_at: null,
-          updated_at: null,
-          last_login_at: new Date().toISOString(),
-          first_name: '',
-          last_name: '',
-          institution: '',
-          department: '',
-          is_onboarded: false,
-          preferences: {},
-          avatar_url: null,
-          full_name: user.email?.split('@')[0] || 'User',
-          user_preferences: null
-        });
-        }
+    return buildMinimalProfile({ id: user.id, email: user.email });
   }, []);
+
+  const fetchProfile = useCallback(async (user: User | undefined): Promise<Profile | null> => {
+    if (!user) {
+      setProfile(null);
+      setSession(null);
+      return null;
+    }
+
+    const profileResult = await fetchProfileInternal(user);
+    setProfile(profileResult);
+    return profileResult;
+  }, [fetchProfileInternal]);
 
   useEffect(() => {
     let mounted = true;

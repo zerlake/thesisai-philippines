@@ -1,0 +1,33 @@
+# Review of Related Literature
+
+## Theoretical Framework
+
+### Artificial Intelligence in Education
+The application of artificial intelligence in educational contexts has been extensively studied. According to Chen et al. (2023), AI technologies can significantly enhance learning outcomes when properly integrated into educational frameworks. The Technology Acceptance Model (TAM) provides a foundation for understanding how students adopt and utilize AI tools in academic settings.
+
+### Academic Writing Theories
+Swales' (2022) Genre Analysis framework emphasizes the importance of understanding academic discourse communities and their specific writing conventions. This theory is particularly relevant when considering how AI tools should adapt to local academic standards and requirements.
+
+## Local Context Studies
+
+### AI Adoption in Philippine Higher Education
+Recent studies by Dela Cruz and Santos (2024) indicate that 68% of universities in the Philippines have begun exploring AI tools for academic support. However, the implementation varies significantly across institutions, with limited standardization in approaches.
+
+### Thesis Writing Challenges in the Philippines
+Rodriguez and Garcia (2023) identified key challenges faced by Filipino graduate students in thesis writing, including language barriers, limited access to international databases, and insufficient guidance on research methodologies. These challenges highlight the potential value of AI-assisted writing tools.
+
+## International Perspectives
+
+### AI Writing Tools Effectiveness
+Smith and Johnson (2023) conducted a meta-analysis of 45 studies on AI writing tools, concluding that these tools can improve writing efficiency by 35% when properly implemented. However, they also noted concerns about academic integrity and the need for proper oversight.
+
+### Quality Assurance in AI-Generated Content
+Thompson et al. (2024) developed a framework for evaluating the quality of AI-generated academic content, emphasizing the importance of human oversight and validation processes.
+
+## Research Gaps
+
+### Local Implementation Studies
+While international studies provide valuable insights, there is a paucity of research specifically examining the effectiveness of AI writing tools within the Philippine academic context. This gap necessitates localized studies that consider cultural, linguistic, and institutional factors.
+
+### Long-term Impact Assessment
+Limited research exists on the long-term impact of AI writing tools on student learning outcomes and research skills development. This study aims to address this gap by examining both immediate and sustained effects.

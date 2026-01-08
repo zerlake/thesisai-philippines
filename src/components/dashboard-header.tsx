@@ -4,14 +4,18 @@ import { Calendar, Clock, TrendingUp } from "lucide-react";
 import { Button } from "./ui/button";
 import { DashboardSyncIndicator } from "./dashboard/DashboardSyncIndicator";
 import { DashboardPuterStatus } from "./dashboard-puter-status";
+import { UpgradeButton } from "./upgrade-button";
+
+type Plan = 'free' | 'pro' | 'pro_advisor' | 'pro_complete';
 
 interface DashboardHeaderProps {
   displayName: string;
   streak?: number;
   projectProgress?: number;
+  userPlan?: Plan | null;
 }
 
-export function DashboardHeader({ displayName, streak = 0, projectProgress = 0 }: DashboardHeaderProps) {
+export function DashboardHeader({ displayName, streak = 0, projectProgress = 0, userPlan }: DashboardHeaderProps) {
   return (
     <div className="space-y-6 border-b bg-gradient-to-b from-background to-background/50 pb-8">
       {/* Main Title Section */}
@@ -25,8 +29,9 @@ export function DashboardHeader({ displayName, streak = 0, projectProgress = 0 }
           </p>
         </div>
         
-        {/* Status Indicators */}
-        <div className="flex items-center gap-4">
+        {/* Status Indicators & Upgrade */}
+        <div className="flex items-center gap-2">
+          <UpgradeButton plan={userPlan} />
           <DashboardPuterStatus />
           <DashboardSyncIndicator className="px-4 py-2 rounded-lg bg-card/50 border" />
         </div>

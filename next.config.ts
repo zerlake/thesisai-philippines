@@ -51,11 +51,11 @@ const nextConfig: NextConfig = {
     // scrollRestoration: true,
     optimizeCss: true, // Optimize CSS loading
     // Disable client trace metadata to avoid workUnitAsyncStorage issues
-    clientTraceMetadata: [],
+    // clientTraceMetadata: [],
 
     // Additional memory optimization settings
-    workerThreads: false, // Disable worker threads to reduce memory overhead during build
-    cpus: 1, // Limit to single CPU during build to reduce memory pressure
+    // workerThreads: false, // Disable worker threads to reduce memory overhead during build
+    // cpus: 1, // Limit to single CPU during build to reduce memory pressure
   },
 
   // Optimize image handling for CDN

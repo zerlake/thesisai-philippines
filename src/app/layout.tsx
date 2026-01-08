@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Lora } from "next/font/google";
+import { Inter } from "next/font/google";
 import "../globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -14,13 +14,13 @@ import { LayoutStabilityOptimizer } from "@/components/performance/layout-stabil
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const fontSans = Outfit({
+const fontSans = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
   display: 'swap',
 });
 
-const fontSerif = Lora({
+const fontSerif = Inter({
   subsets: ["latin"],
   variable: "--font-serif",
   display: 'swap',

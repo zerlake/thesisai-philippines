@@ -9,7 +9,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { redirect } from "next/navigation";
-import { BrandedLoader } from "@/components/branded-loader";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -84,11 +83,20 @@ export default function RevisionTrackerPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
-  if (!authContext) return <BrandedLoader />;
-  const { session, profile, isLoading } = authContext;
-  if (!isLoading && (!session || profile?.role !== 'critic')) redirect('/login');
-  if (isLoading) return <BrandedLoader />;
+  if (!authContext) {
+    // If auth context is not available, redirect to login
+    redirect('/login');
+  }
 
+  const { session, profile, isLoading } = authContext;
+
+  // Redirect if not authenticated or not authorized
+  if (!isLoading && (!session || profile?.role !== 'critic')) {
+    redirect('/login');
+  }
+
+  // Render the page immediately with role-based access control handled inside
+  // The content will show loading states internally if needed
   const filteredRevisions = revisions.filter(rev => {
     const matchesSearch = rev.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          rev.documentTitle.toLowerCase().includes(searchQuery.toLowerCase());

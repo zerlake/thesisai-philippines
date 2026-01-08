@@ -1,0 +1,36 @@
+# Methodology
+
+## Research Design
+This study employs a mixed-methods approach, combining quantitative analysis of writing efficiency metrics with qualitative assessment of user experiences and academic quality outcomes. The convergent parallel design allows for comprehensive evaluation of the AI thesis writing tool's effectiveness.
+
+## Research Setting
+The study was conducted across three major universities in the Philippines: University of the Philippines Diliman, Ateneo de Manila University, and De La Salle University. These institutions were selected to represent different types of higher education in the country.
+
+## Participants
+### Selection Criteria
+- Graduate students currently enrolled in thesis or dissertation courses
+- Students with access to the AI thesis writing tool
+- Willingness to participate in the study
+- Proficiency in English academic writing
+
+### Sample Size
+A total of 120 graduate students participated in the study, with 40 participants from each institution. The sample included students from various disciplines: 35% from Education, 25% from Business, 20% from Engineering, and 20% from Social Sciences.
+
+## Data Collection Methods
+
+### Quantitative Data
+- Pre- and post-implementation writing efficiency metrics
+- Time tracking for thesis writing tasks
+- Quality scores from academic evaluators
+- User satisfaction surveys
+
+### Qualitative Data
+- Semi-structured interviews with participants
+- Focus group discussions with faculty advisors
+- Observational notes during tool usage sessions
+
+## Data Analysis Plan
+Quantitative data will be analyzed using SPSS software, employing t-tests for pre-post comparisons and ANOVA for inter-group differences. Qualitative data will be analyzed using thematic analysis to identify patterns and themes in user experiences.
+
+## Ethical Considerations
+The study received approval from the institutional review boards of all participating universities. All participants provided informed consent, and confidentiality was maintained throughout the research process.

@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
     const isDemoUser = userId === 'demo-student-1' || userId.includes('demo');
     const queryUserId = isDemoUser ? 'demo-student-1' : userId;
 
+    // Fetch messages (simple query without join first)
     let query = supabase
       .from('advisor_student_messages')
       .select('*')
@@ -56,6 +57,29 @@ export async function GET(request: NextRequest) {
     }
 
     const { data, error } = await query.order('created_at', { ascending: true });
+    
+    // Fetch sender profile data separately for each message
+    let enrichedData: any[] = [];
+    if (data && data.length > 0) {
+      const senderIds = [...new Set(data.map((msg: any) => msg.sender_id))];
+      const { data: senderProfiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, full_name')
+        .in('id', senderIds);
+      
+      if (!profileError && senderProfiles) {
+        const profileMap = Object.fromEntries(senderProfiles.map(p => [p.id, p]));
+        enrichedData = data.map((msg: any) => {
+          const senderProfile = profileMap[msg.sender_id];
+          return {
+            ...msg,
+            sender_name: senderProfile?.full_name || senderProfile?.first_name || 'Unknown User'
+          };
+        });
+      } else {
+        enrichedData = data;
+      }
+    }
 
     if (error) {
       console.error('Database error:', error);
@@ -66,7 +90,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ data: data || [] });
+    return NextResponse.json({ data: enrichedData });
   } catch (error) {
     console.error('Error fetching messages:', error);
     // Return empty data instead of error to prevent UI breakage

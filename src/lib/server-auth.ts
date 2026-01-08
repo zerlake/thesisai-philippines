@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { createServerSupabaseClient } from '@/integrations/supabase/server-client';
 import { AuthenticationError, ensureError } from '@/lib/errors';
 import { User } from '@supabase/supabase-js';
+import { capabilitiesFor, Capabilities } from '@/lib/capabilities';
 
 // Re-export AuthenticationError for convenience
 export { AuthenticationError };
@@ -10,6 +11,8 @@ export { AuthenticationError };
 export interface AuthenticatedUser extends User {
   // Add any custom profile properties here if you join with a profiles table
   // e.g., full_name: string;
+  plan?: string;
+  capabilities?: Capabilities;
 }
 
 /**
@@ -19,7 +22,7 @@ export interface AuthenticatedUser extends User {
  * @returns A promise that resolves to the authenticated user object.
  */
 export async function getAuthenticatedUser(): Promise<AuthenticatedUser> {
-  const supabase = createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -49,7 +52,7 @@ export async function getAuthenticatedUserId(): Promise<string> {
  * @returns A promise that resolves to the user object with their profile.
  */
 export async function getAuthenticatedUserWithProfile(): Promise<AuthenticatedUser> {
-    const supabase = createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -68,6 +71,36 @@ export async function getAuthenticatedUserWithProfile(): Promise<AuthenticatedUs
 
     // Combine user and profile data
     return { ...user, ...profile } as AuthenticatedUser;
+}
+
+/**
+ * Retrieves the user along with their plan capabilities.
+ * If the user has no profile, 'free' plan is assumed.
+ *
+ * @returns A promise that resolves to the user object with plan and capabilities.
+ */
+export async function getAuthenticatedUserWithCapabilities(): Promise<AuthenticatedUser & { plan: string; capabilities: Capabilities }> {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new AuthenticationError('Unauthorized: No active session found.');
+  }
+
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (error || !profile) {
+    throw new AuthenticationError('User profile not found.');
+  }
+
+  const plan = profile.plan_type || profile.plan || 'free';
+  const capabilities = capabilitiesFor(plan);
+
+  return { ...user, ...profile, plan, capabilities } as AuthenticatedUser & { plan: string; capabilities: Capabilities };
 }
 
 

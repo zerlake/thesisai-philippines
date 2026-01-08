@@ -65,6 +65,7 @@ const docSections: DocSection[] = [
       { name: 'Advisor Collaboration', slug: 'advisor-collaboration' },
       { name: 'Team Collaboration', slug: 'team-collaboration' },
       { name: 'Defense Preparation', slug: 'defense-preparation' },
+      { name: 'Thesis Finalizer Pro', slug: 'thesis-finalizer-pro' },
     ],
   },
   {

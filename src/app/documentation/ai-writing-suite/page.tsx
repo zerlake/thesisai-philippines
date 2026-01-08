@@ -164,6 +164,31 @@ export default function AIWritingSuiteDoc() {
           </section>
 
           <section className="mb-12">
+            <h2 className="text-2xl font-bold text-white mb-4">Thesis Finalizer Pro</h2>
+            <p className="text-slate-300 mb-4">
+              Our advanced multi-agent AI system that polishes and integrates all chapters into a cohesive final draft:
+            </p>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-indigo-900/20 border border-indigo-800/30">
+                <h3 className="font-semibold text-indigo-400">Multi-Agent Processing</h3>
+                <p className="text-sm text-slate-300">Six specialized AI agents work simultaneously to refine different aspects of your thesis</p>
+              </div>
+              <div className="p-4 rounded-lg bg-indigo-900/20 border border-indigo-800/30">
+                <h3 className="font-semibold text-indigo-400">Chapter Integration & Harmonization</h3>
+                <p className="text-sm text-slate-300">Seamlessly integrate all chapters with consistent voice, tone, and formatting</p>
+              </div>
+              <div className="p-4 rounded-lg bg-indigo-900/20 border border-indigo-800/30">
+                <h3 className="font-semibold text-indigo-400">Quality Assurance & Polish</h3>
+                <p className="text-sm text-slate-300">Final quality check with grammar, clarity, and academic tone improvements</p>
+              </div>
+            </div>
+            <div className="mt-4 p-4 rounded-lg bg-purple-900/20 border border-purple-800/30">
+              <h3 className="font-semibold text-purple-400 mb-2">Availability</h3>
+              <p className="text-sm text-slate-300">Thesis Finalizer Pro is available exclusively for Pro + Advisor and Pro Complete subscribers.</p>
+            </div>
+          </section>
+
+          <section className="mb-12">
             <h2 className="text-2xl font-bold text-white mb-4">Academic Integrity</h2>
             <div className="p-6 rounded-lg bg-yellow-900/20 border border-yellow-800/30">
               <h3 className="text-lg font-semibold text-yellow-400 mb-3">Responsible AI Use</h3>

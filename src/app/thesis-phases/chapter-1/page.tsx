@@ -35,6 +35,13 @@ const Chapter1Features = [
     description: "Create structured outlines for your thesis chapters",
     href: "/outline"
   },
+  {
+    id: "definition-of-terms",
+    icon: BookCopy,
+    title: "Definition of Terms",
+    description: "Define key terms with conceptual and operational definitions",
+    href: "/thesis-phases/definition-of-terms"
+  },
 ];
 
 export default function Chapter1Page() {
@@ -91,7 +98,7 @@ export default function Chapter1Page() {
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 mb-16">
-          {Chapter1Features.map((feature) => {
+          {[...Chapter1Features].map((feature) => {
             const IconComponent = feature.icon;
             return (
               <Link key={feature.id} href={feature.href}>
@@ -108,7 +115,7 @@ export default function Chapter1Page() {
                       <p className="text-muted-foreground">{feature.description}</p>
                     </div>
                   </div>
-                  
+
                   {/* CTA */}
                   <div className="mt-4 pt-4 border-t border-border flex justify-end">
                     <Button variant="outline" size="sm">

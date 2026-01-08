@@ -88,13 +88,8 @@ const defaultContent = {
   type: 'doc',
   content: [
     {
-      type: 'heading',
-      attrs: { level: 1 },
-      content: [{ type: 'text', text: 'Untitled Document' }],
-    },
-    {
       type: 'paragraph',
-      content: [{ type: 'text', text: 'Start writing here...' }],
+      content: [],
     },
   ],
 };
@@ -105,7 +100,7 @@ export function UnifiedNovelEditor({
   onContentChange,
   onSave,
   isReadOnly = false,
-  placeholder = 'Start writing your thesis...',
+  placeholder = 'Write your draft here...',
   showAITools = true,
   showFormattingToolbar = true,
   minHeight = '600px',
@@ -123,6 +118,10 @@ export function UnifiedNovelEditor({
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showWordLimitDialog, setShowWordLimitDialog] = useState(false);
+  const [targetWordCount, setTargetWordCount] = useState(5000);
+  const [showFormattingDialog, setShowFormattingDialog] = useState(false);
+  const [selectedStyle, setSelectedStyle] = useState<'apa' | 'mla' | 'chicago'>('apa');
   const saveTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
   const hasInitialized = useRef(false);
   const editorContainerRef = useRef<HTMLDivElement>(null);
@@ -146,7 +145,7 @@ export function UnifiedNovelEditor({
   };
 
   const editor = useEditor({
-    immediatelyRender: false,
+    immediatelyRender: true,
     extensions: [
       StarterKit.configure({
         heading: {
@@ -186,7 +185,8 @@ export function UnifiedNovelEditor({
           'prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic',
           isReadOnly ? 'cursor-default' : '',
           'bg-white dark:bg-slate-950 text-gray-900 dark:text-gray-100',
-          'rounded-lg shadow-sm'
+          'rounded-lg shadow-sm',
+          '[&_p.is-editor-empty:first-child::before]:text-gray-400 [&_p.is-editor-empty:first-child::before]:dark:text-gray-600 [&_p.is-editor-empty:first-child::before]:pointer-events-none [&_p.is-editor-empty:first-child::before]:opacity-50'
         ),
         style: `min-height: ${minHeight}`,
       },
@@ -218,9 +218,23 @@ export function UnifiedNovelEditor({
     if (editor && !hasInitialized.current) {
       hasInitialized.current = true;
       const content = getInitialContent();
-      editor.commands.setContent(content, { emitUpdate: false });
+      
+      // Check if content is actually empty (no text)
+      const isEmpty = content?.content?.every((block: any) => 
+        !block.content || block.content.length === 0
+      );
+      
+      if (isEmpty) {
+        // For empty documents, clear content to show placeholder
+        editor.commands.setContent('', { emitUpdate: false });
+      } else {
+        // Use setContent with emitUpdate: false to prevent triggering onUpdate during initialization
+        editor.commands.setContent(content, { emitUpdate: false });
+      }
+      // Force editor to render the content
+      editor.view.updateState(editor.state);
     }
-  }, [editor, initialContent]);
+  }, [editor]);
 
   // Handle ESC key to exit fullscreen
   useEffect(() => {
@@ -522,6 +536,141 @@ Keep feedback professional, constructive, and actionable.`;
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
         toast.error('Failed to generate feedback: ' + errorMsg);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+
+    adjustWordLimit: async (targetWordCount: number) => {
+      if (!editor) return;
+      const text = editor.getJSON().content?.map((c: any) => c.content?.map((cc: any) => cc.text).join('') || '').join('\n') || '';
+      const currentWordCount = text.split(/\s+/).length;
+
+      setIsProcessing(true);
+      try {
+        const adjustment = targetWordCount < currentWordCount ? 'condense' : 'expand';
+        const prompt = `You are an expert academic editor. Please ${adjustment} the following thesis text to approximately ${targetWordCount} words while maintaining:
+- All key arguments and findings
+- Academic rigor and tone
+- Proper structure and flow
+- Citation validity
+
+Current word count: ${currentWordCount}
+Target word count: ${targetWordCount}
+
+Text to adjust:
+${text}
+
+Return only the adjusted text without any explanation.`;
+
+        const adjusted = await callPuterAI(prompt, { temperature: 0.6, max_tokens: targetWordCount + 500 });
+        editor.chain().focus().setContent(adjusted).run();
+        toast.success(`Draft adjusted to ~${targetWordCount} words!`);
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        toast.error('Failed to adjust word count: ' + errorMsg);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+
+    applyFormattingStyle: async (style: 'apa' | 'mla' | 'chicago') => {
+      if (!editor) return;
+      const text = editor.getJSON().content?.map((c: any) => c.content?.map((cc: any) => cc.text).join('') || '').join('\n') || '';
+
+      setIsProcessing(true);
+      try {
+        const styleGuides: Record<string, string> = {
+          apa: 'APA 7th Edition format',
+          mla: 'MLA 9th Edition format',
+          chicago: 'Chicago Style 17th Edition (Notes-Bibliography)',
+        };
+
+        const prompt = `You are an expert academic formatter. Reformat the following thesis text according to ${styleGuides[style]} standards. 
+
+Key formatting rules:
+${
+  style === 'apa'
+    ? '- Double-spaced, Times New Roman 12pt\n- In-text citations: (Author, Year)\n- References page at end\n- Headers in APA format'
+    : style === 'mla'
+      ? '- Double-spaced, Times New Roman 12pt\n- In-text citations: (Author page)\n- Works Cited page at end\n- Hanging indent for citations'
+      : '- Double-spaced, Times New Roman 12pt\n- Footnotes/endnotes for citations\n- Bibliography at end\n- Chapter headings properly formatted'
+}
+
+Maintain all content while applying the formatting standards.
+
+Text to format:
+${text}
+
+Return the properly formatted text.`;
+
+        const formatted = await callPuterAI(prompt, { temperature: 0.5, max_tokens: 2000 });
+        editor.chain().focus().setContent(formatted).run();
+        toast.success(`Formatting applied: ${style.toUpperCase()}`);
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        toast.error(`Failed to apply ${style} formatting: ` + errorMsg);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+
+    generateChapterTemplates: async () => {
+      if (!editor) return;
+      setIsProcessing(true);
+      try {
+        const prompt = `Generate comprehensive chapter skeleton templates for a thesis with the following structure:
+1. Introduction Chapter
+2. Literature Review/Related Work
+3. Methodology/Research Design
+4. Results/Findings
+5. Discussion
+6. Conclusion
+
+For each chapter, provide:
+- Suggested structure and subsections
+- Word count expectations
+- Key elements to include
+- Placeholder text in [BRACKETS]
+- Tips for academic writing in that section
+
+Format as full-text chapter skeletons that can be directly used as starting points.`;
+
+        const templates = await callPuterAI(prompt, { temperature: 0.7, max_tokens: 3000 });
+        editor.chain().focus().insertContent(`<h2>Chapter Templates</h2><pre>${templates}</pre>`).run();
+        toast.success('Chapter templates generated!');
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        toast.error('Failed to generate templates: ' + errorMsg);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+
+    improveCitations: async () => {
+      if (!editor) return;
+      const text = editor.getJSON().content?.map((c: any) => c.content?.map((cc: any) => cc.text).join('') || '').join('\n') || '';
+
+      setIsProcessing(true);
+      try {
+        const prompt = `Review the following thesis text and enhance it by:
+1. Adding proper in-text citations where needed
+2. Suggesting scholarly sources for key claims
+3. Improving citation formatting consistency
+4. Identifying unsupported statements that need citations
+5. Maintaining academic rigor
+
+Current text:
+${text}
+
+Return the enhanced text with improved citations and notes on what was added or changed.`;
+
+        const enhanced = await callPuterAI(prompt, { temperature: 0.6, max_tokens: 2000 });
+        editor.chain().focus().setContent(enhanced).run();
+        toast.success('Citations improved and enhanced!');
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        toast.error('Failed to improve citations: ' + errorMsg);
       } finally {
         setIsProcessing(false);
       }
@@ -936,6 +1085,19 @@ Keep feedback professional, constructive, and actionable.`;
                 <DropdownMenuItem onClick={aiCommands.generateConclusion}>
                   Generate Conclusion
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setShowWordLimitDialog(true)}>
+                  Adjust Word Limit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowFormattingDialog(true)}>
+                  Apply Citation Format
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={aiCommands.generateChapterTemplates}>
+                  Generate Chapter Templates
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={aiCommands.improveCitations}>
+                  Improve & Add Citations
+                </DropdownMenuItem>
                 {mode === 'critic' && (
                   <>
                     <DropdownMenuSeparator />
@@ -991,8 +1153,11 @@ Keep feedback professional, constructive, and actionable.`;
       )}
 
       {/* Editor Content */}
-      <div className="border rounded-lg overflow-hidden">
-        <EditorContent editor={editor} />
+      <div className="border rounded-lg overflow-hidden bg-white dark:bg-slate-950 shadow-sm">
+        <EditorContent 
+          editor={editor}
+          className="w-full bg-white dark:bg-slate-950"
+        />
       </div>
 
 
@@ -1043,6 +1208,129 @@ Keep feedback professional, constructive, and actionable.`;
               <Trash2 className="h-4 w-4 mr-2" />
               Clear Content
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Word Limit Dialog */}
+      <Dialog open={showWordLimitDialog} onOpenChange={setShowWordLimitDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adjust Word Limit</DialogTitle>
+            <DialogDescription>
+              Tailor your draft to a specific word count. AI will condense or expand while maintaining academic rigor.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Target Word Count: <span className="font-bold text-primary">{targetWordCount}</span>
+              </label>
+              <input
+                type="range"
+                min="1000"
+                max="50000"
+                step="500"
+                value={targetWordCount}
+                onChange={(e) => setTargetWordCount(Number(e.target.value))}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                <span>1,000 words</span>
+                <span>50,000 words</span>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowWordLimitDialog(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => {
+                  aiCommands.adjustWordLimit(targetWordCount);
+                  setShowWordLimitDialog(false);
+                }}
+                disabled={isProcessing}
+              >
+                {isProcessing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                Adjust Draft
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Citation Format Dialog */}
+      <Dialog open={showFormattingDialog} onOpenChange={setShowFormattingDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Apply Citation Format</DialogTitle>
+            <DialogDescription>
+              Reformat your entire draft according to specific citation and formatting standards.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <label className="flex items-center gap-3 cursor-pointer p-3 border rounded-lg hover:bg-accent" 
+                onClick={() => setSelectedStyle('apa')}>
+                <input
+                  type="radio"
+                  name="style"
+                  value="apa"
+                  checked={selectedStyle === 'apa'}
+                  onChange={() => setSelectedStyle('apa')}
+                  className="cursor-pointer"
+                />
+                <div>
+                  <div className="font-medium">APA 7th Edition</div>
+                  <div className="text-sm text-muted-foreground">In-text: (Author, Year) • Double-spaced • Times New Roman 12pt</div>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer p-3 border rounded-lg hover:bg-accent"
+                onClick={() => setSelectedStyle('mla')}>
+                <input
+                  type="radio"
+                  name="style"
+                  value="mla"
+                  checked={selectedStyle === 'mla'}
+                  onChange={() => setSelectedStyle('mla')}
+                  className="cursor-pointer"
+                />
+                <div>
+                  <div className="font-medium">MLA 9th Edition</div>
+                  <div className="text-sm text-muted-foreground">In-text: (Author Page) • Works Cited page • Hanging indent</div>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer p-3 border rounded-lg hover:bg-accent"
+                onClick={() => setSelectedStyle('chicago')}>
+                <input
+                  type="radio"
+                  name="style"
+                  value="chicago"
+                  checked={selectedStyle === 'chicago'}
+                  onChange={() => setSelectedStyle('chicago')}
+                  className="cursor-pointer"
+                />
+                <div>
+                  <div className="font-medium">Chicago Style 17th Edition</div>
+                  <div className="text-sm text-muted-foreground">Notes-Bibliography • Footnotes/Endnotes • Bibliography page</div>
+                </div>
+              </label>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowFormattingDialog(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => {
+                  aiCommands.applyFormattingStyle(selectedStyle);
+                  setShowFormattingDialog(false);
+                }}
+                disabled={isProcessing}
+              >
+                {isProcessing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                Apply Format
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

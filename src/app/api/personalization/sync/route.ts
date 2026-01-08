@@ -7,7 +7,7 @@ import { ZodError } from 'zod';
 export async function GET(request: NextRequest) {
   try {
     const user = await getAuthenticatedUser(); // Add this line
-    const supabase = createServerSupabaseClient(); // Add this line to create supabase client for data operations
+    const supabase = await createServerSupabaseClient(); // Add this line to create supabase client for data operations
 
     const userId = user.id; // Replace session.user.id with user.id
     const { searchParams } = new URL(request.url);
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = await getAuthenticatedUser(); // Add this line
-    const supabase = createServerSupabaseClient(); // Add this line
+    const supabase = await createServerSupabaseClient(); // Add this line
 
     const userId = user.id; // Replace session.user.id with user.id
     const body = await request.json();
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const user = await getAuthenticatedUser(); // Add this line
-    const supabase = createServerSupabaseClient(); // Add this line
+    const supabase = await createServerSupabaseClient(); // Add this line
 
     const userId = user.id; // Replace session.user.id with user.id
     const body = await request.json();

@@ -11,6 +11,7 @@ import { CriticStudentList } from "./critic-student-list";
 import { StatCard } from "./stat-card";
 import { CriticReviewQueueCard } from "./critic-review-queue-card";
 import { CriticRequestsCard } from "./critic-requests-card";
+import { AIOnboardingModal } from "./ai-onboarding-modal";
 
 export function CriticDashboard() {
   const { session, supabase } = useAuth();
@@ -73,7 +74,9 @@ export function CriticDashboard() {
   }, [session, supabase]);
 
   return (
-    <div className="space-y-8">
+    <>
+      <AIOnboardingModal />
+      <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Critic Dashboard</h1>
@@ -98,5 +101,6 @@ export function CriticDashboard() {
 
       <CriticStudentList />
     </div>
+    </>
   );
 }

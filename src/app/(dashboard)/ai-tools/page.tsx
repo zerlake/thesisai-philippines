@@ -8,9 +8,10 @@
 import { useState } from 'react';
 import { ResearchGapIdentifier } from '@/components/mcp/ResearchGapIdentifier';
 import { DocumentAnalyzer } from '@/components/mcp/DocumentAnalyzer';
+import ThesisFinalizer from '@/components/ThesisFinalizer';
 
 export default function AIToolsPage() {
-  const [activeTool, setActiveTool] = useState<'research' | 'document'>('research');
+  const [activeTool, setActiveTool] = useState<'research' | 'document' | 'finalizer'>('research');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -48,6 +49,16 @@ export default function AIToolsPage() {
             >
               Document Analyzer
             </button>
+            <button
+              onClick={() => setActiveTool('finalizer')}
+              className={`py-4 px-2 border-b-2 font-medium transition-colors ${
+                activeTool === 'finalizer'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Thesis Finalizer Pro
+            </button>
           </div>
         </div>
       </div>
@@ -56,6 +67,7 @@ export default function AIToolsPage() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         {activeTool === 'research' && <ResearchGapIdentifier />}
         {activeTool === 'document' && <DocumentAnalyzer />}
+        {activeTool === 'finalizer' && <ThesisFinalizer />}
       </div>
 
       {/* Footer Info */}

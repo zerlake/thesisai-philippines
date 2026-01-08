@@ -53,7 +53,7 @@ export function PuterProvider({ children }: { children: ReactNode }) {
       console.warn("Failed to initialize Puter SDK:", error);
       return false;
     }
-  }, [puterReady]);
+  }, []);
 
   const signIn = useCallback(async (): Promise<Record<string, any> | null | undefined> => {
     // Initialize SDK if not ready
@@ -175,17 +175,8 @@ export function PuterProvider({ children }: { children: ReactNode }) {
   }, [puterReady, puterUser, initializePuterSDK]);
 
   useEffect(() => {
-    // Check auth status on initial load only once globally, with a small delay to avoid conflicts
-    if (!hasPerformedInitialAuthCheck && puterReady) {
-      hasPerformedInitialAuthCheck = true;
-      // Add a small delay to let other auth flows settle, and bypass debounce for initial check
-      const timer = setTimeout(() => {
-        checkAuth(true); // Bypass debounce for initial check
-      }, 300); // 300ms delay to avoid race conditions with other auth systems
-
-      return () => clearTimeout(timer);
-    }
-  }, [puterReady, checkAuth]); // Add puterReady dependency to ensure SDK is loaded before checking
+    initializePuterSDK();
+  }, [initializePuterSDK]);
 
   return (
     <PuterContext.Provider value={{

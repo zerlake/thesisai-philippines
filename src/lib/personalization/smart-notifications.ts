@@ -1,16 +1,72 @@
 /**
  * Smart Notifications System
  * ML-based priority calculation, optimal timing, and delivery channel selection
+ * Uses the main notifications table with field mapping
  */
 
-import { SmartNotification, NotificationPreferences } from './types';
+import { SmartNotification } from './types';
 import { supabase } from '@/integrations/supabase/client';
 import { userPreferencesManager } from './user-preferences';
 
 const NOTIFICATIONS_TABLE = 'notifications';
 
+// Map database fields to SmartNotification type
+interface DbNotification {
+  id: string;
+  user_id: string;
+  title: string;
+  message: string;
+  notification_type: string;
+  priority: number;
+  channels: string[];
+  data: Record<string, unknown>;
+  read_at: string | null;
+  delivered_at: string | null;
+  expires_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+function mapDbToSmartNotification(db: DbNotification): SmartNotification {
+  return {
+    id: db.id,
+    userId: db.user_id,
+    title: db.title,
+    message: db.message,
+    type: mapNotificationType(db.notification_type),
+    priority: mapPriority(db.priority),
+    channel: 'in-app',
+    scheduledFor: new Date(db.created_at),
+    sentAt: db.delivered_at ? new Date(db.delivered_at) : undefined,
+    read: db.read_at !== null,
+    data: db.data || {},
+    mlScore: undefined,
+  };
+}
+
+function mapNotificationType(type: string): 'info' | 'success' | 'warning' | 'error' | 'urgent' {
+  const mapping: Record<string, 'info' | 'success' | 'warning' | 'error' | 'urgent'> = {
+    system: 'info',
+    feature: 'info',
+    recommendation: 'info',
+    alert: 'warning',
+    warning: 'warning',
+    error: 'error',
+    urgent: 'urgent',
+    success: 'success',
+  };
+  return mapping[type] || 'info';
+}
+
+function mapPriority(priority: number): 'low' | 'medium' | 'high' | 'urgent' {
+  if (priority >= 4) return 'urgent';
+  if (priority >= 3) return 'high';
+  if (priority >= 2) return 'medium';
+  return 'low';
+}
+
 class SmartNotificationManager {
-  private notificationQueue: Map<string, SmartNotification[]> = new Map();
+  private notificationQueue: Map<string, NodeJS.Timeout> = new Map();
   private quietHourTimers: Map<string, NodeJS.Timeout> = new Map();
 
   /**
@@ -28,25 +84,28 @@ class SmartNotificationManager {
       // Determine optimal send time
       const scheduledFor = this._calculateOptimalTime(preferences, notification.priority);
 
-      const smartNotification: SmartNotification = {
-        ...notification,
-        id: `notif_${userId}_${Date.now()}`,
-        userId,
-        scheduledFor,
-        read: false,
-        mlScore,
+      // Map to database schema
+      const dbNotification = {
+        user_id: userId,
+        title: notification.title,
+        message: notification.message,
+        notification_type: this._mapTypeToDb(notification.type),
+        priority: this._mapPriorityToDb(notification.priority),
+        channels: ['in_app'],
+        data: notification.data || {},
+        created_at: new Date().toISOString(),
       };
 
       // Save to database
       const { data, error } = await supabase
         .from(NOTIFICATIONS_TABLE)
-        .insert(smartNotification)
+        .insert(dbNotification)
         .select()
         .single();
 
       if (error) throw error;
 
-      const notif = data as SmartNotification;
+      const notif = mapDbToSmartNotification(data as DbNotification);
 
       // Queue for delivery
       if (options?.immediate || this._shouldSendImmediately(notification.priority, preferences)) {
@@ -60,6 +119,27 @@ class SmartNotificationManager {
       console.error('Error creating notification:', error);
       throw error;
     }
+  }
+
+  private _mapTypeToDb(type: string): string {
+    const mapping: Record<string, string> = {
+      info: 'system',
+      success: 'system',
+      warning: 'alert',
+      error: 'alert',
+      urgent: 'system',
+    };
+    return mapping[type] || 'system';
+  }
+
+  private _mapPriorityToDb(priority: string): number {
+    const mapping: Record<string, number> = {
+      low: 1,
+      medium: 2,
+      high: 3,
+      urgent: 4,
+    };
+    return mapping[priority] || 2;
   }
 
   /**
@@ -82,13 +162,13 @@ class SmartNotificationManager {
     score += typeScores[notification.type] || 0.3;
 
     // Factor 2: User preference for this channel
-    const channel = preferences.notifications.channels.find((c: any) => c.id === notification.data.channelId);
+    const channel = preferences.notifications?.channels?.find((c: any) => c.id === notification.data?.channelId);
     if (channel) {
       score *= channel.priority === 'urgent' ? 1.2 : channel.priority === 'high' ? 1.1 : 0.9;
     }
 
     // Factor 3: Time sensitivity
-    if (notification.data.timeSensitive) {
+    if (notification.data?.timeSensitive) {
       score += 0.2;
     }
 
@@ -104,7 +184,7 @@ class SmartNotificationManager {
     const scheduledFor = new Date(now);
 
     // Check quiet hours
-    if (preferences.notifications.quietHours.enabled) {
+    if (preferences.notifications?.quietHours?.enabled) {
       const [qStart, qEnd] = [
         preferences.notifications.quietHours.start,
         preferences.notifications.quietHours.end,
@@ -141,14 +221,14 @@ class SmartNotificationManager {
    */
   private _shouldSendImmediately(priority: string, preferences: any): boolean {
     if (priority === 'urgent') return true;
-    if (!preferences.notifications.enabled) return false;
+    if (!preferences.notifications?.enabled) return false;
 
     // Check if channel is enabled and set to instant
-    const instantChannels = preferences.notifications.channels.filter(
+    const instantChannels = preferences.notifications.channels?.filter(
       (c: any) => c.enabled && c.frequency === 'instant'
     );
 
-    return instantChannels.length > 0;
+    return (instantChannels?.length || 0) > 0;
   }
 
   /**
@@ -168,16 +248,13 @@ class SmartNotificationManager {
         case 'push':
           await this._deliverPush(notification);
           break;
-        case 'sms':
-          await this._deliverSMS(notification);
-          break;
       }
     }
 
     // Mark as sent
     await supabase
       .from(NOTIFICATIONS_TABLE)
-      .update({ sentAt: new Date() })
+      .update({ delivered_at: new Date().toISOString() })
       .eq('id', notification.id);
   }
 
@@ -187,18 +264,18 @@ class SmartNotificationManager {
   private _selectChannels(
     notification: SmartNotification,
     preferences: any
-  ): Array<'in-app' | 'email' | 'push' | 'sms'> {
-    const channels: Array<'in-app' | 'email' | 'push' | 'sms'> = [];
+  ): Array<'in-app' | 'email' | 'push'> {
+    const channels: Array<'in-app' | 'email' | 'push'> = [];
 
     // In-app is always included for immediate notifications
     channels.push('in-app');
 
     // Add other channels based on preferences and priority
-    if (preferences.notifications.emailNotifications && notification.priority !== 'low') {
+    if (preferences.notifications?.emailNotifications && notification.priority !== 'low') {
       channels.push('email');
     }
 
-    if (preferences.notifications.pushNotifications && notification.priority === 'high' || notification.priority === 'urgent') {
+    if (preferences.notifications?.pushNotifications && (notification.priority === 'high' || notification.priority === 'urgent')) {
       channels.push('push');
     }
 
@@ -262,13 +339,6 @@ class SmartNotificationManager {
   }
 
   /**
-   * Deliver SMS notification (stub for future implementation)
-   */
-  private async _deliverSMS(notification: SmartNotification): Promise<void> {
-    console.log('SMS delivery not yet implemented');
-  }
-
-  /**
    * Schedule notification for future delivery
    */
   private _scheduleNotification(notification: SmartNotification, scheduledFor: Date, preferences: any): void {
@@ -291,12 +361,12 @@ class SmartNotificationManager {
       const { data, error } = await supabase
         .from(NOTIFICATIONS_TABLE)
         .select('*')
-        .eq('userId', userId)
-        .eq('read', false)
-        .order('timestamp', { ascending: false });
+        .eq('user_id', userId)
+        .is('read_at', null)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return (data || []) as SmartNotification[];
+      return ((data as DbNotification[]) || []).map(mapDbToSmartNotification);
     } catch (error) {
       console.error('Error fetching notifications:', error);
       return [];
@@ -310,7 +380,7 @@ class SmartNotificationManager {
     try {
       await supabase
         .from(NOTIFICATIONS_TABLE)
-        .update({ read: true })
+        .update({ read_at: new Date().toISOString() })
         .eq('id', notificationId);
     } catch (error) {
       console.error('Error marking notification as read:', error);

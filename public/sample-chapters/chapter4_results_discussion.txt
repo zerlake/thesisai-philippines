@@ -1,0 +1,36 @@
+# Results and Discussion
+
+## Writing Efficiency Outcomes
+
+### Time Reduction Metrics
+The implementation of the AI thesis writing tool resulted in significant improvements in writing efficiency. Participants reported an average reduction of 42% in time spent on initial drafts compared to traditional writing methods. The most substantial improvements were observed in the literature review and methodology sections, where the AI assistance was particularly effective in organizing content and suggesting appropriate academic language.
+
+### Quality Assessment Scores
+Academic evaluators rated the quality of AI-assisted thesis drafts with an average score of 8.2 out of 10, compared to 7.6 for traditionally written drafts. The improvement was most notable in areas of structure, coherence, and language clarity. However, evaluators emphasized the importance of human oversight in ensuring accuracy of content and proper citation practices.
+
+## User Experience Findings
+
+### Satisfaction Levels
+Survey results indicated that 85% of participants were satisfied with the AI writing tool, citing improved confidence in their writing abilities and reduced anxiety about the thesis writing process. The tool was particularly valued for its ability to suggest improvements in academic tone and formatting.
+
+### Challenges Identified
+Despite positive feedback, participants identified several challenges:
+- Need for careful review of AI-generated content for accuracy
+- Occasional generation of irrelevant suggestions
+- Learning curve associated with effective tool utilization
+
+## Faculty Perspectives
+
+### Advisor Feedback
+Faculty advisors reported mixed reactions to the AI-assisted thesis drafts. While they acknowledged improvements in writing quality and structure, they expressed concerns about students' over-reliance on AI tools and potential impacts on critical thinking development.
+
+### Recommendations from Faculty
+Advisors recommended implementing the AI tool as a supplementary resource rather than a replacement for traditional writing skills development. They emphasized the importance of maintaining human oversight throughout the writing process.
+
+## Comparative Analysis
+
+### Performance Across Institutions
+The effectiveness of the AI tool varied slightly across the three participating institutions, with University of the Philippines students showing the highest improvement rates (47% time reduction), followed by Ateneo (40%) and De La Salle (38%). These differences may be attributed to varying levels of technological preparedness and institutional support.
+
+### Discipline-Based Variations
+Students from Education and Social Sciences disciplines reported higher satisfaction rates compared to those from Engineering and Business. This may reflect differences in the nature of writing tasks and the AI tool's effectiveness across different academic genres.

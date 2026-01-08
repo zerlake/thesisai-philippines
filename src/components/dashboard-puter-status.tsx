@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePuterContext } from '@/contexts/puter-context';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
-import { AlertCircle, CheckCircle2, Loader2, LogOut } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Loader2, LogOut, Zap } from 'lucide-react';
 
 export function DashboardPuterStatus() {
   const { puterReady, isAuthenticated, puterUser, loading, initializePuter, signIn, signOut } = usePuterContext();
@@ -86,12 +86,20 @@ export function DashboardPuterStatus() {
   return (
     <Button
       onClick={handleSignIn}
-      variant="outline"
+      className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 relative overflow-hidden group"
       size="sm"
-      className="gap-2"
     >
-      <AlertCircle className="w-4 h-4" />
-      <span>Connect AI</span>
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-600 opacity-0 group-hover:opacity-50 transition-opacity duration-200 blur" />
+      
+      {/* Pulsing dot indicator */}
+      <div className="relative flex items-center gap-2">
+        <div className="relative">
+          <Zap className="w-4 h-4" />
+          <div className="absolute inset-0 bg-blue-400 rounded-full animate-pulse opacity-75" />
+        </div>
+        <span>Connect AI</span>
+      </div>
     </Button>
   );
 }

@@ -33,7 +33,8 @@ export enum AuditAction {
   API_CALL = 'api_call',
   API_ERROR = 'api_error',
   API_RATE_LIMITED = 'api_rate_limited',
-  
+  RATE_LIMIT_VIOLATION = 'rate_limit_violation',
+
   // Security events
   SECURITY_VALIDATION_FAILED = 'security_validation_failed',
   SECURITY_INJECTION_ATTEMPT = 'security_injection_attempt',
@@ -297,6 +298,51 @@ export async function logRateLimited(
 }
 
 /**
+ * Helper: Log rate limit violation with detailed metadata
+ */
+export async function logRateLimitViolation(
+  options: {
+    userId?: string;
+    identifierType: 'user_id' | 'ip' | 'email' | 'ip_user_pair';
+    identifierValue: string;
+    featureName: string;
+    endpointPath?: string;
+    violationType: 'daily_quota' | 'per_minute' | 'auth_failures';
+    limitThreshold: number;
+    actualCount: number;
+    windowStart?: Date;
+    windowEnd?: Date;
+    ipAddress?: string;
+    userAgent?: string;
+    actionTaken?: 'logged' | 'blocked' | 'captcha_required';
+    plan?: string;
+    quotaMultiplier?: number;
+  }
+): Promise<void> {
+  await logAuditEvent(AuditAction.RATE_LIMIT_VIOLATION, {
+    userId: options.userId,
+    severity: AuditSeverity.WARNING,
+    resourceType: 'rate_limit',
+    resourceId: options.featureName,
+    ipAddress: options.ipAddress,
+    userAgent: options.userAgent,
+    details: {
+      identifierType: options.identifierType,
+      identifierValue: options.identifierValue,
+      endpointPath: options.endpointPath,
+      violationType: options.violationType,
+      limitThreshold: options.limitThreshold,
+      actualCount: options.actualCount,
+      windowStart: options.windowStart?.toISOString(),
+      windowEnd: options.windowEnd?.toISOString(),
+      actionTaken: options.actionTaken,
+      plan: options.plan,
+      quotaMultiplier: options.quotaMultiplier,
+    },
+  });
+}
+
+/**
  * Helper: Log API call with timing
  */
 export async function logApiCall(
@@ -416,6 +462,7 @@ export default {
   logValidationFailure,
   logInjectionAttempt,
   logRateLimited,
+  logRateLimitViolation,
   logApiCall,
   getAuditLogs,
   getAuditStatistics,

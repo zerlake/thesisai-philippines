@@ -25,6 +25,7 @@ import { AdvisorCommunicationHub } from "./advisor/communication-hub";
 import { DocumentReviewTools } from "./advisor/document-review-tools";
 import { ProgressAnalytics } from "./advisor/progress-analytics";
 import { StudentManagementSystem } from "./advisor/student-management-system";
+import { AIOnboardingModal } from "./ai-onboarding-modal";
 
 const totalChecklistItems = thesisChecklist.flatMap((phase: ChecklistPhase) => phase.items).length;
 
@@ -224,7 +225,9 @@ export function AdvisorDashboard() {
 
   if (activeView === 'overview') {
     return (
-      <div className="space-y-8">
+      <>
+        <AIOnboardingModal />
+        <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Advisor Dashboard</h1>
@@ -337,10 +340,13 @@ export function AdvisorDashboard() {
         </div>
         <BugReportAlert />
       </div>
+      </>
     );
   }
 
   return (
+    <>
+      <AIOnboardingModal />
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
@@ -364,5 +370,6 @@ export function AdvisorDashboard() {
       {activeView === 'analytics' && <ProgressAnalytics />}
       {activeView === 'management' && <StudentManagementSystem />}
     </div>
+    </>
   );
 }

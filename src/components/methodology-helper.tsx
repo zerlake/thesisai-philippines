@@ -14,8 +14,10 @@ import {
   Sigma,
   Users,
   ClipboardList,
+  Target,
 } from "lucide-react";
 import { MethodologyToolCard } from "./methodology-tool-card";
+import { ResearchTypeAdvisor } from "./methodology-tools/research-type-advisor";
 import { ResearchDesignSelector } from "./methodology-tools/research-design-selector";
 import { SampleSizeCalculator } from "./methodology-tools/sample-size-calculator";
 import { SamplingMethodAdvisor } from "./methodology-tools/sampling-method-advisor";
@@ -35,6 +37,14 @@ export function MethodologyHelper() {
           </CardDescription>
         </CardHeader>
       </Card>
+
+      <MethodologyToolCard
+        title="Research Type Advisor"
+        description="Automatically detect whether your research is quantitative, qualitative, or mixed-method based on your problem statement."
+        icon={Target}
+      >
+        <ResearchTypeAdvisor />
+      </MethodologyToolCard>
 
       <MethodologyToolCard
         title="Research Design Selector"

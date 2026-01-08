@@ -1,6 +1,6 @@
 /**
  * Notification Bell Component
- * Phase 5: Real-time Monitoring & Analytics
+ * Fixed to handle the actual database schema
  */
 
 'use client';
@@ -9,20 +9,21 @@ import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/components/auth-provider';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Bell, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useRouter } from 'next/navigation';
 
 type Notification = {
   id: string;
   message: string;
-  link: string | null;
+  title?: string;
   created_at: string;
-  is_read: boolean;
+  read_at?: string | null;
+  is_read?: boolean;
+  link?: string | null;
+  notification_type?: string;
 };
 
 type ChatMessage = {
@@ -42,13 +43,13 @@ type ChatMessage = {
 
 export function NotificationBell() {
   const { session, supabase } = useAuth();
-  const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [messagesTableUsed, setMessagesTableUsed] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const isMounted = useRef(true);
+  const messagesTableUsedRef = useRef<string>('');
 
   useEffect(() => {
     isMounted.current = true;
@@ -56,6 +57,16 @@ export function NotificationBell() {
       isMounted.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    messagesTableUsedRef.current = messagesTableUsed;
+  }, [messagesTableUsed]);
+
+  useEffect(() => {
+    const notificationUnreadCount = notifications.filter(n => !n.is_read).length;
+    const messageUnreadCount = chatMessages.length;
+    setUnreadCount(notificationUnreadCount + messageUnreadCount);
+  }, [notifications, chatMessages]);
 
   useEffect(() => {
     if (!session?.user) {
@@ -67,20 +78,55 @@ export function NotificationBell() {
     let messageChannel: any = null;
 
     const fetchNotifications = async () => {
+      if (!isMounted.current) return;
+
       try {
         setLoading(true);
 
-        // Fetch regular notifications
-        const { data: notificationsData, error: notificationsError } = await supabase
-          .from("notifications")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(5);
+        // Fetch notifications - try with all possible columns
+        let notificationsData: any[] = [];
 
-        // Fetch unread messages from the existing system
-        let messagesData: any[] = [];
         try {
-          const { data: messageResponse, error: messageError } = await supabase
+          // First try with the extended schema
+          const result = await supabase
+            .from("notifications")
+            .select("id, message, title, created_at, read_at, notification_type, data")
+            .eq('user_id', session.user.id)
+            .order("created_at", { ascending: false })
+            .limit(5);
+
+          if (result.data && result.data.length > 0) {
+            notificationsData = result.data;
+          } else if (!result.error) {
+            // Table exists but might have different columns
+            const simpleResult = await supabase
+              .from("notifications")
+              .select("id, message, created_at")
+              .eq('user_id', session.user.id)
+              .order("created_at", { ascending: false })
+              .limit(5);
+
+            if (simpleResult.data) {
+              notificationsData = simpleResult.data.map(n => ({
+                ...n,
+                title: null,
+                read_at: null,
+                notification_type: null,
+                data: null
+              }));
+            }
+          }
+        } catch (notifError: any) {
+          console.warn("Notifications table error:", notifError.message);
+          notificationsData = [];
+        }
+
+        // Fetch unread messages
+        let messagesData: any[] = [];
+
+        try {
+          // Try advisor_student_messages first
+          const advisorResult = await supabase
             .from("advisor_student_messages")
             .select(`
               id,
@@ -89,73 +135,120 @@ export function NotificationBell() {
               message,
               subject,
               created_at,
-              read_status,
+              is_read,
               sender_role,
               document_id
             `)
             .eq('recipient_id', session.user.id)
-            .eq('read_status', false)
+            .eq('is_read', false)
             .order('created_at', { ascending: false })
             .limit(5);
 
-          if (messageError) {
-            // If primary table doesn't exist, try alternatives
-            if (messageError.code === '42P01' || // Undefined table
-                messageError.message?.toLowerCase().includes('permission') ||
-                messageError.message?.toLowerCase().includes('does not exist')) {
-              console.warn("Primary messages table not available:", messageError.message);
-              messagesData = [];
-            } else {
-              throw messageError;
+          if (advisorResult.data && advisorResult.data.length > 0) {
+            // Fetch sender information for each message
+            const messagesWithSender = [];
+            for (const message of advisorResult.data) {
+              const { data: senderData } = await supabase
+                .from('profiles')
+                .select('first_name, last_name, role')
+                .eq('id', message.sender_id)
+                .single();
+
+              messagesWithSender.push({
+                ...message,
+                sender: senderData
+              });
             }
-          } else {
-            messagesData = messageResponse || [];
+
+            messagesData = messagesWithSender;
+            setMessagesTableUsed('advisor_student_messages');
+          } else if (advisorResult.error?.code !== '42P01') {
+            // Try messages table if advisor_student_messages doesn't exist
+            try {
+              const messagesResult = await supabase
+                .from("messages")
+                .select(`
+                  id,
+                  sender_id,
+                  recipient_id,
+                  content,
+                  subject,
+                  created_at,
+                  is_read
+                `)
+                .eq('recipient_id', session.user.id)
+                .eq('is_read', false)
+                .order('created_at', { ascending: false })
+                .limit(5);
+
+              if (messagesResult.data) {
+                // Fetch sender information for each message
+                const messagesWithSender = [];
+                for (const message of messagesResult.data) {
+                  const { data: senderData } = await supabase
+                    .from('profiles')
+                    .select('first_name, last_name, role')
+                    .eq('id', message.sender_id)
+                    .single();
+
+                  messagesWithSender.push({
+                    ...message,
+                    sender: senderData,
+                    sender_role: senderData?.role || 'user',
+                    document_id: null
+                  });
+                }
+
+                messagesData = messagesWithSender;
+                setMessagesTableUsed('messages');
+              }
+            } catch (e) {
+              setMessagesTableUsed('');
+            }
           }
-        } catch (error: any) {
-          console.warn("Messages not available:", error.message);
+        } catch (msgError: any) {
+          console.warn("Messages table error:", msgError.message);
           messagesData = [];
+          setMessagesTableUsed('');
         }
 
         if (!isMounted.current) return;
 
-        // Handle notifications
-        if (notificationsError) {
-          console.error("Failed to fetch notifications:", notificationsError);
-          setNotifications([]);
-        } else {
-          setNotifications(notificationsData || []);
-        }
-
-        // Handle messages
-        const transformedMessages = messagesData.map(msg => ({
-          id: msg.id,
-          content: msg.message || 'Message content unavailable',
-          subject: msg.subject || 'No subject',
-          timestamp: msg.created_at,
-          sender: {
-            id: msg.sender_id,
-            first_name: msg.sender_role || 'User',
-            last_name: '',
-            role: msg.sender_role || 'user'
-          },
-          read: msg.read_status ?? false,
-          documentId: msg.document_id || null
+        // Transform notifications
+        const transformedNotifications = (notificationsData || []).map((n: any) => ({
+          id: n.id,
+          message: n.message || n.title || 'No message',
+          title: n.title,
+          created_at: n.created_at,
+          read_at: n.read_at,
+          is_read: n.read_at !== null,
+          notification_type: n.notification_type,
+          link: n.data?.link || null
         }));
-        
-        setChatMessages(transformedMessages);
 
-        // Calculate total unread count (notifications + messages)
-        const notificationUnreadCount = (notificationsData || []).filter(n => !n.is_read).length;
-        const messageUnreadCount = transformedMessages.length;
-        
-        setUnreadCount(notificationUnreadCount + messageUnreadCount);
-        setLastRefresh(new Date());
+        // Transform messages
+        const transformedMessages = (messagesData || []).map((m: any) => ({
+          id: m.id,
+          content: m.message || m.content || 'No content',
+          subject: m.subject || 'No subject',
+          timestamp: m.created_at,
+          sender: {
+            id: m.sender_id,
+            first_name: m.sender?.first_name || m.sender_role || 'User',
+            last_name: m.sender?.last_name || '',
+            role: m.sender?.role || m.sender_role || 'user'
+          },
+          read: m.is_read ?? false,
+          documentId: m.document_id || null
+        }));
+
+        setNotifications(transformedNotifications);
+        setChatMessages(transformedMessages);
       } catch (error: any) {
+        console.error("Error fetching notifications:", error);
         if (isMounted.current) {
-          console.error("Error in fetchNotifications:", error);
           setNotifications([]);
           setChatMessages([]);
-          setUnreadCount(0);
         }
       } finally {
         if (isMounted.current) {
@@ -165,27 +258,14 @@ export function NotificationBell() {
     };
 
     const setupRealtime = async () => {
+      if (!session?.access_token || !session?.user?.id) return;
+
       try {
         await fetchNotifications();
 
-        // Only setup Realtime if we have a valid session and Supabase is configured
-        if (!session?.access_token || !session?.user?.id || !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-          return;
-        }
-
-        // Verify the token is still valid before subscribing
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError || !user) {
-          return;
-        }
-
         // Setup notifications channel
         notificationChannel = supabase
-          .channel(`notifications:${session.user.id}`, {
-            config: {
-              broadcast: { self: false }
-            }
-          })
+          .channel(`notifications:${session.user.id}`)
           .on(
             'postgres_changes',
             {
@@ -194,37 +274,47 @@ export function NotificationBell() {
               table: 'notifications',
               filter: `user_id=eq.${session.user.id}`
             },
-            (payload) => {
+            (payload: any) => {
               if (!isMounted.current) return;
-              const newNotification = payload.new as Notification;
-              setNotifications(prev => [newNotification, ...prev.slice(0, 4)]); // Keep only 5 newest
 
-              // Update unread count
-              const messageUnreadCount = chatMessages.length;
-              setUnreadCount(prev => prev + 1 + messageUnreadCount); // +1 for new notification
+              const newNotification = {
+                ...payload.new,
+                is_read: payload.new.read_at !== null,
+                message: payload.new.message || payload.new.title || 'New notification'
+              };
+
+              setNotifications(prev => {
+                const exists = prev.some(n => n.id === newNotification.id);
+                if (exists) return prev;
+                return [newNotification, ...prev.slice(0, 4)];
+              });
+
               toast.info(newNotification.message);
             }
           )
-          .subscribe((status) => {
-            if (!isMounted.current) return;
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'notifications',
+              filter: `user_id=eq.${session.user.id}`
+            },
+            (payload: any) => {
+              if (!isMounted.current) return;
 
-            if (status === 'CHANNEL_ERROR') {
-              console.warn('Channel error for notifications');
-            } else if (status === 'TIMED_OUT') {
-              console.warn('Channel timed out for notifications');
-            } else if (status === 'SUBSCRIBED') {
-              console.log('Successfully subscribed to notifications');
-            }
-          });
-
-        // Setup messages channel for real-time updates
-        try {
-          messageChannel = supabase
-            .channel(`messages:${session.user.id}`, {
-              config: {
-                broadcast: { self: false }
+              // Remove notification if it's now marked as read
+              if (payload.new.read_at !== null) {
+                setNotifications(prev => prev.filter(n => n.id !== payload.new.id));
               }
-            })
+            }
+          )
+          .subscribe();
+
+        // Setup messages channel
+        if (messagesTableUsedRef.current === 'advisor_student_messages') {
+          messageChannel = supabase
+            .channel(`advisor_student_messages:${session.user.id}`)
             .on(
               'postgres_changes',
               {
@@ -233,62 +323,127 @@ export function NotificationBell() {
                 table: 'advisor_student_messages',
                 filter: `recipient_id=eq.${session.user.id}`
               },
-              (payload) => {
+              async (payload: any) => {
                 if (!isMounted.current) return;
+
+                // Fetch sender information for the new message
+                const { data: senderData } = await supabase
+                  .from('profiles')
+                  .select('first_name, last_name, role')
+                  .eq('id', payload.new.sender_id)
+                  .single();
 
                 const newMessage = {
                   id: payload.new.id,
-                  content: payload.new.message || 'Message content unavailable',
+                  content: payload.new.message || 'No content',
                   subject: payload.new.subject || 'No subject',
                   timestamp: payload.new.created_at,
                   sender: {
                     id: payload.new.sender_id,
-                    first_name: payload.new.sender_role || 'User',
-                    last_name: '',
-                    role: payload.new.sender_role || 'user'
+                    first_name: senderData?.first_name || payload.new.sender_role || 'User',
+                    last_name: senderData?.last_name || '',
+                    role: senderData?.role || payload.new.sender_role || 'user'
                   },
-                  read: payload.new.read_status ?? false,
+                  read: payload.new.is_read ?? false,
                   documentId: payload.new.document_id || null
                 };
 
-                setChatMessages(prev => [newMessage, ...prev.slice(0, 4)]); // Keep only 5 newest
+                setChatMessages(prev => {
+                  const exists = prev.some(m => m.id === newMessage.id);
+                  if (exists) return prev;
+                  return [newMessage, ...prev.slice(0, 4)];
+                });
 
-                // Update unread count
-                const notificationUnreadCount = notifications.filter(n => !n.is_read).length;
-                setUnreadCount(prev => prev + 1 + notificationUnreadCount); // +1 for new message
-                toast.info(`New message from ${newMessage.sender?.first_name || 'User'}`);
+                toast.info(`New message from ${newMessage.sender.first_name}`);
               }
             )
-            .subscribe((status) => {
-              if (!isMounted.current) return;
+            .on(
+              'postgres_changes',
+              {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'advisor_student_messages',
+                filter: `recipient_id=eq.${session.user.id}`
+              },
+              (payload: any) => {
+                if (!isMounted.current) return;
 
-              if (status === 'CHANNEL_ERROR') {
-                console.info('Messages table not available for real-time updates, continuing without subscription');
-              } else if (status === 'TIMED_OUT') {
-                console.warn('Channel timed out for messages');
-              } else if (status === 'SUBSCRIBED') {
-                console.info('Successfully subscribed to messages');
+                // Remove message from list if it's now marked as read
+                if (payload.new.is_read === true) {
+                  setChatMessages(prev => prev.filter(m => m.id !== payload.new.id));
+                }
               }
-            });
-        } catch (subscriptionError) {
-          console.warn("Could not set up real-time subscriptions for messages:", subscriptionError);
+            )
+            .subscribe();
+        } else if (messagesTableUsedRef.current === 'messages') {
+          messageChannel = supabase
+            .channel(`messages:${session.user.id}`)
+            .on(
+              'postgres_changes',
+              {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'messages',
+                filter: `recipient_id=eq.${session.user.id}`
+              },
+              async (payload: any) => {
+                if (!isMounted.current) return;
+
+                // Fetch sender information for the new message
+                const { data: senderData } = await supabase
+                  .from('profiles')
+                  .select('first_name, last_name, role')
+                  .eq('id', payload.new.sender_id)
+                  .single();
+
+                const newMessage = {
+                  id: payload.new.id,
+                  content: payload.new.content || 'No content',
+                  subject: payload.new.subject || 'No subject',
+                  timestamp: payload.new.created_at,
+                  sender: {
+                    id: payload.new.sender_id,
+                    first_name: senderData?.first_name || 'User',
+                    last_name: senderData?.last_name || '',
+                    role: senderData?.role || 'user'
+                  },
+                  read: payload.new.is_read ?? false,
+                  documentId: null
+                };
+
+                setChatMessages(prev => {
+                  const exists = prev.some(m => m.id === newMessage.id);
+                  if (exists) return prev;
+                  return [newMessage, ...prev.slice(0, 4)];
+                });
+
+                toast.info(`New message from ${newMessage.sender.first_name}`);
+              }
+            )
+            .on(
+              'postgres_changes',
+              {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'messages',
+                filter: `recipient_id=eq.${session.user.id}`
+              },
+              (payload: any) => {
+                if (!isMounted.current) return;
+
+                // Remove message from list if it's now marked as read
+                if (payload.new.is_read === true) {
+                  setChatMessages(prev => prev.filter(m => m.id !== payload.new.id));
+                }
+              }
+            )
+            .subscribe();
         }
       } catch (error: any) {
-        if (!isMounted.current) return;
-
-        // Silently handle authentication errors
-        if (error?.message?.includes("Refresh Token") || error?.message?.includes("Invalid") || error?.message?.includes("JWT")) {
+        if (error?.message?.includes("Refresh Token") || error?.message?.includes("Invalid")) {
           return;
         }
-
-        // Check if it's a network error and handle appropriately
-        if (error?.message?.includes("Failed to fetch") || error?.message?.includes("NetworkError")) {
-          console.warn("Network error in notification setup:", error);
-          return;
-        }
-
-        // Log other errors but don't crash
-        console.error("Error in notification setup:", error);
+        console.error("Error setting up realtime:", error);
       }
     };
 
@@ -297,54 +452,50 @@ export function NotificationBell() {
     return () => {
       isMounted.current = false;
       if (notificationChannel) {
-        supabase.removeChannel(notificationChannel).catch((err) => {
-          console.warn("Error removing notification channel:", err);
-        });
+        supabase.removeChannel(notificationChannel);
       }
       if (messageChannel) {
-        supabase.removeChannel(messageChannel).catch((err) => {
-          console.warn("Error removing messages channel:", err);
-        });
+        supabase.removeChannel(messageChannel);
       }
     };
-  }, [session?.user?.id, session?.user, session?.access_token, supabase, notifications, chatMessages]);
+  }, [session?.user?.id, session?.access_token, supabase]);
 
   const handleMarkAllAsRead = async () => {
-    if (!session || unreadCount === 0) return;
+    if (!session) return;
 
     // Mark notifications as read
     const unreadNotificationIds = notifications.filter(n => !n.is_read).map(n => n.id);
     if (unreadNotificationIds.length > 0) {
-      const { error: notificationError } = await supabase
+      await supabase
         .from("notifications")
-        .update({ is_read: true })
+        .update({ read_at: new Date().toISOString() })
         .in("id", unreadNotificationIds);
 
-      if (notificationError) {
-        toast.error("Failed to mark notifications as read.");
-      } else {
-        setNotifications(notifications.map(n => ({ ...n, is_read: true })));
-      }
+      setNotifications(prev => prev.map(n => ({
+        ...n,
+        is_read: true,
+        read_at: new Date().toISOString()
+      })));
     }
 
     // Mark messages as read
     if (chatMessages.length > 0) {
       const messageIds = chatMessages.map(m => m.id);
-      const { error: messageError } = await supabase
-        .from("advisor_student_messages")
-        .update({ read_status: true })
-        .in("id", messageIds);
 
-      if (messageError) {
-        console.warn("Messages table might not exist, continuing without marking as read:", messageError);
-        // Don't show error toast for this since it might be expected if table doesn't exist
-        setChatMessages([]);
-      } else {
-        setChatMessages([]);
+      if (messagesTableUsedRef.current === 'advisor_student_messages') {
+        await supabase
+          .from("advisor_student_messages")
+          .update({ is_read: true })
+          .in("id", messageIds);
+      } else if (messagesTableUsedRef.current === 'messages') {
+        await supabase
+          .from("messages")
+          .update({ is_read: true })
+          .in("id", messageIds);
       }
-    }
 
-    setUnreadCount(0);
+      setChatMessages([]);
+    }
   };
 
   return (
@@ -370,7 +521,7 @@ export function NotificationBell() {
             )}
           </div>
         </div>
-        
+
         <div className="max-h-96 overflow-y-auto">
           {loading ? (
             <div className="p-4 space-y-3">
@@ -385,49 +536,45 @@ export function NotificationBell() {
                   <h4 className="text-sm font-semibold text-muted-foreground">New Messages</h4>
                 </div>
               )}
-              
+
               {chatMessages.map((message) => (
-                <Link 
-                  key={message.id} 
+                <Link
+                  key={message.id}
                   href={`/chat#${message.id}`}
                   className="block px-4 py-3 hover:bg-accent border-b last:border-b-0"
                 >
                   <div className="font-medium">
-                    {message.sender?.first_name} {message.sender?.last_name}
+                    {message.sender?.first_name || message.sender?.role || 'User'}
                   </div>
-                  <div className="text-sm text-muted-foreground truncate">{message.content}</div>
+                  <div className="text-sm text-muted-foreground truncate">{message.content || 'No content'}</div>
                   <div className="text-xs text-muted-foreground mt-1">
                     {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
                   </div>
                 </Link>
               ))}
 
-              {notifications.length > 0 && chatMessages.length > 0 && (
+              {notifications.length > 0 && (
                 <div className="px-4 py-2 border-b">
                   <h4 className="text-sm font-semibold text-muted-foreground">Notifications</h4>
                 </div>
               )}
 
-              {notifications.map((notification) => {
-                const hasLink = notification.link && notification.link !== "#";
-                const Component = hasLink ? Link : 'div';
-                const props = hasLink ? { href: notification.link } : {};
-
-                return (
-                  <Component
-                    key={notification.id}
-                    {...props}
-                    className={`block px-4 py-3 hover:bg-accent border-b last:border-b-0 ${
-                      !notification.is_read ? "bg-accent/50" : ""
-                    } ${hasLink ? 'cursor-pointer' : 'cursor-default'}`}
-                  >
-                    <div className="text-sm">{notification.message}</div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                    </div>
-                  </Component>
-                );
-              })}
+              {notifications.map((notification) => (
+                <div
+                  key={notification.id}
+                  className={`block px-4 py-3 hover:bg-accent border-b last:border-b-0 ${
+                    !notification.is_read ? "bg-accent/50" : ""
+                  }`}
+                >
+                  {notification.title && (
+                    <div className="font-medium text-sm">{notification.title}</div>
+                  )}
+                  <div className="text-sm">{notification.message || 'No message content'}</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                  </div>
+                </div>
+              ))}
 
               {notifications.length === 0 && chatMessages.length === 0 && (
                 <div className="p-8 text-center text-muted-foreground">

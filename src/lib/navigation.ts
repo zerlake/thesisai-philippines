@@ -52,6 +52,7 @@ import {
   FolderOpen,
   Activity,
   Zap,
+  PenLine,
 } from "lucide-react";
 
 export type NavItem = {
@@ -71,9 +72,9 @@ export const studentNavGroups: NavGroup[] = [
     items: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
       { icon: FolderOpen, label: "My Projects", href: "/projects" },
+      { icon: Zap, label: "Workflow Templates", href: "/workflow-templates" },
       { icon: MessageCircleQuestion, label: "Messages", href: "/chat" },
       { icon: FileText, label: "Drafts", href: "/drafts" },
-      { icon: Activity, label: "AI Usage", href: "/ai-usage" },
     ],
   },
   {
@@ -115,12 +116,14 @@ export const studentNavGroups: NavGroup[] = [
       { icon: FileText, label: "Title Page", href: "/title-page" },
       { icon: BarChart, label: "Statistical Analysis", href: "/statistical-analysis" },
       { icon: ClipboardCheck, label: "Results Analyzer", href: "/results" },
+      { icon: FileText, label: "Thesis Finalizer Pro", href: "/thesis-phases/finalizer" }, // Pro+Advisor+ only
     ],
   },
   {
     title: "Submission Prep",
     items: [
       { icon: Shield, label: "Validity Defender", href: "/thesis-phases/chapter-3/validity-defender" },
+      { icon: FileText, label: "Thesis Finalizer Pro", href: "/thesis-phases/finalizer" }, // Pro+Advisor+ only
       { icon: Presentation, label: "Defense PPT Coach", href: "/defense-ppt-coach" },
       { icon: Presentation, label: "Presentation Builder", href: "/presentation" },
       { icon: MessageCircleQuestion, label: "Q&A Simulator", href: "/qa-simulator" },
@@ -149,6 +152,7 @@ export const adminNavItems: NavItem[] = [
   { icon: MessageCircleQuestion, label: "Testimonials", href: "/admin/testimonials" },
   { icon: Banknote, label: "Payouts", href: "/admin/payouts" },
   { icon: Network, label: "MCP Servers", href: "/admin/mcp-servers" },
+  { icon: AlertTriangle, label: "Rate Limiting", href: "/admin/rate-limiting" },
 ];
 
 export const adminNavGroups: NavGroup[] = [
@@ -182,9 +186,11 @@ export const adminNavGroups: NavGroup[] = [
     title: "AI & System",
     items: [
       { icon: Network, label: "MCP Servers", href: "/admin/mcp-servers" },
+      { icon: PenLine, label: "Excalidraw MCP", href: "/admin/excalidraw-mcp" },
       { icon: BrainCircuit, label: "AI Pipeline", href: "/admin/ai" },
       { icon: FlaskConical, label: "Paper Search", href: "/admin/paper-search" },
       { icon: Shield, label: "Security Logs", href: "/admin/security" },
+      { icon: AlertTriangle, label: "Rate Limiting", href: "/admin/rate-limiting" },
     ],
   },
 ];
@@ -207,6 +213,7 @@ export const advisorNavGroups: NavGroup[] = [
       { icon: FileText, label: "Document Reviews", href: "/advisor/students/documents" },
       { icon: MessageCircleQuestion, label: "Communication Hub", href: "/advisor/students/communication" },
       { icon: Target, label: "Milestone Tracking", href: "/advisor/students/milestones" },
+      { icon: FileText, label: "Thesis Finalizer Pro", href: "/thesis-phases/finalizer" }, // Pro+Advisor+ only
     ],
   },
   {
@@ -279,6 +286,7 @@ export const criticNavGroups: NavGroup[] = [
       { icon: FileCheck, label: "Review History", href: "/critic/review-history" },
       { icon: ListTodo, label: "Batch Review", href: "/critic/batch-review" },
       { icon: Award, label: "Issue Certificate", href: "/critic/issue-certificate" },
+      { icon: FileText, label: "Thesis Finalizer Pro", href: "/thesis-phases/finalizer" }, // Pro+Advisor+ only
     ],
   },
   {

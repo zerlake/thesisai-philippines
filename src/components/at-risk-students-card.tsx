@@ -30,18 +30,73 @@ export function AtRiskStudentsCard() {
     if (!user) return;
 
     const fetchAtRiskStudents = async () => {
-      setIsLoading(true);
-      const { data, error } = await supabase.rpc('get_at_risk_students_for_advisor', {
-        p_advisor_id: user.id
-      });
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase.rpc('get_at_risk_students_for_advisor', {
+          p_advisor_id: user.id
+        });
 
-      if (error) {
-        toast.error("Failed to fetch at-risk students.");
-        console.error(error);
-      } else {
-        setStudents(data || []);
+        if (error) {
+          // Provide a user-friendly error message while logging detailed info for debugging
+          // Check if the error is specifically about advisor_profiles table not existing
+          const isAdvisorProfilesNotFoundError = error?.message?.includes('advisor_profiles') &&
+                                                 error?.message?.includes('does not exist');
+
+          // Check if the error is specifically about the academic_milestones table not existing
+          const isAcademicMilestonesNotFoundError = error?.message?.includes('academic_milestones') &&
+                                                     error?.message?.includes('does not exist');
+
+          let userErrorMessage = "Failed to fetch at-risk students. Please try again later.";
+          if (isAdvisorProfilesNotFoundError) {
+            userErrorMessage = "Advisor profiles feature is not fully set up. Contact admin to resolve.";
+          } else if (isAcademicMilestonesNotFoundError) {
+            userErrorMessage = "Academic milestones feature is not available yet. Contact admin to set up the academic_milestones table.";
+          }
+
+          toast.error(userErrorMessage);
+
+          // Log the error in a way that handles empty error objects
+          const errorKeys = error ? Object.keys(error) : [];
+          const hasErrorDetails = error && errorKeys.length > 0;
+
+          let errorDetails;
+          if (hasErrorDetails) {
+            errorDetails = {
+              message: error?.message || 'No error message',
+              details: error,
+              code: error?.code,
+              status: error?.status,
+              keys: errorKeys
+            };
+          } else {
+            // Use JSON.stringify to see the actual content of the error object
+            const errorString = error ? JSON.stringify(error) : 'null';
+            errorDetails = `Empty or null error object received from Supabase: ${errorString}`;
+          }
+
+          // Log error details without showing the empty object directly
+          if (typeof errorDetails === 'string') {
+            console.error("Error fetching at-risk students:", errorDetails);
+          } else {
+            // If errorDetails is an object, log its properties individually to avoid showing {}
+            console.error("Error fetching at-risk students - Message:", errorDetails.message);
+            if (errorDetails.code) console.error("Error Code:", errorDetails.code);
+            if (errorDetails.status) console.error("Status:", errorDetails.status);
+            if (errorDetails.keys) console.error("Available keys:", errorDetails.keys);
+          }
+
+          // Still set an empty array to ensure the UI doesn't break
+          setStudents([]);
+        } else {
+          setStudents(data || []);
+        }
+      } catch (err) {
+        toast.error("An unexpected error occurred while fetching at-risk students.");
+        console.error("Unexpected error fetching at-risk students:", err);
+        setStudents([]); // Ensure we reset to an empty array on unexpected errors
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     fetchAtRiskStudents();

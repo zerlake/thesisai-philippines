@@ -41,6 +41,7 @@ const plans = [
       "Connect with one online advisor",
       "Share documents for feedback",
       "Track milestones with your advisor",
+      "Thesis Finalizer Pro - Multi-agent AI system to polish and integrate chapters",
     ],
     buttonText: "Upgrade Now",
     href: "/register",
@@ -55,7 +56,8 @@ const plans = [
       "Connect with a Manuscript Critic",
       "Get certified by an expert reviewer",
       "Receive professional editing feedback",
-      "Export certificate of editing"
+      "Export certificate of editing",
+      "Thesis Finalizer Pro - Multi-agent AI system to polish and integrate chapters",
     ],
     buttonText: "Get Complete",
     href: "/register",

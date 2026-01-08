@@ -15,7 +15,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { redirect } from "next/navigation";
-import { BrandedLoader } from "@/components/branded-loader";
 import { formatDistanceToNow, format } from "date-fns";
 import {
   FileCheck,
@@ -112,11 +111,19 @@ export default function ReviewHistoryPage() {
   const [filterDecision, setFilterDecision] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('date');
 
-  if (!authContext) return <BrandedLoader />;
+  if (!authContext) {
+    // If auth context is not available, redirect to login
+    redirect('/login');
+  }
   const { session, profile, isLoading } = authContext;
-  if (!isLoading && (!session || profile?.role !== 'critic')) redirect('/login');
-  if (isLoading) return <BrandedLoader />;
 
+  // Redirect if not authenticated or not authorized
+  if (!isLoading && (!session || profile?.role !== 'critic')) {
+    redirect('/login');
+  }
+
+  // Render the page immediately with role-based access control handled inside
+  // The content will show loading states internally if needed
   const filteredHistory = history
     .filter(record => {
       const matchesSearch = record.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||

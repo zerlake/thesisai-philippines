@@ -1,6 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import {
+  detectResearchType,
+  validateProblemStatement,
+  type ResearchType,
+  type ResearchTypeAnalysis
+} from "@/lib/research-type-detector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -55,6 +61,8 @@ type ResearchProblem = {
   relatedLiterature: string[];
   phStatistics: PhilippineStat[];
   literatureGaps: LiteratureGap[];
+  researchType?: ResearchType;
+  researchTypeAnalysis?: ResearchTypeAnalysis;
 };
 
 export function ResearchProblemIdentifier() {
@@ -95,7 +103,7 @@ export function ResearchProblemIdentifier() {
           setIsAnalyzing(false);
           
           // Generate mock research problems with enhanced functionality
-          const mockProblems: ResearchProblem[] = [
+          const problemDescriptions = [
             {
               id: "1",
               title: `Cyberbullying Among Senior High School Students in ${region || 'Philippines'}`,
@@ -103,9 +111,9 @@ export function ResearchProblemIdentifier() {
               context: `According to PSA 2023 data, there has been a 16% increase in reported cyberbullying cases among teenagers in ${region || 'Region X'}.`,
               gap: `Few studies discuss this trend among senior high school students in ${region || 'Bukidnon'}. Most research focuses on Metro Manila and college students.`,
               significance: `Addressing this gap could inform local prevention strategies and school policies tailored to this region.`,
-              relevance: "high",
+              relevance: "high" as const,
               phStatus: true,
-              dataAvailability: "high",
+              dataAvailability: "high" as const,
               potentialImpact: "High potential to inform local school policies and intervention strategies",
               suggestedApproach: "Mixed-methods approach with surveys and focus group discussions in selected schools",
               relatedLiterature: [
@@ -226,7 +234,17 @@ export function ResearchProblemIdentifier() {
               ]
             }
           ];
-          
+
+          // Analyze each problem for research type
+          const mockProblems: ResearchProblem[] = problemDescriptions.map(problem => {
+            const analysis = detectResearchType(problem.description);
+            return {
+              ...problem,
+              researchType: analysis.type,
+              researchTypeAnalysis: analysis
+            };
+          });
+
           setIdentifiedProblems(mockProblems);
           return 100;
         }
@@ -245,15 +263,43 @@ export function ResearchProblemIdentifier() {
   };
 
   const exportProblemStatement = (problem: ResearchProblem) => {
-    const statement = `Research Problem Statement:
-    
+    const analysis = problem.researchTypeAnalysis;
+    const validation = analysis ? validateProblemStatement(problem.description, analysis.type) : null;
+
+    let statement = `Research Problem Statement:
+
 Context: ${problem.context}
 
 Gap: ${problem.gap}
 
 Significance: ${problem.significance}
 
-Suggested Research Question: To what extent does ${problem.title.toLowerCase()} affect [specific outcomes] in ${region || 'the Philippines'}, and what factors contribute to this phenomenon?`;
+`;
+
+    if (analysis) {
+      statement += `Research Type: ${analysis.type.charAt(0).toUpperCase() + analysis.type.slice(1)} Research
+Confidence: ${(analysis.confidence * 100).toFixed(0)}%
+
+${analysis.rationale}
+
+`;
+
+      if (analysis.suggestions.length > 0) {
+        statement += `Methodology Suggestions:
+${analysis.suggestions.map((s, i) => `${i + 1}. ${s}`).join('\n')}
+
+`;
+      }
+
+      if (validation && !validation.isValid) {
+        statement += `Validation Issues:
+${validation.issues.map(i => `- ${i.message}\n  ${i.correction}`).join('\n\n')}
+
+`;
+      }
+    }
+
+    statement += `Suggested Research Question: To what extent does ${problem.title.toLowerCase()} affect [specific outcomes] in ${region || 'the Philippines'}, and what factors contribute to this phenomenon?`;
 
     // Copy to clipboard for user
     navigator.clipboard.writeText(statement);
@@ -266,9 +312,9 @@ Suggested Research Question: To what extent does ${problem.title.toLowerCase()} 
     setFieldOfStudy("education");
     setLocation("regional");
     setRegion("Region III");
-    
+
     // Create sample research problems
-    const mockProblems: ResearchProblem[] = [
+    const problemDescriptions = [
       {
         id: "1",
         title: "Social Media Usage and Academic Performance in Region III",
@@ -276,9 +322,9 @@ Suggested Research Question: To what extent does ${problem.title.toLowerCase()} 
         context: "According to PSA 2023 data, 85% of teenagers in Region III have daily access to social media platforms, with average usage of 4.5 hours per day.",
         gap: "Few studies discuss this relationship specifically among senior high school students in Region III. Most research focuses on college students or national trends.",
         significance: "Addressing this gap could inform local education policies and student guidance programs for balanced technology use.",
-        relevance: "high",
+        relevance: "high" as const,
         phStatus: true,
-        dataAvailability: "high",
+        dataAvailability: "high" as const,
         potentialImpact: "High potential to inform local education policies and student guidance programs",
         suggestedApproach: "Mixed-methods approach with surveys in selected schools and focus group discussions",
         relatedLiterature: [
@@ -296,7 +342,7 @@ Suggested Research Question: To what extent does ${problem.title.toLowerCase()} 
             description: "In Region III, with average usage of 4.5 hours per day"
           },
           {
-            id: "stat-2", 
+            id: "stat-2",
             source: "DepEd",
             year: 2023,
             value: "42% of students report distraction from social media",
@@ -327,9 +373,9 @@ Suggested Research Question: To what extent does ${problem.title.toLowerCase()} 
         context: "NEDA data shows that 65% of public senior high schools in Region III have limited digital infrastructure, affecting implementation of the technology-focused tracks.",
         gap: "Limited research on teacher readiness and institutional factors that affect technology integration in the new K-12 system.",
         significance: "Could guide policy for educational technology investment in line with the Digital Philippines 2030 plan.",
-        relevance: "medium",
+        relevance: "medium" as const,
         phStatus: true,
-        dataAvailability: "medium", 
+        dataAvailability: "medium" as const,
         potentialImpact: "Could guide educational technology policies and teacher training programs",
         suggestedApproach: "Case study approach with selected schools in Region III",
         relatedLiterature: [
@@ -364,13 +410,23 @@ Suggested Research Question: To what extent does ${problem.title.toLowerCase()} 
         ]
       }
     ];
-    
+
+    // Analyze each problem for research type
+    const mockProblems: ResearchProblem[] = problemDescriptions.map(problem => {
+      const analysis = detectResearchType(problem.description);
+      return {
+        ...problem,
+        researchType: analysis.type,
+        researchTypeAnalysis: analysis
+      };
+    });
+
     setIdentifiedProblems(mockProblems);
     setAnalysisProgress(100);
     setIsAnalyzing(false);
     setSelectedProblem(mockProblems[0]); // Select the first problem
-    
-    alert("Sample research problems added! The tool now shows realistic examples with Philippine statistics and literature gaps.");
+
+    alert("Sample research problems added! The tool now shows realistic examples with Philippine statistics, literature gaps, and automatic research type detection.");
   };
 
   return (

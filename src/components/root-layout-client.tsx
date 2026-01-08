@@ -9,6 +9,8 @@ import { FocusModeProvider } from "@/contexts/focus-mode-context";
 import { PuterProvider } from "@/contexts/puter-context";
 import { MCPProvider } from "@/components/mcp/MCPProvider";
 import { Context7Provider } from "@/contexts/context7-provider";
+import { OnboardingProvider } from "@/contexts/onboarding-context";
+import { OnboardingModal } from "@/components/onboarding/onboarding-modal";
 import { useState, useEffect } from 'react';
 import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
 import { CommandPalette } from '@/components/CommandPalette/CommandPalette';
@@ -69,15 +71,18 @@ export function RootLayoutClient({ children }: { children: React.ReactNode }) {
     <Context7Provider>
       <MCPProvider>
         <PuterProvider>
-          <FocusModeProvider>
-            <>
-              <MainLayoutWrapper>
-                {children}
-              </MainLayoutWrapper>
-              <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
-              <CommandPaletteHint isVisible={isNewUser} />
-            </>
-          </FocusModeProvider>
+          <OnboardingProvider>
+            <FocusModeProvider>
+              <>
+                <OnboardingModal />
+                <MainLayoutWrapper>
+                  {children}
+                </MainLayoutWrapper>
+                <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
+                <CommandPaletteHint isVisible={isNewUser} />
+              </>
+            </FocusModeProvider>
+          </OnboardingProvider>
         </PuterProvider>
       </MCPProvider>
     </Context7Provider>

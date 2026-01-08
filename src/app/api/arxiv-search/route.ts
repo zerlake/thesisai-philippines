@@ -1,47 +1,69 @@
 /**
  * API Route: ArXiv Search (Server-side to avoid CORS)
- * 
+ *
  * Proxies requests to arXiv API to avoid browser CORS issues
+ * Includes rate limiting based on user plan
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { withRateLimit } from '@/lib/rate-limit-middleware';
 
 export async function GET(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResult = await withRateLimit(request, {
+    feature: 'paper_search',
+    planLimits: true,
+    perMinute: 20,
+  });
+
+  if (!rateLimitResult.allowed && rateLimitResult.response) {
+    return rateLimitResult.response;
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q') ?? '';
     const maxResults = Number(searchParams.get('max') ?? '20');
 
     if (!query.trim()) {
-      return NextResponse.json(
+      const errorResponse = NextResponse.json(
         { error: 'Query is required' },
         { status: 400 }
       );
+
+      // Add rate limit headers
+      Object.entries(rateLimitResult.headers).forEach(([key, value]) => {
+        if (value !== undefined) {
+          errorResponse.headers.set(key, value);
+        }
+      });
+
+      return errorResponse;
     }
 
     // Build arXiv search query
-    const searchQuery = encodeURIComponent(`all:${query.split(' ').join(' AND ')}`);
-    const arxivUrl = `https://export.arxiv.org/api/query?search_query=${searchQuery}&max_results=${Math.min(maxResults, 100)}&sortBy=relevance&sortOrder=descending`;
+    const searchQuery = `all:${query.split(' ').join(' AND ')}`;
+    const arxivUrl = `https://export.arxiv.org/api/query?search_query=${encodeURIComponent(searchQuery)}&max_results=${Math.min(maxResults, 100)}&sortBy=relevance&sortOrder=descending`;
 
     console.log(`[API] ArXiv search: ${query}, max: ${maxResults}`);
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
 
-    const response = await fetch(arxivUrl, {
+    const arxivResponse = await fetch(arxivUrl, {
       headers: { 'User-Agent': 'ThesisAI/1.0' },
       signal: controller.signal,
     }).finally(() => clearTimeout(timeout));
 
-    if (!response.ok) {
-      console.error(`[API] ArXiv returned ${response.status}`);
+    if (!arxivResponse.ok) {
+      console.error(`[API] ArXiv returned ${arxivResponse.status}`);
       return NextResponse.json(
-        { error: `ArXiv API error: ${response.status}`, entries: [] },
-        { status: response.status }
+        { error: `ArXiv API error: ${arxivResponse.status}`, entries: [] },
+        { status: arxivResponse.status }
       );
     }
 
-    const text = await response.text();
+    const text = await arxivResponse.text();
 
     // Parse XML entries - using regex matching which is safe in server environment
     const entryMatches = text.match(/<entry[^>]*>([\s\S]*?)<\/entry>/g) || [];
@@ -100,18 +122,37 @@ export async function GET(request: NextRequest) {
 
     console.log(`[API] ArXiv found ${entries.length} papers`);
 
-    return NextResponse.json({
+    const successResponse = NextResponse.json({
       entries,
       count: entries.length,
       query: query,
     });
+
+    // Add rate limit headers
+    Object.entries(rateLimitResult.headers).forEach(([key, value]) => {
+      if (value !== undefined) {
+        successResponse.headers.set(key, value);
+      }
+    });
+
+    return successResponse;
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error('[API] ArXiv search error:', msg);
-    return NextResponse.json(
+
+    const errorResponse = NextResponse.json(
       { error: `ArXiv search failed: ${msg}`, entries: [] },
       { status: 500 }
     );
+
+    // Add rate limit headers
+    Object.entries(rateLimitResult.headers).forEach(([key, value]) => {
+      if (value !== undefined) {
+        errorResponse.headers.set(key, value);
+      }
+    });
+
+    return errorResponse;
   }
 }
 

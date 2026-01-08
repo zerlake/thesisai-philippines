@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { redirect } from "next/navigation";
-import { BrandedLoader } from "@/components/branded-loader";
 import { toast } from "sonner";
 import {
   LayoutTemplate,
@@ -68,11 +67,19 @@ export default function FormatCheckerPage() {
   const [result, setResult] = useState<FormatResult | null>(null);
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
 
-  if (!authContext) return <BrandedLoader />;
+  if (!authContext) {
+    // If auth context is not available, redirect to login
+    redirect('/login');
+  }
   const { session, profile, isLoading } = authContext;
-  if (!isLoading && (!session || profile?.role !== 'critic')) redirect('/login');
-  if (isLoading) return <BrandedLoader />;
 
+  // Redirect if not authenticated or not authorized
+  if (!isLoading && (!session || profile?.role !== 'critic')) {
+    redirect('/login');
+  }
+
+  // Render the page immediately with role-based access control handled inside
+  // The content will show loading states internally if needed
   const handleFileUpload = () => {
     setUploadedFile("sample_thesis.docx");
     toast.success("File uploaded: sample_thesis.docx");

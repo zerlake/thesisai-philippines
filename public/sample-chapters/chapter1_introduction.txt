@@ -1,0 +1,22 @@
+# Introduction
+
+## Background of the Study
+The rapid advancement of artificial intelligence technologies has significantly transformed various sectors, including education, healthcare, and business operations. In the Philippines, the adoption of AI-driven solutions has been gaining momentum, particularly in academic institutions where research and development play crucial roles in national progress.
+
+The integration of AI in academic writing assistance tools has emerged as a promising area of development. These tools aim to support students and researchers in producing high-quality academic outputs while maintaining the rigor required in scholarly work. However, the effectiveness of such tools in the Philippine academic context requires thorough investigation.
+
+## Problem Statement
+Despite the increasing availability of AI writing tools, there remains a gap in understanding how these technologies can be effectively utilized to support thesis writing in Philippine universities. Current AI tools may not be optimized for local academic standards, citation formats, and research methodologies commonly used in the region.
+
+## Objectives
+This study aims to:
+1. Evaluate the effectiveness of AI-driven thesis writing tools
+2. Assess the impact on student productivity and academic quality
+3. Identify best practices for AI integration in academic writing
+4. Develop recommendations for local academic institutions
+
+## Significance of the Study
+The findings of this research will contribute to the growing body of knowledge on AI applications in academic settings, particularly within the Philippine educational context. It will provide valuable insights for educators, students, and technology developers.
+
+## Scope and Limitations
+This study focuses on AI writing tools used in thesis preparation among graduate students in selected universities in the Philippines. The research is limited to tools that are accessible and currently in use.

@@ -8,6 +8,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Paper, PaperSearchQuery } from '@/types/paper';
 import { generatePaperSummaries } from '@/lib/paper-summary';
+import { withRateLimit } from '@/lib/rate-limit-middleware';
+import { withAuth } from '@/lib/jwt-validator';
 
 export const maxDuration = 30; // Allow up to 30 seconds for search
 
@@ -18,6 +20,17 @@ export const maxDuration = 30; // Allow up to 30 seconds for search
  * Returns: { papers: Paper[], totalResults: number, query: string, timestamp: number }
  */
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResult = await withRateLimit(request, {
+    feature: 'paper_search',
+    planLimits: true,
+    perMinute: 20, // Fallback: 20 searches/minute
+  });
+
+  if (!rateLimitResult.allowed && rateLimitResult.response) {
+    return rateLimitResult.response;
+  }
+
   try {
     const query: PaperSearchQuery = await request.json();
 
@@ -107,12 +120,17 @@ export async function POST(request: NextRequest) {
       `[API] Found ${papersWithSummaries.length} papers from ${results.length} candidates`
     );
 
-    return NextResponse.json({
+    // Create response with rate limit headers
+    const response = NextResponse.json({
       papers: papersWithSummaries,
       totalResults: papersWithSummaries.length,
       query: query.query,
       timestamp: Date.now(),
+    }, {
+      headers: rateLimitResult.headers,
     });
+
+    return response;
   } catch (error) {
     console.error('[API] Search error:', error);
     return NextResponse.json(

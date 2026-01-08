@@ -175,6 +175,14 @@ export function FeaturesSectionServer() {
             badge: "Professional",
             link: "/documentation/defense-preparation",
           },
+          {
+            id: "submit-6",
+            icon: "FileText",
+            title: "Thesis Finalizer Pro",
+            description: "Multi-agent AI system to polish and integrate all chapters into a cohesive final draft",
+            badge: "Pro+Advisor+",
+            link: "/thesis-phases/finalizer",
+          },
         ],
       },
     ],
@@ -220,6 +228,8 @@ export function FeaturesSectionServer() {
         return "bg-green-500/20 text-green-300 border border-green-500/30";
       case "Essential":
         return "bg-orange-500/20 text-orange-300 border border-orange-500/30";
+      case "Pro+Advisor+":
+        return "bg-purple-600/20 text-purple-300 border border-purple-600/30";
       default:
         return "bg-slate-500/20 text-slate-300 border border-slate-500/30";
     }

@@ -311,7 +311,9 @@ export class BackgroundSyncManager {
    * Setup online detection
    */
   private setupOnlineDetection(): void {
-    this.isOnline = navigator.onLine;
+    if (typeof navigator !== 'undefined') {
+      this.isOnline = navigator.onLine;
+    }
   }
 
   /**

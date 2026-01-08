@@ -230,6 +230,45 @@ export const THESIS_PHASES: ThesisPhase[] = [
       toolsCount: 16, // Changed back to original count of 16
       estimatedDuration: "2-4 weeks",
   },
+  {
+    id: "finalizer",
+    phaseNumber: 5,
+    phase: "05. Finalizer Pro",
+    title: "Thesis Finalizer Pro",
+    description: "Polish and integrate all chapters into a cohesive final draft (Pro+Advisor+ Feature)",
+    longDescription:
+      "Use our advanced multi-agent AI system to refine, harmonize, and finalize your thesis. Upload all chapters to get a cohesive, polished final draft with improved flow, consistent style, and proper formatting. This premium feature is available exclusively for Pro + Advisor and Pro Complete subscribers.",
+    color: "from-indigo-500 to-indigo-600",
+    bgColor: "bg-indigo-50",
+    icon: "Bot",
+    features: [
+      {
+        id: "multi-agent-processing",
+        icon: "Bot",
+        title: "Multi-Agent AI Processing",
+        description:
+          "Six specialized AI agents work simultaneously to refine different aspects of your thesis",
+        tools: ["coherence-agent", "style-agent", "citation-agent"],
+      },
+      {
+        id: "chapter-integration",
+        icon: "FileText",
+        title: "Chapter Integration & Harmonization",
+        description: "Seamlessly integrate all chapters with consistent voice, tone, and formatting",
+        tools: ["integration-tool", "style-harmonizer", "flow-improver"],
+      },
+      {
+        id: "quality-assurance",
+        icon: "Shield",
+        title: "Quality Assurance & Polish",
+        description:
+          "Final quality check with grammar, clarity, and academic tone improvements",
+        tools: ["quality-checker", "polish-agent", "final-review"],
+      },
+    ],
+    toolsCount: 9,
+    estimatedDuration: "1-2 days",
+  },
 ];
 
 /**

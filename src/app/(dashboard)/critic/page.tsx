@@ -2,14 +2,15 @@
 
 import { useAuth } from '@/components/auth-provider';
 import { redirect } from 'next/navigation';
-import { BrandedLoader } from '@/components/branded-loader';
 import { EnhancedCriticDashboard } from '@/components/critic/enhanced-critic-dashboard';
 
 export default function CriticPage() {
   const authContext = useAuth();
 
   if (!authContext) {
-    return <BrandedLoader />;
+    // If auth context is not available, return null to let the layout handle it
+    // or redirect to login if needed
+    redirect('/login');
   }
 
   const { session, profile, isLoading } = authContext;
@@ -19,9 +20,7 @@ export default function CriticPage() {
     redirect('/login');
   }
 
-  if (isLoading) {
-    return <BrandedLoader />;
-  }
-
+  // Render the dashboard immediately with role-based access control handled inside
+  // The EnhancedCriticDashboard will handle its own loading states
   return <EnhancedCriticDashboard />;
 }

@@ -63,7 +63,10 @@ export async function POST(request: NextRequest) {
       const termsWithGuideId = keyTerms.map((term: any) => ({
         guide_id: guide.id,
         term: term.term,
-        definition: term.definition,
+        conceptual_definition: term.conceptualDefinition || term.definition, // For backward compatibility
+        operational_definition: term.operationalDefinition || '',
+        source_type: term.sourceType || 'researcher-defined',
+        variable_link: term.variableLink || '',
       }));
 
       const { error: termsError } = await supabase
@@ -117,18 +120,47 @@ export async function GET(request: NextRequest) {
 
     const userId = session.user.id;
 
-    const { data: guides, error } = await supabase
+    // First, get the study guides
+    const { data: guides, error: guidesError } = await supabase
       .from('study_guides')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching study guides:', error);
-      return NextResponse.json({ error: 'Failed to fetch guides: ' + error.message }, { status: 500 });
+    if (guidesError) {
+      console.error('Error fetching study guides:', guidesError);
+      return NextResponse.json({ error: 'Failed to fetch guides: ' + guidesError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, guides });
+    // For each guide, fetch its terms
+    const guidesWithTerms = await Promise.all(
+      guides.map(async (guide) => {
+        const { data: terms, error: termsError } = await supabase
+          .from('study_guide_terms')
+          .select('*')
+          .eq('guide_id', guide.id)
+          .order('created_at', { ascending: true });
+
+        if (termsError) {
+          console.error('Error fetching terms for guide:', guide.id, termsError);
+          return { ...guide, terms: [] };
+        }
+
+        // Transform the terms to match the expected format
+        const formattedTerms = terms.map((term: any) => ({
+          id: term.id,
+          term: term.term,
+          conceptualDefinition: term.conceptual_definition,
+          operationalDefinition: term.operational_definition,
+          sourceType: term.source_type,
+          variableLink: term.variable_link,
+        }));
+
+        return { ...guide, terms: formattedTerms };
+      })
+    );
+
+    return NextResponse.json({ success: true, guides: guidesWithTerms });
   } catch (error) {
     console.error('Study guides fetch error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

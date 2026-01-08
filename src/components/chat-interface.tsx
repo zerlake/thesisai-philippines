@@ -13,9 +13,11 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Send, Users, Clock, MessageCircle, MessageCircleMore } from 'lucide-react';
+import { Send, Users, Clock, MessageCircle, MessageCircleMore, Loader2, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import Link from 'next/link';
+import { toast } from 'sonner';
 
 type ChatMessage = {
   id: string;
@@ -49,6 +51,8 @@ export function ChatInterface({
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+  const [sendSuccess, setSendSuccess] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load conversations
@@ -68,14 +72,28 @@ export function ChatInterface({
           .or(`student_id.eq.${session.user.id},advisor_id.eq.${session.user.id}`);
 
         if (error) {
-          // If relationships table doesn't exist, continue with empty array
+          // If relationships table doesn't exist or user doesn't have permission, continue with empty array
           const errorCode = error?.code;
           const errorMessage = error?.message || String(error);
-          if (errorCode === '42P01' || errorMessage.toLowerCase().includes('does not exist')) {
-            console.warn('Relationships table not found, continuing without relationship-based messages:', error);
+          console.warn('Error fetching advisor_student_relationships:', {
+            code: errorCode,
+            message: errorMessage,
+            details: error?.details,
+            hint: error?.hint
+          });
+
+          // Check for specific error conditions
+          if (errorCode === '42P01' || // undefined_table
+              errorCode === '42501' || // insufficient_privilege (permission denied)
+              errorMessage.toLowerCase().includes('does not exist') ||
+              errorMessage.toLowerCase().includes('permission denied') ||
+              errorMessage.toLowerCase().includes('relation does not exist')) {
+            console.warn('Relationships table not accessible, continuing without relationship-based messages');
             relationships = [];
           } else {
-            throw error; // Throw other errors
+            // For other types of errors (network, etc.), we might want to retry or handle differently
+            console.error('Unexpected error when fetching relationships:', error);
+            relationships = []; // Continue with empty relationships to not break the UI
           }
         } else {
           relationships = data || [];
@@ -85,6 +103,7 @@ export function ChatInterface({
           message: typeof error === 'string' ? error : error?.message || 'Unknown error',
           code: error?.code,
           details: error?.details,
+          hint: error?.hint,
           stack: error?.stack
         };
         console.error('Error fetching relationships:', errorInfo);
@@ -401,12 +420,13 @@ export function ChatInterface({
   }, [session?.user.id, profile, initialConversationId]);
 
   // Auto-scroll to bottom of messages when active conversation changes
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [activeConversation?.messages]);
+  // DISABLED: Users have a dedicated Message section in the sidebar
+  // useEffect(() => {
+  //   messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // }, [activeConversation?.messages]);
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !activeConversation || !session?.user?.id) return;
+    if (!newMessage.trim() || !activeConversation || !session?.user?.id || isSending) return;
 
     // Find the other participant in the conversation
     const otherParticipant = activeConversation.participants.find(
@@ -415,31 +435,140 @@ export function ChatInterface({
 
     if (!otherParticipant) return;
 
+    const messageText = newMessage.trim();
+    const tempMessageId = `temp-${Date.now()}`;
+    const now = new Date().toISOString();
+
+    setIsSending(true);
+    setSendSuccess(false);
+
+    // Optimistically add the message to the UI immediately
+    const tempMessage: ChatMessage = {
+      id: tempMessageId,
+      sender_id: session.user.id,
+      recipient_id: otherParticipant.id,
+      message: messageText,
+      created_at: now,
+      read_status: false,
+      sender_role: profile?.role || 'user',
+      sender_name: `${profile?.first_name || 'User'} ${profile?.last_name || ''}`,
+    };
+
+    // Update active conversation with the temp message
+    setActiveConversation(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        messages: [...(prev.messages || []), tempMessage]
+      };
+    });
+
+    // Clear input immediately for better UX
+    setNewMessage('');
+
     try {
+      // Prepare request body with demo token if applicable
+      // Determine role based on email for demo users (more reliable than profile.role)
+      // This prevents role override issues when admins access other dashboards
+      let senderRole = profile?.role || 'user';
+      
+      if (session.user.email) {
+        if (session.user.email.includes('demo-student')) senderRole = 'student';
+        else if (session.user.email.includes('demo-advisor')) senderRole = 'advisor';
+        else if (session.user.email.includes('demo-critic')) senderRole = 'critic';
+      }
+
+      const requestBody: any = {
+        senderId: session.user.id,
+        senderRole: senderRole,
+        recipientId: otherParticipant.id,
+        message: messageText,
+      };
+
+      // Note: Demo users now have built-in authorization via UUID in DEMO_USER_UUIDS
+      // No need to send demo token anymore - they're authorized as admin avatars
+      const DEMO_IDS = ['6e4c887c-6d11-4c8a-bf7b-eb94f562b9b7', 'ff79d401-5614-4de8-9f17-bc920f360dcf', '14a7ff7d-c6d2-4b27-ace1-32237ac28e02', '7f22dff0-b8a9-4e08-835f-2a79dba9e6f7'];
+      console.log('Sending message:', { 
+        senderId: session.user.id, 
+        senderRole: senderRole,
+        userEmail: session.user.email,
+        isDemo: DEMO_IDS.includes(session.user.id) 
+      });
+
       const response = await fetch('/api/messages/send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          senderId: session.user.id,
-          senderRole: profile?.role || 'user',
-          recipientId: otherParticipant.id,
-          message: newMessage.trim(),
-        }),
+        credentials: 'include', // Send cookies with the request
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error sending message:', errorData);
-        throw new Error(errorData.error || 'Failed to send message');
+        let errorData: any = {};
+        try {
+          errorData = await response.json();
+        } catch (parseError) {
+          const errorText = await response.text();
+          console.error('Failed to parse error response:', errorText, 'Status:', response.status);
+          errorData = { error: `Server error (${response.status}): ${errorText || 'Unknown error'}` };
+        }
+        console.error('Error sending message:', errorData, 'Status:', response.status);
+        
+        // Remove the temp message on error
+        setActiveConversation(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            messages: prev.messages.filter(m => m.id !== tempMessageId)
+          };
+        });
+        
+        const errorMessage = errorData?.error || `Failed to send message (Status: ${response.status})`;
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();
       console.log('Message sent successfully:', result);
-      setNewMessage('');
+
+      // Replace temp message with actual message from server
+      if (result.data && result.data[0]) {
+        setActiveConversation(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            messages: prev.messages.map(m => 
+              m.id === tempMessageId 
+                ? {
+                    id: result.data[0].id,
+                    sender_id: result.data[0].sender_id,
+                    recipient_id: result.data[0].recipient_id,
+                    message: result.data[0].message,
+                    created_at: result.data[0].created_at,
+                    read_status: result.data[0].read_status || false,
+                    sender_role: result.data[0].sender_role,
+                    sender_name: tempMessage.sender_name
+                  }
+                : m
+            )
+          };
+        });
+      }
+
+      // Show success animation
+      setSendSuccess(true);
+      toast.success('Message sent');
+      setTimeout(() => setSendSuccess(false), 1500);
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error sending message:', error instanceof Error ? error.message : String(error));
+      
+      // Optionally show a toast notification for better UX
+      if (typeof window !== 'undefined' && 'toaster' in window) {
+        // If you have a toast library, use it here
+      }
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -460,11 +589,22 @@ export function ChatInterface({
       {/* Conversations List */}
       <div className="w-1/3 border-r flex flex-col">
         <div className="p-4 border-b">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <MessageCircle className="w-5 h-5" />
-            Messages
-          </h2>
-          <p className="text-sm text-muted-foreground">Chat with your team</p>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <MessageCircle className="w-5 h-5" />
+                Messages
+              </h2>
+              <p className="text-sm text-muted-foreground">Chat with your team</p>
+            </div>
+            <div className="flex-shrink-0">
+              <Link href="/dashboard">
+                <Button variant="outline" size="sm">
+                  ← Back to Dashboard
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
         
         <ScrollArea className="flex-1">
@@ -540,31 +680,41 @@ export function ChatInterface({
         {activeConversation ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b flex items-center gap-3">
-              <Avatar className="w-8 h-8">
-                {activeConversation.participants
-                  .find(p => p.id !== session?.user.id)?.avatar_url && (
-                  <AvatarImage 
-                    src={activeConversation.participants
-                      .find(p => p.id !== session?.user.id)?.avatar_url} 
-                  />
-                )}
-                <AvatarFallback>
-                  {getAvatarInitials(
-                    activeConversation.participants
-                      .find(p => p.id !== session?.user.id)?.name || 'U'
+            <div className="p-4 border-b flex items-center">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setActiveConversation(null)}
+                  className="p-1 h-auto flex-shrink-0"
+                >
+                  ← Back to Messages
+                </Button>
+                <Avatar className="w-8 h-8 flex-shrink-0">
+                  {activeConversation.participants
+                    .find(p => p.id !== session?.user.id)?.avatar_url && (
+                    <AvatarImage
+                      src={activeConversation.participants
+                        .find(p => p.id !== session?.user.id)?.avatar_url}
+                    />
                   )}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-semibold">
-                  {activeConversation.participants
-                    .find(p => p.id !== session?.user.id)?.name}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {activeConversation.participants
-                    .find(p => p.id !== session?.user.id)?.role}
-                </p>
+                  <AvatarFallback>
+                    {getAvatarInitials(
+                      activeConversation.participants
+                        .find(p => p.id !== session?.user.id)?.name || 'U'
+                    )}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold truncate">
+                    {activeConversation.participants
+                      .find(p => p.id !== session?.user.id)?.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {activeConversation.participants
+                      .find(p => p.id !== session?.user.id)?.role}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -609,9 +759,24 @@ export function ChatInterface({
                   onKeyPress={handleKeyPress}
                   placeholder="Type your message..."
                   className="flex-1"
+                  disabled={isSending}
                 />
-                <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
-                  <Send className="w-4 h-4" />
+                <Button 
+                  onClick={handleSendMessage} 
+                  disabled={!newMessage.trim() || isSending}
+                  className={`transition-all duration-500 ${
+                    sendSuccess 
+                      ? 'bg-green-500 hover:bg-green-500 text-white' 
+                      : ''
+                  }`}
+                >
+                  {isSending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : sendSuccess ? (
+                    <Check className="w-4 h-4 animate-bounce" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
                 </Button>
               </div>
             </div>

@@ -53,9 +53,24 @@ export async function GET(request: NextRequest) {
  * Used as fallback when WebSocket is unavailable
  */
 export async function POST(request: NextRequest) {
+  let user;
   try {
-    const user = await getAuthenticatedUser(); // Add this line
+    user = await getAuthenticatedUser();
+  } catch (authError) {
+    if (authError instanceof AuthenticationError) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Authentication required for sync operations' },
+        { status: 401 }
+      );
+    }
+    console.error('Authentication error in realtime sync:', authError);
+    return NextResponse.json(
+      { error: 'Authentication service unavailable' },
+      { status: 500 }
+    );
+  }
 
+  try {
     const body = await request.json();
     const { operations, type } = body;
 
@@ -72,8 +87,8 @@ export async function POST(request: NextRequest) {
 
       for (const op of operations) {
         try {
-          const supabase = createServerSupabaseClient(); // Keep this line to pass supabase to helper functions
-          const result = await processPendingOperation(supabase, user.id, op); // Replace session.user.id with user.id
+          const supabase = await createServerSupabaseClient();
+          const result = await processPendingOperation(supabase, user.id, op);
           results.push(result);
         } catch (error) {
           console.error('Error processing operation:', error);
@@ -98,12 +113,6 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error('Error in realtime sync:', error);
-    if (error instanceof AuthenticationError) { // Add this block
-      return NextResponse.json(
-        { error: error.message },
-        { status: 401 }
-      );
-    }
     if (error instanceof SyntaxError) {
       return NextResponse.json(
         { error: 'Invalid JSON in request body' },

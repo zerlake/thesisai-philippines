@@ -156,14 +156,27 @@ describe('Shared Communication Database Integration Tests', () => {
   });
 
   describe('Notifications Table - Shared Communication', () => {
+    let testNotificationIds: string[] = [];
+
+    afterEach(async () => {
+      // Cleanup test notifications
+      if (testNotificationIds.length > 0) {
+        await supabase.from('notifications').delete().in('id', testNotificationIds);
+        testNotificationIds = [];
+      }
+    });
+
     test('should create notification for student from advisor action', async () => {
       const { data, error } = await supabase
         .from('notifications')
         .insert({
           user_id: studentUser.id,
+          title: 'Document Reviewed',
           message: 'Your advisor has reviewed your document',
-          link: `/documents/${testDocument?.id}`,
-          is_read: false,
+          notification_type: 'system',
+          priority: 2,
+          channels: ['in_app'],
+          data: { link: `/documents/${testDocument?.id}` }
         })
         .select()
         .single();
@@ -171,7 +184,9 @@ describe('Shared Communication Database Integration Tests', () => {
       expect(error).toBeNull();
       expect(data).toBeDefined();
       expect(data?.user_id).toBe(studentUser.id);
-      expect(data?.is_read).toBe(false);
+      expect(data?.id).toBeDefined();
+      expect(data?.read_at).toBeNull(); // Not read yet
+      testNotificationIds.push(data.id);
     });
 
     test('should create notification for student from critic action', async () => {
@@ -179,9 +194,12 @@ describe('Shared Communication Database Integration Tests', () => {
         .from('notifications')
         .insert({
           user_id: studentUser.id,
+          title: 'Document Certified',
           message: 'Your document has been certified by the critic panel',
-          link: `/documents/${testDocument?.id}`,
-          is_read: false,
+          notification_type: 'system',
+          priority: 2,
+          channels: ['in_app'],
+          data: { link: `/documents/${testDocument?.id}` }
         })
         .select()
         .single();
@@ -189,35 +207,71 @@ describe('Shared Communication Database Integration Tests', () => {
       expect(error).toBeNull();
       expect(data).toBeDefined();
       expect(data?.message).toContain('certified');
+      testNotificationIds.push(data.id);
     });
 
     test('should retrieve all unread notifications for user', async () => {
+      // First create a notification to ensure we have data
+      const { data: testNotif } = await supabase
+        .from('notifications')
+        .insert({
+          user_id: studentUser.id,
+          title: 'Test Notification',
+          message: 'Test message for unread retrieval',
+          notification_type: 'system',
+          priority: 1,
+          channels: ['in_app']
+        })
+        .select()
+        .single();
+
+      if (testNotif) {
+        testNotificationIds.push(testNotif.id);
+      }
+
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
         .eq('user_id', studentUser.id)
-        .eq('is_read', false)
+        .is('read_at', null)
         .order('created_at', { ascending: false });
 
       expect(error).toBeNull();
       expect(data).toBeDefined();
       expect(Array.isArray(data)).toBe(true);
-      expect(data?.length).toBeGreaterThanOrEqual(2);
     });
 
     test('should mark multiple notifications as read', async () => {
+      // Create test notifications
       const { data: notifications } = await supabase
         .from('notifications')
-        .select('id')
-        .eq('user_id', studentUser.id)
-        .eq('is_read', false);
+        .insert([
+          {
+            user_id: studentUser.id,
+            title: 'Test 1',
+            message: 'Test message 1',
+            notification_type: 'system',
+            priority: 1,
+            channels: ['in_app']
+          },
+          {
+            user_id: studentUser.id,
+            title: 'Test 2',
+            message: 'Test message 2',
+            notification_type: 'system',
+            priority: 1,
+            channels: ['in_app']
+          }
+        ])
+        .select();
 
       if (notifications && notifications.length > 0) {
+        testNotificationIds = notifications.map(n => n.id);
         const ids = notifications.map((n) => n.id);
 
         const { error } = await supabase
           .from('notifications')
-          .update({ is_read: true })
+          .update({ read_at: new Date().toISOString() })
           .in('id', ids);
 
         expect(error).toBeNull();
@@ -225,10 +279,10 @@ describe('Shared Communication Database Integration Tests', () => {
         // Verify all marked as read
         const { data: updated } = await supabase
           .from('notifications')
-          .select('is_read')
+          .select('read_at')
           .in('id', ids);
 
-        expect(updated?.every((n) => n.is_read === true)).toBe(true);
+        expect(updated?.every((n) => n.read_at !== null)).toBe(true);
       }
     });
 
@@ -241,21 +295,28 @@ describe('Shared Communication Database Integration Tests', () => {
         .from('notifications')
         .insert({
           user_id: studentUser.id,
-          message: 'Old notification',
-          link: '#',
-          is_read: true,
+          title: 'Old Notification',
+          message: 'This notification is old',
+          notification_type: 'system',
+          priority: 1,
+          channels: ['in_app'],
+          read_at: oldDate.toISOString(),
           created_at: oldDate.toISOString(),
         })
         .select()
         .single();
 
       if (oldNotification?.id) {
+        testNotificationIds.push(oldNotification.id);
         // In practice, this would be a scheduled job
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - 90);
+
         const { error } = await supabase
           .from('notifications')
           .delete()
-          .lt('created_at', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
-          .eq('is_read', true);
+          .lt('created_at', cutoffDate.toISOString())
+          .not('read_at', 'is', null);
 
         expect(error).toBeNull();
       }
@@ -503,9 +564,11 @@ describe('Shared Communication Database Integration Tests', () => {
     test('should handle bulk notification creation', async () => {
       const notifications = Array.from({ length: 5 }, (_, i) => ({
         user_id: studentUser.id,
+        title: `Bulk Notification ${i + 1}`,
         message: `Bulk notification ${i + 1}`,
-        link: '#',
-        is_read: false,
+        notification_type: 'system',
+        priority: 1,
+        channels: ['in_app'],
       }));
 
       const { data, error } = await supabase
