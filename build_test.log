@@ -1,7 +1,0 @@
-
-> next-template@0.1.0 build C:\Users\Projects\thesis-ai
-> next build ";" "type" "build_test.log"
-
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-Invalid project directory provided, no such directory: C:\Users\Projects\thesis-ai\;
- ELIFECYCLE  Command failed with exit code 1.

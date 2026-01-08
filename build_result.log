@@ -1,6 +1,0 @@
-
-> next-template@0.1.0 build C:\Users\Projects\thesis-ai
-> next build
-
-   Suggestion: If you intended to restart next build, terminate the other process, and then try again.
- ELIFECYCLE  Command failed with exit code 1.
