@@ -7,8 +7,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Loader2, X, Check } from "lucide-react";
+import { Loader2, X, Check, Edit2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 type Testimonial = {
   id: string;
@@ -26,6 +30,13 @@ export default function AdminTestimonialsPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isResponding, setIsResponding] = useState<string | null>(null);
+  const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
+  const [editForm, setEditForm] = useState({
+    content: "",
+    full_name: "",
+    course: "",
+    institution: ""
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,6 +63,46 @@ export default function AdminTestimonialsPage() {
     };
     fetchData();
   }, [session, supabase]);
+
+  const handleEditClick = (testimonial: Testimonial) => {
+    setEditingTestimonial(testimonial);
+    setEditForm({
+      content: testimonial.content,
+      full_name: testimonial.full_name || "",
+      course: testimonial.course || "",
+      institution: testimonial.institution || ""
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!session || !editingTestimonial) return;
+    setIsResponding(editingTestimonial.id);
+    try {
+      const { error } = await supabase
+        .from('testimonials')
+        .update({
+          content: editForm.content,
+          full_name: editForm.full_name,
+          course: editForm.course,
+          institution: editForm.institution
+        })
+        .eq('id', editingTestimonial.id);
+
+      if (error) throw error;
+
+      setTestimonials(testimonials.map(t =>
+        t.id === editingTestimonial.id
+          ? { ...t, ...editForm }
+          : t
+      ));
+      setEditingTestimonial(null);
+      toast.success("Testimonial updated successfully.");
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsResponding(null);
+    }
+  };
 
   const handleTestimonialResponse = async (testimonialId: string, newStatus: 'approved' | 'rejected') => {
     if (!session) return;
@@ -127,18 +178,29 @@ export default function AdminTestimonialsPage() {
                     </TableCell>
                     <TableCell>{formatDistanceToNow(new Date(testimonial.created_at), { addSuffix: true })}</TableCell>
                     <TableCell className="text-right space-x-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => handleTestimonialResponse(testimonial.id, 'rejected')} 
+                       <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleEditClick(testimonial)}
+                        disabled={!!isResponding}
+                        title="Edit testimonial"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleTestimonialResponse(testimonial.id, 'rejected')}
                         disabled={isResponding === testimonial.id}
+                        title="Reject testimonial"
                       >
                         <X className="w-4 h-4" />
                       </Button>
-                      <Button 
-                        size="sm" 
-                        onClick={() => handleTestimonialResponse(testimonial.id, 'approved')} 
+                      <Button
+                        size="sm"
+                        onClick={() => handleTestimonialResponse(testimonial.id, 'approved')}
                         disabled={isResponding === testimonial.id}
+                        title="Approve testimonial"
                       >
                         {isResponding === testimonial.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                       </Button>
@@ -154,6 +216,71 @@ export default function AdminTestimonialsPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!editingTestimonial} onOpenChange={(open) => !open && setEditingTestimonial(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Testimonial</DialogTitle>
+            <DialogDescription>
+              Make changes to the testimonial before approving it. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="name"
+                value={editForm.full_name}
+                onChange={(e) => setEditForm({...editForm, full_name: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="course" className="text-right">
+                Course
+              </Label>
+              <Input
+                id="course"
+                value={editForm.course}
+                onChange={(e) => setEditForm({...editForm, course: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="institution" className="text-right">
+                School
+              </Label>
+              <Input
+                id="institution"
+                value={editForm.institution}
+                onChange={(e) => setEditForm({...editForm, institution: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="content" className="text-right">
+                Content
+              </Label>
+              <Textarea
+                id="content"
+                value={editForm.content}
+                onChange={(e) => setEditForm({...editForm, content: e.target.value})}
+                className="col-span-3"
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => setEditingTestimonial(null)}>Cancel</Button>
+            <Button type="submit" onClick={handleSaveEdit} disabled={!!isResponding}>
+               {isResponding === editingTestimonial?.id && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+               Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
