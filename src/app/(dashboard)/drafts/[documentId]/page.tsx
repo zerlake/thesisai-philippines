@@ -13,6 +13,7 @@ import { AdvisorMessagesPanel } from "@/components/advisor-messages-panel";
 import { StudentMessagesPanel } from "@/components/student-messages-panel";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
+import { TestimonialRequestModal } from "@/components/TestimonialRequestModal";
 
 export default function DocumentEditorPage() {
   const params = useParams();
@@ -25,6 +26,7 @@ export default function DocumentEditorPage() {
   const [studentId, setStudentId] = useState<string>("");
   const [isNotesPanelOpen, setIsNotesPanelOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showTestimonialModal, setShowTestimonialModal] = useState(false);
 
   // Track if document has been loaded for this documentId
   const loadedDocumentIdRef = useRef<string | null>(null);
@@ -157,17 +159,21 @@ export default function DocumentEditorPage() {
       }
 
       toast.success('Draft submitted to your advisor!');
-      
-      // Redirect to chat/messages page after success
-      setTimeout(() => {
-        router.push('/chat');
-      }, 800);
+
+      // Show testimonial modal instead of immediate redirect
+      setShowTestimonialModal(true);
+
     } catch (err: any) {
       console.error('Error submitting to advisor:', err?.message || err);
       toast.error(err?.message || 'Failed to submit draft to advisor');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleTestimonialComplete = () => {
+    // Redirect to chat/messages page after modal closes
+    router.push('/chat');
   };
 
   if (!documentId) {
@@ -216,6 +222,12 @@ export default function DocumentEditorPage() {
 
   return (
     <div className="relative">
+      <TestimonialRequestModal
+        isOpen={showTestimonialModal}
+        onClose={handleTestimonialComplete}
+        onSuccess={handleTestimonialComplete}
+        planType={profile?.plan === 'pro_complete' ? 'pro_complete' : 'pro_advisor'}
+      />
       {/* Main Editor Area - adjusts width when messaging panel is open */}
       <div
         className="transition-all duration-300"

@@ -9,6 +9,7 @@ import { ThesisFinalizerService } from '@/lib/thesis-finalizer-service';
 import { AdvisorComment } from '@/lib/types/advisor-comments';
 import { RevisionJob } from '@/lib/types/revision';
 import { extractProtectedSpans, getChapterAgentPrompt, calculateChangeRatio } from '@/lib/thesis-sections';
+import { TestimonialRequestModal } from './TestimonialRequestModal';
 
 interface ThesisFinalizerProps {
   onSave?: (finalDraft: string, shouldComplete?: boolean) => void;
@@ -22,6 +23,7 @@ export default function ThesisFinalizer({ onSave }: ThesisFinalizerProps = {}) {
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [loadingPremiumStatus, setLoadingPremiumStatus] = useState(true);
   const [isSampleMode, setIsSampleMode] = useState(false);
+  const [showTestimonialModal, setShowTestimonialModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { profile, isLoading: authLoading, supabase } = useAuth();
@@ -382,8 +384,20 @@ Agent outputs: ${JSON.stringify(agentResults)} + Original thesis chapters: ${cha
     }
   };
 
+  const handleTestimonialTrigger = () => {
+      // Only show for Pro users (no advisor plans) as they are "done" here
+      if (profile?.plan === 'pro') {
+        setShowTestimonialModal(true);
+      }
+  };
+
   return (
     <div className="p-6 border rounded-lg bg-white shadow-sm">
+      <TestimonialRequestModal
+        isOpen={showTestimonialModal}
+        onClose={() => setShowTestimonialModal(false)}
+        planType="pro"
+      />
       <h3 className="text-xl font-bold mb-4 text-slate-900">Thesis Finalizer Pro</h3>
       <p className="text-slate-600 mb-4">
         Upload your thesis chapters and let our multi-agent AI system polish them into a cohesive final draft.
@@ -534,7 +548,10 @@ Agent outputs: ${JSON.stringify(agentResults)} + Original thesis chapters: ${cha
           </div>
           <div className="mt-4 flex flex-wrap gap-3">
             <button
-              onClick={() => navigator.clipboard.writeText(finalDraft)}
+              onClick={() => {
+                navigator.clipboard.writeText(finalDraft);
+                handleTestimonialTrigger();
+              }}
               className="px-4 py-2 bg-slate-200 text-slate-800 rounded-lg hover:bg-slate-300 transition-colors"
             >
               Copy to Clipboard
@@ -550,6 +567,7 @@ Agent outputs: ${JSON.stringify(agentResults)} + Original thesis chapters: ${cha
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
+                handleTestimonialTrigger();
               }}
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
@@ -560,6 +578,7 @@ Agent outputs: ${JSON.stringify(agentResults)} + Original thesis chapters: ${cha
                 if (onSave) {
                   onSave(finalDraft, true);
                 }
+                handleTestimonialTrigger();
               }}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
             >
