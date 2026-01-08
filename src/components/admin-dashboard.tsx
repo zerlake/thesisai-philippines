@@ -23,7 +23,16 @@ import { UserOnboardingDashboard } from "./admin/user-onboarding-dashboard";
 
 type Profile = { id: string; first_name: string | null; last_name: string | null; role: string; };
 type InstitutionRequest = { id: string; name: string; created_at: string; profiles: { first_name: string | null; last_name: string | null; } | null; };
-type Testimonial = { id: string; content: string; created_at: string; status: string; profiles: { first_name: string | null; last_name: string | null; } | null; };
+type Testimonial = {
+  id: string;
+  content: string;
+  created_at: string;
+  status: string;
+  full_name?: string;
+  course?: string;
+  institution?: string;
+  profiles: { first_name: string | null; last_name: string | null; } | null;
+};
 type PayoutRequest = { id: string; amount: number; payout_method: string; payout_details: string; created_at: string; user_id: string; profiles: { first_name: string | null; last_name: string | null; } | null; };
 type VerificationStatus = { is_verified: boolean; checks: { [key: string]: boolean }; details: string; };
 
@@ -411,6 +420,7 @@ export function AdminDashboard() {
                   <TableHeader>
                     <TableRow className="hover:bg-transparent border-b-2">
                       <TableHead>User</TableHead>
+                      <TableHead>Details</TableHead>
                       <TableHead>Testimonial</TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -420,13 +430,27 @@ export function AdminDashboard() {
                     {isLoading ? Array.from({ length: 1 }).map((_, i) => (
                       <TableRow key={i} className="hover:bg-slate-800/50">
                         <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-24" /></TableCell>
                         <TableCell><Skeleton className="h-5 w-48" /></TableCell>
                         <TableCell><Skeleton className="h-5 w-20" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-8 w-24 float-right" /></TableCell>
                       </TableRow>
                     )) : testimonials.length > 0 ? testimonials.map((testimonial, idx) => (
                       <TableRow key={testimonial.id} className={cn("border-b transition-colors", idx % 2 === 0 ? "bg-slate-900/30" : "hover:bg-slate-800/50")}>
-                        <TableCell className="font-medium">{testimonial.profiles?.first_name} {testimonial.profiles?.last_name}</TableCell>
+                        <TableCell className="font-medium">
+                          <div className="flex flex-col">
+                            <span>{testimonial.full_name || `${testimonial.profiles?.first_name} ${testimonial.profiles?.last_name}`}</span>
+                            {testimonial.profiles?.first_name && testimonial.full_name && (
+                               <span className="text-xs text-muted-foreground">Auth: {testimonial.profiles.first_name}</span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col text-sm">
+                            <span className="font-medium">{testimonial.institution || '-'}</span>
+                            <span className="text-muted-foreground">{testimonial.course || '-'}</span>
+                          </div>
+                        </TableCell>
                         <TableCell className="max-w-sm"><p className="truncate text-sm text-muted-foreground">{testimonial.content}</p></TableCell>
                         <TableCell className="text-muted-foreground">{isMounted && formatDistanceToNow(new Date(testimonial.created_at), { addSuffix: true })}</TableCell>
                         <TableCell className="text-right space-x-2">

@@ -10,12 +10,15 @@ import { Button } from "@/components/ui/button";
 import { Loader2, X, Check } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-type Testimonial = { 
-  id: string; 
-  content: string; 
-  created_at: string; 
-  status: string; 
-  profiles: { first_name: string | null; last_name: string | null; } | null; 
+type Testimonial = {
+  id: string;
+  content: string;
+  created_at: string;
+  status: string;
+  full_name?: string;
+  course?: string;
+  institution?: string;
+  profiles: { first_name: string | null; last_name: string | null; } | null;
 };
 
 export default function AdminTestimonialsPage() {
@@ -85,6 +88,7 @@ export default function AdminTestimonialsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>User</TableHead>
+                <TableHead>Details</TableHead>
                 <TableHead>Testimonial</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -95,6 +99,7 @@ export default function AdminTestimonialsPage() {
                 Array.from({ length: 1 }).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-48" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-20" /></TableCell>
                     <TableCell className="text-right"><Skeleton className="h-8 w-24 float-right" /></TableCell>
@@ -103,9 +108,22 @@ export default function AdminTestimonialsPage() {
               ) : testimonials.length > 0 ? (
                 testimonials.map((testimonial) => (
                   <TableRow key={testimonial.id}>
-                    <TableCell>{testimonial.profiles?.first_name} {testimonial.profiles?.last_name}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{testimonial.full_name || `${testimonial.profiles?.first_name} ${testimonial.profiles?.last_name}`}</span>
+                        {testimonial.profiles?.first_name && testimonial.full_name && (
+                           <span className="text-xs text-muted-foreground">Auth: {testimonial.profiles.first_name}</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col text-sm">
+                        <span className="font-medium">{testimonial.institution || '-'}</span>
+                        <span className="text-muted-foreground">{testimonial.course || '-'}</span>
+                      </div>
+                    </TableCell>
                     <TableCell className="max-w-sm">
-                      <p className="truncate">{testimonial.content}</p>
+                      <p className="truncate" title={testimonial.content}>{testimonial.content}</p>
                     </TableCell>
                     <TableCell>{formatDistanceToNow(new Date(testimonial.created_at), { addSuffix: true })}</TableCell>
                     <TableCell className="text-right space-x-2">
