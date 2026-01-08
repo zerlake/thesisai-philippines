@@ -48,7 +48,17 @@ export function useOnboardingState(): UseOnboardingStateReturn {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch('/api/onboarding/state');
+      if (!session) {
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await fetch('/api/onboarding/state', {
+        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to fetch onboarding state: ${response.statusText}`);
@@ -68,9 +78,15 @@ export function useOnboardingState(): UseOnboardingStateReturn {
 
   const markAsSkipped = async () => {
     try {
+      if (!session) return;
+
       const response = await fetch('/api/onboarding/skip', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
       });
 
       if (!response.ok) {
@@ -86,9 +102,15 @@ export function useOnboardingState(): UseOnboardingStateReturn {
 
   const markAsCompleted = async () => {
     try {
+      if (!session) return;
+
       const response = await fetch('/api/onboarding/complete-status', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
       });
 
       if (!response.ok) {
